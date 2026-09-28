@@ -1,0 +1,304 @@
+# autto — 수집 소스 정의
+#
+# 모든 URL은 2026-09-28에 실제 HTTP 요청으로 검증했다.
+# status: ok        = 200 응답 + 파싱 가능한 본문 확인
+#         dead      = 404 / 401 등 해당 경로 없음
+#         blocked   = 403 / 429 (봇 차단, 서버 환경에 따라 성공할 수도 있음)
+#
+# tier 의미 (docs/02-architecture.md 참고)
+#   1 = 화제 감지: "무엇을 다룰지" 고르는 신호원
+#   2 = 1차 출처: 사실 확인용 원본
+#   3 = 해석: 맥락 파악용 읽을 거리 (발행 소재로 직접 쓰지 않는다)
+
+meta:
+  verified_at: "2026-09-28"
+  scope: "AI 트렌드"
+
+# ---------------------------------------------------------------- Tier 1
+tier1:
+  - id: hf-daily-papers
+    name: Hugging Face Daily Papers
+    url: https://huggingface.co/api/daily_papers
+    type: json
+    status: ok
+    note: |
+      이 프로젝트의 중심축. 인증 없이 50건 반환.
+      paper.upvotes / numComments = 커뮤니티 큐레이션 신호.
+      paper.githubRepo 존재 = 코드 공개됨(실용성 신호).
+      arXiv 원문 대조는 paper.id(arXiv ID)로 가능.
+    fields:
+      - paper.id
+      - paper.title
+      - paper.summary
+      - paper.upvotes
+      - paper.githubRepo
+      - numComments
+      - submittedBy
+      - organization
+      - publishedAt
+
+  - id: hn-ai
+    name: Hacker News (AI 키워드)
+    url: https://hnrss.org/newest?q=AI&points=100
+    type: rss
+    status: ok
+    note: points 임계값으로 노이즈 조절. 쿼리·점수 모두 URL 파라미터로 튜닝한다.
+
+  - id: geeknews
+    name: GeekNews
+    url: https://news.hada.io/rss/news
+    type: atom
+    status: ok
+    note: 국내 개발자 반응 파악용. Atom 포맷(<entry>)이므로 RSS 파서와 분기 필요.
+    mirror: https://feeds.feedburner.com/geeknews-feed
+
+# ---------------------------------------------------------------- Tier 2
+tier2:
+  - id: openai-news
+    name: OpenAI News
+    url: https://openai.com/news/rss.xml
+    type: rss
+    status: ok
+
+  - id: deepmind-blog
+    name: Google DeepMind Blog
+    url: https://deepmind.google/blog/rss.xml
+    type: rss
+    status: ok
+    note: |
+      gzip 압축으로 응답한다. Accept-Encoding 협상을 하지 않으면
+      깨진 바이너리를 받는다. curl은 --compressed, requests는 기본 처리됨.
+    requires_compression: true
+
+  - id: hf-blog
+    name: Hugging Face Blog
+    url: https://huggingface.co/blog/feed.xml
+    type: rss
+    status: ok
+
+  - id: google-ai-blog
+    name: Google AI Blog
+    url: https://blog.google/technology/ai/rss/
+    type: rss
+    status: ok
+
+  - id: arxiv-cs-ai
+    name: arXiv cs.AI
+    url: https://rss.arxiv.org/rss/cs.AI
+    type: rss
+    status: ok
+
+  - id: arxiv-cs-lg
+    name: arXiv cs.LG
+    url: https://rss.arxiv.org/rss/cs.LG
+    type: rss
+    status: ok
+    note: |
+      하루 수백 건. 단독으로는 필터링 불가.
+      tier1(hf-daily-papers)에서 고른 논문의 원문 확인용으로만 쓴다.
+
+  - id: mit-tr-ai
+    name: MIT Technology Review — AI
+    url: https://www.technologyreview.com/topic/artificial-intelligence/feed
+    type: rss
+    status: ok
+
+  - id: techcrunch-ai
+    name: TechCrunch AI
+    url: https://techcrunch.com/category/artificial-intelligence/feed/
+    type: rss
+    status: ok
+
+# ---------------------------------------------------------------- Tier 3
+tier3:
+  - id: simonwillison
+    name: Simon Willison's Weblog
+    url: https://simonwillison.net/atom/everything/
+    type: atom
+    status: ok
+
+  - id: interconnects
+    name: Interconnects (Nathan Lambert)
+    url: https://www.interconnects.ai/feed
+    type: rss
+    status: ok
+
+  - id: latent-space
+    name: Latent Space
+    url: https://www.latent.space/feed
+    type: rss
+    status: ok
+
+  - id: raschka
+    name: Ahead of AI (Sebastian Raschka)
+    url: https://magazine.sebastianraschka.com/feed
+    type: rss
+    status: ok
+
+  - id: semianalysis
+    name: SemiAnalysis
+    url: https://semianalysis.com/feed/
+    type: rss
+    status: ok
+    note: 반도체·인프라 관점. 다른 소스와 겹치지 않는 각도를 준다.
+
+  - id: import-ai
+    name: Import AI (Jack Clark)
+    url: https://importai.substack.com/feed
+    type: rss
+    status: ok
+
+  - id: zvi
+    name: Don't Worry About the Vase (Zvi)
+    url: https://thezvi.substack.com/feed
+    type: rss
+    status: ok
+
+  - id: lilian-weng
+    name: Lil'Log (Lilian Weng)
+    url: https://lilianweng.github.io/index.xml
+    type: rss
+    status: ok
+
+# ---------------------------------------------------------------- 국내
+domestic:
+  - id: aitimes-com
+    name: AI타임스
+    url: https://www.aitimes.com/rss/allArticle.xml
+    type: rss
+    status: ok
+
+  - id: aitimes-kr
+    name: AI타임스kr
+    url: https://www.aitimes.kr/rss/allArticle.xml
+    type: rss
+    status: ok
+    note: aitimes.com과 다른 매체다. 둘 다 구독해도 중복이 심하지 않다.
+
+  - id: itworld-kr
+    name: ITWorld Korea
+    url: https://www.itworld.co.kr/feed/
+    type: rss
+    status: ok
+
+  - id: byline
+    name: 바이라인네트워크
+    url: https://byline.network/feed/
+    type: rss
+    status: ok
+    note: |
+      User-Agent 에 민감하다. 범용 "Mozilla/5.0" 으로는 403 이지만
+      설명적인 UA(autto-feed-checker/0.1 (+repo url))로는 200 이다.
+      Cloudflare 가 위장한 UA 를 더 의심하는 것으로 보인다.
+    ua_sensitive: true
+
+# ---------------------------------------------------------------- 죽은 경로
+# 추측으로 다시 시도하지 말 것. 아래는 모두 직접 확인한 실패 결과다.
+dead:
+  - url: https://www.anthropic.com/rss.xml
+    status: dead
+    code: 404
+    note: Anthropic은 공식 RSS가 없다. 뉴스룸 HTML 스크래핑이 필요하다.
+  - url: https://news.anthropic.com/rss.xml
+    status: dead
+    code: 000
+    note: 응답 없음(서브도메인 부재).
+  - url: https://mistral.ai/news/feed.xml
+    status: dead
+    code: 404
+  - url: https://www.deeplearning.ai/the-batch/feed/
+    status: dead
+    code: 404
+    note: The Batch 본문은 이메일 전용. 필요하면 메일 파싱을 따로 붙여야 한다.
+  - url: https://huggingface.co/papers/feed.xml
+    status: dead
+    code: 401
+    note: 폐기된 경로. tier1의 /api/daily_papers 를 쓴다.
+  - url: https://ai.meta.com/blog/rss/
+    status: dead
+    code: 404
+  - url: https://www.zdnet.co.kr/Include/RSS/zdnetkorea_news.xml
+    status: dead
+    code: 404
+
+blocked:
+  - url: https://venturebeat.com/category/ai/feed/
+    code: 429
+    note: |
+      레이트리밋. UA 를 바꿔도 429 가 유지된다.
+      안정적으로 의존할 소스로 취급하지 않는다.
+      (securityweek / byline 은 UA 교체로 통과해 각각 스코프에 편입했다.)
+
+# ---------------------------------------------------------------- 스코프 외
+# 초기 조사에서 보안 뉴스도 함께 검증했으나 스코프를 AI 트렌드로 좁혔다.
+# 되살릴 때 재조사하지 않아도 되도록 검증 결과만 보존한다.
+# 배경은 docs/04-decisions.md 의 ADR-001 참고.
+out_of_scope_security:
+  - id: boannews
+    name: 보안뉴스 전체기사
+    url: https://cdn.boannews.com/rss/gn_rss_allArticle.xml
+    status: ok
+    note: |
+      50건. content:encoded 에 기사 본문 전문 + 이미지가 그대로 들어있다
+      (Google News 전송용 피드). 전재 금지 — 요약 + 원문 링크만.
+  - id: dailysecu
+    name: 데일리시큐 전체기사
+    url: https://cdn.dailysecu.com/rss/gn_rss_allArticle.xml
+    status: ok
+    note: 보안뉴스와 동일 구조(본문 전문 포함).
+  - id: kisa-security-notice
+    name: KISA 보호나라 보안공지
+    url: https://www.boho.or.kr/kr/rss.do?bbsId=B0000133
+    status: ok
+  - id: kisa-vuln
+    name: KISA 취약점 정보
+    url: https://www.boho.or.kr/kr/rss.do?bbsId=B0000302
+    status: ok
+    note: CVE + 국내 제품(ipTIME 등) 취약점.
+  - id: kisa-alert-level
+    name: KISA 사이버위기 경보단계
+    url: https://www.boho.or.kr/kr/rss.do?bbsId=B0000342
+    status: ok
+    note: 갱신은 드물지만 변경 자체가 이슈. 자동화 ROI가 가장 높았던 소스.
+  - id: kisa-notice
+    name: KISA 공지사항
+    url: https://www.boho.or.kr/kr/rss.do?bbsId=B0000132
+    status: ok
+  - id: kisa-report
+    name: KISA 보고서/가이드
+    url: https://www.boho.or.kr/kr/rss.do?bbsId=B0000127
+    status: ok
+  - id: cisa-kev
+    name: CISA Known Exploited Vulnerabilities
+    url: https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json
+    type: json
+    status: ok
+    note: |
+      2026-09-28 확인 시 catalogVersion 2026.09.27, count 1728.
+      catalogVersion / dateReleased 로 델타 감지.
+      "실제 공격에 쓰이는 중"이라는 필터가 이미 걸려 있어 신호 대비 노이즈가 압도적으로 낮다.
+  - id: cisa-advisories
+    name: CISA Cybersecurity Advisories
+    url: https://www.cisa.gov/cybersecurity-advisories/all.xml
+    status: ok
+  - id: thehackernews
+    url: https://thehackernews.com/feeds/posts/default
+    status: ok
+  - id: bleepingcomputer
+    url: https://www.bleepingcomputer.com/feed/
+    status: ok
+  - id: krebs
+    url: https://krebsonsecurity.com/feed/
+    status: ok
+  - id: darkreading
+    url: https://www.darkreading.com/rss.xml
+    status: ok
+  - id: arxiv-cs-cr
+    url: https://rss.arxiv.org/rss/cs.CR
+    status: ok
+  - id: securityweek
+    name: SecurityWeek
+    url: https://www.securityweek.com/feed/
+    status: ok
+    note: byline 과 동일하게 UA 에 민감하다. 범용 UA 로는 403.
+    ua_sensitive: true
