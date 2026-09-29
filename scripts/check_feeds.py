@@ -30,7 +30,7 @@ SOURCES = ROOT / "sources.yaml"
 IN_SCOPE = ["tier1", "tier2", "tier3", "domestic"]
 FAILING = ["dead", "blocked"]
 
-UA = "autto-feed-checker/0.1 (+https://github.com/fpdhs/autto)"
+UA = "mediq-feed-checker/0.1 (+https://github.com/fpdhs/mediQ)"
 TIMEOUT = 20
 
 # 항목 수 집계는 줄 단위가 아니라 전체 본문에서 센다.

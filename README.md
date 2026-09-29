@@ -1,4 +1,4 @@
-# autto
+# mediQ
 
 AI 트렌드 뉴스를 수집·선별해 Threads(Meta)에 발행하기 위한 조사 및 설계 저장소.
 

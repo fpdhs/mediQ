@@ -1,4 +1,4 @@
-# autto — 수집 소스 정의
+# mediQ — 수집 소스 정의
 #
 # 모든 URL은 2026-09-28에 실제 HTTP 요청으로 검증했다.
 # status: ok        = 200 응답 + 파싱 가능한 본문 확인
@@ -188,7 +188,7 @@ domestic:
     status: ok
     note: |
       User-Agent 에 민감하다. 범용 "Mozilla/5.0" 으로는 403 이지만
-      설명적인 UA(autto-feed-checker/0.1 (+repo url))로는 200 이다.
+      설명적인 UA(mediq-feed-checker/0.1 (+repo url))로는 200 이다.
       Cloudflare 가 위장한 UA 를 더 의심하는 것으로 보인다.
     ua_sensitive: true
 

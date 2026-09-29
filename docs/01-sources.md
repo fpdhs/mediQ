@@ -151,7 +151,7 @@ deeplearning.ai The Batch(`/the-batch/feed/`)는 **404**다. 본문은 이메일
 
 ```
 User-Agent: Mozilla/5.0                                        → 403
-User-Agent: autto-feed-checker/0.1 (+https://github.com/...)   → 200
+User-Agent: mediq-feed-checker/0.1 (+https://github.com/...)   → 200
 ```
 
 Cloudflare 계열 보호는 브라우저를 어설프게 위장한 UA를 더 의심한다. 정체와 연락처를
