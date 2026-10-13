@@ -111,7 +111,7 @@ def rollback_program(baseline, image):
     return 'EXPECTED='+repr(baseline)+'\nCANDIDATE='+repr(image)+'\n'+r'''
 import subprocess,json,os,time
 def run(args,**kwargs):
- return subprocess.check_output(args,timeout=60,**kwargs)
+ return subprocess.check_output(args,timeout=60,stderr=subprocess.PIPE,**kwargs)
 old=EXPECTED[0];name=old['name'].lstrip('/')
 current=json.loads(run(['docker','inspect',name]))[0]
 assert current['Image']==CANDIDATE
@@ -129,7 +129,7 @@ end=time.monotonic()+55
 while True:
  restored=json.loads(run(['docker','inspect',name]))[0]
  assert restored['Image']==old['image']
- assert restored['Config']['Env']==current['Config']['Env'] and restored['Mounts']==current['Mounts']
+ assert dict(v.split('=',1) for v in restored['Config']['Env'])==dict(v.split('=',1) for v in current['Config']['Env']) and restored['Mounts']==current['Mounts']
  assert restored['Config']['Labels']['com.docker.compose.project.config_files'].split(',')==files
  if restored['State'].get('Health',{}).get('Status')=='healthy':break
  assert time.monotonic()<end,'ROLLBACK_READINESS_TIMEOUT'
@@ -141,11 +141,14 @@ def release(args):
     folder, manifest, identity = load_bundle(args.folder)
     image = run(['docker','image','inspect',args.image,'--format','{{.Id}}']).decode().strip()
     assert re.fullmatch('sha256:[a-f0-9]{64}',image), 'IMAGE_ID_INVALID'
-    run([sys.executable,str(ROOT/'scripts/clinician-bundle-verify.py'),'--folder',str(folder),'--image',image],180)
+    run([sys.executable,str(ROOT/'scripts/clinician-bundle-verify.py'),'--folder',str(folder),'--image',image],300)
     validate_scan(args.scan,image)
     if args.apply:
-        assert args.validation, 'AUTHENTICATED_REGRESSION_REPORT_REQUIRED'
-        validate_flow_report(args.validation,folder,image,identity['revision'])
+        if args.live_check:
+            assert args.playwright and pathlib.Path(args.playwright).is_file(), 'PLAYWRIGHT_MODULE_REQUIRED'
+        else:
+            assert args.validation, 'AUTHENTICATED_REGRESSION_REPORT_REQUIRED'
+            validate_flow_report(args.validation,folder,image,identity['revision'])
     if not args.credential_gui and not sys.stdin.isatty():
         raise RuntimeError('B_VM_CREDENTIAL_REQUIRED_USE_OPERATOR_TERMINAL_OR_CREDENTIAL_GUI')
     password = bundle.align.check.read_vm_credential(args.credential_gui)
@@ -157,29 +160,43 @@ def release(args):
         ca = (ROOT/'tmp/certs/mtls/ca.crt').read_text()
         result = bundle.align.check.remote(client,'B',password,bundle.align.remote_program('B',baseline,image,ca,False),90)
         assert result['status'] == 'PASS', 'DEPLOYMENT_PREFLIGHT_FAILED'
+        print(json.dumps(dict(phase='PREFLIGHT',status='PASS')),flush=True)
         if args.apply:
-            archive = folder/'candidate.tar'
-            run(['docker','save','-o',str(archive),image],180)
-            digest = sha(archive.read_bytes())
-            target = '/home/server/.clinician-ui-'+image[7:23]+'.tar'
-            with client.open_sftp() as sftp:
-                sftp.get_channel().settimeout(20)
-                started = time.monotonic()
-                def deadline(done,total):
-                    if time.monotonic()-started > 240:raise TimeoutError('TRANSFER_TIMEOUT')
-                sftp.put(str(archive),target,callback=deadline)
-                sftp.chmod(target,0o600)
-            program = 'import pathlib,hashlib,subprocess,json;p=pathlib.Path('+repr(target)+');assert hashlib.sha256(p.read_bytes()).hexdigest()=='+repr(digest)+';subprocess.run(["docker","load","-i",str(p)],check=True,capture_output=True,timeout=90);print(json.dumps({"status":"PASS"}))'
-            bundle.align.check.remote(client,'B',password,program,100)
+            probe='import subprocess,json;r=subprocess.run(["docker","image","inspect",'+repr(image)+',"--format","{{.Id}}"],capture_output=True,timeout=15);print(json.dumps({"present":r.returncode==0 and r.stdout.decode().strip()=='+repr(image)+'}))'
+            present=bundle.align.check.remote(client,'B',password,probe,20)['present']
+            if not present:
+                archive = folder/'candidate.tar'
+                run(['docker','save','-o',str(archive),image],180)
+                digest = sha(archive.read_bytes())
+                target = '/home/server/.clinician-ui-'+image[7:23]+'.tar'
+                with client.open_sftp() as sftp:
+                    sftp.get_channel().settimeout(20)
+                    started = time.monotonic()
+                    def deadline(done,total):
+                        if time.monotonic()-started > 240:raise TimeoutError('TRANSFER_TIMEOUT')
+                    sftp.put(str(archive),target,callback=deadline)
+                    sftp.chmod(target,0o600)
+                program = 'import pathlib,hashlib,subprocess,json;p=pathlib.Path('+repr(target)+');assert hashlib.sha256(p.read_bytes()).hexdigest()=='+repr(digest)+';subprocess.run(["docker","load","-i",str(p)],check=True,capture_output=True,timeout=90);print(json.dumps({"status":"PASS"}))'
+                bundle.align.check.remote(client,'B',password,program,100)
+            print(json.dumps(dict(phase='IMAGE_PRESENT' if present else 'IMAGE_TRANSFER',status='PASS')),flush=True)
             result = bundle.align.check.remote(client,'B',password,bundle.align.remote_program('B',baseline,image,ca,True),260)
         result.update(scope='UNIFIED_CLINICIAN_UI',sourceRevision=identity['revision'],deployed=args.apply,observedAt=datetime.now(timezone.utc).isoformat())
         (folder/'release-result.json').write_text(json.dumps(result,indent=2),encoding='utf8')
         assert result['status'] == 'PASS', 'RELEASE_FAILED_SEE_RECEIPT'
+        print(json.dumps(dict(phase='ACTIVATION',status=result['status'],rollback=result['rollback'])),flush=True)
         if args.apply:
             try:
+                if args.live_check:
+                    browser_env = dict(__import__('os').environ, NODE_EXTRA_CA_CERTS=str(ROOT/'tmp/certs/mtls/ca.crt'))
+                    subprocess.check_output(['node',str(ROOT/'scripts/clinician-ui-live-check.js'),'--folder',str(folder),'--image',image,'--revision',identity['revision'],'--playwright',args.playwright],cwd=ROOT,env=browser_env,timeout=180)
+                    browser_report=json.loads((folder/'browser-regression.json').read_text())
+                    assert browser_report['status']=='PASS', 'AUTHENTICATED_UI_REGRESSION_FAILED'
+                    gate=dict(image=image,sourceRevision=identity['revision'],checks=browser_report['checks'],evidence=[dict(path=(folder/'browser-regression.json').relative_to(ROOT).as_posix(),sha256=sha((folder/'browser-regression.json').read_bytes()))])
+                    (folder/'validation.json').write_text(json.dumps(gate,indent=2))
+                    validate_flow_report(str(folder/'validation.json'),folder,image,identity['revision'])
                 parity = check_served(str(folder),'https://192.168.111.149:9443/hipass',str(ROOT/'tmp/certs/mtls/ca.crt'))
-            except Exception:
-                result.update(status='FAIL',reason='SERVED_UI_PARITY_FAILED',rollback='NOT VERIFIED')
+            except Exception as error:
+                result.update(status='FAIL',reason='POST_DEPLOYMENT_UI_VALIDATION_FAILED',detail=str(error) if isinstance(error,AssertionError) else type(error).__name__,rollback='NOT VERIFIED')
                 try:
                     rollback = bundle.align.check.remote(client,'B',password,rollback_program(baseline,image),120)
                     result.update(rollback=rollback['status'],deployed=False)
@@ -207,6 +224,8 @@ def main():
             p.add_argument('--validation')
             p.add_argument('--apply',action='store_true')
             p.add_argument('--credential-gui',action='store_true')
+            p.add_argument('--live-check',action='store_true',help='Run actual synthetic browser checks after trial activation; restore baseline on failure.')
+            p.add_argument('--playwright',help='Installed playwright/index.mjs for --live-check')
     args = parser.parse_args()
     if args.command == 'release':result = release(args)
     else:
@@ -226,7 +245,7 @@ def main():
             try:result = check_served(str(folder),args.url,args.ca)
             except (AssertionError,urllib.error.URLError) as error:
                 result=dict(status='FAIL',scope='STATIC_UI_PARITY_ONLY',sourceRevision=identity['revision'],reason=str(error))
-                (folder/'served-parity-'+('local' if urllib.parse.urlsplit(args.url).hostname in ['localhost','127.0.0.1','::1'] else 'web')+'.json').write_text(json.dumps(result,indent=2),encoding='utf8')
+                (folder/('served-parity-'+('local' if urllib.parse.urlsplit(args.url).hostname in ['localhost','127.0.0.1','::1'] else 'web')+'.json')).write_text(json.dumps(result,indent=2),encoding='utf8')
                 print(json.dumps(result));raise SystemExit(2)
         output='source-parity.json'
         if args.command=='check' and args.url:output='served-parity-'+('local' if urllib.parse.urlsplit(args.url).hostname in ['localhost','127.0.0.1','::1'] else 'web')+'.json'

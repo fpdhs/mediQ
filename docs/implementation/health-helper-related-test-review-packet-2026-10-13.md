@@ -1,5 +1,7 @@
 # 건강도우미 교차검사 관계 후보 검토 패킷
 
+> **범위 변경 (2026-10-13):** 이 문서는 이전 환자 서비스 후보 작업의 보관용 기록이다. 사용자의 최신 지시에 따라 출처·번역·임상·편집 검토자 배정과 30개 문장/출처 버전 검토는 활성 작업에서 제외했으며, 학교 발표용 MVP의 시작 조건이나 승인 근거가 아니다. 현재 실행 범위는 [한국어 번역 전용 학교 RAG](./health-helper-school-demo-rag-2026-10-13.md)다.
+
 작성일: 2026-10-13
 상태: 검토 요청 전 준비본 · 승인 아님
 대상: 환자용 건강도우미의 합성/교육 후보 RAG
@@ -73,13 +75,17 @@
 
 검증기는 이제 고정 스냅샷의 제목에서 모든 섹션 경로가 존재하는지 확인하고, 불일치하면 fail closed한다. 새 스냅샷은 `health-helper-liver-evidence-20261013-v4` 및 `health-helper-screening-evidence-20261013-v3`이다. 이번 구조 검사는 제목 위치만 확인하며 출처 문단과 한국어 요약의 사실 일치·번역 정확도·의학적 적절성을 승인하지 않는다. 검토자와 서비스 상태는 계속 `UNASSIGNED`/비활성이다.
 
-검토 위치를 고정하기 위해 [문장별 출처 locator JSON](./health-helper-cross-test-source-locators-2026-10-13-v2.json)을 추가했다. 교차검사 16개 후보의 30개 한국어 문장별 SHA-256, 후보 본문 해시, 출처 URL, 로컬 페이지 스냅샷 해시, H1–H6 제목 경로, 해당 제목 구간 HTML fingerprint를 포함한다. `supportStatus`는 전부 `UNASSESSED`이며, 이 파일은 출처 위치를 재현할 뿐 의미상 지지 여부를 판정하지 않는다.
+검토 위치를 고정하기 위해 [문장별 출처 locator JSON v2](./health-helper-cross-test-source-locators-2026-10-13-v2.json)을 추가했다. v2에는 후보·문장 해시, URL, 스냅샷 해시, 제목 경로와 HTML fingerprint가 있다. [locator v3](./health-helper-cross-test-source-locators-2026-10-13-v3.json)는 고정 스냅샷의 `Last updated` 날짜를 보강하고, 최신 [locator v4](./health-helper-cross-test-source-locators-2026-10-13-v4.json)는 각 후보 제목 구간의 `<p>` ordinal과 visible-text hash를 기록한다. 문장마다 해당 제목 경로의 모든 문단 ID를 순위 없이 연결하므로 어느 문단도 자동으로 지지 근거로 선택하지 않는다. `supportStatus`는 계속 전부 `UNASSESSED`다.
+
+당시 검토 입력은 최신 [v2 claim review template](./health-helper-claim-review-template-2026-10-13-v2.json)에 기록하도록 제안했다. 14개 출처와 30개 문장은 모두 `UNASSESSED` 상태다. 해당 제안은 2026-10-13 사용자 범위 결정으로 활성 계획에서 제외되었으며 학교 데모의 진행을 막지 않는다.
+
+출처 재사용은 [MedlinePlus 이용범위 점검 메모](./health-helper-medlineplus-rights-scope-2026-10-13.md)에 별도로 기록했다. 공식 정책상 후보 원문은 공공영역의 Medical test information 범주와 맞는 것으로 보이나, 이는 프로젝트/제품의 서비스 이용승인이 아니며 저작권 예외·번역 검수·임상 검토도 포함하지 않는다. 검토 담당자 지정과 승인 전까지 권리 상태를 승격하지 않는다.
 
 ## 재현 증적
 
 - 평가 데이터: `data/health-helper-scenario-scope-20261012-v2/evaluation.jsonl`
 - 평가셋 SHA-256: `f6d5d96acbf7cda2bd675747d435b4df6a027d7161521cf5bacfbf429a04f92a`
 - 검색 구현: `src/health-helper-education-retrieval.js`, `src/health-helper-screening-evidence.js`, `src/health-helper-liver-evidence.js`, `src/health-helper-scenario-evidence.js`, `src/health-helper-source-sections.js`
-- 회귀: `node --test test/health-helper-education-retrieval.test.js test/health-helper-liver-evidence.test.js test/health-helper-screening-evidence.test.js test/health-helper-scenario-evidence.test.js test/health-helper-afp-evidence.test.js test/health-helper-cross-test-source-locators.test.js`
+- 회귀: `node --test test/health-helper-rag.test.js test/health-helper-education-retrieval.test.js test/health-helper-liver-evidence.test.js test/health-helper-screening-evidence.test.js test/health-helper-scenario-evidence.test.js test/health-helper-afp-evidence.test.js test/health-helper-cross-test-source-locators.test.js`
 - 평가: `node scripts/evaluate-health-helper-scenario-retrieval.js`
-- 이번 기록의 관련 건강도우미 HTTP/RAG·스냅샷·locator 회귀는 74/74 PASS다. 모델 생성품질·출처 권리·임상 적절성·서비스 배포는 미검증이다.
+- 이번 기록의 관련 건강도우미 HTTP/RAG·스냅샷·locator 회귀는 75/75 PASS다. 모델 생성품질·출처 권리·임상 적절성·서비스 배포는 미검증이다.

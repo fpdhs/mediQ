@@ -3,6 +3,7 @@ import {readFile} from 'node:fs/promises';
 import {POLICY,retrieveScenarioEvidence} from './health-helper-scenario-evidence.js';
 import {sha256} from './health-helper-medlineplus.js';
 import {sourceSectionsExist} from './health-helper-source-sections.js';
+import {sourceUpdatedAtForUrl} from './health-helper-source-freshness.js';
 
 const base='https://medlineplus.gov/lab-tests/';
 const urls=Object.freeze({
@@ -187,6 +188,9 @@ const relatedTestIntentByTopic=Object.freeze({
  triglycerides:'LIMITS','hcv-antibody':'LIMITS',dental:'PURPOSE',
 });
 const relatedTestQuestionPattern=/(?:다른\s*검사|추가\s*검사|함께|같이).*(?:이유|왜|목적)|(?:이유|왜|목적).*(?:다른\s*검사|추가\s*검사|함께|같이)/u;
+const creatinineEgfrPairPattern=/(?:크레아티닌|creatinine).*(?:e\s*gfr|사구체\s*여과율)|(?:e\s*gfr|사구체\s*여과율).*(?:크레아티닌|creatinine)/iu;
+const explicitRelationPattern=/(?:어떤\s*관계|관계(?:인가|은|는|가|를)|어떻게\s*(?:계산|산출)|(?:계산|산출)(?:되|하)|(?:이용|사용).*(?:계산|산출))/u;
+const clinicalDecisionPattern=/(?:진단|확진|질환|질병|암|치료|약물|약제|복용)/u;
 const personalPattern=/(?:내|제)\s*(?:건강검진|검진|검사|결과|수치|기록|영상|키|체중|몸무게|허리둘레|BMI|혈압|시력|청력|혈색소|헤모글로빈|공복혈당|혈당|크레아티닌|신장|eGFR|요단백|콜레스테롤|HDL|LDL|중성지방|간염|폐기능|흉부|구강)|홍길동|개인.*(?:수치|결과)|결과.*정상인가/iu;
 const unsupportedPattern=/(?:정상|참고)\s*(?:범위|수치|기준)(?:\s*(?:가|은|는|이란))?\s*(?:얼마|몇|무엇)|(?:참고|정상)\s*(?:범위|기준|수치)\s*(?:얼마|몇|알려|무엇)|몇\s*(?:이상|미만|정도)|(?:수치|값).*(?:정상인가|정상인지|높은가|낮은가)|(?:얼마나|어느\s*정도).*(?:정상|높|낮|진단)|임계값|진단\s*기준|정상\s*기준/iu;
 
@@ -197,9 +201,10 @@ export function retrieveScreeningEvidence(question){
  if(personalPattern.test(question))return {status:'PERSONAL_INPUT_NOT_SUPPORTED',evidence:[],reason:'PERSONAL_RESULT_NOT_SUPPORTED'};
  if(unsupportedPattern.test(question))return {status:'INSUFFICIENT_EVIDENCE',evidence:[],reason:'REFERENCE_RANGE_NOT_COVERED'};
  const q=normalized(question),matches=screeningTopics.filter(topic=>topic.aliases.some(alias=>q.includes(normalized(alias))));
- if(matches.length!==1)return matches.length>1?{status:'INSUFFICIENT_EVIDENCE',evidence:[],reason:'AMBIGUOUS_SCREENING_TOPICS'}:baseResult;
- const topic=matches[0];
- if(relatedTestQuestionPattern.test(question)){
+ const explicitCreatinineEgfrRelation=creatinineEgfrPairPattern.test(question)&&explicitRelationPattern.test(question)&&!clinicalDecisionPattern.test(question);
+ if(matches.length!==1&&!explicitCreatinineEgfrRelation)return matches.length>1?{status:'INSUFFICIENT_EVIDENCE',evidence:[],reason:'AMBIGUOUS_SCREENING_TOPICS'}:baseResult;
+ const topic=explicitCreatinineEgfrRelation?screeningTopics.find(candidate=>candidate.key==='egfr'):matches[0];
+ if(relatedTestQuestionPattern.test(question)||explicitCreatinineEgfrRelation){
   const supportedIntent=relatedTestIntentByTopic[topic.key];
   if(!supportedIntent)return {status:'INSUFFICIENT_EVIDENCE',evidence:[],reason:'RELATED_TEST_RATIONALE_NOT_COVERED'};
   const entry=screeningEvidenceEntries.find(e=>e.key===topic.key&&e.intent===supportedIntent);
@@ -207,7 +212,7 @@ export function retrieveScreeningEvidence(question){
   return {status:'CANDIDATE',topic:`screening-${topic.key}`,intent:'RELATED_TESTS',extractiveOnly:true,
    questionTemplate:'자료에 명시된 이 검사와 다른 검사 사이의 관계는 무엇인가요?',
    evidence:[{chunk_id:entry.id,doc_id:entry.id,topic:`screening-${topic.key}`,title_ko:entry.title,text_ko:entry.text,textSha256:sha256(entry.text),
-    source_url:entry.url,source_title:entry.sourceTitle,source_updated_at:null,section_path:[entry.section],contentReview:'UNASSIGNED',clinicalUse:false,
+    source_url:entry.url,source_title:entry.sourceTitle,source_updated_at:sourceUpdatedAtForUrl(entry.url),section_path:[entry.section],contentReview:'UNASSIGNED',clinicalUse:false,
     attribution:entry.attribution,institution:entry.institution,rights_policy_url:entry.rightsPolicy,
     translation_notice:`프로젝트 작성 한국어 요약 초안 · 공식 번역 아님 · 의료전문가 검토 미실시 · ${entry.checkedAt} 확인 · ${entry.applicability}`} ]};
  }
@@ -222,7 +227,7 @@ export function retrieveScreeningEvidence(question){
  if(!entry)return {status:'INSUFFICIENT_EVIDENCE',evidence:[],reason:'SCREENING_DETAIL_NOT_COVERED'};
   return {status:'CANDIDATE',topic:`screening-${topic.key}`,intent,extractiveOnly:true,questionTemplate:entry.question,
   evidence:[{chunk_id:entry.id,doc_id:entry.id,topic:`screening-${topic.key}`,title_ko:entry.title,text_ko:entry.text,textSha256:sha256(entry.text),
-   source_url:entry.url,source_title:entry.sourceTitle,source_updated_at:null,section_path:[entry.section],contentReview:'UNASSIGNED',clinicalUse:false,
+   source_url:entry.url,source_title:entry.sourceTitle,source_updated_at:sourceUpdatedAtForUrl(entry.url),section_path:[entry.section],contentReview:'UNASSIGNED',clinicalUse:false,
    attribution:entry.attribution,institution:entry.institution,rights_policy_url:entry.rightsPolicy,
    translation_notice:`프로젝트 작성 한국어 요약 초안 · 공식 번역 아님 · 의료전문가 검토 미실시 · ${entry.checkedAt} 확인 · ${entry.applicability}`} ]};
 }

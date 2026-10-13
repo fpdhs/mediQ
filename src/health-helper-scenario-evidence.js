@@ -1,5 +1,6 @@
 // Small source-grounded Korean editorial drafts; not official translations or clinical approval.
 import {sha256} from './health-helper-medlineplus.js';
+import {sourceUpdatedAtForUrl} from './health-helper-source-freshness.js';
 import {readFile} from 'node:fs/promises';
 export const POLICY='https://medlineplus.gov/about/using/usingcontent/';
 const lab=path=>`https://medlineplus.gov/lab-tests/${path}/`;
@@ -65,7 +66,7 @@ export function retrieveScenarioEvidence(question){
  if(!/무엇|뭐|개념|뜻|설명/.test(q)||/원인|증상|한계|알수없는|범위|기준|비교|준비|다른검사|다음진료|목적|질문|주기|조영|단계|phase|기간|얼마|정상|왜|높|낮|위험|퍼센트|증가|감소/.test(q))
   return {status:'INSUFFICIENT_EVIDENCE',topic:e.id,evidence:[],sourceHint:{title:e.title,url:e.url},reason:'INTENT_NOT_COVERED_BY_CONCEPT_NOTE'};
  const c={chunk_id:e.id,doc_id:e.id,topic:e.id,title_ko:e.label,text_ko:e.text,textSha256:sha256(e.text),
-  source_url:e.url,source_updated_at:null,section_path:[e.section],contentReview:'UNASSIGNED',clinicalUse:false,
+  source_url:e.url,source_updated_at:sourceUpdatedAtForUrl(e.url),section_path:[e.section],contentReview:'UNASSIGNED',clinicalUse:false,
   attribution:'Source: MedlinePlus, National Library of Medicine.',rights_policy_url:POLICY,
   translation_notice:'프로젝트 작성 한국어 개념 요약 초안 · 공식 번역 아님 · 의료전문가 검수 미실시 · 2026-10-12 원문 확인'};
  return {status:'CANDIDATE',topic:e.id,intent:'CONCEPT',evidence:[c]};
@@ -91,7 +92,7 @@ export function retrieveScenarioRelatedTestEvidence(question){
  return {status:'CANDIDATE',topic:e.id,intent:'RELATED_TESTS',extractiveOnly:true,
   questionTemplate:'자료에 명시된 이 검사와 다른 검사 사이의 관계는 무엇인가?',
   evidence:[{chunk_id:e.id,doc_id:e.id,topic:e.id,title_ko:e.label,text_ko:e.text,textSha256:sha256(e.text),
-   source_url:e.url,source_updated_at:null,section_path:[e.section],contentReview:'UNASSIGNED',clinicalUse:false,
+   source_url:e.url,source_updated_at:sourceUpdatedAtForUrl(e.url),section_path:[e.section],contentReview:'UNASSIGNED',clinicalUse:false,
    attribution:'Source: MedlinePlus, National Library of Medicine.',rights_policy_url:POLICY,
    translation_notice:'프로젝트 작성 한국어 개념 요약 초안 · 공식 번역 아님 · 의료전문가 검토 미실시 · 2026-10-12 원문 확인 · 일반 정보만 설명하며 진료 판단을 대신하지 않음'} ]};
 }

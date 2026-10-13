@@ -16,6 +16,12 @@ test('default-off patient runtime never reads secrets; release-only activation i
   const env={};loadCapstonePatientRuntimeSecrets(env,()=>assert.fail('must not read'));assert.deepEqual(env,{});
   assert.throws(()=>loadCapstonePatientRuntimeSecrets({HIPASS_CAPSTONE_PATIENT_KEY_RELEASE:'1'}),/PATIENT_RUNTIME_PROFILE_REQUIRED/);
 });
+
+test('Entra patient runtime retains distinct service credentials and narrow DB identity',()=>{
+  const f=fixture();f.env.AUTH_MODE='ENTRA_OIDC';loadCapstonePatientRuntimeSecrets(f.env,f.read);
+  assert.equal(new URL(f.env.HIPASS_PATIENT_AUTHORITY_DATABASE_URL).username,'hipass_patient_authority');
+  assert.notEqual(f.env.HIPASS_PATIENT_SELF_VIEW_SERVICE_TOKEN,f.env.HIPASS_PATIENT_KEY_RELEASE_SERVICE_TOKEN);
+});
 test('patient runtime loads separate A/B keys and dedicated bounded database connection, not app URI',()=>{
   const f=fixture();f.env.DATABASE_URL='postgresql://hipass_app@postgres/hipass';f.env.HIPASS_PATIENT_AUTHORITY_DATABASE_URL='postgresql://postgres@arbitrary/other';
   loadCapstonePatientRuntimeSecrets(f.env,f.read);

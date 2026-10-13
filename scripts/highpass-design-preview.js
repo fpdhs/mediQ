@@ -1,7 +1,7 @@
 // Loopback-only static design preview. Never starts the application or accesses its DB.
 import http from 'node:http';
 import { readFile } from 'node:fs/promises';
-const root = new URL('../public/mockups/highpass-refresh/', import.meta.url);
+const root = new URL('../docs/design/archive/mockups/highpass-refresh/', import.meta.url);
 const routes = new Map([
   ['/', ['index.html', 'text/html; charset=utf-8']],
   ['/design.css', ['design.css', 'text/css; charset=utf-8']],

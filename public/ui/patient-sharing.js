@@ -3,22 +3,15 @@ import {libraryStudy} from './patient-library.js';
 import {createWalletDock,createWalletIcon} from './wallet-home.js';
 // Presentation shell only; all existing form IDs, event handlers and approval gates survive.
 export function createSharingSurface(root,navigate,mobile=false){
+  if(!mobile){root.setAttribute('data-sharing-surface','patient-web');return;}
   if(root.querySelector('.sharing-expanded-card'))return;
   root.classList.add('sharing-extracted-sheet','sharing-wallet-v2');
   const paper=document.createElement('div');paper.className='sharing-expanded-card';
   paper.append(...root.children);root.append(paper);
-  const heading=paper.querySelector(mobile?'.section-title':'.page-head h1');
-  if(heading){heading.replaceChildren(createWalletIcon('sharing'),document.createTextNode(mobile?'영상 공유':'어떤 영상을 어디로 공유할까요?'));}
-  const intro=paper.querySelector(mobile?'.section-sub':'.page-head p');
+  const heading=paper.querySelector('.section-title');
+  if(heading){heading.replaceChildren(createWalletIcon('sharing'),document.createTextNode('영상 공유'));}
+  const intro=paper.querySelector('.section-sub');
   if(intro)intro.textContent='영상과 병원을 고르고, 공유 내용을 확인하세요.';
-  if(!mobile){
-    const steps=document.createElement('ol');steps.className='sharing-preparation-steps';steps.setAttribute('aria-label','공유 단계');
-    ['공유 준비','내용 확인','승인·연결'].forEach((text,index)=>{const li=document.createElement('li');li.textContent=text;if(!index)li.setAttribute('aria-current','step');steps.append(li);});
-    paper.querySelector('.page-head')?.append(steps);
-    const title=paper.querySelector('.sharing-new h2');if(title)title.textContent='공유할 검사';
-    const summary=paper.querySelector('.sharing-summary h2');if(summary)summary.textContent='공유할 내용을 확인하세요';
-    const existing=paper.querySelector('.sharing-existing h2');if(existing)existing.textContent='현재 공유 중';
-  }
   root.append(createWalletDock({selected:'sharing',navigate}));
 }
 // Configured MVP choices, not a live directory; server policy is authoritative.
@@ -57,7 +50,7 @@ export function createPatientSharing({root,onPrepare,onRevoke}){
   const readDraft=()=>({study:studies.find(row=>row.studyInstanceUid===select.value),target:target.value,purpose:purpose.value,permission:permission.value,from:from.value,until:until.value});
   const validate=()=>{const model=sharingDraftModel(readDraft());prepare.disabled=busy||!model.valid;
     const draft=readDraft(),summary=root.querySelector('#sharing-summary-values'),route=root.querySelector('#sharing-summary-route');
-    if(route)route.textContent=`${draft.study?hospital(draft.study.sourceHospitalId):'내 영상'} → ${draft.target?hospital(draft.target):'받을 병원 선택'}`;
+    if(route)route.textContent=`${studyPreview&&draft.study?hospital(draft.study.sourceHospitalId):'내 영상'} → ${draft.target?hospital(draft.target):'받을 병원 선택'}`;
     if(summaryTitle)summaryTitle.textContent=draft.target?`${hospital(draft.target)}에 공유할 내용`:'받는 병원을 선택해 주세요';
     if(studyPreview){studyPreview.replaceChildren();const info=draft.study?libraryStudy(draft.study):null;const text=node('span','sharing-study-identity');text.append(node('strong','',info?.title??'검사를 선택하세요'),node('span','',info?`${info.date} · ${hospital(draft.study.sourceHospitalId)}`:'등록된 검사만 공유할 수 있어요.'));studyPreview.append(icon('archive'),text,node('span','sharing-study-change','변경'));}
     if(summaryExam)summaryExam.textContent=draft.study?libraryStudy(draft.study).title:'검사를 선택하세요';
@@ -66,8 +59,10 @@ export function createPatientSharing({root,onPrepare,onRevoke}){
     if(permissionHint)permissionHint.textContent=draft.permission==='DOWNLOAD_ALLOWED'?'병원이 영상을 저장할 수 있어요. 저장된 자료는 공유 중단으로 회수되지 않습니다.':'다운로드는 허용하지 않아요.';
     const days=(Date.parse(until.value)-Date.parse(from.value))/86400000;
     for(const [value,control] of presetButtons){control.disabled=busy;control.setAttribute('aria-pressed',String(value===days||value===null&&![1,3,7].includes(days)));}
-    if(summary){summary.replaceChildren();for(const [label,value] of [['목적',({TREATMENT:'진료',TRANSFER:'전원',CONSULTATION:'협진'})[draft.purpose]||'선택 필요'],['허용 작업',draft.permission==='DOWNLOAD_ALLOWED'?'열람·다운로드':'영상 열람'],['다운로드',draft.permission==='DOWNLOAD_ALLOWED'?'허용':'허용 안 함']])summary.append(node('dt','',label),node('dd','',value));}
-    status.textContent=busy?'처리 결과를 확인하고 있어요.':!target.value?'받는 병원을 선택해 주세요.':!model.valid?'목적·허용 작업·기간을 확인하세요. 종료 시각은 시작 이후이며 현재보다 미래여야 해요.':permission.value==='DOWNLOAD_ALLOWED'?'병원이 자료를 저장할 수 있어요. 저장된 자료는 공유 중단으로 회수되지 않습니다.':'';return model;};
+    if(summary){const rows=[['목적',({TREATMENT:'진료',TRANSFER:'전원',CONSULTATION:'협진'})[draft.purpose]||'선택 필요'],['허용 작업',draft.permission==='DOWNLOAD_ALLOWED'?'열람·다운로드':'영상 열람'],['다운로드',draft.permission==='DOWNLOAD_ALLOWED'?'허용':'허용 안 함']];
+      if(!studyPreview){rows.unshift(['검사',draft.study?libraryStudy(draft.study).title:'검사 선택']);rows.push(['시작',date(draft.from)],['종료',date(draft.until)]);}
+      summary.replaceChildren();for(const [label,value] of rows)summary.append(node('dt','',label),node('dd','',value));}
+    status.textContent=busy?'처리 결과를 확인하고 있어요.':!target.value?'받는 병원을 선택해 주세요.':!model.valid?'목적·허용 작업·기간을 확인하세요. 종료 시각은 시작 이후이며 현재보다 미래여야 해요.':permission.value==='DOWNLOAD_ALLOWED'?'병원이 자료를 저장할 수 있어요. 저장된 자료는 공유 중단으로 회수되지 않습니다.':studyPreview?'':'초안입니다. 다음 화면에서 확인하고 승인해야 공유가 생성됩니다.';return model;};
   for(const field of [purpose,permission,from,until]){field.oninput=validate;field.onchange=validate;}
   if(presets){for(const [days,label] of [[1,'1일'],[3,'3일'],[7,'7일'],[null,'직접 설정']]){const control=button(label,()=>{if(busy)return;if(days===null){until.focus();return;}const start=Date.parse(from.value);if(!Number.isFinite(start)){from.focus();return;}until.value=localDate(start+days*86400000);validate();},'sharing-period-button');control.setAttribute('aria-label',`공유 기간 ${label}`);presets.append(control);presetButtons.push([days,control]);}}
   const recipients=()=>{const study=studies.find(row=>row.studyInstanceUid===select.value),previous=target.value;target.replaceChildren();const empty=node('option','','받는 병원을 선택하세요');empty.value='';target.append(empty);

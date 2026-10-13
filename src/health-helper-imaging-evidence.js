@@ -2,6 +2,7 @@
 import {readFile} from 'node:fs/promises';
 import {POLICY,retrieveScenarioEvidence} from './health-helper-scenario-evidence.js';
 import {sha256} from './health-helper-medlineplus.js';
+import {sourceUpdatedAtForUrl} from './health-helper-source-freshness.js';
 
 const ultrasound='https://medlineplus.gov/lab-tests/sonogram/';
 const ct='https://medlineplus.gov/ctscans.html';
@@ -89,7 +90,7 @@ export function retrieveImagingEvidence(question){
  if(!entry)return {status:'INSUFFICIENT_EVIDENCE',evidence:[],reason:'IMAGING_DETAIL_NOT_COVERED'};
  return {status:'CANDIDATE',topic:'health-imaging-tests',intent:entry.intent,extractiveOnly:true,questionTemplate:entry.question,
   evidence:[{chunk_id:entry.id,doc_id:entry.id,topic:'health-imaging-tests',title_ko:entry.title,text_ko:entry.text,textSha256:sha256(entry.text),
-   source_url:entry.url,source_title:entry.sourceTitle,source_updated_at:entry.sourceUpdatedAt,section_path:[entry.section],contentReview:'UNASSIGNED',clinicalUse:false,
+   source_url:entry.url,source_title:entry.sourceTitle,source_updated_at:sourceUpdatedAtForUrl(entry.url),section_path:[entry.section],contentReview:'UNASSIGNED',clinicalUse:false,
    attribution:entry.attribution,institution:entry.institution,rights_policy_url:entry.rightsPolicy,
    translation_notice:`프로젝트 작성 한국어 요약 초안 · 공식 번역 아님 · 의료전문가 검토 미실시 · ${entry.checkedAt} 확인 · ${entry.applicability}`} ]};
 }

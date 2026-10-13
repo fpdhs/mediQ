@@ -1,18 +1,36 @@
 # Medi Q 발표 환경 통합 상태와 실행 순서
 
+## 2026-10-13 Entra 시연 사용자 — 등록 PASS / 초대 수락·로그인 NOT VERIFIED
+
+사용자가 지정한 환자/의료진 이메일을 정확 조회 후 두 Guest로 초대 생성하고 개별 GET readback `PendingAcceptance` 확인. `scripts/entra-demo-users.py --apply` exit0; 증적 artifacts/azure/entra-demo-users-20261013T035605Z-a8a379/result.json은 Git 제외·로컬 ACL 보호, DRAFT / UNASSIGNED. 계정 이메일·oid·초대 링크는 코드/문서에 기록하지 않았다. Graph 초대 발송 요청 성공은 실제 메일 수신·수락·앱 역할·로그인 성공이 아니다. 관리자/Azure RBAC·서버 매핑·공개 ingress·배포 변경 없음. [계약의 지정 guest 예외 및 수락 관문](../integration/entra-oidc-synthetic-actor-contract.md). 다음 작업 한 개: 사용자가 두 초대를 수락하면 Accepted/object ID 재확인. 기존 B 재부팅/700장 전송 중단은 유지한다.
+
+## 2026-10-13 12:19 KST Azure DNS — 이름 등록 PASS / 공개 웹 NOT VERIFIED
+
+사용자가 highpass-demo 및 외부망 로그인 접속을 선택했다. 기존 공인 IP의 DNS `highpass-demo.japaneast.cloudapp.azure.com`을 설정하고 ARM GET readback PASS. `python scripts/azure-web-dns.py --apply` exit0, artifacts/azure/web-dns-20261013T031954Z/result.json. 초기 CLI 미지원 FAIL은 artifacts/azure/web-dns-20261013T031830Z/result.json에 보존. 기존 Public IP 핵심속성 동일 확인, NSG/인증/서비스/CT 변경 없음. 공개 HTTPS·실제 로그인·DNS 전파·외부망 정상/거부는 NOT VERIFIED. TEST 인증과 기존 /32 제한 유지. 안전성 offline 4/4 PASS는 종단 시험이 아니다. 신규 증적 DRAFT / UNASSIGNED, commit/push 없음. [공개 계획·관문](../operations/azure-synthetic-web-edge-plan-2026-10-13.md). 다음 작업 한 개: 허용 환자·의료진 시연 계정 지정 및 실제 OIDC 계약 확정. B 재부팅/700장 전송의 기존 중단은 유지한다.
+
+## 2026-10-13 12:12 KST Azure 별도 웹 진입 검토 — 공개 배포 NOT VERIFIED
+
+[기존 Edge 계획의 최신 관측·다음 단계](../operations/azure-synthetic-web-edge-plan-2026-10-13.md). 실제 고정 공인 IP 138.91.2.60 / NIC 10.89.0.4 확인, DNS 미설정, HTTPS는 10.90.88.1 overlay만 존재. 실제 Control AUTH_MODE=TEST이므로 공개하지 않는다. 네트워크+호스트 inventory 8개 조회 PASS, offline safety 2/2 PASS; 공개 브라우저 로그인·TLS·허용/거부 probe·배포/복구 NOT VERIFIED. 증적 artifacts/azure/web-edge-inventory-20261013T031231Z/result.json, DRAFT / UNASSIGNED. HEAD9f27b85ab349ea5e5e5b6dc2da659825047a6d25+dirty. DNS/NSG/서비스/인증 변경·commit/push 없음. 다음 작업 한 개: DNS 이름·접속 대상·실제 OIDC·TLS의 공개 접속 계약 확정. 중단된 B 재부팅/700장 전송은 재개하지 않았다. 아래는 다른 작업 범위 및 이전 이력이다.
+
+## 2026-10-13 10:58 KST 공유 Vault purge protection — 승인 적용 PASS
+
+사용자의 명시 승인으로 `kv-hp-demo-4869edd9`에 현재7일 기준 purge protection을 활성화했다. **지정한 설정 변경 PASS / DRAFT · UNASSIGNED**. [실행·검증 기록](b-pacs-purge-protection-activation-2026-10-13.md). 실제 HEAD150adeb4f64acd8075de2eea51fe8105882f6f1e+dirty. ARM 최소 PATCH `enablePurgeProtection=true` 후 독립 GET=true;7일 retention/private/RBAC/soft-delete·나머지 properties/tags/region·기존 key scope assignment 동일 PASS. 기존 키/권한/VM/서비스/고정 CT와 병행 UI 작업 보존. crypto/key lifecycle/배포 변경, commit/push 없음.
+
+`python scripts/b-pacs-enable-purge-protection.py --apply`, exit0/42,562ms, 증적 artifacts/azure/b-purge-protection-20261013T015714Z/result.json. 안전 guard unittest6/6 PASS. 관리 write Activity Log event는 즉시 조회 미확인 NOT VERIFIED이며, **Key Vault crypto AuditEvent 진단 수집 미구성 문제는 해결되지 않았다**. 다음 작업 한 개: **기존 승인된 로그 수집처·보존 기간·조회 권한을 조사하여 AuditEvent 수집 연결 준비**. 재부팅 recovery·별도 Vault restore·전체 볼륨 backup·B PACS·700장·브라우저는 계속 NOT VERIFIED. purge protection은 비가역적이며 false rollback/삭제를 수행하지 않는다. 아래 승인 대기 절은 적용 이전 이력이다.
+
 ## 2026-10-13 10:51 KST 저장 키 복구 검토 — 공유 Vault 비가역 변경 승인 대기
 
 **DRAFT / UNASSIGNED; 기술 권고는 purge protection 활성화/기존7일 유지, 실제 설정 변경 없음.** [검토·영향·복구 절차](b-pacs-key-recovery-review-2026-10-13.md). 실제 private/RBAC/soft-delete readback PASS, purge protection 미설정 FAIL, **Key Vault AuditEvent 진단 설정0개 FAIL**. 저장 키의 잔여 임시 assignment0개, 두 encrypted 복구 자료 hash/KEK binding/LUKS header PASS. workstation ARM keys list는 ForbiddenByConnection으로 현재 Data Plane key metadata NOT VERIFIED이며 우회하지 않았다. 증적 artifacts/azure/b-key-recovery-review-20261013T015144Z/result.json, read-only 검토 exit0/7,591ms. 검토 실행 성공을 보안 Gate 전체 PASS로 해석하지 않는다.
 
 활성화는 공유 Vault 전체에 적용되고 되돌릴 수 없다. 기존7일 보존 기간도 생성 후 변경 불가이며90일을 원하면 별도 Vault/이관 승인이 필요하다. **다음 작업 한 개: 공유 Vault의7일 purge protection 활성화 승인 확인**. 실제 B 재부팅·별도 Vault 복원·ciphertext volume backup·감사 event·B PACS·700장·브라우저는 계속 NOT VERIFIED. VM/서비스/키/권한/데이터 변경, commit/push 없음. 아래 의료진 UI 작업 상태는 별도 트랙이며 보존했다.
 
-## 2026-10-13 의료진 화면 단일 소스 관리 — 코드 반영 / B 교체 미실행
+## 2026-10-13 의료진 화면 단일 소스 관리 — 관리 구현 완료 / 최종 B 유지 BLOCKED
 
 사용자 지시에 따라 의료진 로컬/웹 화면의 수정 원본을 `public/index.html#hospital-saas-app`과 의존 파일로 통일했다. [관리·실행 절차](../operations/clinician-ui-management.md). 전체 root, 원본 CSS 순서와 공용 JS/import/이미지/폰트를 같은 묶음으로 생성하며 sourceRevision으로 관리한다. 기존 홈/보안 여정의 별도 부분 배포 entry point는 종료하고 통합 stage/build/check/release 경로를 사용한다. 기존 helper·증적은 보존한다. API/DB/인증·권한/암호화 정책 및 요구사항 baseline 변경 없음. 관련 FR-010~013 / FR-032~036, 공용 모듈의 환자 동의·공유 회귀 포함.
 
-Python 관리/음성 회귀 12/12 PASS, 의료진·환자·공유/보관 선택 Node 회귀 34/34 PASS. snapshot 기반 통합 묶음은 정적 파일76개, sourceRevision `03358bc46638a395217c7d6e0afbf1c2d7d40b94e41d37fd99124a22b2061534`. 로컬 `http://127.0.0.1:3000`의 실제 GET root·스타일 순서·의존 파일 비교 PASS. strict CA의 B `https://192.168.111.149:9443/hipass` GET 비교는 `FAIL / SERVED_WORKSPACE_DIFFERS`: B 웹은 아직 구형 배포본이다. 이 실패를 권한 거부 결과로 취급하지 않는다.
+Python 관리/음성 회귀15/15 PASS, 선택 Node 회귀36/36 PASS. 마지막 시험 후보는 `artifacts/workstation/clinician-bundle-20261013T025001556100Z`, 정적 파일73개, sourceRevision `4e3c6f7f22a694b6d28002b9e0ada2729c498c1441020c80a338c03936ba614b`. 로컬 실제 GET root·스타일 순서·의존 파일 비교 PASS, 이미지 보호 파일471개 보존 PASS, Trivy HIGH/CRITICAL0건 PASS. 실제 B 적용·복구·재적용과 의료진/환자 로그인·메뉴/오류 처리·역할 거부·영상 공유 설정 폼 회귀5개 check PASS. 새 동의 승인·전송·실제 PACS는 시험하지 않았다. 보관함403 `METADATA_ROUTE_REQUIRED`, 새 건강기록404는 오류 처리만 확인했으며 기능은 NOT VERIFIED다.
 
-B VM 인증 정보와 실제 후보의 의료진 로그인·메뉴 API 정상/거부·환자 로그인/공유 회귀가 준비되지 않아 B 교체 및 새 이미지 복구·인증 E2E는 NOT VERIFIED. 관리 경로의 단일화와 실제 원격 화면 교체는 별도 결과다. commit/push/merge 없음. 아래의 별도 화면 배포 절은 과거 이력이며 신규 변경에 재사용하지 않는다.
+사용자 제공 B 인증 정보로 실행했으나 마지막 파일 대조 전에 `public/app.js`, 의료진 홈 CSS/JS, 환자 helper 및 의료진 root가 다른 작업에서 변경됐다. `SOURCE_CHANGED_RESTAGE_REQUIRED`로 최종 Gate FAIL; `release-result.json`의 deployed=false / rollback=PASS이며 원래 B 이미지의 healthy 상태로 복구했다. 최종 화면 통합 배포는 BLOCKED다. 공용 원본 수정 작업의 실제 중단 확인과 최신 묶음 재생성이 다음 Gate다. [세부 증적·제한사항](../operations/clinician-ui-management.md). 관리 경로의 단일화와 실제 원격 화면 교체는 별도 결과다. 이 작업에서 commit/push/merge 없음. 아래 별도 화면 배포 절은 과거 이력이며 신규 변경에 재사용하지 않는다.
 
 ## 2026-10-13 10:42 KST B 전용 8GiB 암호화 저장소 — 생성·수동 복구 scoped PASS
 

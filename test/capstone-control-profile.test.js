@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
+import { validateCapstoneControlRuntime } from '../src/capstone-control-runtime-config.js';
 
 test("cloud profile exposes neither database nor bare Control API and enforces strict persistent policy", () => {
   const env = { ...process.env, HIPASS_APP_IMAGE: "highpass-platform-mvp:local", HIPASS_POSTGRES_IMAGE: "postgres:16-alpine", HIPASS_CLOUD_SECRET_DIR: "/opt/highpass/secrets", HIPASS_CAPSTONE_PUBLIC_ORIGIN: "https://192.168.111.149:9443" };
@@ -26,7 +27,10 @@ test("role bootstrap safely binds SQL and entrypoint reads distinct external sec
   assert.doesNotMatch(bootstrap, /console\.(?:log|error)\([^)]*(?:appPassword|statement|error)/u);
   const start = readFileSync("scripts/start-capstone-control.js", "utf8");
   assert.match(start, /Role secrets must be distinct/u);
-  assert.match(start, /HIPASS_CONTROL_PLANE_ONLY !== "1"/u);
+  assert.match(start, /validateCapstoneControlRuntime\(process\.env\)/u);
+  assert.ok(start.indexOf('validateCapstoneControlRuntime(process.env)') < start.indexOf('readFileSync(filename'));
+  assert.throws(() => validateCapstoneControlRuntime({NODE_ENV:'production',AUTH_MODE:'TEST',HIPASS_STORE:'postgres',
+    HIPASS_DPOP_REQUIRED:'1',HIPASS_CONTROL_PLANE_ONLY:'0'}), /cloud boundary/u);
   assert.doesNotMatch(start, /console\./u);
 });
 

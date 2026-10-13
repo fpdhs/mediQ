@@ -1,0 +1,5 @@
+# Candidate only; existing TLS, encryption, patient and PACS overlays stay intact.
+services:
+  portal:
+    environment:
+      CAPSTONE_ENTRA_LOGIN_ENABLED: '1'

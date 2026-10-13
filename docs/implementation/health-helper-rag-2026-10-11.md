@@ -1000,3 +1000,15 @@ Azure REST는 fetch 테스트 대역으로만 검증한다. HTTP 테스트는 �
 - source inventory는 `NO_ELIGIBLE_MEDICAL_EVIDENCE`, eligibleCount 0이다. locator는 출처 위치와 버전 추적을 돕지만, 한국어 문장이 원문에 의해 의미상 뒷받침되는지 판정하지 않는다.
 
 다음 선행조치는 PM이 출처별 재사용 검토자와 적격 임상 검토자를 지정하여 locator에 고정된 30개 문장을 검토하도록 하는 것이다. 검토 전에는 후보를 서비스 RAG에 연결하거나 환자-facing 의료 설명으로 승격하지 않는다.
+
+## 최신 관측 — 2026-10-13 10:55 KST
+
+이번에는 출처 재사용 범위와 환자 서비스 통합 경계를 확인했다.
+
+- MedlinePlus 공식 [이용 정책](https://medlineplus.gov/about/using/usingcontent/)을 확인했다. NLM은 영어·스페인어의 `Medical test information`을 공공영역 콘텐츠로 열거하고, 해당 공공영역 정보의 재사용 및 출처 표시를 안내한다. 현 locator의 16개 후보는 14개 고유 `/lab-tests/` URL에 한정되고, 출처 표기는 정책이 제안하는 `Source: MedlinePlus, National Library of Medicine.` 형식과 일치한다.
+- [MedlinePlus 이용범위 메모](./health-helper-medlineplus-rights-scope-2026-10-13.md)를 작성했다. 이는 정확한 콘텐츠 클래스에 관한 정책 근거일 뿐 법률·제품 승인으로 승격하지 않는다. 사이트 내 A.D.A.M., 약품 정보, 이미지·삽화 등 별도 저작권 콘텐츠는 후보에 포함하지 않고, 전체 HTML 스냅샷도 환자 서비스에 노출하지 않는다.
+- 실제 웹 경로에서 `src/server.js`는 `HealthHelperRag`를 `VISIT_PREPARATION`(로컬 Ollama 설정 시) 또는 `SOURCE_GUIDANCE`로 설정한다. `src/health-helper-education-retrieval.js`는 현재 환자 API/웹 경로에서 호출되지 않는다. 따라서 앞선 312문항/146 후보 검색 결과는 격리된 로컬 교육 후보 검색 평가이며 실제 환자용 의료 설명 RAG의 Recall/정확도라고 볼 수 없다.
+- `test/health-helper-rag.test.js`에 교차검사 후보가 `CANDIDATE`로 검색되더라도 승인되지 않은 서비스 코퍼스에는 도달하지 않아 모델 호출이 발생하지 않는 회귀를 추가했다. 해당 회귀 포함 건강도우미 통합 실행은 **75/75 PASS**다.
+- 재실행한 312문항 평가와 소스 인벤토리는 이전 상태를 유지했다. `PASS_SAFETY_WITH_SCOPE_ABSTENTIONS`, 146/208(70.19%), 기준값 후보 오출 0, 임상 질문 거부 26/26, 개인 결과 미지원 26/26, injection payload 누출 0이며, 승인 가능한 정적 의료 근거는 여전히 0이다.
+
+**후속 범위 결정 (2026-10-13):** 위의 검토자 배정·30개 문장/출처 버전 검토는 사용자 결정으로 학교 발표용 MVP의 활성 작업에서 제외했다. 현재 작업은 별도 검토자 없이 한국어 번역문만 검색 지식베이스로 쓰는 격리 데모다. 구현·실행 상태는 [학교 발표용 RAG 실행 안내](./health-helper-school-demo-rag-2026-10-13.md)를 기준으로 한다. 이 결정은 환자 API 연결·서비스 배포를 승인하지 않는다.

@@ -58,7 +58,7 @@ if(patientSelfViewEnabled && process.env.CAPSTONE_PATIENT_IMAGE_ENCRYPTION_REQUI
   };
   patientImageDecryption=createPatientImageDecryptor({...hospitalKeyConfig('B'),control,publicBaseUrl:'https://192.168.111.149:9443'});
 }
-const server = https.createServer({ cert: readFileSync(process.env.CAPSTONE_B_TLS_CERT_FILE), key: readFileSync(process.env.CAPSTONE_B_TLS_KEY_FILE), minVersion: "TLSv1.2" }, createCapstoneBPortal({ root: "/app/public", ca, encryptionRequired, imageDecryption,patientSelfViewEnabled,patientImageDecryption, pacsReceiver, diagnosticFactory: createRuntimeDiagnosticFactory(process.env) }));
+const server = https.createServer({ cert: readFileSync(process.env.CAPSTONE_B_TLS_CERT_FILE), key: readFileSync(process.env.CAPSTONE_B_TLS_KEY_FILE), minVersion: "TLSv1.2" }, createCapstoneBPortal({ root: "/app/public", ca, encryptionRequired, imageDecryption,patientSelfViewEnabled,patientImageDecryption, pacsReceiver, entraLoginEnabled: process.env.CAPSTONE_ENTRA_LOGIN_ENABLED === '1', diagnosticFactory: createRuntimeDiagnosticFactory(process.env) }));
 server.headersTimeout = 10000;
 server.requestTimeout = 15000;
 server.setTimeout(encryptionRequired ? 35000 : 20000, socket => socket.destroy());

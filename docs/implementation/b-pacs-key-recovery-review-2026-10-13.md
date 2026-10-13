@@ -1,5 +1,7 @@
 # B 저장 키 보호·복구 검토 — purge protection 적용 권고
 
+최신 후속: 2026-10-13 사용자 명시 승인 후 실제 공유 Vault purge protection을 현재7일 기준으로 활성화했고 독립 GET과 기존 설정/role 보존을 검증했다. [10:58 KST 적용 기록](b-pacs-purge-protection-activation-2026-10-13.md). 아래 승인 대기·미설정 설명은 10:51 검토 당시 이력이다. 재부팅/별도 Vault 복원/AuditEvent 미검증을 승격하지 않는다.
+
 검토 시각: 2026-10-13 10:51 Asia/Seoul. HEAD `c1040c8439a0bdb78c68a7a83a73d84bc2704f31` + dirty. **DRAFT / UNASSIGNED; 기술 검토 완료, 비가역 변경 승인 대기**. 의료진 UI의 병행 변경을 포함한 기존 작업은 보존했다. 요구사항 영향: V3-SR-CRY-002/004/005, V3-SR-AUD-001/003, V3-SR-OPS-003. 요구사항 완료 판정은 아니다.
 
 ## 결론

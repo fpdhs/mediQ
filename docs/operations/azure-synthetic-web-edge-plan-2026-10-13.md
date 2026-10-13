@@ -1,5 +1,46 @@
 # Azure 합성 웹 Edge·NSG 및 복구 계획
 
+## 2026-10-13 12:19 KST DNS 적용 — 외부 로그인 서비스는 미배포
+
+사용자가 `highpass-demo` 이름 및 휴대폰 외부망에서 로그인 후 접속하는 방향을 선택했다. 기존 Public IP에 DNS label만 설정했고 독립 GET에서 `highpass-demo.japaneast.cloudapp.azure.com`을 확인했다. **DNS 설정 PASS / 웹 HTTPS·외부 로그인 NOT VERIFIED**. 초기 CLI `check-dns-name`은 미지원으로 FAIL(변경 없음), 공식 ARM `checkDnsNameAvailability` GET으로 대체해 성공했다. 기존 지정망 /32 제한을 아직 유지하고 있으며 일반 인터넷 허용으로 변경하지 않았다.
+
+- 명령 `python scripts/azure-web-dns.py --apply`, exit 0; 증적 `artifacts/azure/web-dns-20261013T031954Z/result.json`, DRAFT / UNASSIGNED. 초기 실패 증적 `artifacts/azure/web-dns-20261013T031830Z/result.json` 보존.
+- Public IP 주소/할당/SKU/NIC 연결/idle timeout/tags 전후 동일 확인. DNS 외 NSG·VM·Control·DB·PACS·Key Vault 변경 및 서비스 재시작 없음. DNS 전파 및 실제 TLS 브라우저 연결은 ARM readback과 구분한다.
+- 안전성 정적 계약 `python -m unittest discover -s test -p azure_web_*_test.py`, exit 0, 4/4 PASS, unittest reported 0.025초. 전체 보안·배포 회귀가 아니다.
+- 후속 `Resolve-DnsName highpass-demo.japaneast.cloudapp.azure.com -Type A -DnsOnly -QuickTimeout`, exit 0: 워크스테이션 resolver에서 A=138.91.2.60 PASS. 모든 외부 DNS resolver의 전파 완료 또는 HTTPS 접속을 뜻하지 않는다. DNS operator receipt elapsedSeconds=35.502.
+
+### 외부망 공개 방향과 남은 결정
+
+확인된 요구사항: 인터넷 어디서나 HTTPS 진입, 인증된 시연 사용자만 합성 환자·의료진 권한으로 접근. 전체 신규 회원에게 홍길동 기록을 자동 할당하거나 공유 발표자 키로 인터넷 로그인을 대체하지 않는다. 기존 OIDC/동의/DPoP/감사 계약을 유지한다.
+
+현재 TEST 인증 때문에 인터넷 개방은 차단한다. 실제 허용 계정(환자/의료진 Microsoft 또는 Entra 계정)을 사용자에게 지정받고, 서버 관리형 object ID 매핑과 actual tenant/app/scope/redirect를 설정·검증해야 한다. 사용자 비밀번호·client secret·private key를 채팅이나 Git으로 받지 않는다.
+
+기존 계획의 일반 인터넷 공개 관문인 WAF·비용 검토도 미완료다. Front Door는 시간별 기본 요금과 요청/전송 비용이 있으며 Standard/Premium과 managed rule 지원이 다르다. 비용 승인 없이 새 자원을 생성하지 않는다. Front Door를 채택하면 공개 사용자 주소는 해당 frontend이고 `highpass-demo`는 보호된 origin으로 활용할 수 있으므로, 현재 이름을 유지한 직접 VM 접속 요구와 구분해 확정해야 한다. 직접 VM Edge와 관리형 WAF는 서로 대체 가능한 완료 증거가 아니다. [Microsoft 비용 구조](https://learn.microsoft.com/en-us/azure/frontdoor/billing), [요금 비교](https://learn.microsoft.com/en-us/azure/frontdoor/compare-cdn-front-door-price).
+
+다음 작업 한 개: **허용 환자·의료진 시연 계정을 지정하고 실제 OIDC 연결 계약 확정**. 이후 WAF/예산·TLS 발급 갱신·경로 allowlist·clean reviewed image·외부망 정상/거부/rollback을 완료한 후에만 공개한다. DNS 등록만으로 공개 시연 또는 전체 MVP/v3 완료라고 표현하지 않는다. `azure-compliance` 스킬의 진단/변경 분리 원칙을 적용했고 전체 azqr audit를 실행한 것으로 주장하지 않는다.
+
+## 2026-10-13 12:12 KST 실제 VM 재점검 — 공개 배포 전 관문 유지
+
+사용자 요청에 따라 기존 VM의 별도 안전한 웹 진입점을 검토했다. 이번 범위는 읽기 전용 inventory와 계획 보완이며 DNS/NSG/인증/서비스 배포 변경은 없다. 이전 B 저장소 재부팅·전송 작업의 중단은 유지한다. 아래 예전의 CLI/NIC 미확인 기록은 이력이며 네트워크 관측은 이번 결과를 우선한다.
+
+- 실행: `python scripts/azure-web-edge-inventory.py`, exit 0, 22.440초. VM/NIC/Public IP/NSG/subnet/effective NSG/routes/pinned SSH host 8개 조회 PASS. 조회 성공은 보안 적합성 또는 공개 로그인 PASS가 아니다.
+- 증적: `artifacts/azure/web-edge-inventory-20261013T031231Z/result.json`; DRAFT / UNASSIGNED. HEAD `9f27b85ab349ea5e5e5b6dc2da659825047a6d25` + dirty. 다른 작업의 파일은 보존하고 commit/push하지 않았다.
+- 실제 VM `vm-highpass-capstone`, Japan East, Standard_B2als_v2. NIC `10.89.0.4` (Dynamic), 연결된 Standard Static Public IP `138.91.2.60`, `dnsSettings=null`. 서브넷 별도 NSG/route table 없음; NIC NSG와 effective routes 조회 증적 보존.
+- effective inbound: source `112.76.111.121/32`의 SSH 22/TCP, VPN 51820/UDP, HTTPS 443/TCP만 priority 100/110/120 허용; priority 200에서 나머지 inbound 거부. 외부 허용/거부 source의 실제 probe는 NOT VERIFIED.
+- 호스트 `ss -lnt`: HTTPS는 `10.90.88.1:443`만 존재. `10.89.0.4:443` listener는 없다. 현재 Control/PostgreSQL healthy, API/DB published port 없음. ingress 자체 healthcheck는 null이므로 healthy라고 승격하지 않는다.
+- 실제 Control `AUTH_MODE=TEST`, `HIPASS_CONTROL_PLANE_ONLY=1`, `HIPASS_DPOP_REQUIRED=1`. 기존 테스트 인증 공개 금지. 실제 Entra 로그인은 NOT VERIFIED.
+- 실행 이미지: Control `sha256:3d1cb6c2d7dfcaf33d1cefd13b89055ac58e6a5ab349808352862fbe08895436`, ingress `sha256:ac29dc9d739bb1fd6fa6caebd2ee001dbbbf551a51d982b8d69b7df6dda10eb5`, PostgreSQL `sha256:8d0e686f1620c154c0c35ba8c7173a90f8f1a55ff8062f75677be1f3a4196568`.
+
+### 구현 결정과 다음 작업 한 개
+
+기존 overlay listener는 유지하고, 후보 Edge는 관측된 NIC private IP에만 별도로 bind한다. NIC IP가 Dynamic이므로 매 적용 전 재조회·일치 검사하며 임의 static 전환하지 않는다. 정확 경로 allowlist, 정상 TLS, 실제 OIDC actor mapping, 기존 동의/DPoP/감사를 통과하기 전 Edge를 띄우지 않는다. PACS·DB·키 발급·DICOM/Viewer 픽셀 경로는 이번 공개 메타데이터 단계에서 제외하고 미완료로 남긴다.
+
+DNS 후보 prefix는 `highpass-demo`로 제안하지만 미확정/미예약이다. `*.japaneast.cloudapp.azure.com`의 정확 FQDN은 Azure availability 조회와 적용 후 반환값으로 확인한다. DNS 이름만 설정해도 TLS 인증서가 자동 설치되지는 않는다. source 제한을 전 세계로 확대하거나 인증서 발급을 위해 port 80을 자동 개방하지 않는다. 발급 방식과 갱신은 별도 검증해야 한다. [Microsoft VM FQDN](https://learn.microsoft.com/en-us/azure/virtual-machines/create-fqdn), [Public IP DNS label](https://learn.microsoft.com/en-us/azure/virtual-network/ip-services/public-ip-addresses/).
+
+다음 작업은 **공개 접속 계약 확정**이다: DNS prefix, 기존 지정망만/추가 시연망/일반 인터넷 접속 중 대상, 실제 Entra SPA/API app 및 허용 환자·의료진 object ID, TLS 발급·갱신 방식을 확정한다. 일반 인터넷 공개는 기존 /32 제한의 확장이고 WAF·비용 검토가 필요한 별도 결정이다. 인증서는 private key를 채팅·Git에 받지 않는다. 입력 전에는 공개 배포를 진행하지 않는다.
+
+검증: `python -m unittest discover -s test -p azure_web_edge_inventory_test.py`, exit 0, 2/2 PASS (unittest reported 0.010초). 읽기 전용 명령·tenant/subscription guard·환경값 최소화의 offline 확인이며 Azure 인증/차단/rollback 시험을 대체하지 않는다. 관련 FR-001~025, FR-037~041; 기존 Gate/승인 요구를 변경하지 않는다. `azure-validate` 스킬은 승인된 azd 계획이 없어 적용 중단했고, 기존 non-azd VM/Compose workflow를 유지했으며 Validated 상태를 선언하지 않는다.
+
 상태: PREPARATION / DRAFT / UNASSIGNED / NO CHANGE APPLIED
 기준일: 2026-10-13 KST
 범위: 제한된 합성 데이터 웹 시연의 Edge와 네트워크. 영상 Data Plane 공개는 제외한다.
@@ -9,7 +50,7 @@
 - Cloud Control은 `infra/azure/capstone-control.compose.yml`에서 API/DB 포트를 publish하지 않고 내부 Docker network에 둔다. 현재 TLS ingress는 `infra/azure/capstone-control-ingress.compose.yml`의 `10.90.88.1:443:8443` binding뿐이며, 주석상 overlay 전용이다.
 - VM template `infra/azure/capstone-cloud-vm.json`은 management source CIDR에서 SSH/VPN/HTTPS를 제한하고 나머지 inbound를 거부하도록 선언한다. 템플릿은 실제 Azure NIC/서브넷 effective rules의 증거가 아니다.
 - 이 셸에서 `az` 실행파일을 찾지 못해 실제 NIC private IP, 연결된 NIC·subnet NSG, route table, effective security rules 및 public IP mapping은 조회하지 못했다. 현재 Azure network state는 **NOT VERIFIED**.
-- 현재 checkout: branch `codex/wbs-12-key-release-20260912`; HEAD `c1040c8439a0bdb78c68a7a83a73d84bc2704f31` (2026-10-10). 현재 `git status --short`는 540개 변경 파일(486 staged additions, 54 staged modifications)이며 clean하지 않다. 기존 변경과 이번 준비 작업을 섞어 commit하지 않았다. 따라서 HEAD는 immutable identifier일 뿐 staged working tree를 포함하지 않으며 이번 demo의 deployable release SHA로 선언할 수 없다.
+- 현재 checkout: branch `codex/wbs-12-key-release-20260912`; HEAD `9f27b85ab349ea5e5e5b6dc2da659825047a6d25` (2026-10-13 10:55 KST). 2026-10-13 11시대 점검에서 `git status --short`는 여러 변경 경로를 보여 dirty였고 staged 경로는 없었다. 공유 작업 트리의 다른 변경과 이번 준비 작업을 섞어 stage/commit하지 않았다. 따라서 HEAD는 immutable identifier일 뿐 현재 변경을 포함하지 않으며 이번 demo의 deployable release SHA로 선언할 수 없다.
 - `docs/governance/release-approval.md`의 release gate는 exact source/hosted SHA 일치, security/container gate, SBOM, digest-bound exceptions, rollback evidence 및 approver를 요구한다. 이 문서의 새 기능/배포는 현재 없음. 기존 [`rollback.md`](rollback.md)는 이전 PoC application container 복구 기록이며 이번 Azure listener/NSG 복구를 증명하지 않는다.
 
 ## Edge 경로 결정안
@@ -29,17 +70,17 @@ Azure Public IP → VM NIC private IP:443 → 별도 Web Edge (정확 경로 all
 1. 기존 `10.90.88.1:443`를 재사용·재바인딩하지 않는다. public IP 자체에 직접 bind하지 않고 Azure NIC의 **현재 확인된 private IP**에 별도 Edge listener를 bind한다. 해당 주소를 확인하고 port collision/effective route 검증하기 전 Compose overlay를 만들거나 띄우지 않는다. wildcard `0.0.0.0` bind도 금지한다.
 2. 한정 시연은 미리 승인된 demo 출구 IP/CIDR만 TCP 443 allowlist에 넣는다. `Internet`, `Any`, `0.0.0.0/0` 허용은 금지한다. 현재 template의 management `/32` 및 VPN 제한은 보존한다. 일반 공개 대상이 반드시 필요하면 별도 WAF/Front Door 비용·구성 검토를 먼저 하고 현재 USD 100 입력 상한에 대한 최신 가격/비용 검증 후 별도 승인한다.
 3. NIC와 subnet 양쪽 NSG, effective rules/priority, host firewall, Docker published ports를 함께 점검한다. 명시적 demo 443 allow는 검증된 CIDR·TCP·443에만 한정하고, 나머지 inbound deny를 그대로 유지한다. 적용 후 allowed/denied source 양쪽에서 IP flow 및 실제 TLS probe를 확인한다.
-4. Edge는 별도 서비스/Compose override로 분리하고 Control API의 내부 route policy를 그대로 전제하지 않는다. 현재 Control ingress는 일반 `/api/*` 다수를 허용하므로, public Edge는 승인된 demo에 실제 필요한 경로를 조사해 **정확 path allowlist**를 만든다. unknown route, `/dicomweb`, WADO, frame, Viewer image, import/export, PACS, Gateway, key release 및 일반 admin API는 기본 거부한다.
+4. Edge는 별도 서비스/Compose override로 분리하고 Control API의 내부 route policy를 그대로 전제하지 않는다. 현재 Control ingress는 일반 `/api/*` 다수를 허용하므로, public Edge는 승인된 demo에 실제 필요한 경로를 조사해 **정확 path allowlist**를 만든다. 최소한 `/entra-redirect.html`, `/vendor/msal-browser.js`, `/vendor/entra-redirect.js` 및 합성 auth-config 경로를 검토하고, `connect-src https://login.microsoftonline.com`을 반영한다. redirect bridge 응답에는 COOP를 적용하지 않는다. unknown route, `/dicomweb`, WADO, frame, Viewer image, import/export, PACS, Gateway, key release 및 일반 admin API는 기본 거부한다.
 5. TLS는 demo DNS와 일치하는 유효 인증서 및 정상 chain을 사용한다. API/DB/Orthanc/Gateway port는 publish하지 않는다. `HIPASS_CONTROL_PLANE_ONLY=1`, 동의·RBAC/ABAC·감사·DPoP fail-closed 조건을 유지한다. 인증·actor mapping readiness 전까지 listener/NSG 변경은 적용하지 않는다.
 
 ## 적용 전 수집·승인 게이트
 
 | 게이트 | 필요한 증거 | 현 상태 |
 |---|---|---|
-| Entra 로그인 및 합성 actor mapping | tenant/app/scope/redirect, 허용 사용자 `oid`, browser/MSAL flow, actual API+DPoP negative tests | BLOCKED — backend code/tests ready; Entra values and browser integration absent; [계약](../integration/entra-oidc-synthetic-actor-contract.md) 참조 |
-| clean release | 승인된 source SHA, clean tree/PR, hosted SHA match, security·container scans, SBOM/digest | BLOCKED — 540 staged changed files (486 additions, 54 modifications) |
+| Entra 로그인 및 합성 actor mapping | tenant/app/scope/redirect, 허용 사용자 `oid`, actual browser token exchange, API+DPoP negative tests | BLOCKED — backend and same-origin MSAL popup/bridge implemented; local mock browser flow through `/identity` returns a synthetic mapped actor; tenant values and real sign-in absent; [계약](../integration/entra-oidc-synthetic-actor-contract.md) 참조 |
+| clean release | 승인된 source SHA, clean tree/PR, hosted SHA match, security·container scans, SBOM/digest | BLOCKED — shared worktree remains dirty (no staged paths at last check); full suite has 3 failures; no reviewed release commit or image digest |
 | 실제 Azure network inventory | VM/NIC/private IP/public IP, subnet/NIC NSG, route table, effective rules, host firewall | BLOCKED — local `az` unavailable |
-| exact Edge path set | 정적 자산 목록 및 UI가 실제 호출하는 metadata routes; 모든 DICOM/관리 경로 denial | NOT STARTED |
+| exact Edge path set | 정적 자산 목록 및 UI가 실제 호출하는 metadata routes; 모든 DICOM/관리 경로 denial | IN PROGRESS — auth bootstrap candidate is `/`, `/entra-redirect.html`, `/vendor/msal-browser.js`, `/vendor/entra-redirect.js`, `GET /api/capstone-demo/auth-config`, and bearer-protected `GET /api/capstone-demo/identity`; full app/API route trace is still required before publishing any allowlist |
 | audience/CIDR/TLS | 승인된 demo DNS, TLS certificate chain, 모든 허용 출구 CIDR | INPUT REQUIRED |
 | 비용·운영 창 | 실제 현재 비용/quota, 제한된 시험 시간과 종료 책임자 | NOT VERIFIED |
 
@@ -76,6 +117,8 @@ Rollback trigger: OIDC/actor-map 또는 DPoP denial test 실패, unknown/public 
 6. 복구 확인 전 재시도하지 않는다. 원인 분석 및 새 release SHA/변경 승인이 필요하다.
 
 이번 단계에서는 Entra app registration, Azure NSG/NIC, DNS, TLS, VM, Compose runtime을 변경하지 않았다. 실제 공개 배포 및 적용은 clean release SHA, 필수 입력, network inventory 및 별도 change approval 이후 작업이다.
+
+로컬 준비 검증: `node --test test/entra-browser-auth.test.js test/entra-oidc-auth.test.js test/capstone-login-preflight.test.js` PASS 13/13; 테스트 전용 mock browser flow는 합성 `/identity` actor 반환까지 PASS. `node scripts/build-entra-client.js`, `docker build --progress=plain --target entra-client .` 및 두 Compose 파일의 `config --no-interpolate --quiet`는 PASS다. Docker build는 dependency install script를 실행하지 않도록 `--ignore-scripts`로 고정한 build-only stage이며 최종 app image는 아직 만들지 않았다. 실제 Compose 변수 보간은 `HIPASS_APP_IMAGE`, `HIPASS_CAPSTONE_PUBLIC_ORIGIN`, `HIPASS_POSTGRES_IMAGE`, `HIPASS_CLOUD_SECRET_DIR`가 없어 검증되지 않았다. 전체 suite는 1,210건 중 1,207 PASS / 3 FAIL (`test/hcc-source-operator-contract.test.js` 1건, `test/medlineplus-upload.test.js` 2건)이다. 실패를 분리해 재실행했을 때 HCC 실패는 재현됐고 MedlinePlus 2건은 재현되지 않았다. 모두 이번 Entra 변경과 무관한 현재 worktree 테스트이며 release gate를 계속 막는다.
 
 ## 참고 (Microsoft 공식 문서)
 

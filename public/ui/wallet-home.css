@@ -209,3 +209,7 @@
  #patient-portal-app .mq-wallet-card,.mq-wallet-card:hover,.mq-wallet-card:focus-visible,.mq-wallet-card.is-extracting{transform:translateY(var(--lift,0px)) rotate(var(--angle,0deg))!important}
  .mq-wallet-screen-enter{animation:none}
 }
+/* Shared in-flow navigation, after each patient's task and status content. */
+.mq-wallet-dock.mq-wallet-object{margin-top:48px;margin-bottom:16px;font-family:inherit;grid-column:1 / -1}
+.mq-wallet-dock .mq-wallet-card.is-selected{outline:2px solid #3566b8;outline-offset:2px}
+.mq-wallet-dock.mq-wallet-object button:focus-visible{outline:3px solid #3566b8;outline-offset:4px;z-index:5}

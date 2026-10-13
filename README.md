@@ -2,6 +2,8 @@
 
 현재 발표 환경·실제 사용자 흐름·남은 실패의 권위 위치는 [발표 환경 통합 상태](docs/implementation/mediq-presentation-integration-status-2026-10-09.md)의 현재 절입니다. 아래 날짜별 설명은 해당 시점의 이력이며 최신 배포의 PASS로 승계하지 않습니다. 전체 MVP/v3 미완료.
 
+현재 웹 엔트리포인트와 보관된 디자인 시안의 구분은 [UI 기준 및 시안 보관 안내](docs/design/README.md)를 따릅니다. 서비스 화면은 `public/`에서 제공하고, 독립 시안은 `docs/design/archive/mockups/`에 보관합니다.
+
 ## MediQ 기록 계승 — 2026-10-08
 
 일정·전체 P0 목표 미달로 종료한 MediQ의 회고·선별 검증 기록·코드 재사용 후보를 [계승 자료집](docs/inherited/mediq/README.md)에 등록했습니다.

@@ -3,6 +3,7 @@ import {readFile} from 'node:fs/promises';
 import {POLICY,retrieveScenarioEvidence} from './health-helper-scenario-evidence.js';
 import {sha256} from './health-helper-medlineplus.js';
 import {sourceSectionsExist} from './health-helper-source-sections.js';
+import {sourceUpdatedAtForUrl} from './health-helper-source-freshness.js';
 
 const root='https://medlineplus.gov/lab-tests/';
 const urls=Object.freeze({
@@ -89,7 +90,7 @@ const markerPatterns=[['AST',/(?<![a-z])AST(?![a-z])|아스파르트산아미노
 const detailIntentPatterns=[['PURPOSE',/목적|왜|무엇.*검사|사용하|하는.*검사/],
  ['LIMITS',/한계|원인|알.*수|의미|해석|높|낮|정상.*(?:뜻|의미)/],
  ['PREPARATION',/준비|금식|공복|약.*(?:중단|복용)|검사.*전/],
- ['COMPARISON',/비교|이전|직전|지난|추세|참고범위|검사기관|단위/]];
+ ['COMPARISON',/비교|이전|직전|지난|추세|참고범위|단위/]];
 const relatedTestQuestionPattern=/(?:다른\s*검사와\s*함께|함께\s*(?:보|시행|확인)|같이\s*(?:보|시행|확인)).*(?:이유|왜|목적)|(?:이유|왜|목적).*(?:다른\s*검사|함께|같이)/u;
 
 export function retrieveLiverFunctionEvidence(question){
@@ -121,7 +122,7 @@ export function retrieveLiverFunctionEvidence(question){
  return {status:'CANDIDATE',topic:'health-liver-tests',intent:relatedTestQuestion?'RELATED_TESTS':entry.intent,extractiveOnly:true,
   questionTemplate:relatedTestQuestion?'자료에 명시된 이 검사와 다른 검사 사이의 관계는 무엇인가요?':entry.question,
   evidence:[{chunk_id:entry.id,doc_id:entry.id,topic:'health-liver-tests',title_ko:entry.title,text_ko:entry.text,textSha256:sha256(entry.text),
-   source_url:entry.url,source_updated_at:entry.sourceUpdatedAt,section_path:[entry.section],contentReview:'UNASSIGNED',clinicalUse:false,
+   source_url:entry.url,source_updated_at:sourceUpdatedAtForUrl(entry.url),section_path:[entry.section],contentReview:'UNASSIGNED',clinicalUse:false,
    attribution:'Source: MedlinePlus, National Library of Medicine.',rights_policy_url:POLICY,
    translation_notice:`프로젝트 작성 한국어 요약 초안 · 공식 번역 아님 · 의료전문가 검토 미실시 · ${entry.checkedAt} 확인 · ${entry.applicability}`} ]};
 }

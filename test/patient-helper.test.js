@@ -29,6 +29,42 @@ test('KDCA source guide renders attribution, context, license and non-AI questio
     assert.equal(find('helper-question-input').value,'어떤 정보를 확인하나요?');
   } finally {globalThis.document=prior;}
 });
+test('MRI list source guidance renders structured source fragments and provenance note as inert text',async()=>{
+ const prior=globalThis.document;globalThis.document={createElement:tag=>new Element(tag)};
+ try {
+  const heading='MRI 전에는 다음과 같은 물품을 제거해야 합니다.',item='장신구와 시계';
+  const contextNote='한국어 번역의 목록 안내와 항목을 원문 조각별로 나누어 표시합니다. 문장부호를 새로 덧붙이지 않았으며, 원문 전체 페이지의 임상적 적용 여부는 별도로 확인해야 합니다.';
+  const root=new Element('main');createPatientHelper(root,{ask:async()=>({status:'SOURCE_GUIDANCE',responseMode:'SOURCE_GUIDANCE_LIST_CONTEXT',
+   answer:'질문과 관련된 목록 안내와 항목을 번역 후보로 나누어 표시합니다. 본인에게 적용되는지는 의료진에게 확인해 주세요.',
+   generationUsed:false,sources:[{institution:'MedlinePlus · 미국 국립의학도서관',title:'자기공명영상(MRI)',
+    section:'MRI 준비',contextNote,listContexts:[{heading,items:[item]}],licenseLabel:'Source: MedlinePlus, National Library of Medicine.',
+    url:'https://medlineplus.gov/mriscans.html'}],questions:['진료에서 무엇을 확인하면 좋을까요?']})});
+  const find=cls=>descendants(root).find(el=>el.className===cls);
+  find('helper-manual-input').value='MRI 전에 장신구를 제거해야 하나요?';await find('helper-add-form').dispatch('submit');
+  assert.equal(find('helper-answer').textContent,'질문과 관련된 목록 안내와 항목을 번역 후보로 나누어 표시합니다. 본인에게 적용되는지는 의료진에게 확인해 주세요.');
+  assert.ok(descendants(root).some(el=>el.className==='helper-note helper-source-context'&&el.textContent===contextNote));
+  const listSection=find('helper-source-list-context');assert.ok(listSection);
+  assert.equal(listSection.tag,'section');assert.equal(listSection.attributes['aria-label'],'원문 목록 안내와 항목');
+  assert.ok(descendants(listSection).some(el=>el.className==='helper-note helper-source-list-heading'&&el.textContent===heading));
+  assert.ok(descendants(listSection).some(el=>el.tag==='ul'));
+  assert.ok(descendants(listSection).some(el=>el.tag==='li'&&el.textContent===item));
+  assert.equal(descendants(root).some(el=>el.textContent===`${heading}: ${item}.`),false);
+  assert.ok(descendants(root).some(el=>el.textContent==='원문 링크 안내 · AI 생성 답변 아님 · 질문은 프로젝트 예시입니다.'));
+  assert.equal(descendants(root).some(el=>el.className==='helper-claim-evidence'),false);
+ } finally {globalThis.document=prior;}
+});
+test('RAG claim quotes render as text, never as executable markup',async()=>{
+ const prior=globalThis.document;globalThis.document={createElement:tag=>new Element(tag)};
+ try {
+  const root=new Element('main');createPatientHelper(root,{ask:async()=>({status:'GENERATED',answer:'합성 답변 문장입니다.',questions:[],sources:[],
+   claimEvidence:[{text:'합성 답변 문장입니다.',evidenceId:'E1',quote:'<img src=x onerror=alert(1)>'}]})});
+  const find=cls=>descendants(root).find(el=>el.className===cls);
+  find('helper-manual-input').value='합성 질문';await find('helper-add-form').dispatch('submit');
+  const panel=find('helper-evidence-drawer helper-claim-evidence');assert.ok(panel);
+  assert.ok(descendants(panel).some(el=>el.tag==='blockquote'&&el.textContent==='근거 원문 발췌: <img src=x onerror=alert(1)>'));
+  assert.equal(descendants(panel).some(el=>el.tag==='img'),false);
+ } finally {globalThis.document=prior;}
+});
 test('question notes reject non-string and bound length',()=>{
   assert.equal(cleanQuestion(null),''); assert.equal(cleanQuestion({}),'');
   assert.equal(cleanQuestion('  질문  '),'질문'); assert.equal(cleanQuestion('가'.repeat(300)).length,240);

@@ -45,6 +45,45 @@ test('output maps evidence to server URLs and rejects invented citations and uns
  assert.match(combined.sources[0].excerpt,/두 번째 테스트 문단/u);
  for(const bad of [{...good,evidenceIds:['made-up']},{...good,answer:'약을 복용하세요.'},{...good,answer:'<script>alert(1)</script>'},{...good,questions:['확진인가요?']},{...good,url:'https://evil.example'}])assert.throws(()=>validateEducationOutput(bad,r));
 });
+test('school-demo generation maps every answer sentence to an exact retrieved quote',()=>{
+ const r={...retrieveMedlineplus('빈혈',candidate()),claimEvidenceRequired:true};
+ r.evidence[0]={...r.evidence[0],text_ko:`${r.evidence[0].text_ko} 두 번째 테스트 문장입니다.`};
+ const p=educationPayload(r),userContent=JSON.parse(p.messages.find(message=>message.role==='user').content);
+ assert.ok(p.format.required.includes('claimEvidence'));
+ assert.ok(p.format.properties.claimEvidence.items.properties.sentenceIndexes.items.type==='integer');
+ assert.equal(p.format.required.includes('questions'),false);
+ assert.deepEqual(userContent.evidence[0].sentences,[{index:0,text:'빈혈의 개념에 관한 테스트 문장입니다.'},{index:1,text:'두 번째 테스트 문장입니다.'}]);
+ assert.equal(Object.hasOwn(userContent.evidence[0],'text'),false);
+ assert.doesNotMatch(JSON.stringify(p),/원문 질문/u);
+ const quote='빈혈의 개념에 관한 테스트 문장입니다.';
+ const good={evidenceIds:['E1'],claimEvidence:[{evidenceId:'E1',sentenceIndexes:[0]}]};
+ const out=validateEducationOutput(good,r);assert.equal(out.status,'GENERATED');assert.equal(out.answer,quote);
+ assert.deepEqual(out.questions,['진료에서 이 자료와 관련해 무엇을 확인하면 좋을까요?']);
+ assert.deepEqual(out.claimEvidence,[{text:quote,evidenceId:'E1',quote}]);
+ const heldRetrieval={...r,evidence:r.evidence.map(chunk=>({...chunk,demoIndexStatus:'PASS',ai_qa_status:'HOLD',
+  sourceContentReview:'HOLD',unresolvedIssueCount:7,translation_notice:'사용자 제공 AI 번역 · 임상 검토 미실시.'}))};
+ const heldOut=validateEducationOutput(good,heldRetrieval);
+ assert.match(heldOut.sources[0].contextNote,/번역 색인 PASS는 텍스트 무결성만/u);
+ assert.match(heldOut.sources[0].contextNote,/자동 QA HOLD/u);
+ assert.match(heldOut.sources[0].contextNote,/미해결 이슈 7건/u);
+ const combinedQuote=`${quote} 두 번째 테스트 문장입니다.`;
+ const combined=validateEducationOutput({...good,claimEvidence:[{evidenceId:'E1',sentenceIndexes:[0,1]}]},r);
+ assert.equal(combined.answer,combinedQuote);
+ r.evidence.push({...r.evidence[0],chunk_id:'test-anemia-c2',text_ko:'세 번째 테스트 문장입니다.'});
+ const missingQuote={...good,claimEvidence:undefined};delete missingQuote.claimEvidence;
+ const appended={...good,answer:`${quote} 모든 환자에게 입원이 필요합니다.`};
+ const wrongReference={...good,claimEvidence:[{...good.claimEvidence[0],evidenceId:'E2'}]};
+ const outOfRange={...good,claimEvidence:[{evidenceId:'E1',sentenceIndexes:[2]}]};
+ const negativeIndex={...good,claimEvidence:[{evidenceId:'E1',sentenceIndexes:[-1]}]};
+ const fractionalIndex={...good,claimEvidence:[{evidenceId:'E1',sentenceIndexes:[0.5]}]};
+ const repeatedIndex={...good,claimEvidence:[{evidenceId:'E1',sentenceIndexes:[0,0]}]};
+ const skippedSentence={...good,claimEvidence:[{evidenceId:'E1',sentenceIndexes:[0,2]}]};
+ const reversedSentences={...good,claimEvidence:[{evidenceId:'E1',sentenceIndexes:[1,0]}]};
+ const multipleEvidenceClaims={evidenceIds:['E1','E2'],claimEvidence:[
+  {evidenceId:'E1',sentenceIndexes:[0,1]},{evidenceId:'E2',sentenceIndexes:[0]}]};
+ for(const bad of [missingQuote,appended,wrongReference,outOfRange,negativeIndex,fractionalIndex,repeatedIndex,skippedSentence,reversedSentences,multipleEvidenceClaims])
+  assert.throws(()=>validateEducationOutput(bad,r),/EDUCATION_OUTPUT_REJECTED/u);
+});
 test('source UI accepts only fixed MedlinePlus topics and rejects spoofed or held links',()=>{
  assert.equal(helperSourceUrl('https://medlineplus.gov/anemia.html'),'https://medlineplus.gov/anemia.html');
  for(const url of ['https://medlineplus.gov/highbloodpressure.html','https://medlineplus.gov/anemia.html?x=1','https://medlineplus.gov.evil/anemia.html','https://evil@medlineplus.gov/anemia.html','https://medlineplus.gov/anemia.html#x'])assert.equal(helperSourceUrl(url),null);

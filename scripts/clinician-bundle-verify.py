@@ -7,7 +7,7 @@ m=json.loads((folder/'manifest.json').read_text())
 spec=importlib.util.spec_from_file_location('clinician_ui',ROOT/'scripts/clinician-ui.py')
 manager=importlib.util.module_from_spec(spec);spec.loader.exec_module(manager)
 manager.load_bundle(str(folder))
-def run(args):return subprocess.check_output(args,cwd=ROOT,timeout=60)
+def run(args):return subprocess.check_output(args,cwd=ROOT,timeout=120)
 js="const fs=require('fs'),c=require('crypto');let files=JSON.parse(process.argv[1]);function walk(p){if(!fs.existsSync('/app/'+p))return;for(const n of fs.readdirSync('/app/'+p)){const f=p+'/'+n;if(fs.statSync('/app/'+f).isDirectory())walk(f);else files.push(f)}}for(const p of ['src','scripts','public'])walk(p);console.log(JSON.stringify(Object.fromEntries([...new Set(files)].map(f=>[f,c.createHash('sha256').update(fs.readFileSync('/app/'+f)).digest('hex')]))));"
 base=m['base'];image=run(['docker','image','inspect',a.image,'--format','{{.Id}}']).decode().strip()
 hashes={}
@@ -19,5 +19,5 @@ assert all(hashes['candidate'].get(f)==h for f,h in hashes['base'].items() if f 
 assert set(hashes['candidate'])==set(hashes['base'])|set(m['hashes']),'UNDECLARED_IMAGE_FILE'
 info=json.loads(run(['docker','image','inspect',image]))[0];bi=json.loads(run(['docker','image','inspect',base]))[0]
 assert info['RootFS']['Layers'][:-m.get('overlayLayers',len(m['hashes']))]==bi['RootFS']['Layers'],'BASE_CHANGED'
-out=dict(status='PASS',scope='CANDIDATE_BYTES_AND_PROTECTED_TREES_ONLY',sourceRevision=m['sourceRevision'],image=image,base=base,files=len(m['hashes']),protectedFiles=len(hashes['base']),deployed=False,review='DRAFT / UNASSIGNED')
+out=dict(status='PASS',scope='CANDIDATE_BYTES_AND_PROTECTED_TREES_ONLY',sourceRevision=m['sourceRevision'],image=image,base=base,files=len(m['hashes']),baseFiles=len(hashes['base']),protectedFiles=sum(f not in m['hashes'] for f in hashes['base']),deployed=False,review='DRAFT / UNASSIGNED')
 (folder/'verification.json').write_text(json.dumps(out,indent=2));print(json.dumps(out))

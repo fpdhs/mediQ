@@ -2,6 +2,8 @@
 
 ## Medi Q 웹 화면 설계
 
+- [환자 웹 영상 공유 기준](PATIENT-WEB-SHARING-BASELINE.md): 사용자가 지정한 `192.168.111.149:9443/hipass/#PATIENT`의 공유 준비 화면을 환자 웹의 단일 기준으로 적용.
+
 - [A/B/C 로컬 디자인 구현 보고](MEDI-Q-ABC-DESIGN-IMPLEMENTATION-REPORT.md): 3열 의료진 화면, 집중 Viewer, 청록 환자 화면, 검증과 미연결 범위.
 
 - **현행 구현 기준:** [A 의료진 기본 / B 집중 Viewer / C 환자 기본 — 화면 설계 v1.0](MEDI-Q-SCREEN-BASELINE-V1.md). 사용자 선택 반영; 이전 시각 배치와 구현 순서를 대체. 구현·보안 승인과 별개.
@@ -57,11 +59,11 @@
 
 ---
 
-## 3. 웹 콘솔 및 인터랙티브 목업 실행
+## 3. 현재 웹 진입점과 시안 보관
 
-웹 브라우저를 통해 직접 인터랙티브하게 체험할 수 있는 목업 화면들이 제공됩니다:
+- **환자·의료진 웹:** `public/index.html`을 `src/server.js`가 `/`에서 제공합니다. 현재 구현 상태의 기준은 이 파일과 연결된 `public/app.js`, `public/styles.css`, 그리고 발표 환경 통합 상태 문서의 최신 절입니다.
+- **환자 모바일 PWA:** `public/mobile/index.html`을 `/mobile/`에서 제공합니다. 보관된 모바일 디자인 프로토타입과 구분합니다.
+- **과거 웹·모바일 시안:** [`archive/mockups/`](archive/mockups/README.md)에 보관합니다. 이 파일들은 애플리케이션 정적 경로에서 제거되어 웹 서버나 Docker 이미지의 공개 진입점으로 제공되지 않습니다.
+- **Highpass 화면 시안 미리보기:** `node scripts/highpass-design-preview.js`로 로컬 전용 미리보기를 실행하면 `http://127.0.0.1:9457/`에서 확인할 수 있습니다. 실제 로그인·동의·전송·토큰·영상 API와 연결되지 않은 시안입니다.
 
-- **UI 설계서 및 목업 종합 포털**: [`http://localhost:3000/mockups/`](http://localhost:3000/mockups/)
-- **병원 SaaS 콘솔 인터랙티브 목업**: [`http://localhost:3000/mockups/saas-console.html`](http://localhost:3000/mockups/saas-console.html)
-- **환자 경험 포털 인터랙티브 목업**: [`http://localhost:3000/mockups/patient-portal.html`](http://localhost:3000/mockups/patient-portal.html)
-- **HiPass 플랫폼 통합 데모 콘솔**: [`http://localhost:3000/`](http://localhost:3000/)
+Git 저장소의 `master`가 오래된 화면을 보이는 경우에는 현재 작업 브랜치와 기본 브랜치가 서로 다른지 먼저 확인해야 합니다. 이 안내는 브랜치 병합이나 원격 배포를 수행하지 않습니다.

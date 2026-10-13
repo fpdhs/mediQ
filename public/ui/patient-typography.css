@@ -1,0 +1,117 @@
+/* The selected sharing screen keeps its deployed type scale. Other menus use shared tokens. */
+#patient-portal-app {
+  --hp-patient-page-title:32px;
+  --hp-patient-section-title:22px;
+  --hp-patient-subsection-title:18px;
+  --hp-patient-body:16px;
+  --hp-patient-label:14px;
+  --hp-patient-caption:13px;
+  --hp-patient-heading-leading:1.35;
+  --hp-patient-body-leading:1.6;
+}
+
+#patient-portal-app :is(.mq-wallet-home,.health-wallet-sheet),
+#patient-portal-app #patient-phr .health-layout.health-wallet-sheet {
+  font-family:var(--hp-font);
+}
+
+#patient-portal-app :is(
+  .page-head h1,
+  [data-page="home"] .page-head h1,
+  .pass-home .page-head h1,
+  .sharing-page .page-head h1,
+  .sharing-expanded-card .page-head h1,
+  .image-library h1,
+  [data-page="activity"] .history-heading h1,
+  .helper-heading h1,
+  #patient-phr .health-heading h1,
+  #patient-phr .health-main h1,
+  .mq-wallet-greeting h1
+):not(.sharing-page *) {
+  font-family:var(--hp-font);
+  font-size:var(--hp-patient-page-title);
+  font-weight:700;
+  line-height:var(--hp-patient-heading-leading);
+  letter-spacing:0;
+  overflow-wrap:anywhere;
+}
+
+#patient-portal-app :is(
+  .page-head p:not(.premium-greeting),
+  [data-page="home"] .page-head p:not(.premium-greeting),
+  .history-heading p,
+  .helper-heading > p:last-child,
+  .health-heading .health-intro,
+  .image-library .page-head p
+):not(.sharing-page *) {
+  font-family:var(--hp-font);
+  font-size:var(--hp-patient-body);
+  line-height:var(--hp-patient-body-leading);
+}
+
+#patient-portal-app :is(
+  .panel h2,
+  .sharing-page h2,
+  .sharing-expanded-card .section-title,
+  #tab-share .section-title,
+  .library-detail h2,
+  .health-detail h2,
+  .health-featured h2,
+  .health-record-guide h2,
+  .helper-pocket h2,
+  .helper-introduction h2,
+  .share-ticket h2,
+  .history-detail-head h2
+):not(.sharing-page *) {
+  font-family:var(--hp-font);
+  font-size:var(--hp-patient-section-title);
+  font-weight:650;
+  line-height:var(--hp-patient-heading-leading);
+  letter-spacing:0;
+}
+
+#patient-portal-app :is(
+  .sharing-exam h3,
+  .sharing-pass-stub h3,
+  .visit-pass-exam h3,
+  .visit-pass-stub h3,
+  .history-exam h3,
+  .history-timeline h3,
+  .library-sharing h3,
+  .helper-pocket h3
+):not(.sharing-page *) {
+  font-family:var(--hp-font);
+  font-size:var(--hp-patient-subsection-title);
+  line-height:var(--hp-patient-heading-leading);
+  letter-spacing:0;
+}
+
+#patient-portal-app :is(.sharing-route,.visit-pass-route,.history-route,.sharing-summary-exam):not(.sharing-page *) {
+  font-family:var(--hp-font);
+  font-size:var(--hp-patient-section-title);
+  font-weight:650;
+  line-height:var(--hp-patient-heading-leading);
+  letter-spacing:0;
+  overflow-wrap:anywhere;
+}
+
+#patient-portal-app :is(.page-head,.history-heading,.helper-heading,.health-heading):not(.sharing-page *) {
+  font-family:var(--hp-font);
+}
+
+#patient-portal-app :is(.btn,.hp-button,.helper-button,.health-filter):not(.sharing-page *) {
+  font-family:var(--hp-font);
+  font-size:15px;
+}
+
+#patient-portal-app :is(input:not([type="checkbox"]),select,textarea):not(.sharing-page *) {
+  font-family:var(--hp-font);
+  font-size:16px;
+}
+
+@media (max-width:767px) {
+  #patient-portal-app {
+    --hp-patient-page-title:28px;
+    --hp-patient-section-title:20px;
+  }
+}

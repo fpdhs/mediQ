@@ -43,20 +43,34 @@ export function createHelperSurface(root,navigate,mobile=false){
 const cardDefinitions=[['requests','공유 내용 확인','내가 허용한 공유를 확인해요'],['records','내 건강기록','영상부터 건강검진까지'],['sharing','영상 공유','다음 병원에 안전하게'],['helper','건강도우미','내 기록을 알기 쉽게']];
 
 // The same foreground artwork and menu vocabulary continue below an extracted card.
-export function createWalletDock({selected,navigate}) {
-  const wallet=node('nav','mq-wallet-object mq-wallet-dock');
-  wallet.setAttribute('aria-label','내 지갑의 다른 카드');
+export function createWalletDock({selected,navigate,home=false}) {
+  const wallet=node(home?'section':'nav',home?'mq-wallet-object':'mq-wallet-object mq-wallet-dock');
+  wallet.setAttribute('aria-label',home?'내 의료 지갑 · 카드를 선택하세요':'내 지갑의 다른 카드');
   const cards=node('div','mq-wallet-cards');
-  for(const [route,label,copy] of cardDefinitions.filter(([route])=>route!==selected)) {
+  for(const [route,label,copy] of cardDefinitions) {
     const card=node('button',`mq-wallet-card mq-wallet-card-${route}`);card.type='button';card.dataset.walletRoute=route;
     const badge=node('span','mq-card-icon');badge.append(icon(route));
     card.append(badge,node('strong','',label),node('span','mq-card-copy',copy));
     if(route==='requests')card.append(node('span','mq-card-cta','확인하기'));
-    card.setAttribute('aria-label',label);card.onclick=()=>navigate(route);cards.append(card);
+    card.setAttribute('aria-label',label);
+    if(route===selected){card.setAttribute('aria-current','page');card.classList.add('is-selected');}
+    card.onclick=()=>{if(route!==selected)navigate(route);};cards.append(card);
   }
   const pocket=node('div','mq-wallet-pocket');pocket.setAttribute('aria-hidden','true');
   const leather=node('img','mq-wallet-art');leather.src='/images/mediq-wallet-front-v1.webp';leather.alt='';leather.width=1905;leather.height=826;leather.decoding='async';pocket.append(leather);
   wallet.append(cards,pocket);return wallet;
+}
+export function mountPatientWalletDock(root,page,navigate){
+  if(!root||page==='home')return null;
+  const selected=({phr:'records',images:'records',health:'records',documents:'records',consent:'sharing',visit:'sharing',activity:'requests'})[page]||page;
+  const existing=root.querySelector(':scope > .mq-wallet-dock');
+  root.querySelectorAll('.mq-wallet-dock').forEach(dock=>{if(dock!==existing)dock.remove();});
+  if(existing?.dataset.walletPage===page)return existing;
+  root.querySelectorAll('.mq-wallet-dock').forEach(dock=>dock.remove());
+  const dock=createWalletDock({selected,navigate:route=>navigate(({records:'phr',requests:'activity'})[route]||route)});
+  dock.dataset.walletPage=page;
+  root.append(dock);
+  return dock;
 }
 export function createWalletHome({root, navigate}) {
   if (!root) return null;
@@ -78,26 +92,17 @@ export function createWalletHome({root, navigate}) {
     const head=node('div','mq-wallet-panel-head'); head.append(node('h2','',label),button('모두 보기 ↗',route)); panel.append(head,list);
   }
   overview.append(records,shares);
-  const wallet = node('section','mq-wallet-object'); wallet.setAttribute('aria-label','내 의료 지갑 · 카드를 선택하세요');
-  const cards = node('div','mq-wallet-cards');
+  const wallet = createWalletDock({home:true,navigate});
   let busy=false, timer, expiryTimer;
-  const buttons=[];
-  for(const [route,label,copy] of cardDefinitions) {
-    const card=node('button',`mq-wallet-card mq-wallet-card-${route}`);card.type='button';card.dataset.walletRoute=route;
-    const badge=node('span','mq-card-icon');badge.append(icon(route));
-    card.append(badge,node('strong','',label),node('span','mq-card-copy',copy));
-    if(route==='requests')card.append(node('span','mq-card-cta','확인하기'));
-    card.setAttribute('aria-label',`${label} 열기`);
+  const buttons=Array.from(wallet.querySelectorAll('.mq-wallet-card'));
+  for(const card of buttons) {
+    const route=card.dataset.walletRoute;
     card.onclick=()=>{
       if(busy)return;busy=true;card.classList.add('is-extracting');
       const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       timer=setTimeout(()=>{card.classList.remove('is-extracting');busy=false;navigate(route);},reduced?0:180);
     };
-    buttons.push(card);cards.append(card);
   }
-  const pocket=node('div','mq-wallet-pocket');pocket.setAttribute('aria-hidden','true');
-  const leather=node('img','mq-wallet-art');leather.src='/images/mediq-wallet-front-v1.webp';leather.alt='';leather.width=1905;leather.height=826;leather.decoding='async';pocket.append(leather);
-  wallet.append(cards,pocket);
   const top=node('div','mq-wallet-top');top.append(greeting,overview);
   surface.append(top,wallet,node('p','mq-wallet-swipe-hint','카드를 옆으로 넘겨보세요'),node('p','mq-wallet-disclosure','합성 시연 데이터 · 공유 현황은 동의 상태이며 병원의 열람·수신 완료를 뜻하지 않습니다.'));
   root.prepend(surface);

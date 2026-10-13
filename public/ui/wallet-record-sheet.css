@@ -36,18 +36,7 @@
 .health-expanded-card:has(.health-detail:not([hidden])) .health-featured-copy{padding-right:0}
 .health-expanded-card:has(.health-detail:not([hidden])) .health-featured-actions{position:static;transform:none;margin-top:12px}
 .health-expanded-card:has(.health-detail:not([hidden])) .health-recent-grid{grid-template-columns:1fr!important}
-/* Original front-facing leather image, central strap and three remaining menu cards. */
-.health-extracted-sheet .mq-wallet-dock{position:relative;width:min(100%,760px);height:auto;aspect-ratio:1.88;margin:24px auto 0;isolation:isolate;font-family:inherit}
-.mq-wallet-dock .mq-wallet-cards{position:absolute;left:9%;right:8%;top:0;height:54%;display:grid;grid-template-columns:1.28fr 1fr 1fr;gap:8px;overflow:visible;padding:0;align-items:start}
-.mq-wallet-dock .mq-wallet-card{height:100%;min-height:0;padding:22px 12px 62px;border-radius:14px;margin:0;--lift:0px;box-shadow:inset 0 2px #ffffffd9,2px 2px 3px #263b5820,6px 5px 14px #1b325d20}
-.mq-wallet-dock .mq-wallet-card-requests{display:grid;grid-template-columns:27px 1fr;text-align:left;gap:4px 6px;padding:24px 14px 60px;--angle:-4deg}
-.mq-wallet-dock .mq-wallet-card-sharing{--angle:2deg}.mq-wallet-dock .mq-wallet-card-helper{--angle:3deg}
-.mq-wallet-dock .mq-wallet-card strong{font-size:20px;white-space:normal;line-height:1.3}
-.mq-wallet-dock .mq-card-icon{margin:0 auto 10px}.mq-wallet-dock .mq-card-icon svg{width:27px;height:27px}
-.mq-wallet-dock .mq-card-copy{font-size:12px;margin:8px 0 0;line-height:1.5}
-.mq-wallet-dock .mq-card-cta{font-size:12px;min-height:34px;width:110px;padding:8px;margin-top:10px}
-.mq-wallet-dock .mq-wallet-pocket{top:29%;left:0;right:0;z-index:3;pointer-events:none}
-.mq-wallet-dock button:focus-visible{outline:3px solid #3566b8;outline-offset:4px}
+/* Wallet geometry is shared with home in wallet-home.css. */
 .mq-wallet-screen-enter:has(.health-expanded-card){animation:none}
 .mq-wallet-screen-enter .health-expanded-card{animation:mq-record-card-expand 240ms cubic-bezier(.2,.75,.25,1) both;transform-origin:50% 100%}
 @keyframes mq-record-card-expand{from{opacity:.4;transform:translateY(32px) scale(.96)}to{opacity:1;transform:none}}
@@ -75,15 +64,6 @@
  .health-expanded-card .health-records-bar{gap:6px}.health-expanded-card .health-records-bar h2{font-size:17px}
  .health-extracted-sheet.health-wallet-sheet .health-expanded-card .health-recent-grid{grid-template-columns:1fr;gap:9px}
  .health-expanded-card .health-recent-grid .health-record{min-height:84px;padding:14px;gap:12px}
- .health-extracted-sheet .mq-wallet-dock{aspect-ratio:1.5;margin-top:24px;width:100%}
- .mq-wallet-dock .mq-wallet-cards{left:6%;right:6%;top:0;height:66%;gap:4px;grid-template-columns:1.18fr 1fr 1fr;scroll-snap-type:none}
- .mq-wallet-dock .mq-wallet-card{padding:13px 6px 52px;border-radius:10px;flex:none;scroll-snap-align:none;--lift:0px}
- .mq-wallet-dock .mq-wallet-card-requests{display:block;text-align:center;padding:14px 5px 52px}
- .mq-wallet-dock .mq-wallet-card strong{font-size:13px;letter-spacing:-.05em}
- .mq-wallet-dock .mq-card-icon{margin:0 auto 8px}.mq-wallet-dock .mq-card-icon svg{width:22px;height:22px}
- .mq-wallet-dock .mq-card-copy{display:none}
- .mq-wallet-dock .mq-card-cta{min-height:30px;width:62px;max-width:95%;font-size:10px;padding:6px;margin:8px auto 0}
- .mq-wallet-dock .mq-wallet-pocket{top:39%}
 }
 @media(prefers-reduced-motion:reduce){.mq-wallet-screen-enter .health-expanded-card{animation:none}.mq-wallet-dock .mq-wallet-card{transition:none}}
 /* The lavender sharing card uses the same extracted-paper / original-wallet grammar. */
@@ -118,8 +98,6 @@
 .sharing-extracted-sheet .sharing-existing .sharing-status{margin-bottom:8px;font-size:12px}.sharing-extracted-sheet .sharing-existing .sharing-route{font-size:18px!important;margin-bottom:12px}
 .sharing-extracted-sheet .sharing-existing .sharing-exam{grid-template-columns:28px 1fr;margin-bottom:8px;gap:3px 10px}.sharing-extracted-sheet .sharing-existing .sharing-exam svg{width:24px;height:24px}.sharing-extracted-sheet .sharing-existing .sharing-exam h3{font-size:17px}.sharing-extracted-sheet .sharing-existing .sharing-exam p{font-size:12px}
 .sharing-extracted-sheet .sharing-existing .sharing-meta{padding-top:10px}.sharing-extracted-sheet .sharing-existing .sharing-pass-body>p.sharing-note{margin-top:10px}
-.sharing-extracted-sheet .mq-wallet-dock{position:relative;width:min(100%,760px);height:auto;aspect-ratio:1.88;margin:24px auto 0;isolation:isolate}
-.mq-wallet-dock .mq-wallet-card-records{--angle:2deg}
 .mq-wallet-screen-enter:has(.sharing-expanded-card){animation:none}.mq-wallet-screen-enter .sharing-expanded-card{animation:mq-record-card-expand 240ms cubic-bezier(.2,.75,.25,1) both;transform-origin:50% 100%}
 #tab-share.sharing-extracted-sheet .sharing-expanded-card{padding:20px 14px}
 #tab-share.sharing-extracted-sheet .section-title{font-size:23px;line-height:1.4;display:flex;align-items:center;gap:10px}
@@ -131,7 +109,7 @@
 #tab-share.sharing-extracted-sheet .share-tab-switch{margin:20px 0}#tab-share.sharing-extracted-sheet .subtab-btn{min-height:44px}
 #tab-share.sharing-extracted-sheet .wizard-box-title{color:#293653;font-size:20px}#tab-share.sharing-extracted-sheet .wizard-box-desc{color:#62718e;line-height:1.6}
 @media(max-width:850px){.sharing-extracted-sheet .sharing-compose{grid-template-columns:1fr}#patient-portal-app .sharing-expanded-card .page-head{padding-right:0}.sharing-preparation-steps{position:static;justify-content:flex-start;margin:20px 0 0}}
-@media(max-width:650px){#patient-portal-app .sharing-page.sharing-extracted-sheet{padding:20px 0 36px}.sharing-extracted-sheet .sharing-expanded-card{padding:18px 14px;border-radius:20px}#patient-portal-app .sharing-expanded-card .page-head h1{font-size:25px}.sharing-extracted-sheet .sharing-draft{grid-template-columns:1fr}.sharing-extracted-sheet .sharing-conditions{grid-template-columns:1fr}.sharing-extracted-sheet .sharing-pass,.sharing-extracted-sheet .sharing-existing .sharing-pass{grid-template-columns:1fr}.sharing-extracted-sheet .mq-wallet-dock{aspect-ratio:1.5;width:100%}.sharing-extracted-sheet .sharing-summary.sharing-summary{padding:18px}}
+@media(max-width:650px){#patient-portal-app .sharing-page.sharing-extracted-sheet{padding:20px 0 36px}.sharing-extracted-sheet .sharing-expanded-card{padding:18px 14px;border-radius:20px}#patient-portal-app .sharing-expanded-card .page-head h1{font-size:25px}.sharing-extracted-sheet .sharing-draft{grid-template-columns:1fr}.sharing-extracted-sheet .sharing-conditions{grid-template-columns:1fr}.sharing-extracted-sheet .sharing-pass,.sharing-extracted-sheet .sharing-existing .sharing-pass{grid-template-columns:1fr}.sharing-extracted-sheet .sharing-summary.sharing-summary{padding:18px}}
 @media(prefers-reduced-motion:reduce){.mq-wallet-screen-enter .sharing-expanded-card{animation:none}}
 /* Mint extracted helper card; evidence and patient permissions remain unchanged. */
 #patient-health-helper.helper-extracted-sheet{max-width:1120px;margin:auto;padding:32px 0 48px;--helper-ink:#192638;--helper-muted:#526780}
@@ -146,7 +124,6 @@
 .helper-extracted-sheet .helper-card,.helper-extracted-sheet .helper-card--saved,.helper-extracted-sheet .helper-card--suggested{background:#fff;border:1px solid #c7d5e7;border-radius:14px;color:#192638;box-shadow:0 5px 10px #2445680b}
 .helper-extracted-sheet .helper-card textarea{background:#fff;color:#192638}.helper-extracted-sheet .helper-card button{color:#334e73;min-height:44px}.helper-extracted-sheet .helper-card p{color:#192638}
 .helper-extracted-sheet .helper-add-form input,.helper-extracted-sheet select{min-height:48px;box-sizing:border-box;max-width:100%}.helper-extracted-sheet .helper-add-form button{min-height:48px}.helper-extracted-sheet .helper-introduction{background:#f3f8f6;border-radius:14px}
-.helper-extracted-sheet .mq-wallet-dock{position:relative;width:min(100%,760px);height:auto;aspect-ratio:1.88;margin:28px auto 0;isolation:isolate}
 .helper-mobile-notes>summary{padding:16px;background:#e5edf6;color:#192638;border:1px solid #c7d5e7;border-radius:14px;font-weight:600;cursor:pointer;min-height:48px;box-sizing:border-box}
 #tab-helper:has(.helper-extracted-sheet)>.wallet-helper-back{display:none}
 #patient-health-helper.helper-extracted-sheet .helper-grid{grid-template-columns:minmax(0,1.7fr) minmax(280px,1fr);gap:24px}
@@ -157,6 +134,6 @@
 #patient-health-helper.helper-extracted-sheet .helper-context{background:#ffffff9c;border:1px solid #dbe9e4;padding:16px}
 #patient-health-helper.helper-extracted-sheet .helper-conversation{background:#fff;border:1px solid #dbe7e3;padding:24px;border-radius:20px}
 @media(max-width:850px){.helper-extracted-sheet .helper-grid{grid-template-columns:1fr}}
-@media(max-width:650px){#patient-health-helper.helper-extracted-sheet{padding:12px 0 28px}.helper-extracted-sheet .helper-expanded-card{padding:18px 14px;border-radius:20px}.helper-extracted-sheet .helper-heading h1{font-size:26px}.helper-extracted-sheet .helper-conversation{padding:18px 14px}.helper-extracted-sheet .helper-pocket{padding:18px 14px}.helper-extracted-sheet .mq-wallet-dock{aspect-ratio:1.5;width:100%}.helper-extracted-sheet .helper-add-form{flex-wrap:wrap}.helper-extracted-sheet .helper-add-form input{min-width:0;width:100%}}
+@media(max-width:650px){#patient-health-helper.helper-extracted-sheet{padding:12px 0 28px}.helper-extracted-sheet .helper-expanded-card{padding:18px 14px;border-radius:20px}.helper-extracted-sheet .helper-heading h1{font-size:26px}.helper-extracted-sheet .helper-conversation{padding:18px 14px}.helper-extracted-sheet .helper-pocket{padding:18px 14px}.helper-extracted-sheet .helper-add-form{flex-wrap:wrap}.helper-extracted-sheet .helper-add-form input{min-width:0;width:100%}}
 @media(max-width:850px){#patient-health-helper.helper-extracted-sheet .helper-grid{grid-template-columns:1fr}}
 @media(max-width:650px){#patient-health-helper.helper-extracted-sheet .helper-heading h1{font-size:26px}#patient-health-helper.helper-extracted-sheet .helper-conversation,#patient-health-helper.helper-extracted-sheet .helper-pocket{padding:18px 14px}}

@@ -281,6 +281,16 @@ export function createPatientHelper(root, {navigate, ask, getRecords, getCompari
       if (sequence !== generation) return;
       answers.append(node('p', 'helper-answer', surface === 'mobile' && result.status === 'VISIT_PREPARATION'
         ? result.answer.replace('오른쪽에서', '아래 메모에서') : result.answer));
+      const claimEvidence = Array.isArray(result.claimEvidence)
+        ? result.claimEvidence.filter(item => typeof item?.text === 'string' && typeof item?.quote === 'string') : [];
+      if (claimEvidence.length) {
+        const panel = node('details', 'helper-evidence-drawer helper-claim-evidence');
+        panel.append(node('summary', '', '답변 발췌와 근거'));
+        for (const item of claimEvidence) panel.append(
+          node('p', 'helper-note', `답변 발췌: ${item.text}`),
+          node('blockquote', 'helper-note', `근거 원문 발췌: ${item.quote}`));
+        answers.append(panel);
+      }
       for (const source of result.sources ?? []) {
         const url = helperSourceUrl(source.url); if (!url) continue;
         const card = node('article', 'helper-source-card');
@@ -292,6 +302,18 @@ export function createPatientHelper(root, {navigate, ask, getRecords, getCompari
         const drawer = node('details', 'helper-evidence-drawer');
         drawer.append(node('summary', '', '근거 서랍 · 위치와 이용조건'));
         drawer.append(node('p', 'helper-note', `확인할 위치: ${source.section ?? '원문'} · 자료 갱신: ${source.updatedAt ?? '미제공'}`));
+        for (const context of Array.isArray(source.listContexts) ? source.listContexts : []) {
+          if (typeof context?.heading !== 'string' || !Array.isArray(context.items)) continue;
+          const items = context.items.filter(item => typeof item === 'string' && item.trim());
+          if (!items.length) continue;
+          const listSection = node('section', 'helper-source-list-context');
+          listSection.setAttribute('aria-label', '원문 목록 안내와 항목');
+          listSection.append(node('p', 'helper-note helper-source-list-label', '목록 안내'));
+          listSection.append(node('p', 'helper-note helper-source-list-heading', context.heading));
+          const list = node('ul', 'helper-source-list-items');
+          for (const item of items) list.append(node('li', 'helper-source-list-item', item));
+          listSection.append(list); drawer.append(listSection);
+        }
         if (source.excerpt) drawer.append(node('p', 'helper-note', source.excerpt));
         drawer.append(node('p', 'helper-note', source.licenseLabel ?? '개별 원문 이용조건 확인'));
         const terms = node('a', 'helper-source-terms', '이용조건 확인');

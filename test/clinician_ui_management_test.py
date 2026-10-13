@@ -10,10 +10,27 @@ spec=importlib.util.spec_from_file_location('manager',ROOT/'scripts/clinician-ui
 manager=importlib.util.module_from_spec(spec);spec.loader.exec_module(manager)
 
 class UnifiedUiTests(unittest.TestCase):
+    def test_failed_served_check_writes_failure_evidence(self):
+        import json,io,contextlib,urllib.error
+        with tempfile.TemporaryDirectory() as temp:
+            folder=pathlib.Path(temp)
+            with patch.object(manager.sys,'argv',['clinician-ui.py','check','--folder',temp,'--url','http://127.0.0.1:3000']),patch.object(manager,'load_bundle',return_value=(folder,{'hashes':{},'captureMode':'snapshot'},{'revision':'test'})),patch.object(manager,'check_served',side_effect=urllib.error.URLError('test transport failure')),contextlib.redirect_stdout(io.StringIO()),self.assertRaises(SystemExit):
+                manager.main()
+            report=json.loads((folder/'served-parity-local.json').read_text())
+            self.assertEqual(report['status'],'FAIL')
+    def test_live_probe_uses_issued_doctor_token_not_last_request(self):
+        script=(ROOT/'scripts/clinician-ui-live-check.js').read_text(encoding='utf8')
+        self.assertIn('issued.profiles.DOCTOR',script)
+        self.assertNotIn('request.headers(',script)
+        self.assertIn("pixelRequests.push('PIXEL_REQUEST')",script)
+    def test_rollback_compares_environment_values_not_order(self):
+        program=manager.rollback_program([], 'candidate')
+        self.assertIn("dict(v.split('=',1) for v in restored['Config']['Env'])",program)
+        self.assertNotIn("restored['Config']['Env']==current['Config']['Env']",program)
     def test_identity_changes_when_clinician_markup_changes(self):
         html=(ROOT/'public/index.html').read_text(encoding='utf8')
         a=manager.bundle.source_identity(html)
-        b=manager.bundle.source_identity(html.replace('다음 진료를 준비하세요.','다음 검사를 확인하세요.'))
+        b=manager.bundle.source_identity(html.replace('다음 진료, 바로 이어가세요.','다음 검사를 확인하세요.'))
         self.assertNotEqual(a['revision'],b['revision'])
     def test_identity_does_not_depend_on_patient_markup(self):
         html=(ROOT/'public/index.html').read_text(encoding='utf8')
@@ -42,12 +59,14 @@ class UnifiedUiTests(unittest.TestCase):
             (context/'public').mkdir(parents=True)
             for name in identity['sourceHashes']:
                 path=context/name;path.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(ROOT/name,path)
-            (context/'public/index.html').write_text(html,encoding='utf8',newline='')
+            original=html.replace('\n','\r\n')
+            candidate=manager.bundle.overlay(original,html)
+            (context/'public/index.html').write_text(candidate,encoding='utf8',newline='')
             (context/'public/clinician-ui-version.js').write_text('export default '+json.dumps(identity)+';\n')
-            (folder/'baseline-index.html').write_text(html,encoding='utf8',newline='')
-            a,b=manager.bundle.region(html,'patient-portal-app')
+            (folder/'baseline-index.html').write_text(original,encoding='utf8',newline='')
+            a,b=manager.bundle.region(original,'patient-portal-app')
             hashes={name:manager.sha((context/name).read_bytes()) for name in list(identity['sourceHashes'])+['public/index.html','public/clinician-ui-version.js']}
-            manifest=dict(schema=manager.bundle.SCHEMA,sourceRevision=identity['revision'],hashes=hashes,patientHtmlSha256=manager.sha(html[a:b].encode()))
+            manifest=dict(schema=manager.bundle.SCHEMA,sourceRevision=identity['revision'],hashes=hashes,patientHtmlSha256=manager.sha(original[a:b].encode()))
             (folder/'manifest.json').write_text(json.dumps(manifest))
             with patch.object(manager,'ROOT',root):
                 manager.load_bundle(str(folder))

@@ -12,6 +12,15 @@ async function start(t, transport, configuration = {}) {
   const origin = `http://127.0.0.1:${server.address().port}`;
   return (pathname, options) => fetch(origin + pathname, { ...options, signal: AbortSignal.timeout(3000) });
 }
+
+test('Entra-only CSP extension permits the fixed Microsoft authority, never arbitrary hosts',async t=>{
+  const get=await start(t,async()=>({status:200,contentType:'application/json',body:Buffer.from('{}')}),{entraLoginEnabled:true});
+  const response=await get('/entra-redirect.html');assert.equal(response.status,200);
+  const policy=response.headers.get('content-security-policy');
+  assert.match(policy,/connect-src 'self' https:\/\/login\.microsoftonline\.com;/);
+  assert.match(policy,/script-src 'self';/);assert.match(policy,/frame-ancestors 'none';/);
+  assert.equal(response.headers.get('cross-origin-opener-policy'),null);
+});
 test('only exact helper POST has finite 65s/32KiB budget; image and other API budgets remain unchanged',async t=>{
   const calls=[];const get=await start(t,async(...args)=>{calls.push(args);return {status:200,contentType:'application/json',body:Buffer.from('{}')};});
   await get('/api/v1/me/health-helper/questions',{method:'POST',headers:{origin:'https://192.168.111.149:9443'}});

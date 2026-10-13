@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-const html = readFileSync(new URL('../public/mockups/highpass-refresh/index.html', import.meta.url), 'utf8');
-const css = readFileSync(new URL('../public/mockups/highpass-refresh/design.css', import.meta.url), 'utf8');
-const js = readFileSync(new URL('../public/mockups/highpass-refresh/preview.js', import.meta.url), 'utf8');
+const html = readFileSync(new URL('../docs/design/archive/mockups/highpass-refresh/index.html', import.meta.url), 'utf8');
+const css = readFileSync(new URL('../docs/design/archive/mockups/highpass-refresh/design.css', import.meta.url), 'utf8');
+const js = readFileSync(new URL('../docs/design/archive/mockups/highpass-refresh/preview.js', import.meta.url), 'utf8');
 test('design preview isolates synthetic examples from real authorization and network', () => {
   assert.match(html, /connect-src 'none'/);
   assert.match(html, /form-action 'none'/);

@@ -2,6 +2,7 @@
 import {readFile} from 'node:fs/promises';
 import {POLICY,retrieveScenarioEvidence} from './health-helper-scenario-evidence.js';
 import {sha256} from './health-helper-medlineplus.js';
+import {sourceUpdatedAtForUrl} from './health-helper-source-freshness.js';
 const afp='https://medlineplus.gov/lab-tests/alpha-fetoprotein-afp-tumor-marker-test/';
 const results='https://medlineplus.gov/lab-tests/how-to-understand-your-lab-results/';
 const relatedTestQuestionPattern=/(?:다른\s*검사|추가\s*검사|함께|같이).*(?:이유|왜|목적)|(?:이유|왜|목적).*(?:다른\s*검사|추가\s*검사|함께|같이)/u;
@@ -48,7 +49,7 @@ export function retrieveAfpEvidence(question){
  return {status:'CANDIDATE',topic:'scenario-24',intent:relatedTestQuestion?'RELATED_TESTS':e.intent,extractiveOnly:true,
   questionTemplate:relatedTestQuestion?'자료에 명시된 이 검사와 다른 검사 사이의 관계는 무엇인가요?':e.question,
   evidence:[{chunk_id:e.id,doc_id:e.id,topic:'scenario-24',title_ko:e.title,text_ko:e.text,textSha256:sha256(e.text),
-   source_url:e.url,source_updated_at:e.sourceUpdatedAt,section_path:[e.section],contentReview:'UNASSIGNED',clinicalUse:false,
+   source_url:e.url,source_updated_at:sourceUpdatedAtForUrl(e.url),section_path:[e.section],contentReview:'UNASSIGNED',clinicalUse:false,
    attribution:'Source: MedlinePlus, National Library of Medicine.',rights_policy_url:POLICY,
    translation_notice:`프로젝트 작성 한국어 요약 초안 · 공식 번역 아님 · 의료전문가 검토 미실시 · ${e.checkedAt} 확인 · ${e.applicability}`} ]};
 }

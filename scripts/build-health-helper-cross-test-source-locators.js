@@ -9,9 +9,10 @@ import {verifyAfpEvidence} from '../src/health-helper-afp-evidence.js';
 import {verifyLiverFunctionEvidence} from '../src/health-helper-liver-evidence.js';
 import {verifyScenarioEvidence} from '../src/health-helper-scenario-evidence.js';
 import {verifyScreeningEvidence} from '../src/health-helper-screening-evidence.js';
-import {sourceSectionFingerprints,sourceSectionsExist} from '../src/health-helper-source-sections.js';
+import {extractSourceUpdatedAt,sourceSectionFingerprints,sourceSectionParagraphLocators,sourceSectionsExist} from '../src/health-helper-source-sections.js';
+import {sourceUpdatedAtForUrl} from '../src/health-helper-source-freshness.js';
 
-const outputUrl=new URL('../docs/implementation/health-helper-cross-test-source-locators-2026-10-13-v2.json',import.meta.url);
+const outputUrl=new URL('../docs/implementation/health-helper-cross-test-source-locators-2026-10-13-v4.json',import.meta.url);
 const expectedByLabel=new Map([
  ['시력 · 좌 / 우','screening-vision-purpose'],['청력 · 좌 / 우','screening-hearing-limits'],
  ['혈색소','screening-hemoglobin-purpose'],['간 효소 AST','liver-ast-purpose'],['간 효소 ALT','liver-alt-purpose'],
@@ -49,30 +50,46 @@ export async function buildCrossTestSourceLocators(){
   if(!definition||!source)throw Error('SOURCE_LOCATOR_SNAPSHOT_MISSING');
   const html=await readFile(new URL(source.file,definition.folder),'utf8');
   if(!sourceSectionsExist(html,evidence.section_path.join(' · ')))throw Error('SOURCE_LOCATOR_SECTION_MISMATCH');
+  const sourceUpdatedAt=extractSourceUpdatedAt(html);
+  if(!sourceUpdatedAt||sourceUpdatedAt!==sourceUpdatedAtForUrl(evidence.source_url)||evidence.source_updated_at!==sourceUpdatedAt)
+   throw Error('SOURCE_LOCATOR_FRESHNESS_MISMATCH');
   const sourceSectionFingerprintsForEntry=sourceSectionFingerprints(html,evidence.section_path.join(' · '));
   if(!sourceSectionFingerprintsForEntry)throw Error('SOURCE_LOCATOR_SECTION_FINGERPRINT_MISSING');
+  const sourceParagraphLocators=sourceSectionParagraphLocators(html,evidence.section_path.join(' · '));
+  if(!sourceParagraphLocators?.length)throw Error('SOURCE_LOCATOR_PARAGRAPH_MISSING');
   const sentences=evidence.text_ko.split(/(?<=[.!?。])\s*/u).map(value=>value.trim()).filter(Boolean);
   if(!sentences.length)throw Error('SOURCE_LOCATOR_CLAIM_MISSING');
   rows.push({topic:topic.label,question,chunkId:evidence.chunk_id,reviewStatus:'DRAFT / UNASSIGNED',
    clinicalUse:false,serviceEligible:false,candidateTextSha256:hash(evidence.text_ko),sourceUrl:evidence.source_url,
+   sourceUpdatedAt,
    snapshot:snapshotName,sourceSnapshotPath:`${definition.path}/${source.file}`,
    sourcePageSha256:source.sha256,sectionPath:evidence.section_path,sourceSectionFingerprints:sourceSectionFingerprintsForEntry,
-   locatorMethod:'Exact H1-H6 heading title(s) in hashed local HTML snapshot',
+   sourceParagraphLocators,locatorMethod:'Heading-bounded H1-H6 sections plus global <p> ordinals and visible-text SHA-256 in hashed local HTML snapshot',
    supportAssessment:'UNASSESSED',claims:sentences.map((claim,index)=>({claimId:`${evidence.chunk_id}-claim-${index+1}`,
-    claimText:claim,claimSha256:hash(claim),sourceSections:evidence.section_path,supportStatus:'UNASSESSED'}))});
+    claimText:claim,claimSha256:hash(claim),sourceSections:evidence.section_path,
+    candidateSourceParagraphIds:sourceParagraphLocators.map(paragraph=>paragraph.paragraphId),supportStatus:'UNASSESSED'}))});
  }
  if(rows.length!==expectedByLabel.size)throw Error('SOURCE_LOCATOR_COVERAGE_MISMATCH');
  return {title:'Health Helper cross-test candidate source locators',createdAt:'2026-10-13',status:'DRAFT / UNASSIGNED',
-  purpose:'Reviewer aid for locating current source sections corresponding to each project-authored candidate sentence.',
-  limitations:['Section-title presence does not establish semantic or clinical support.',
+  purpose:'Reviewer aid for locating candidate sections and recording explicit editorial update dates from the fixed hashed page snapshots.',
+  limitations:['Section and paragraph locators identify review locations only; they do not establish semantic or clinical support.',
+   'Each claim lists all paragraph IDs in its declared section path, unranked; no paragraph is claimed as a one-to-one supporting passage.',
    'All claim-to-source judgments remain UNASSESSED until independent human review.',
+   'Paragraph text is not copied into this artifact; ordinal references are valid only for the recorded snapshot hash.',
    'Candidate text is not eligible for patient service, and no model weights were trained.'],
   snapshots:snapshotDefinitions.map(item=>item.name),candidateCount:rows.length,claimCount:rows.reduce((n,row)=>n+row.claims.length,0),candidates:rows};
 }
 
 if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){
  const report=await buildCrossTestSourceLocators();
- await writeFile(outputUrl,`${JSON.stringify(report,null,2)}\n`,{flag:'wx'});
+ const output=Buffer.from(`${JSON.stringify(report,null,2)}\n`);
+ let created=true;
+ try{await writeFile(outputUrl,output,{flag:'wx'});}
+ catch(error){
+  if(error.code!=='EEXIST')throw error;
+  if(!output.equals(await readFile(outputUrl)))throw Error('SOURCE_LOCATOR_IMMUTABLE_ARTIFACT_MISMATCH');
+  created=false;
+ }
  process.stdout.write(JSON.stringify({output:outputUrl.pathname,candidates:report.candidateCount,claims:report.claimCount,
-  status:report.status,supportAssessment:'UNASSESSED'})+'\n');
+  status:report.status,supportAssessment:'UNASSESSED',created,byteIdenticalExisting:!created})+'\n');
 }

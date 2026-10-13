@@ -16,9 +16,13 @@ export function mountDemoEntry(form, openLogin) {
   back.className = 'mediq-login-back'; back.textContent = '시작 화면으로';
   form.querySelector('.mediq-login-entry').prepend(back);
   let trigger;
+  function open(role, source) {
+    trigger = source;
+    entry.hidden = true; shell.hidden = false; shell.inert = false;
+    form.classList.remove('mediq-entry-active'); openLogin(role);
+  }
   for (const button of entry.querySelectorAll('[data-entry-start]')) button.addEventListener('click', () => {
-    trigger = button; entry.hidden = true; shell.hidden = false; shell.inert = false;
-    form.classList.remove('mediq-entry-active'); openLogin(button.dataset.entryStart);
+    open(button.dataset.entryStart, button);
   });
   back.addEventListener('click', () => {
     form.querySelectorAll('input[type="password"]').forEach(input => { input.value = ''; });
@@ -35,5 +39,5 @@ export function mountDemoEntry(form, openLogin) {
   pause(reduced.matches);
   motion.addEventListener('click', () => pause(!entry.classList.contains('mediq-entry-paused')));
   reduced.addEventListener('change', event => pause(event.matches));
-  return { isOpen: () => !entry.hidden };
+  return { isOpen: () => !entry.hidden, open: role => open(role, null) };
 }

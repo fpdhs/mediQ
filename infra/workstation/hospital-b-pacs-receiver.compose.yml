@@ -1,6 +1,8 @@
 # Candidate only. Do NOT run before host encrypted-mount verification, dedicated
 # B mTLS issuance, pinned image scan and A/B/Control contract alignment.
 # No raw PACS ports; no Control/cloud volume; no overwrite/automatic cleanup.
+# MANUAL START ONLY: use b-pacs-receiver-start.py after the LUKS mount check.
+# A bind directory existing after reboot is NOT proof of an encrypted mount.
 services:
   b-orthanc:
     image: ${HIPASS_B_ORTHANC_IMAGE:?pinned reviewed Orthanc image required}
@@ -13,7 +15,7 @@ services:
         bind:
           create_host_path: false
     networks: [b_pacs_private]
-    restart: unless-stopped
+    restart: 'no'
     healthcheck:
       test: [CMD, /usr/local/bin/busybox, wget, -T, '3', -q, -O, /dev/null, 'http://127.0.0.1:8042/system']
       interval: 10s
@@ -39,7 +41,7 @@ services:
     networks: [b_pacs_private, b_pacs_receiver]
     depends_on:
       b-orthanc: {condition: service_healthy}
-    restart: unless-stopped
+    restart: 'no'
 networks:
   b_pacs_private:
     internal: true

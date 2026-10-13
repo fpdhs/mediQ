@@ -5,7 +5,7 @@ import { parseDataPlaneRequest } from "./data-plane-authorization.js";
 import { parsePatientDataPlaneRequest } from './patient-self-view-authorization.js';
 import { beginRuntimeDiagnostic } from "./capstone-runtime-diagnostics.js";
 
-export function createCapstoneBPortal({ root, ca, origin = "https://192.168.111.149:9443", transport = boundedHttps, encryptionRequired = false, imageDecryption, diagnosticFactory, patientSelfViewEnabled=false,patientImageDecryption, pacsReceiver }) {
+export function createCapstoneBPortal({ root, ca, origin = "https://192.168.111.149:9443", transport = boundedHttps, encryptionRequired = false, imageDecryption, diagnosticFactory, patientSelfViewEnabled=false,patientImageDecryption, pacsReceiver, entraLoginEnabled = false }) {
   if (origin !== "https://192.168.111.149:9443") throw new Error("CAPSTONE_PRESENTATION_ORIGIN_MISMATCH");
   root = path.resolve(root);
   if (encryptionRequired && typeof imageDecryption?.open !== "function") throw new Error("IMAGE_DECRYPTION_REQUIRED");
@@ -21,7 +21,8 @@ export function createCapstoneBPortal({ root, ca, origin = "https://192.168.111.
     response.setHeader("x-content-type-options", "nosniff");
     response.setHeader("referrer-policy", "no-referrer");
     response.setHeader("cache-control", "no-store");
-    response.setHeader("content-security-policy", "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; worker-src 'self' blob:; frame-ancestors 'none'; object-src 'none'; base-uri 'self'");
+    const entraConnect = entraLoginEnabled === true ? ' https://login.microsoftonline.com' : '';
+    response.setHeader("content-security-policy", `default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'${entraConnect}; worker-src 'self' blob:; frame-ancestors 'none'; object-src 'none'; base-uri 'self'`);
     const raw = request.url ?? "";
     if (raw.length > 4096 || !raw.startsWith("/") || raw.startsWith("//") || /(?:^|[?&])(?:token|access_token|jwt|key)=/i.test(raw)) { request.resume(); return fail(400, "UNSAFE_URL"); }
     const pathname = raw.split("?")[0];

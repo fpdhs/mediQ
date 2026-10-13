@@ -6,7 +6,7 @@ export function loadCapstonePatientRuntimeSecrets(env=process.env,readFile=readF
     if(env.HIPASS_CAPSTONE_PATIENT_KEY_RELEASE==='1')throw new Error('PATIENT_RUNTIME_PROFILE_REQUIRED');
     return;
   }
-  if(env.HIPASS_CONTROL_PLANE_ONLY!=='1' || env.AUTH_MODE!=='TEST' || env.HIPASS_STORE!=='postgres'
+  if(env.HIPASS_CONTROL_PLANE_ONLY!=='1' || !['TEST','ENTRA_OIDC'].includes(env.AUTH_MODE) || env.HIPASS_STORE!=='postgres'
     || env.HIPASS_CAPSTONE_SINGLE_WRITER!=='1' || env.POSTGRES_HOST!=='postgres' || env.POSTGRES_DB!=='hipass'
     || (env.HIPASS_PATIENT_AUTHORITY_DATABASE_USER && env.HIPASS_PATIENT_AUTHORITY_DATABASE_USER!=='hipass_patient_authority'))
     throw new Error('PATIENT_RUNTIME_PROFILE_REQUIRED');

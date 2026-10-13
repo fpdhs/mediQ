@@ -20,7 +20,7 @@ DEC-021/021-A (CAPSTONE-P0) preserves all existing Screen IDs/priorities. SAAS-S
 
 본 문서는 Hospital Portal, Synthetic Patient Web, QR Hospital Web, Hospital Clinical Workflow P1 Extension 및 후속 SaaS Administration 화면의 구현 계약을 정의한다. 실제 React 코드, Backend API, DB Migration, PACS 연동 또는 테스트 완료를 의미하지 않는다.
 
-`mediq-patient-experience-mockup.html`의 통합 Timeline·쉬운 모드·AI 질문자료 화면은 비규범 Synthetic Patient Web Prototype이다. 기존 79개 SaaS Screen ID에 자동 합산하지 않으며, 실제 건강정보 외부 제공 또는 외부 LLM 연동이 구현되었다는 주장을 금지한다.
+`archive/mockups/mediq-legacy/mediq-patient-experience-mockup.html`의 통합 Timeline·쉬운 모드·AI 질문자료 화면은 비규범 Synthetic Patient Web Prototype이다. 기존 79개 SaaS Screen ID에 자동 합산하지 않으며, 실제 건강정보 외부 제공 또는 외부 LLM 연동이 구현되었다는 주장을 금지한다.
 
 ```text
 REQUIREMENTS.md
@@ -971,7 +971,7 @@ PASS — DOCUMENTATION SCOPE ONLY
 
 # Synthetic Health Data Preview Boundary — 2026-09-26
 
-`MOB-HHP-001~008`은 Android Patient App 전용 `CAPSTONE-P1 PROTOTYPE`이며 본 SaaS Web 79개 Screen ID에 포함하지 않는다. `mediq-patient-experience-mockup.html`의 건강검진·혈액·항체검사 화면은 발표용 Patient Web HTML 시안일 뿐 79개 SaaS Screen 기준선이나 구현 완료 상태에 포함되지 않는다. Hospital Portal과 Admin Portal은 합성 건강기록을 실제 환자정보, 의료진 공유 또는 PACS Import 대상으로 표시해서는 안 된다.
+`MOB-HHP-001~008`은 Android Patient App 전용 `CAPSTONE-P1 PROTOTYPE`이며 본 SaaS Web 79개 Screen ID에 포함하지 않는다. `archive/mockups/mediq-legacy/mediq-patient-experience-mockup.html`의 건강검진·혈액·항체검사 화면은 발표용 Patient Web HTML 시안일 뿐 79개 SaaS Screen 기준선이나 구현 완료 상태에 포함되지 않는다. Hospital Portal과 Admin Portal은 합성 건강기록을 실제 환자정보, 의료진 공유 또는 PACS Import 대상으로 표시해서는 안 된다.
 
 향후 실제 Provider 연계와 의료진 활용 화면은 지정심사·법률·Identity/Consent·OpenAPI·Security 승인을 포함하는 별도 Productionization Screen Baseline이 필요하다. 상세 경계는 `SYNTHETIC-HEALTH-DATA-PREVIEW.md`를 따른다.
 

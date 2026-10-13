@@ -5,7 +5,7 @@ ROOT=pathlib.Path(__file__).resolve().parents[1]
 spec=importlib.util.spec_from_file_location('bundle_align',ROOT/'scripts/health-helper-align.py')
 align=importlib.util.module_from_spec(spec);spec.loader.exec_module(align)
 SHEETS=['clinician','clinician-desk','clinician-preparation','clinician-health','viewer-studio','clinician-demo-tools','image-journey']
-MENU=[('dashboard','진료 준비'),('records','환자 기록'),('viewer','환자 영상'),('qr','공유 접수'),('transfer','병원 보관함')]
+MENU=[('dashboard','진료 홈'),('records','환자 기록'),('viewer','환자 영상'),('qr','공유 접수'),('transfer','병원 보관함')]
 SCHEMA='highpass.clinician-ui/1'
 
 def entry_assets(html):

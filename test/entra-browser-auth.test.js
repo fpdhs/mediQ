@@ -30,6 +30,7 @@ const patientIdentity = Object.freeze({
 
 test("browser Entra config is tenant-bound and same-origin with one delegated API scope", () => {
   const trusted = validateEntraBrowserConfig(config, ORIGIN);
+  assert.equal(trusted.synthetic, true);
   assert.equal(trusted.tenantId, TENANT_ID);
   assert.deepEqual(trusted.scopes, config.scopes);
   assert.throws(() => validateEntraBrowserConfig({ ...config, redirectUri: "https://evil.example/entra-redirect.html" }, ORIGIN), /ENTRA_CONFIG_INVALID/u);
@@ -52,7 +53,9 @@ test("MSAL uses memory cache, fixed tenant authority and server-mapped role; tok
     }
   }
   const session = await signInWithEntra({
-    config,
+    // Exercise the same normalized config that initializeCapstoneAuth passes
+    // into the login helper after its initial server-config validation.
+    config: validateEntraBrowserConfig(config, ORIGIN),
     msalModule: { PublicClientApplication: FakePublicClientApplication },
     appOrigin: ORIGIN,
     now: () => clock,

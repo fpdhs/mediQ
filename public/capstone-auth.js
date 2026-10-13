@@ -65,6 +65,7 @@ export async function initializeCapstoneAuth() {
     });
   }
   let entryRole = !mobile && /^(?:#DOCTOR|#doctor)$/.test(location.hash) ? 'DOCTOR' : 'PATIENT';
+  let entraMode = false;
   const submit = form.querySelector('[type="submit"]');
   const select = form.querySelector('select');
   const presenterMode = form.querySelector('#mediq-presenter-mode');
@@ -108,6 +109,12 @@ export async function initializeCapstoneAuth() {
   applyMode();
   const landing = mountDemoEntry(form, role => {
     entryRole = role;
+    if (entraMode) {
+      form.querySelector('#mediq-login-title').textContent = '합성 시연 계정으로 로그인해요.';
+      form.querySelector('#capstone-login-help').textContent = '계정 역할은 사용자의 선택이 아니라 서버의 합성 사용자 매핑으로 결정됩니다.';
+      submit.focus();
+      return;
+    }
     presenterMode.checked = role === 'DOCTOR';
     applyMode();
     form.querySelector('#mediq-login-title').textContent = role === 'DOCTOR' ? 'B대학병원 의료진 로그인' : '다음 진료를 준비해요.';
@@ -154,18 +161,18 @@ export async function initializeCapstoneAuth() {
     form.querySelector('.mediq-entry-caption').textContent = '허용된 합성 시연 계정만 접근할 수 있습니다. 역할은 서버의 합성 사용자 매핑으로 결정됩니다.';
     form.querySelector('.mediq-entry-actions').replaceChildren();
     const entraButton = document.createElement('button');
-    entraButton.type = 'submit';
+    entraButton.type = 'button';
     entraButton.textContent = 'Microsoft Entra로 계속';
     form.querySelector('.mediq-entry-actions').append(entraButton);
-    const entraError = authConfigError;
-    entraError.hidden = false;
-    form.querySelector('#mediq-login-title').textContent = '합성 시연 계정으로 로그인해요.';
+    entraMode = true;
+    entraButton.addEventListener('click', () => landing.open(entryRole));
+    const entraError = form.querySelector('#capstone-login-error');
     submit.textContent = 'Microsoft Entra로 계속';
+    submit.disabled = false;
     const entraSession = await new Promise(resolve => {
       form.addEventListener('submit', async event => {
         event.preventDefault();
         entraError.textContent = '';
-        entraButton.disabled = true;
         submit.disabled = true;
         try {
           const msalModule = await import('/vendor/msal-browser.js');
@@ -184,7 +191,6 @@ export async function initializeCapstoneAuth() {
             : '로그인할 수 없습니다. 허용된 합성 시연 계정과 연결 상태를 확인해 주세요.';
         } finally {
           if (form.isConnected) {
-            entraButton.disabled = false;
             submit.disabled = false;
           }
         }

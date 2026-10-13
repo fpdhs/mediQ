@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {HealthHelperRag, AFP_SOURCE, retrieveHelperEvidence, validateHelperOutput} from '../src/health-helper-rag.js';
 import {createAzureHelperModel} from '../src/health-helper-azure.js';
+import {retrieveHealthEducationEvidence} from '../src/health-helper-education-retrieval.js';
 import {testOnlyClearedCorpus} from './helpers/health-helper-corpus.js';
 const patient={role:'PATIENT',subject:'synthetic-account',patientId:'synthetic-patient'};
 const answer={answer:'AFP는 간질환의 경과를 살피는 혈액검사입니다. 검사기관의 참고범위를 확인하세요.',sourceIds:[AFP_SOURCE.id],questions:['다른 검사와 함께 어떻게 이해하면 되나요?']};
@@ -64,6 +65,21 @@ test('production corpus blocks generation while every medical source remains unr
     assert.equal(logs.at(-1).reasonCode,'HELPER_EVIDENCE_INSUFFICIENT',question);
   }
   assert.equal(calls,0,'unassigned evidence must never reach the model');
+});
+test('draft educational retrieval candidates are not connected to patient-service generation',async()=>{
+  const question='간 효소 AST 다른 검사와 함께 보는 이유는 무엇인가요?';
+  const candidate=retrieveHealthEducationEvidence(question);
+  assert.equal(candidate.status,'CANDIDATE');
+  assert.equal(candidate.evidence[0].chunk_id,'liver-ast-purpose');
+  assert.equal(candidate.serviceEligible,false);
+  let calls=0;const logs=[];
+  const service=new HealthHelperRag({mode:'GENERATION',audit:async row=>logs.push(row),
+    model:{generate:async()=>{calls++;return structuredClone(answer);}}});
+  const result=await service.ask(patient,{question});
+  assert.equal(result.status,'INSUFFICIENT_EVIDENCE');
+  assert.equal(result.recordContext,'NOT_CONNECTED');
+  assert.equal(logs.at(-1).reasonCode,'HELPER_EVIDENCE_INSUFFICIENT');
+  assert.equal(calls,0,'draft education evidence must not reach the patient-service model');
 });
 test('clinical request is a policy response, not AI-generated success',async()=>{
   const f=fixture();assert.equal((await f.service.ask(patient,{question:'AFP로 암인지 진단해줘'})).status,'REFUSED');assert.equal(f.calls.length,0);

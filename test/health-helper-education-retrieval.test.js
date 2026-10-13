@@ -167,6 +167,26 @@ test('cross-test relation queries use only explicitly related draft evidence and
     }
   }
   assert.equal(supported.size,16);
+
+  const explicitPair=retrieveHealthEducationEvidence('혈청 크레아티닌과 eGFR은 어떤 관계인가요?');
+  assert.equal(explicitPair.status,'CANDIDATE');
+  assert.equal(explicitPair.evidence[0].chunk_id,'screening-egfr-purpose');
+  assert.equal(explicitPair.intent,'RELATED_TESTS');
+  assert.match(explicitPair.evidence[0].text_ko,/혈청 크레아티닌으로 계산/);
+  assert.equal(explicitPair.evidence[0].contentReview,'UNASSIGNED');
+  assert.equal(explicitPair.clinicalUse,false);
+  assert.equal(explicitPair.serviceEligible,false);
+  assert.equal(explicitPair.reviewStatus,'DRAFT / UNASSIGNED');
+
+  const ambiguousCoTesting=retrieveHealthEducationEvidence('혈청 크레아티닌 다른 검사와 함께 보는 이유는 무엇인가요?');
+  assert.equal(ambiguousCoTesting.status,'INSUFFICIENT_EVIDENCE');
+  assert.deepEqual(ambiguousCoTesting.evidence,[]);
+  assert.equal(ambiguousCoTesting.serviceEligible,false);
+
+  const clinicalDecision=retrieveHealthEducationEvidence('eGFR과 크레아티닌을 이용해 신장 질환을 진단할 수 있나요?');
+  assert.notEqual(clinicalDecision.status,'CANDIDATE');
+  assert.deepEqual(clinicalDecision.evidence,[]);
+  assert.equal(clinicalDecision.serviceEligible,false);
 });
 
 test('screening comparison wording routes to one comparison candidate',()=>{

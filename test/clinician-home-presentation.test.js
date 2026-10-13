@@ -22,7 +22,7 @@ test('clinician home translates internal routing values into readable Korean lab
 test('clinician home explains that active consent is not a granted image-access decision', () => {
   assert.match(app, /영상 열람 전 서버가 권한을 다시 확인합니다/);
   assert.match(app, /열람 전 서버 재검증/);
-  assert.match(html, /<th>보낸 병원<\/th><th>받는 병원<\/th><th>공유 목적<\/th><th>허용 범위<\/th><th>동의 상태<\/th>/);
+  assert.match(html, /id="cq-access-state"[^>]*>서버 검증 전/);
   assert.match(html, /공유·접근 상태 보기/);
 });
 

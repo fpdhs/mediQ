@@ -24,7 +24,7 @@ Azure는 웹 정적 자산과 동의·정책 메타데이터 API를 제공한다
 | Cloud HTTPS 진입 | 현재 Compose는 `10.90.88.1:443`에만 바인딩하며 overlay 전용 주석이 있음 | 공인 웹 진입 아님 |
 | 네트워크 정책 | VM 템플릿은 지정된 source CIDR만 443 허용하고 나머지 inbound를 거부 | public 443 전체 허용 상태로 변경하지 않음 |
 | 병원 B 수신 경로 | 2026-10-13 점검에서 B Portal은 healthy였으나 수신 PACS 컨테이너와 등록된 반입 경로는 확인되지 않음 | 실제 영상 수신·열람 NOT VERIFIED |
-| 배포 후보 | 현재 checkout `codex/wbs-12-key-release-20260912` / HEAD `c1040c8439a0bdb78c68a7a83a73d84bc2704f31`; `git status --short` 540개(486 staged additions, 54 staged modifications) | HEAD는 현재 변경을 포함하지 않음. clean/reviewed release SHA로 고정할 수 없음 |
+| 배포 후보 | 현재 checkout `codex/wbs-12-key-release-20260912` / HEAD `9f27b85ab349ea5e5e5b6dc2da659825047a6d25`; worktree dirty, staged 0 (마지막 확인 시) | HEAD는 현재 변경을 포함하지 않음. clean/reviewed release SHA로 고정할 수 없음 |
 
 기준 설정은 `infra/azure/capstone-control.compose.yml`, `infra/azure/capstone-control-ingress.compose.yml`, `infra/azure/capstone-cloud-vm.json`에서 확인했다. B와 Cloud의 실제 실행 상태 관련 기록은 [통합 상태 문서](../implementation/mediq-presentation-integration-status-2026-10-09.md)를 따른다.
 
@@ -55,7 +55,7 @@ Web Edge는 기존 overlay Control ingress와 별도 서비스·별도 listener�
 공개 웹 진입 전에는 다음이 필요하다.
 
 1. 단일 Entra tenant의 OIDC 로그인과 초대된 시연자만 허용하는 사용자 정책을 정한다.
-2. 신뢰할 수 있는 issuer·audience·서명키와 키 회전 절차를 서버에서 검증한다. 현재 `AUTH_MODE=OIDC` 경로는 `JWT_PUBLIC_KEY`를 이용한 RS256 검증이다. Entra 로그인 연결, JWKS 키 회전, 사용자와 합성 PATIENT/DOCTOR·병원 간 매핑은 이번 준비에서 확인되지 않았다.
+2. 신뢰할 수 있는 issuer·audience·서명키와 키 회전 절차를 서버에서 검증한다. 선택형 `AUTH_MODE=ENTRA_OIDC`는 tenant-pinned Microsoft JWKS의 RS256 token을 확인하고, 검증된 `oid`만 고정된 합성 PATIENT/DOCTOR actor map에 연결하도록 구현됐다. Cloud Compose의 현재 기본 프로필은 여전히 `AUTH_MODE=TEST`; Entra tenant 설정·사용자 object ID·실제 JWKS 회전/토큰 수용은 미구성·미검증이다.
 3. 서버가 검증된 identity를 고정된 합성 계정에 매핑한다. 브라우저가 보낸 role, patientId, doctorId, hospitalId 또는 `X-MS-CLIENT-PRINCIPAL` 유사 헤더를 권한 근거로 직접 신뢰하지 않는다.
 4. 기존 RBAC·ABAC·동의·Study/Series 검증과 DPoP를 유지한다. 웹 로그인 성공은 리소스 접근 허용을 뜻하지 않는다.
 5. 인증 쿠키와 API 응답은 HTTPS·짧은 만료·CSRF 고려·`Cache-Control: no-store`를 적용하고, 토큰이나 키를 URL·브라우저 저장소·로그에 남기지 않는다.
@@ -74,17 +74,20 @@ Web Edge는 기존 overlay Control ingress와 별도 서비스·별도 listener�
 
 - Entra OIDC 서버 검증과 `tid`+`oid` 기반 환자/의료진 합성 actor mapping 코드 및 RSA/JWKS mock 테스트를 추가했다.
 - 현재 테스트는 PASS 68/68(Entra 인증·기존 동의/정책/DPoP/API 경계). 실제 tenant token, 키 회전, 브라우저 로그인과 Entra-to-DICOM DPoP end-to-end는 NOT VERIFIED다.
-- 브라우저는 아직 TEST Mock IdP를 사용한다. MSAL Browser same-origin 공급/redirect 경로와 실제 Entra 사용자 설정 전까지 Edge route allowlist와 NSG를 적용하지 않는다.
+- `/api/capstone-demo/auth-config`가 Entra 모드일 때 same-origin MSAL popup/redirect bridge UI를 선택하도록 연결했고, TEST 전용 `404`에서만 기존 Mock IdP 화면을 쓴다. 테스트 전용 browser fixture에서 landing → login → mock popup → `/identity` → 합성 환자 actor 반환을 확인했고 local/session storage는 0이었다. actual tenant authority/token exchange는 수행하지 않았다.
+- 실제 tenant/app/scope/object ID와 redirect 등록이 완료되고, redirect bridge의 CSP·COOP 경로 예외 및 실제 token exchange/API/DPoP negative tests를 통과하기 전까지 Edge route allowlist와 NSG를 적용하지 않는다.
 
 ### 현재 로컬 검증 기록
 
 | 검증 | 결과 | 근거 / 제한 |
 |---|---|---|
-| Entra OIDC + 합성 actor map 및 동의/정책/Control 경계 회귀 | PASS | `node --test test/entra-oidc-auth.test.js test/hipass-service.test.js test/privacy-service-identity.test.js test/capstone-control-ingress.test.js` — 68/68 |
-| 전체 Node 테스트 suite | FAIL | 직렬 실행 1,192개 중 1,189 PASS / 3 FAIL. AFP 교차검사 검색 기대값 불일치 1건은 단독 재현됨. 전체 run의 liver/screening source snapshot 2건은 파일 누락으로 실패했지만 같은 테스트를 단독 재실행했을 때는 PASS; clean runner 재검증 필요. |
-| 실제 Entra SPA 로그인/토큰 및 합성 사용자 할당 | NOT VERIFIED | tenant/app/scope/object ID 및 MSAL UI 연결이 아직 없음 |
+| Entra OIDC + 합성 actor mapping UI/backend focused tests | PASS | `node --test test/entra-browser-auth.test.js test/entra-oidc-auth.test.js test/capstone-login-preflight.test.js` — 13/13 |
+| 전체 Node 테스트 suite | FAIL | 병렬 실행 1,210개 중 1,207 PASS / 3 FAIL: `test/hcc-source-operator-contract.test.js` 1건, `test/medlineplus-upload.test.js` 2건. Entra/인증 실패는 없음. 실패 3건을 분리 재실행했을 때 HCC 1건은 재현됐고 MedlinePlus 2건은 재현되지 않음. |
+| 실제 Entra SPA 로그인/토큰 및 합성 사용자 할당 | NOT VERIFIED | 실제 tenant/app/scope/object ID, redirect 등록 및 Microsoft authority token exchange가 없음 |
+| 브라우저 Entra 화면→actor 응답 흐름 | PASS (mock only) | 로컬 fixture + Playwright: 합성 환자 actor 및 ID 반환, local/session storage 0. `/identity` backend cryptographic validation/audit persistence가 아닌 mock 응답 |
 | 현재 Azure NIC/NSG/effective rules | NOT VERIFIED | 로컬 `az` 실행 파일 없음 |
-| 배포 가능한 release SHA | BLOCKED | 현재 staged 변경 파일 540개, 전체 suite FAIL, browser authentication gap |
+| 브라우저 bundle/Compose 형식 | PASS / PARTIAL | `node scripts/build-entra-client.js`, `docker build --progress=plain --target entra-client .`, Compose `config --no-interpolate --quiet` PASS. Docker build는 scripts 미실행 build-only stage; full app image 및 Compose interpolation은 app image, public origin, PostgreSQL image, secret directory 입력이 없어 NOT VERIFIED |
+| 배포 가능한 release SHA | BLOCKED | 공유 worktree dirty, staged 0 (마지막 확인 시); 전체 suite 3 FAIL; 실제 Entra 및 Azure NIC/NSG 검증 미완료 |
 
 ### 2. 격리된 웹 Edge 후보 — 미착수
 

@@ -1,6 +1,7 @@
 import { createHmac, createVerify, randomUUID, timingSafeEqual } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { isAbsolute } from "node:path";
+import { createEntraMetadataFetch } from './entra-metadata.js';
 
 export const PrincipalRole = Object.freeze({
   PATIENT: "PATIENT",
@@ -267,7 +268,7 @@ export class EntraOidcProvider extends AuthenticationProvider {
     this.issuer = `https://login.microsoftonline.com/${this.tenantId}/v2.0`;
     this.discoveryUrl = `${this.issuer}/.well-known/openid-configuration`;
     this.actorMap = validateSyntheticActorMap(actorMap ?? readSyntheticActorMap(env), this.tenantId);
-    this.fetchImpl = fetchImpl;
+    this.fetchImpl = createEntraMetadataFetch(env, fetchImpl);
     this.cache = cache;
   }
 

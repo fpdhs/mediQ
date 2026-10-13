@@ -21,7 +21,7 @@ import {renderSecurityTimeline} from '/ui/security-timeline.js';
 let auditTimelineVersion=0;
 let pacsImportBusy = false;
 let healthSharePicker=null, clinicianHealth=null;
-import {createWalletHome,createHelperSurface} from '/ui/wallet-home.js';
+import {createWalletHome,createHelperSurface,mountPatientWalletDock} from '/ui/wallet-home.js';
 let walletHome=null;
 let walletSnapshotReady=false;
 function refreshWalletHome(){walletHome?.update({name:demo.patientName,records:healthRecords(lastStudies,Boolean(capstoneAuth?.context.scenario),syntheticHealthClient?.records()||[]),consents:lastConsents,ready:walletSnapshotReady});}
@@ -39,6 +39,8 @@ import { createShareReview } from '/ui/patient-share-review.js';
 let shareReview = null;
 import { clinicalNextAction, renderClinicalActivity, renderClinicalDossier, renderClinicianDetail, clinicianDetailModel, filterClinicalStudies, renderClinicalMetrics, renderClinicalStudyList } from "/ui/clinician.js";
 import { initializeViewerStudio } from '/ui/viewer-studio.js';
+import { createClinicianHome } from '/ui/clinician-home.js';
+let clinicianHome = null;
 const capstoneAuth = await initializeCapstoneAuth();
 const patientQrController = createPatientQrController({
   readStatus: (consentId, ticketId) => fetchJson(`/api/consents/${encodeURIComponent(consentId)}/handoff-tickets/${encodeURIComponent(ticketId)}`, { cache: "no-store", signal: AbortSignal.timeout(10000) }),
@@ -315,6 +317,7 @@ function switchPersona(persona, updateHash = true) {
   syntheticHealthClient?.reset();
   healthSharePicker?.reset();
   clinicianHealth?.reset();
+  clinicianHome?.reset();
   walletHome?.reset();
   walletSnapshotReady=false;
   patientLibrary?.setActive(false);
@@ -381,6 +384,7 @@ function navigatePatientPage(page) {
   });
   patientLibrary?.setActive(page === 'images');
   patientHealth?.setActive(page === 'phr');
+  mountPatientWalletDock(patientApp.querySelector(`[data-page="${page}"]`),page,navigateFromPatientWallet);
   patientApp.querySelectorAll("[data-route]").forEach((b) => {
     const active = b.dataset.route === page || (['consent','activity','visit'].includes(page) && b.dataset.route === 'sharing') || (page==='images' && b.dataset.route==='phr');
     b.classList.toggle("active", active);
@@ -394,6 +398,15 @@ function navigatePatientPage(page) {
   }
 }
 
+function navigateFromPatientWallet(page) {
+  navigatePatientPage(page);
+  const destination=document.querySelector(`#patient-portal-app [data-page="${page}"]`);
+  const heading=destination?.querySelector('h1');
+  heading?.setAttribute('tabindex','-1');
+  heading?.focus({preventScroll:true});
+  destination?.scrollIntoView({block:'start',behavior:'instant'});
+}
+
 function navigateHospitalScreen(screen) {
   const hospitalApp = document.querySelector("#hospital-saas-app");
   if (!hospitalApp) return;
@@ -403,7 +416,7 @@ function navigateHospitalScreen(screen) {
   if (screen !== 'qr') stopCameraQrScan();
 
   const screenMeta = {
-    dashboard: ["Clinical Desk / Home", "진료 준비"],
+    dashboard: ["Clinical Desk / Home", "진료 홈"],
     exchange: ["시연도구 / 영상 보안 여정", "영상 보안 여정"],
     studies: ["Hospital Portal / 의료영상", "승인된 의료영상"],
     records: ["Hospital Portal / 환자 기록", "환자가 공유한 건강기록"],
@@ -785,6 +798,7 @@ async function loadDashboard(options = {}) {
   } catch (error) {
     if (typeof document !== "undefined") {
       walletSnapshotReady=false;
+      clinicianHome?.fail();
       walletHome?.update({name:demo.patientName,error:true});
       const state = document.querySelector("#patient-read-state");
       if (state) { state.textContent = "최신 정보를 확인하지 못했습니다. 연결을 확인하고 새로고침해 주세요."; state.dataset.state = "error"; }
@@ -1211,6 +1225,7 @@ function clinicianConsentLabel(value, known, fallback) {
 }
 
 function updateHospitalSaaSState(activeConsent, consents) {
+  refreshClinicianHome();
   const patientHeading = document.querySelector('#home-selected-name');
   if (patientHeading) patientHeading.textContent = demo.patientName || demo.patientId;
   const sourceHeading = document.querySelector('#home-selected-source');
@@ -2060,6 +2075,7 @@ function renderStudies(studies) {
 }
 
 function renderDoctorStudies(studies) {
+  refreshClinicianHome();
   const container = document.querySelector("#doctor-studies");
   if (!container) return;
   const selectedTitle = document.querySelector('#clinical-selected-title');
@@ -2128,6 +2144,30 @@ async function selectStudy(studyUid, studies = lastStudies) {
   updateConsentState(lastConsents);
   if (viewerStatus) viewerStatus.textContent = "토큰 필요";
   syncSelectedStudyUi();
+  refreshClinicianHome();
+}
+
+function refreshClinicianHome() {
+  clinicianHome?.update({studies:lastStudies, selectedUid:selectedStudyUid,
+    consentForStudy:uid=>getConsentForStudy(uid,lastConsents),
+    context:{...capstoneAuth?.context,patientName:demo.patientName}, logs:clinicalRecentLogs});
+}
+
+async function openClinicianHomeViewer() {
+  const consent=getConsentForStudy(selectedStudyUid,lastConsents);
+  if (!consent || clinicianDetailModel(selectedStudy,consent)[2]?.[1] !== '동의 유효 · 서버 검증 필요') {
+    await loadDashboard();
+    return;
+  }
+  // The home action confirms the purpose shown for this selected consent.
+  // Server policy still verifies purpose, hospital, scope and current consent.
+  demo.purpose=consent.purpose;
+  if (accessPurposeSelect) accessPurposeSelect.value=consent.purpose;
+  consentViewRevision++;
+  latestToken=null;
+  latestTokenInfo=null;
+  resetViewerData();
+  await openViewer();
 }
 
 function syncSelectedStudyUi() {
@@ -4055,6 +4095,9 @@ patientSharing = createPatientSharing({root:document.querySelector('[data-page="
 });
 renderAdminShell();
 patientHistory=createPatientHistory({root:document.querySelector('[data-page="activity"]'),onManage:()=>navigatePatientPage('sharing'),onRefresh:()=>loadDashboard()});
+clinicianHome=createClinicianHome(document.querySelector('#clinical-home'),{
+  onSelect:uid=>selectStudy(uid), onOpen:openClinicianHomeViewer, onRefresh:()=>loadDashboard()
+});
 bindEvents();
 await loadDashboard().catch(() => {});
 if (pendingPhrHandoffNonce) {

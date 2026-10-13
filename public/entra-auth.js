@@ -35,6 +35,7 @@ export function validateEntraBrowserConfig(config, appOrigin) {
   }
   return Object.freeze({
     provider: config.provider,
+    synthetic: true,
     tenantId: config.tenantId.toLowerCase(),
     clientId: config.clientId.toLowerCase(),
     redirectUri: redirectUrl.href,

@@ -4,6 +4,7 @@ import {readFile} from 'node:fs/promises';
 import {imagingEvidenceEntries,retrieveImagingEvidence,verifyImagingEvidence} from '../src/health-helper-imaging-evidence.js';
 import {validateEducationOutput} from '../src/health-helper-medlineplus.js';
 import {helperSourceUrl} from '../public/ui/patient-helper.js';
+import {sourceUpdatedAtForUrl} from '../src/health-helper-source-freshness.js';
 
 test('ultrasound and CT purpose, limits, preparation, and comparison are isolated extractive candidates',()=>{
  const cases=[
@@ -19,6 +20,7 @@ test('ultrasound and CT purpose, limits, preparation, and comparison are isolate
  for(const [question,id] of cases){
   const result=retrieveImagingEvidence(question);assert.equal(result.status,'CANDIDATE',question);
   const entry=result.evidence[0];assert.equal(entry.chunk_id,id);assert.equal(entry.contentReview,'UNASSIGNED');
+  assert.equal(entry.source_updated_at,sourceUpdatedAtForUrl(entry.source_url));
   assert.equal(result.extractiveOnly,true);assert.equal(entry.clinicalUse,false);
   assert.ok(helperSourceUrl(entry.source_url),`approved source link: ${entry.source_url}`);
   assert.ok(helperSourceUrl(entry.rights_policy_url),`approved rights link: ${entry.rights_policy_url}`);
