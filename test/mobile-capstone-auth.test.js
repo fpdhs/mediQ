@@ -168,7 +168,7 @@ test('mobile share submission preserves every selected consent duration and reje
     const calls = [];
     const context = vm.createContext({
       Date: FixedDate, AbortSignal, encodeURIComponent,
-      state: { shareTargetDuration: duration, shareSelectedItems: new Set(['1.2.3']), studies: [{ studyInstanceUid: '1.2.3' }], patientId: 'synthetic-patient', sourceHospitalId: 'HOSP-A', shareTargetHospital: 'HOSP-B' },
+      state: { sharePurpose:'TRANSFER', shareTargetDuration: duration, shareSelectedItems: new Set(['1.2.3']), studies: [{ studyInstanceUid: '1.2.3' }], patientId: 'synthetic-patient', sourceHospitalId: 'HOSP-A', shareTargetHospital: 'HOSP-B' },
       showToast() {}, patientHeaders: () => ({}),
       fetch: async (url, options) => { calls.push({ url, body: JSON.parse(options.body) }); return { ok: false }; },
     });
@@ -180,6 +180,7 @@ test('mobile share submission preserves every selected consent duration and reje
       assert.equal(calls[0].url, '/api/consents');
       assert.equal(Date.parse(calls[0].body.validUntil) - now, hours * 3600000);
       assert.equal(calls[0].body.permission, 'VIEW_ONLY');
+      assert.equal(calls[0].body.purpose, 'TRANSFER');
     }
   }
 });

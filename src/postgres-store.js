@@ -76,6 +76,18 @@ export class PostgresStore {
     return this.runExclusive(() => this.saveNow());
   }
 
+  // Security evidence/catalog paths must never fall back to whole-store rewrite
+  // if another request changes existing rows before this save obtains its lock.
+  async saveRequiredAppendOnly() {
+    return this.runExclusive(async () => {
+      normalizeStoreData(this.data);
+      const snapshot = structuredClone(this.data), changes = this.appendOnlyChanges(snapshot);
+      if (changes === null) throw new Error('POSTGRES_APPEND_ONLY_REQUIRED');
+      await this.saveAppendOnly(changes);
+      this.persistedData = snapshot;
+    });
+  }
+
   runExclusive(operation) {
     const guarded = () => {
       if (this.persistenceBlocked) throw new Error('POSTGRES_RELOAD_REQUIRED');
@@ -373,9 +385,9 @@ export class PostgresStore {
       await this.client.query(
         `INSERT INTO consents (
            consent_id, patient_id, source_hospital_id, target_hospital_id, purpose,
-           permission, valid_from, valid_until, status, created_at, updated_at, revoked_at
+           permission, valid_from, valid_until, status, created_at, updated_at, revoked_at, health_record_scope
          )
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13::jsonb)`,
         [
           row.consentId,
           row.patientId,
@@ -389,6 +401,7 @@ export class PostgresStore {
           row.createdAt,
           row.updatedAt ?? row.createdAt,
           row.revokedAt ?? null,
+          row.healthRecordScope ? JSON.stringify(row.healthRecordScope) : null,
         ],
       );
     }
@@ -684,6 +697,7 @@ const rowMappers = {
     createdAt: toIsoString(row.created_at),
     updatedAt: toIsoString(row.updated_at),
     revokedAt: toIsoString(row.revoked_at),
+    healthRecordScope: row.health_record_scope ?? null,
   }),
   consentScopes: (row) => ({
     scopeId: row.scope_id,
@@ -945,6 +959,7 @@ CREATE TABLE IF NOT EXISTS consents (
 
 ALTER TABLE consents ADD COLUMN IF NOT EXISTS updated_at timestamptz;
 ALTER TABLE consents ADD COLUMN IF NOT EXISTS revoked_at timestamptz;
+ALTER TABLE consents ADD COLUMN IF NOT EXISTS health_record_scope jsonb;
 UPDATE consents SET updated_at = created_at WHERE updated_at IS NULL;
 ALTER TABLE consents ALTER COLUMN updated_at SET NOT NULL;
 

@@ -15,12 +15,24 @@ spec = importlib.util.spec_from_file_location("vm_ops", ROOT / "scripts/workstat
 ops = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(ops)
 
+def validate_image_reference(image, image_id):
+    if not re.fullmatch(r"sha256:[a-f0-9]{64}", image_id):
+        raise ValueError("PUBLIC_IMAGE_ARGUMENT_INVALID")
+    if image.startswith("sha256:"):
+        if image != image_id:
+            raise ValueError("IMAGE_DIGEST_PIN_MISMATCH")
+    elif not re.fullmatch(r"highpass-platform-mvp:capstone-[a-z0-9-]{1,70}", image):
+        raise ValueError("PUBLIC_IMAGE_ARGUMENT_INVALID")
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--image", required=True)
     parser.add_argument("--image-id", required=True)
     args = parser.parse_args()
-    if not re.fullmatch(r"highpass-platform-mvp:capstone-[a-z0-9-]{1,70}", args.image) or not re.fullmatch(r"sha256:[a-f0-9]{64}", args.image_id):
+    try:
+        validate_image_reference(args.image, args.image_id)
+    except ValueError:
         raise SystemExit("PUBLIC_IMAGE_ARGUMENT_INVALID")
     stamp = datetime.now(timezone.utc).isoformat().replace(":", "-")
     directory = ROOT / "artifacts/workstation" / ("current-mtls-" + stamp)

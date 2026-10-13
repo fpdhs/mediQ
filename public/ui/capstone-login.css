@@ -60,3 +60,51 @@
 #capstone-login .mediq-login-footer{margin:28px 0 0;padding-top:20px;border-top:1px solid var(--login-line);font-size:12px;color:var(--login-muted);text-align:center}
 .mediq-scenario{padding:24px 28px;margin:0 0 28px;border:1px solid #e4e8ee;border-radius:20px;background:#fff}.mediq-scenario h2{margin:0 0 8px;font-size:21px;letter-spacing:-.025em}.mediq-scenario p{color:#586579;margin:0 0 16px}.mediq-scenario ol{display:flex;list-style:none;padding:0;gap:24px;flex-wrap:wrap;margin:0 0 20px}.mediq-scenario li{display:grid;gap:4px;font-size:14px}.mediq-scenario li span{color:#586579;font-size:13px}.mediq-scenario-actions{display:flex;gap:12px;flex-wrap:wrap}.mediq-scenario small{display:block;margin-top:16px;color:#586579}
 @media(max-width:740px){#capstone-login{padding:16px}.mediq-login-shell{grid-template-columns:1fr;border-radius:20px}.mediq-login-story{padding:28px}.mediq-login-brand{margin-bottom:20px;height:36px}#capstone-login h1{font-size:32px}.mediq-login-intro{font-size:14px}.mediq-login-patient{margin:20px 0 16px}.mediq-login-entry{padding:28px}.mediq-login-note{margin-top:16px}.mediq-login-entry h2{font-size:23px}.mediq-login-roles{margin-top:20px}.mediq-scenario{padding:20px}.mediq-scenario ol{gap:16px}}
+/* Patient account mode only: the blue wallet is artwork, never clinical storage. */
+.mediq-wallet-story,.mediq-wallet-label{display:none}
+#capstone-login.mediq-wallet-login:not(.mediq-entry-active){padding:0;background:#fff;align-items:start}
+#capstone-login.mediq-wallet-login .mediq-login-shell{max-width:none;min-height:100svh;grid-template-columns:58% 42%;border:0;border-radius:0;box-shadow:none;overflow:visible}
+#capstone-login.mediq-wallet-login .mediq-login-story{display:none}
+#capstone-login.mediq-wallet-login .mediq-wallet-story{display:block;position:relative;min-height:100svh;background:#3566b8 url('/images/mediq-login-wallet.webp') center bottom/cover no-repeat;color:#fff;padding:28px 4vw;overflow:hidden}
+.mediq-wallet-wordmark{display:inline-flex;align-items:center;gap:8px;font-size:34px;font-weight:720;letter-spacing:-1.5px;color:#fff;text-decoration:none}
+.mediq-wallet-wordmark span{display:grid;place-items:center;background:#123976;width:46px;height:48px;border-radius:7px}
+.mediq-wallet-copy{position:relative;margin-top:7vh}
+#capstone-login.mediq-wallet-login .mediq-wallet-copy h1{font-size:clamp(44px,5.4vw,82px);line-height:1.18;letter-spacing:-.055em;font-weight:740;color:#fff;margin-bottom:24px}
+.mediq-wallet-copy p{font-size:clamp(18px,2vw,28px);margin:0;color:#fff}
+.mediq-wallet-caption{position:absolute;left:4vw;bottom:24px;font-size:12px;color:#fff}
+#capstone-login.mediq-wallet-login .mediq-login-entry{position:relative;width:100%;max-width:620px;padding:82px clamp(28px,4vw,70px) 32px;align-self:center;margin:auto}
+#capstone-login.mediq-wallet-login .mediq-login-back{position:absolute;right:30px;top:20px;margin:0;background:transparent;border:0}
+#capstone-login.mediq-wallet-login .mediq-wallet-label{display:block;font-size:14px;font-weight:600;margin-bottom:16px}
+#capstone-login.mediq-wallet-login h2{font-size:clamp(32px,3vw,46px);line-height:1.18;letter-spacing:-.05em;max-width:none;word-break:keep-all;font-weight:720;margin:0 0 18px}
+#capstone-login.mediq-wallet-login .mediq-login-entry>p:first-of-type{font-size:15px;margin-bottom:30px}
+#capstone-login.mediq-wallet-login .mediq-presenter-toggle{margin:16px 0 8px;color:#697589;font-size:11px}
+#capstone-login.mediq-wallet-login .mediq-login-help{font-size:11px;margin:8px 0 18px}
+#capstone-login.mediq-wallet-login .mediq-login-submit{min-height:56px;background:#4778be;border-radius:11px;font-size:17px}
+#capstone-login.mediq-wallet-login .mediq-login-text-button{text-decoration:underline;text-underline-offset:4px;font-size:14px}
+#capstone-login.mediq-wallet-login .mediq-social{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;border:0;margin-top:22px;padding:0}
+#capstone-login.mediq-wallet-login .mediq-social p{grid-column:1/-1;display:flex;align-items:center;gap:12px;font-size:11px;margin:0 0 8px}
+#capstone-login.mediq-wallet-login .mediq-social p::before,#capstone-login.mediq-wallet-login .mediq-social p::after{content:"";height:1px;background:#d9e0e9;flex:1}
+#capstone-login.mediq-wallet-login .mediq-social button{min-height:48px;font-size:13px;background:#eef1f6;border:0;color:#647188}
+#capstone-login.mediq-wallet-login .mediq-login-footer{border:0;font-size:11px;margin-top:20px;padding:0}
+#capstone-login.mediq-wallet-login.mediq-mobile-login .mediq-login-shell{display:grid;max-width:none;grid-template-columns:58% 42%}
+#capstone-login.mediq-wallet-login.mediq-mobile-login .mediq-login-entry>.mediq-login-brand{display:none}
+#capstone-login.mediq-wallet-login.mediq-mobile-login h2{text-align:left}
+#capstone-login.mediq-wallet-login.mediq-mobile-login .mediq-login-entry>p:first-of-type{text-align:left}
+@media(max-width:900px){
+ #capstone-login.mediq-wallet-login .mediq-login-shell{grid-template-columns:48% 52%}
+ #capstone-login.mediq-wallet-login.mediq-mobile-login .mediq-login-shell{grid-template-columns:48% 52%}
+ #capstone-login.mediq-wallet-login .mediq-wallet-copy h1{font-size:46px}
+}
+@media(max-width:740px){
+ #capstone-login.mediq-wallet-login .mediq-login-shell{display:block;max-width:none}
+ #capstone-login.mediq-wallet-login.mediq-mobile-login .mediq-login-shell{display:block;max-width:none}
+ #capstone-login.mediq-wallet-login .mediq-wallet-story{min-height:260px;padding:20px 24px;background-position:center 55%;background-size:cover}
+ .mediq-wallet-wordmark{font-size:24px}.mediq-wallet-wordmark span{width:34px;height:36px}
+ .mediq-wallet-copy{margin-top:22px}
+ #capstone-login.mediq-wallet-login .mediq-wallet-copy h1{font-size:34px;max-width:12ch;margin-bottom:10px;text-shadow:0 1px 12px #163f7433}
+ .mediq-wallet-copy p{font-size:14px}.mediq-wallet-caption{display:none}
+ #capstone-login.mediq-wallet-login .mediq-login-entry{padding:62px 26px 30px;max-width:500px}
+ #capstone-login.mediq-wallet-login h2{font-size:32px;text-align:left;max-width:none}
+ #capstone-login.mediq-wallet-login .mediq-login-entry>p:first-of-type{text-align:left;font-size:14px}
+ #capstone-login.mediq-wallet-login .mediq-login-entry>.mediq-login-brand{display:none}
+}

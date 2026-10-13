@@ -48,15 +48,19 @@ def main():
         flags = json.loads(run("docker inspect hp-capstone-control-control-1 --format '{{json .Config.Env}}' | python3 -c " + shlex.quote(filter_script)))
         checks.append({"test": phase, "status": "PASS" if all(flags.values()) else "NOT VERIFIED", "enabled": flags})
         phase = "ROOT_PROTECTED_PATIENT_SECRET_METADATA"
-        # Only lstat metadata, not secret contents. Presence is not validity proof.
-        secret_probe = """import os,stat,json
+        # Only lstat metadata, not secret contents. Metadata does not prove that
+        # a readonly mount exists or the running process can read its contents.
+        # Use the same pure policy exercised by the local negative tests.
+        secret_probe = (ROOT / "scripts/lib/patient_secret_permissions.py").read_text(encoding="utf8") + """
+import os,json
 names=['patient-authority-password','patient-a-service-secret','patient-b-service-secret']
+directory='/opt/highpass/capstone-control-secrets'
 out={}
 for name in names:
  try:
-  value=os.lstat('/opt/highpass/capstone-control-secrets/'+name)
-  out[name]=stat.S_ISREG(value.st_mode) and value.st_uid==0 and value.st_mode & 0o077==0
- except FileNotFoundError:
+  value=os.lstat(directory+'/'+name)
+  out[name]=protected_secret_metadata(value,os.lstat(directory))
+ except OSError:
   out[name]=False
 print(json.dumps(out))"""
         secret_metadata = json.loads(run("python3 -c " + shlex.quote(secret_probe)))

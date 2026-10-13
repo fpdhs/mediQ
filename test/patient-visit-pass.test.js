@@ -1,0 +1,33 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {patientPassState} from '../public/ui/patient.js';
+const now=Date.parse('2026-10-10T12:00:00Z');
+const active={status:'ACTIVE',validFrom:'2026-10-10T11:00:00Z',validUntil:'2026-10-10T13:00:00Z'};
+test('pass distinguishes missing, active, future, expired, revoked and unknown consent without claiming transfer completion',()=>{
+  assert.equal(patientPassState(null,now).state,'NONE');
+  assert.equal(patientPassState(active,now).state,'ACTIVE');
+  assert.equal(patientPassState(active,Date.parse(active.validUntil)).state,'EXPIRED');
+  assert.equal(patientPassState({...active,validFrom:'2026-10-11T12:00:00Z'},now).state,'PENDING');
+  assert.equal(patientPassState({...active,validUntil:'invalid'},now).state,'PENDING');
+  assert.equal(patientPassState({...active,status:'REVOKED'},now).state,'REVOKED');
+  assert.equal(patientPassState({...active,status:'other'},now).state,'UNKNOWN');
+  assert.doesNotMatch(patientPassState(active,now).label,/열람 완료|전송 완료|접수 완료/);
+});
+test('pass is an accessible DOM surface preserving existing controllers and not a baked screenshot or automatic approval',()=>{
+  const source=readFileSync('public/ui/patient.js','utf8');
+  const css=readFileSync('public/ui/patient-visit-pass.css','utf8');
+  const html=readFileSync('public/index.html','utf8');
+  assert.match(html,/href="\/ui\/patient-visit-pass.css"/);
+  assert.match(source,/공유 절차 안내 · 실제 전송 완료 상태 아님/);
+  assert.match(source,/presentationActions\[kind === 'view' \? 'onView' : 'onShare'\]/);
+  assert.match(source,/if\(passBox\) passBox.replaceChildren\(\)/);
+  assert.match(source,/canvas\.cloneNode\(true\)/);
+  assert.match(source,/catch \{ box.replaceChildren\(\); passBox\?\.replaceChildren\(\)/);
+  assert.doesNotMatch(source,/innerHTML\s*=/);
+  assert.match(css,/prefers-reduced-motion:reduce/);
+  assert.match(css,/min-height:48px/);
+  assert.doesNotMatch(css,/https?:|exec-9c2d/);
+  assert.match(css,/sidebar \{[^}]*flex-direction:row/);
+  assert.match(css,/sidebar \.nav \{ position:static; flex-wrap:nowrap;/);
+});

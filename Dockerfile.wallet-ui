@@ -1,0 +1,17 @@
+# UI-only overlay. Never copies server code, credentials or DICOM data.
+ARG CAPSTONE_BASE_IMAGE
+FROM ${CAPSTONE_BASE_IMAGE}
+COPY public/app.js public/index.html /app/public/
+COPY public/mobile/app.js public/mobile/index.html public/mobile/sw.js /app/public/mobile/
+COPY public/ui/wallet-home.js public/ui/wallet-home.css /app/public/ui/
+COPY public/ui/patient-health.js /app/public/ui/
+COPY public/ui/patient-sharing.js /app/public/ui/
+COPY public/images/mediq-wallet-front-v1.webp /app/public/images/
+COPY public/ui/wallet-open.css /app/public/ui/
+COPY public/images/mediq-wallet-leather-v1.webp /app/public/images/
+COPY public/ui/wallet-bifold.css /app/public/ui/
+COPY public/ui/wallet-record-sheet.css /app/public/ui/
+COPY public/images/mediq-wallet-bifold-v1.webp /app/public/images/
+COPY public/ui/sharing-wallet-v2.css /app/public/ui/
+COPY public/images/mediq-wallet-model-back.webp public/images/mediq-wallet-model-front.webp /app/public/images/
+COPY public/images/mediq-wallet-model-mobile-back.webp public/images/mediq-wallet-model-mobile-front.webp /app/public/images/

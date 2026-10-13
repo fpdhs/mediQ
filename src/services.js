@@ -1,11 +1,13 @@
 import { createHash, createHmac, createPublicKey, randomBytes, timingSafeEqual, verify } from "node:crypto";
 import { createKeyProvider } from "./key-provider.js";
+import {validateHealthRecordSelection,healthRecordScope} from './shared-health-records.js';
 import { orderStoredAuditChain } from "./audit-chain-order.js";
 import { MemoryDPoPReplayStore } from "./dpop-replay-store.js";
 import { OrthancClient } from "./orthanc-client.js";
 import { LocalDevelopmentPseudonymKeyProvider } from "./pseudonym-protection.js";
 import { buildRetentionPolicies, executeRetentionPurge, planRetentionPurge } from "./retention.js";
 import { importStudyToHospitalBPacs, listHospitalBArchivedStudies } from "./pacs-import-engine.js";
+import { archiveRetentionDecision, purgeExpiredArchive } from './archive-retention.js';
 import {
   AccessDecision,
   AccessDenyReason,
@@ -62,6 +64,8 @@ export class HipassService {
     this.orthanc = options.orthancClient ?? new OrthancClient();
     this.hospitalArchiveKek = options.hospitalArchiveKek ?? null;
     this.allowSyntheticArchive = options.allowSyntheticArchive === true;
+    this.hospitalArchiveRoot = options.hospitalArchiveRoot ?? process.env.HIPASS_ARCHIVE_RETENTION_ROOT;
+    this.archiveRetentionBusy = false;
     this.pseudonymKeyProvider = options.pseudonymKeyProvider ?? new LocalDevelopmentPseudonymKeyProvider(this.tokenSecret, this.dicomTokenKeyProvider);
     this.dpopReplayStore = options.dpopReplayStore ?? store.dpopReplayStore ?? new MemoryDPoPReplayStore();
     if (process.env.NODE_ENV === "production" && process.env.HIPASS_DPOP_REQUIRED === "1" && !this.dpopReplayStore.persistent) throw new Error("Strict production DPoP requires persistent replay storage");
@@ -368,6 +372,8 @@ export class HipassService {
   }
 
   async createConsent(input) {
+    const healthScopeError=validateHealthRecordSelection(input);
+    if(healthScopeError){await this.writeAudit({actorType:'PATIENT',actorId:input.patientId??'UNKNOWN',action:'CONSENT_CREATE_FAILED',result:'FAIL',reason:healthScopeError});await this.store.save();throw new ServiceValidationError(healthScopeError,'Health record scope invalid');}
     const validation = await this.validateConsentInput(input);
     if (!validation.ok) {
       await this.writeAudit({
@@ -399,6 +405,7 @@ export class HipassService {
       createdAt: now,
       updatedAt: now,
       revokedAt: null,
+      healthRecordScope: healthRecordScope(input.healthRecordIds),
     };
 
     const scopes = validation.scopes.map((scope) => ({
@@ -412,6 +419,7 @@ export class HipassService {
 
     this.store.get("consents").push(consent);
     this.store.get("consentScopes").push(...scopes);
+    try {
     await this.writeAudit({
       actorType: ActorType.PATIENT,
       actorId: input.patientId,
@@ -425,6 +433,16 @@ export class HipassService {
       result: "SUCCESS",
     });
     await this.store.save();
+    } catch (error) {
+      // Never let an unconfirmed creation become an in-memory health grant.
+      // Remove only this request's objects, preserving concurrent user changes.
+      const pendingConsents=this.store.get('consents');
+      const index=pendingConsents.findIndex(row=>row.consentId===consentId);
+      if(index>=0)pendingConsents.splice(index,1);
+      const pendingScopes=this.store.get('consentScopes');
+      for(let i=pendingScopes.length-1;i>=0;i--)if(pendingScopes[i].consentId===consentId)pendingScopes.splice(i,1);
+      throw error;
+    }
     return this.decorateConsent({ ...consent, scopes });
   }
 
@@ -524,6 +542,8 @@ export class HipassService {
       result: "SUCCESS",
     });
     await this.store.save();
+    // Revocation is durable first. Cleanup failure must never undo access denial.
+    await this.reconcileHospitalArchiveRetention().catch(() => {});
     return this.getConsent(consentId);
   }
 
@@ -1490,6 +1510,9 @@ export class HipassService {
         targetHospitalId,
         kek: this.hospitalArchiveKek,
         allowSynthetic: this.allowSyntheticArchive,
+        consent: { ...consent },
+        clock: this.clock,
+        ...(this.hospitalArchiveRoot ? { baseDestDir:this.hospitalArchiveRoot } : {}),
         ...(input.destDir || input.baseDestDir ? { baseDestDir: input.destDir || input.baseDestDir } : {}),
       });
     } catch (err) {
@@ -1537,13 +1560,30 @@ export class HipassService {
       cipherSuite: importReceipt.cipherSuite ?? "AES-256-GCM",
       destinationVerification: false,
       simulation: true,
+      retention: importReceipt.retention,
       auditSessionId,
       timestamp: this.clock(),
     };
   }
 
   listHospitalBPacsArchive() {
-    return listHospitalBArchivedStudies();
+    return listHospitalBArchivedStudies(this.hospitalArchiveRoot).map(archive => ({...archive,
+      access: archiveRetentionDecision(archive, this.store.get('consents').find(c=>c.consentId===archive.retention?.consentId), this.clock())}));
+  }
+
+  async reconcileHospitalArchiveRetention() {
+    if (!this.hospitalArchiveRoot || this.archiveRetentionBusy) return [];
+    this.archiveRetentionBusy = true;
+    try {
+      const results = [];
+      for (const archive of listHospitalBArchivedStudies(this.hospitalArchiveRoot)) {
+        try { results.push(await purgeExpiredArchive({root:this.hospitalArchiveRoot,studyUid:archive.studyInstanceUid,
+          getConsent:id=>this.store.get('consents').find(c=>c.consentId===id),now:this.clock(),
+          audit:async event=>{await this.writeAudit({...event,actorType:'GATEWAY',actorId:'hospital-b-retention',targetHospitalId:'HOSP-B'});await this.store.save();}})); }
+        catch { results.push({allowed:false,state:'REVIEW_REQUIRED'}); }
+      }
+      return results;
+    } finally { this.archiveRetentionBusy = false; }
   }
 
   listDicomStudies(patientId) {

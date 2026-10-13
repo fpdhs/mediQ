@@ -1,0 +1,211 @@
+@import url('/ui/wallet-open.css');
+@import url('/ui/wallet-bifold.css');
+@import url('/ui/wallet-record-sheet.css');
+/* Approved wallet board: real leather foreground with live paper-card controls. */
+/* One unfolded leather wallet surface for sharing and records. Decorative pixels only. */
+.sharing-open-wallet{position:relative;padding:24px 0 34px;isolation:isolate}
+.sharing-open-wallet:before,.health-wallet-sheet:before,#tab-share:before{content:'';position:absolute;z-index:-1;pointer-events:none;left:-18px;right:-18px;bottom:0;height:220px;border-radius:38px;background:#23558f url('/images/mediq-wallet-front-v1.webp') center 58%/cover;box-shadow:0 18px 34px #163a6630;border:1px solid #264d7e}
+.sharing-paper{position:relative;background:#fff;border:1px solid #e1e8f2;border-radius:28px;padding:26px;box-shadow:0 12px 32px #243b5612}
+.sharing-leather-tab{position:absolute;top:-18px;left:45%;padding:12px 22px;background:#275a99 url('/images/mediq-wallet-front-v1.webp') center/cover;color:#e6effd;border:1px dashed #a2b5d1;border-radius:0 0 15px 15px;font-size:12px;box-shadow:0 4px 7px #102e5730}
+.sharing-compose{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(270px,1fr);gap:24px}
+#patient-portal-app .sharing-page{max-width:1280px;padding:28px 32px 64px}
+#patient-portal-app .sharing-page .page-head{margin-bottom:10px}
+#patient-portal-app .sharing-page .page-head h1{font-size:clamp(30px,3.6vw,46px);letter-spacing:-.04em}
+.sharing-compose .sharing-new{margin:0;padding:24px;border-color:#e5eaf2;background:#fff;border-radius:20px}
+.sharing-compose .sharing-conditions{grid-template-columns:1fr 1fr}
+.sharing-summary{background:#edf4ff;border:1px solid #d5e4fa;border-radius:20px;padding:26px;min-width:0}
+.sharing-summary h2{margin:0 0 12px}.sharing-preparing{display:inline-block;color:#3566b8;font-size:13px;background:#dceaff;border-radius:18px;padding:7px 12px}
+.sharing-summary-route{font-size:20px;font-weight:650;line-height:1.6;padding:18px 0;border-bottom:1px solid #ccdaf0}
+.sharing-summary dl{display:grid;grid-template-columns:85px minmax(0,1fr);gap:14px 10px;font-size:14px;line-height:1.6}.sharing-summary dt{color:#5f7290}.sharing-summary dd{margin:0;overflow-wrap:anywhere;font-weight:600}
+#patient-portal-app .sharing-summary .btn{width:100%;min-height:54px;background:#3566b8;color:#fff;border-radius:13px;border:0;margin-top:14px}
+.sharing-summary p[role=status],.sharing-summary small{font-size:12px;color:#596e8d;line-height:1.7}.sharing-summary small{display:block}
+.sharing-existing{margin-top:24px;border-top:1px solid #e1e8f3;padding-top:18px}.sharing-existing .sharing-pass{box-shadow:none;border-color:#dfe8f4}.sharing-existing .sharing-pass-stub{background:#edf4ff;border-color:#ccdaf0}
+.health-layout.health-wallet-sheet{position:relative;isolation:isolate;margin-bottom:36px!important;padding-bottom:180px!important;background:#fff!important;box-shadow:0 12px 32px #243b5612}
+.health-wallet-sheet:before{bottom:-24px;left:-12px;right:-12px;height:160px}
+#tab-share{position:relative;isolation:isolate;padding:24px 18px 40px;margin-bottom:26px;border-radius:24px;background:#fff;border:1px solid #e0e8f3;box-shadow:0 12px 30px #243b5612}
+#tab-share:before{left:-8px;right:-8px;bottom:-20px;height:170px}
+#tab-share .section-title{font-size:28px;letter-spacing:-.04em;line-height:1.3;color:#192638}
+#tab-share .section-sub{font-size:15px;line-height:1.6;color:#61738c}
+#tab-share .wizard-step-pane,#tab-share .summary-card{background:#f4f8ff;border:1px solid #dce7f6;border-radius:18px;padding:20px}
+#tab-share .wizard-stepper{gap:4px;font-size:11px;margin:22px 0}#tab-share .step-dot{min-width:0;white-space:normal}
+#tab-share .btn-primary{background:#3566b8!important;border-color:#3566b8!important;min-height:48px}
+#tab-share .config-select{min-height:48px;width:100%;max-width:100%;box-sizing:border-box;border-color:#cbd9ec;border-radius:12px}
+#tab-share .share-check-card{border-radius:14px;border-color:#d3e0f2;background:white}
+@media(max-width:800px){.sharing-compose{grid-template-columns:1fr}.sharing-paper{padding:20px 14px}.sharing-leather-tab{left:40%}.sharing-open-wallet:before{left:-8px;right:-8px}#patient-portal-app .sharing-page{padding:22px 16px 48px}.sharing-compose .sharing-new{padding:18px}.sharing-summary{padding:22px}}
+@media(max-width:420px){.sharing-compose .sharing-draft,.sharing-compose .sharing-conditions{grid-template-columns:1fr}#tab-share{padding:20px 12px 30px}#tab-share .wizard-step-pane{padding:16px}.sharing-leather-tab{left:35%}}
+/* Open bifold: visible inner leather, central spine and foreground pockets.
+   Pockets occupy reserved card padding only; no live controls are covered. */
+.sharing-open-wallet{padding:30px 28px 26px;border-radius:32px;background:#244f80 url('/images/mediq-wallet-front-v1.webp') center/cover;border:2px solid #173c68;box-shadow:inset 0 2px 2px #a4c5ed80,inset 0 0 0 9px #12396360,0 22px 38px #17365730}
+.sharing-open-wallet:before{left:calc(63% - 14px);right:auto;top:12px;bottom:12px;height:auto;width:22px;border-radius:12px;background:linear-gradient(90deg,#0d2d5270,#75a2d03d,#0b294f80);border:0;box-shadow:inset 3px 0 6px #071b3950;z-index:0}
+.sharing-paper{background:transparent;border:0;padding:0;box-shadow:none}
+.sharing-leather-tab{display:none}
+.sharing-compose{gap:36px;align-items:stretch}
+.sharing-compose .sharing-new,.sharing-summary{position:relative;isolation:isolate;border-radius:16px 16px 24px 24px;box-shadow:0 5px 16px #081e4760,inset 0 3px #fff;min-width:0;padding:28px 26px 124px}
+.sharing-compose .sharing-new{background:#fffefb;transform:rotate(-.6deg)}
+.sharing-summary{background:#f0f5ff;transform:rotate(.7deg)}
+.sharing-compose .sharing-new:after,.sharing-summary:after,.health-hero>article:after,.health-hero>aside:after{content:'';position:absolute;pointer-events:none;left:-12px;right:-12px;bottom:-8px;height:92px;border-radius:12px 12px 24px 24px;background:#285b96 url('/images/mediq-wallet-front-v1.webp') center 65%/cover;border:1px solid #11365e;box-shadow:0 -8px 14px #09284b36,inset 0 3px 2px #86add27a;clip-path:polygon(0 0,48% 13%,100% 0,100% 100%,0 100%)}
+.sharing-compose .sharing-new:before,.sharing-summary:before,.health-hero>article:before,.health-hero>aside:before{content:'';position:absolute;pointer-events:none;left:0;right:0;bottom:5px;height:64px;border:1px dashed #c2d4e37a;border-radius:10px 10px 18px 18px;z-index:2;background:none;width:auto;top:auto;box-shadow:none}
+.sharing-existing{background:#fff;border:1px solid #e1e8f3;border-radius:20px;padding:24px;margin-top:34px}
+.health-layout.health-wallet-sheet{padding-bottom:32px!important;background:#f7faff!important;box-shadow:none;margin-bottom:0!important}
+.health-wallet-sheet:before{display:none}
+.health-wallet-sheet .health-hero{position:relative;isolation:isolate;padding:26px;gap:32px;border-radius:28px;background:#244f80 url('/images/mediq-wallet-front-v1.webp') center/cover;border:2px solid #173c68;box-shadow:inset 0 0 0 7px #11376260,0 16px 28px #17365726}
+.health-hero:before{content:'';position:absolute;pointer-events:none;left:62%;top:12px;bottom:12px;width:18px;background:linear-gradient(90deg,#092b5960,#8eafd238,#08234470);border-radius:12px}
+.health-wallet-sheet .health-hero>article,.health-wallet-sheet .health-hero>aside{position:relative;isolation:isolate;padding-bottom:116px!important;box-shadow:0 6px 14px #081e4740}
+.health-wallet-sheet .health-hero>article:before,.health-wallet-sheet .health-hero>aside:before{top:auto;bottom:5px;left:0;right:0;width:auto;height:64px;background:none;border:1px dashed #c2d4e37a;border-radius:10px 10px 18px 18px;box-shadow:none}
+.health-wallet-sheet .health-featured{transform:rotate(-.5deg)}
+.health-wallet-sheet .health-record-guide{transform:rotate(.5deg);background:#f1f5fc}
+#tab-share{background:transparent;border:0;box-shadow:none;padding:20px 10px 32px}
+#tab-share:before{display:none}
+#tab-share #share-wizard-wrap{padding:18px 14px 22px;border-radius:25px;background:#244f80 url('/images/mediq-wallet-front-v1.webp') center/cover;border:2px solid #173c68;box-shadow:inset 0 0 0 6px #11376260,0 14px 24px #17365726}
+#tab-share .wizard-stepper{color:white;margin:8px 0 22px}
+#tab-share .wizard-step-pane{position:relative;isolation:isolate;background:#fffefb;padding-bottom:108px!important;border-radius:15px;box-shadow:0 5px 16px #081e4750}
+#tab-share .wizard-step-pane:after{content:'';position:absolute;pointer-events:none;left:-8px;right:-8px;bottom:-8px;height:80px;background:#285b96 url('/images/mediq-wallet-front-v1.webp') center/cover;border:1px solid #163b65;border-radius:12px 12px 20px 20px;box-shadow:0 -7px 12px #09284b30,inset 0 3px #a5bdd355;clip-path:polygon(0 0,50% 12%,100% 0,100% 100%,0 100%)}
+@media(max-width:1100px){.health-hero:before{display:none}}
+@media(max-width:800px){.sharing-open-wallet{padding:20px 18px}.sharing-open-wallet:before{display:none}.sharing-compose{gap:28px}.sharing-compose .sharing-new,.sharing-summary{padding:22px 20px 116px;transform:none}.health-wallet-sheet .health-hero{padding:18px;gap:28px}.health-wallet-sheet .health-featured,.health-wallet-sheet .health-record-guide{transform:none}}
+@media(prefers-reduced-motion:reduce){.sharing-compose>*,.health-hero>*{transition:none;animation:none}}
+/* The extracted record sheet shares the wallet palette, not its heavy silhouette. */
+#patient-phr .health-layout.health-wallet-sheet,.mq-mobile-records .health-layout.health-wallet-sheet{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,420px);background:#f7faff;color:#192638;padding:32px;border:1px solid #e1e9f3;border-radius:24px;gap:24px;font-family:Pretendard,system-ui,sans-serif}
+.health-wallet-sheet:has(.health-detail[hidden]){grid-template-columns:minmax(0,1fr)!important}
+.health-heading{position:relative;padding:0 180px 0 0}
+#patient-phr .health-heading h1,.mq-mobile-records .health-heading h1{font-size:36px;line-height:1.35;letter-spacing:-.035em;margin:12px 0 8px;color:#192638}
+.health-heading .health-intro{font-size:17px;color:#596b85;margin:0;line-height:1.6}
+.health-wallet-back{border:0;background:transparent;color:#3566b8;font:inherit;font-size:14px;min-height:44px;padding:8px 0;cursor:pointer;text-align:left}
+.health-compare-button{position:absolute;right:0;top:46px;min-height:48px;border:1px solid #cbd9ec;background:white;border-radius:10px;padding:12px 18px;font:inherit;color:#3566b8;cursor:pointer}
+.health-wallet-sheet .health-tools{margin:24px 0;gap:10px}.health-wallet-sheet .health-filter{font-size:15px;padding:10px 18px;border-color:#dce6f3}
+.health-hero{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(250px,1fr);gap:20px;margin:0 0 32px}
+.health-featured{position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(180px,.9fr);gap:24px;padding:30px;border-radius:22px;background:white;border:1px solid #e2e8f1;box-shadow:0 8px 18px #29466812,inset 0 -4px #f0f4fa}
+.health-featured::before{content:'';position:absolute;left:-9px;top:-9px;width:56px;height:44px;background:#245693 url('/images/mediq-wallet-front-v1.webp') center/220px auto;border:1px solid #4576af;border-radius:14px 3px 20px 3px;box-shadow:2px 3px 6px #14244326;pointer-events:none}
+.health-featured h2{font-size:30px;line-height:1.3;letter-spacing:-.035em;margin:12px 0}
+.health-featured-meta{font-size:15px;color:#526b8e;line-height:1.5}.health-featured .health-note{border-top:1px solid #e3eaf3;padding-top:15px;margin-top:20px}
+.health-featured-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.health-featured-actions .btn{min-height:48px;border-radius:10px;font-size:15px;font-family:inherit;padding:12px 18px;border:1px solid #cbd9ec;background:white;color:#3566b8;cursor:pointer}.health-featured-actions .btn.primary{background:#3566b8;color:white;border-color:#3566b8}
+.health-featured-frame{background:#111820;border-radius:14px;min-height:220px;display:flex;flex-direction:column;justify-content:center;overflow:hidden}
+.health-featured-image{width:100%;height:auto;max-height:300px;object-fit:contain;border-radius:0;background:#111820;flex:none}
+.health-preview-label{font-size:11px;line-height:1.5;color:#d4deea;padding:12px;text-align:center}
+.health-record-guide{background:#eaf3fc;border:1px solid #dde9f6;border-radius:22px;padding:30px;box-shadow:0 8px 18px #2946680c}
+.health-record-guide h2{font-size:24px;line-height:1.4;letter-spacing:-.03em;margin:6px 0 12px}.health-record-guide p{font-size:16px;line-height:1.7;color:#526b8e}.health-guide-flow{font-size:20px;font-weight:600;color:#3566b8;margin:30px 0}
+.health-wallet-sheet .health-group{position:relative;margin:0 0 24px 125px;padding:0 0 0 24px;border-left:1px solid #dbe6f3}
+#patient-phr .health-wallet-sheet .health-date,.health-wallet-sheet .health-date{position:absolute;left:-125px;top:0;font-size:23px;margin:12px 0;font-weight:650;color:#192638}
+.health-wallet-sheet .health-record{position:relative;border:0;border-bottom:1px solid #e0e8f3;border-radius:0;background:transparent;padding:16px 8px;min-height:88px;margin:0;gap:16px}
+.health-wallet-sheet .health-record::before{content:'';position:absolute;left:-29px;top:35px;width:9px;height:9px;background:#7fa1cd;border-radius:50%;border:2px solid #f7faff}
+.health-wallet-sheet .health-record[aria-pressed=true]{background:#edf3fd;box-shadow:none;border-radius:10px}
+.health-wallet-sheet .health-record-copy strong{font-size:18px;line-height:1.4}.health-wallet-sheet .health-record-copy small,.health-wallet-sheet .health-record-copy>span{font-size:14px;line-height:1.5;color:#5b6f8d}
+.health-wallet-sheet .health-detail{position:static;background:white;border:1px solid #dce6f3;padding:24px;border-radius:20px;max-width:100%;overflow-wrap:anywhere}
+.health-wallet-sheet .health-detail h2{font-size:28px}.health-wallet-sheet:has(.health-detail:not([hidden])) .health-hero{grid-template-columns:1fr}.health-wallet-sheet .health-disclaimer{margin-top:24px;background:transparent;padding:0;color:#687a94;font-size:12px}
+.health-wallet-sheet button:focus-visible{outline:3px solid #3566b8;outline-offset:3px}.health-wallet-sheet button:disabled{opacity:.55;cursor:default}
+@media(max-width:1100px){#patient-phr .health-layout.health-wallet-sheet{grid-template-columns:1fr}.health-hero{grid-template-columns:1fr}.health-record-guide{padding:22px}.health-guide-flow{margin:18px 0}}
+@media(max-width:600px){
+ #patient-phr .health-layout.health-wallet-sheet,.mq-mobile-records .health-layout.health-wallet-sheet{display:block;padding:18px 14px;border-radius:18px}
+ .health-heading{padding:0}.health-heading .health-intro{font-size:16px}#patient-phr .health-heading h1,.mq-mobile-records .health-heading h1{font-size:28px}
+ .health-compare-button{position:static;margin-top:16px;width:100%}.health-wallet-sheet .health-tools{gap:8px;margin:20px 0}.health-wallet-sheet .health-filter{font-size:14px;padding:10px 12px}
+ .health-featured{grid-template-columns:1fr;padding:24px 18px;gap:18px}.health-featured h2{font-size:27px}.health-featured-frame{min-height:180px}.health-featured-image{max-height:240px}
+ .health-record-guide{padding:20px}.health-record-guide h2{font-size:22px}.health-record-guide p{font-size:15px}
+ .health-wallet-sheet .health-group{margin:24px 0 24px 8px;padding-left:15px}.health-wallet-sheet .health-date,#patient-phr .health-wallet-sheet .health-date{position:static;font-size:22px;margin:0 0 10px}
+ .health-wallet-sheet .health-record{gap:10px;padding:14px 4px}.health-wallet-sheet .health-record::before{left:-20px}.health-wallet-sheet .health-record-copy strong{font-size:17px}.health-wallet-sheet .health-record-copy small,.health-wallet-sheet .health-record-copy>span{font-size:13px}.health-wallet-sheet .health-record-action{font-size:12px;max-width:50px}.health-wallet-sheet .health-detail{margin-top:24px;padding:18px}
+}
+.wallet-home-host > :not(.mq-wallet-home){display:none!important}
+.mq-wallet-home{max-width:1240px;margin:auto;color:#142443;font-family:Pretendard,system-ui,sans-serif;padding:16px 0 20px}
+.mq-wallet-top{display:grid;grid-template-columns:1.12fr 2fr;gap:32px;align-items:start}
+.mq-wallet-greeting{padding:0}
+#patient-portal-app .mq-wallet-greeting h1,.mq-wallet-greeting h1{font-size:clamp(28px,3vw,42px);letter-spacing:-.05em;line-height:1.34;margin:0 0 18px;font-weight:750}
+.mq-wallet-title-line{display:block;white-space:nowrap}
+.mq-wallet-hello{font-size:17px;line-height:1.65;color:#65748e;margin:0;max-width:330px}
+.mq-wallet-overview{display:grid;grid-template-columns:1fr 1fr;gap:20px;padding-top:7px}
+.mq-wallet-panel{background:#ffffffa8;border:1px solid #e1e7ef;border-radius:15px;padding:19px 20px;min-width:0}
+.mq-wallet-panel-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
+.mq-wallet-panel-head h2{font-size:18px;letter-spacing:-.035em;margin:0;white-space:nowrap}
+.mq-wallet-link{border:0;background:none;font:inherit;font-size:12px;color:#526b91;cursor:pointer;padding:8px 0;white-space:nowrap}
+.mq-wallet-row{display:grid;grid-template-columns:25px 1fr;gap:4px 9px;align-items:center;width:100%;text-align:left;border:0;border-top:1px solid #e9edf3;padding:11px 0;background:none;font:inherit;color:inherit;cursor:pointer}
+.mq-wallet-row strong{font-size:14px;font-weight:600;letter-spacing:-.025em}
+.mq-wallet-row small{grid-column:2;font-size:12px;color:#697a94;line-height:1.4}
+.mq-record-symbol,.mq-share-symbol{grid-row:span 2;display:grid;place-items:center;color:#3566b8;font-size:23px}
+.mq-record-symbol svg{width:23px;height:23px}
+.mq-wallet-list .mq-wallet-row:nth-child(n+3){display:none}
+.mq-wallet-panel:last-child .mq-wallet-row:nth-child(n+2){display:none}
+.mq-wallet-panel:last-child .mq-wallet-row small{justify-self:start;border:1px solid #77bcb6;color:#16796b;background:#effaf8;border-radius:8px;padding:4px 8px}
+.mq-wallet-panel:last-child .mq-wallet-row small[data-wallet-state=other]{border-color:#c6cdd7;color:#627086;background:#f3f5f8}
+.mq-wallet-empty{font-size:13px;color:#65748e;line-height:1.6}
+.mq-wallet-object{position:relative;isolation:isolate;width:min(100%,1020px);height:565px;margin:30px auto 0}
+.mq-wallet-cards{position:absolute;left:7%;right:7%;top:22px;height:290px;z-index:2;display:grid;grid-template-columns:1.42fr 1fr 1fr 1fr;align-items:start;gap:0;padding:0 10px}
+.mq-wallet-card{position:relative;min-width:0;height:265px;padding:25px 12px 88px;border:1px solid #d5deea;border-radius:17px;background:#eef3fb;color:#142443;font:inherit;text-align:center;cursor:pointer;transform:translateY(var(--lift,0px)) rotate(var(--angle,0deg));transform-origin:center bottom;box-shadow:inset 0 2px 1px #fffffff0,inset -2px 0 1px #cad3df88,3px 1px 3px #263b5820,8px 6px 17px #1b325d1c;transition:transform .36s cubic-bezier(.2,.8,.2,1),box-shadow .36s}
+.mq-wallet-card-requests{--angle:-5deg;--lift:0px;background:linear-gradient(110deg,#fcf8ef,#fffef9);z-index:4;display:grid;grid-template-columns:40px 1fr;align-content:start;column-gap:10px;text-align:left;padding:32px 18px 80px}
+.mq-wallet-card-records{--angle:2deg;--lift:14px;background:linear-gradient(120deg,#e3edfc,#f5f8ff);z-index:3;margin-left:-12px}
+.mq-wallet-card-sharing{--angle:3deg;--lift:20px;background:linear-gradient(120deg,#e8e7fc,#f5f5ff);z-index:2;margin-left:-12px}
+.mq-wallet-card-helper{--angle:4deg;--lift:26px;background:linear-gradient(120deg,#e7f0e8,#f5faf5);z-index:1;margin-left:-12px}
+.mq-wallet-card::after{content:'';position:absolute;left:0;right:0;bottom:0;height:75px;background:linear-gradient(transparent,#1e355b1c);border-radius:0 0 16px 16px;pointer-events:none}
+.mq-wallet-card-requests .mq-card-icon{grid-row:span 3;align-self:start;margin:7px 0 0}
+.mq-wallet-card-requests .mq-card-copy,.mq-wallet-card-requests .mq-card-cta{grid-column:2;margin-left:0}
+.mq-card-icon{display:grid;place-items:center;color:#3566b8;margin:0 auto 15px}
+.mq-card-icon svg{width:33px;height:33px}
+.mq-wallet-card-sharing .mq-card-icon{color:#625bba}.mq-wallet-card-helper .mq-card-icon{color:#477e75}
+.mq-wallet-card strong{display:block;font-size:clamp(18px,1.75vw,23px);letter-spacing:-.045em;white-space:nowrap;line-height:1.3}
+.mq-card-copy{display:block;font-size:14px;line-height:1.55;color:#5e6c83;margin:9px auto 0;max-width:195px}
+.mq-card-cta{display:block;width:140px;max-width:90%;padding:10px;margin:14px auto 0;border-radius:24px;background:#2565bd;color:white;font-size:14px;font-weight:650;box-shadow:inset 0 1px #78a0db}
+.mq-wallet-pocket{position:absolute;left:0;right:0;top:135px;z-index:3;pointer-events:none}
+.mq-wallet-art{display:block;width:100%;height:auto;filter:drop-shadow(0 20px 12px #29466822)}
+.mq-wallet-card:hover,.mq-wallet-card:focus-visible{transform:translateY(calc(var(--lift,0px) - 18px)) rotate(0deg);z-index:5}
+.mq-wallet-card.is-extracting{transform:translateY(-90px) rotate(0) scale(1.04);z-index:6;box-shadow:0 18px 30px #1d39552b}
+.mq-wallet-home button:focus-visible{outline:3px solid #3566b8;outline-offset:4px}
+.mq-wallet-disclosure{text-align:center;font-size:11px;line-height:1.6;color:#71819a;margin:0 auto;max-width:700px}
+.mq-wallet-swipe-hint{display:none}
+.mq-wallet-screen-enter{animation:mq-wallet-open .24s ease-out}
+@keyframes mq-wallet-open{from{opacity:.7;transform:translateY(10px)}to{opacity:1;transform:none}}
+#patient-portal-app{background:linear-gradient(150deg,#fcfdff,#f0f4f9)}
+#patient-portal-app .sidebar .nav{gap:7px}#patient-portal-app .sidebar .nav-button{font-size:14px;padding:14px 12px}#patient-portal-app .sidebar{gap:26px}
+#patient-portal-app .sidebar .nav-button[data-route=images],#patient-portal-app .sidebar .nav-button[data-route=activity]{display:none}
+#tab-records.wallet-records-host > :not(.mq-mobile-records){display:none!important}
+.mq-mobile-records .health-layout{display:block}.mq-mobile-records .health-main,.mq-mobile-records .health-detail{min-width:0}.mq-mobile-records .health-filters,.mq-mobile-records .health-tools{flex-wrap:wrap}.mq-mobile-records .health-main h1{font-size:25px}.mq-mobile-records .health-detail{margin-top:20px}
+.mobile-shell > .mobile-header{position:relative;top:auto;flex-shrink:0;padding:16px 24px 8px;transform:none}
+.mobile-shell .mobile-content{padding-top:8px}
+@media(max-width:1100px){
+ .mq-wallet-top{grid-template-columns:1fr;gap:20px}.mq-wallet-hello{max-width:600px}.mq-wallet-title-line{display:inline;white-space:normal}
+ .mq-wallet-object{height:535px}.mq-card-copy{font-size:12px}.mq-wallet-card-requests{grid-template-columns:28px 1fr;column-gap:6px;padding-left:12px;padding-right:10px}.mq-wallet-card-requests .mq-card-icon svg{width:27px}
+}
+@media(max-width:760px){
+ .mq-wallet-home{padding-top:0}.mq-wallet-top{gap:18px}.mq-wallet-overview{gap:12px;padding:0}.mq-wallet-panel{padding:13px 15px}.mq-wallet-panel-head h2{font-size:16px}
+ .mq-wallet-object{height:440px}.mq-wallet-card strong{font-size:16px}.mq-card-cta{width:105px}.mq-wallet-card-requests{display:block;text-align:center;padding-top:16px}.mq-wallet-card-requests .mq-card-icon{margin:0 auto 8px}.mq-wallet-card-requests .mq-card-cta,.mq-wallet-card-requests .mq-card-copy{margin-left:auto}
+}
+@media(max-width:520px){
+ .mq-wallet-top{display:block}.mq-wallet-greeting h1{font-size:28px;margin-bottom:10px;line-height:1.3}.mq-wallet-title-line{display:block;white-space:normal}.mq-wallet-hello{font-size:14px;line-height:1.65}
+ .mq-wallet-overview{grid-template-columns:1fr;gap:10px;margin-top:16px}.mq-wallet-panel{padding:8px 14px;border-radius:12px}.mq-wallet-panel-head{margin-bottom:0}.mq-wallet-panel-head h2{font-size:15px}.mq-wallet-list .mq-wallet-row:nth-child(n+2){display:none}
+ .mq-wallet-row{padding:8px 0;grid-template-columns:22px 1fr}.mq-wallet-row strong{font-size:13px}.mq-wallet-row small{font-size:11px}.mq-wallet-panel:last-child .mq-wallet-row small{padding:3px 7px}
+ .mq-wallet-object{height:260px;margin-top:12px;width:calc(100% + 18px);margin-left:-9px}
+ .mq-wallet-cards{left:6%;right:6%;top:0;height:190px;display:flex;overflow-x:auto;scroll-snap-type:x proximity;padding:28px 8px 0;scrollbar-width:none;gap:2px}
+ .mq-wallet-card{flex:0 0 66%;height:178px;padding:14px 10px 48px;scroll-snap-align:start;border-radius:12px}
+ .mq-wallet-card-requests{display:grid;grid-template-columns:24px 1fr;column-gap:5px;text-align:left;padding:18px 9px 48px}
+ .mq-wallet-card-requests .mq-card-icon{margin:3px 0 0}.mq-wallet-card-requests .mq-card-copy,.mq-wallet-card-requests .mq-card-cta{margin-left:0}
+ .mq-wallet-card-records,.mq-wallet-card-sharing,.mq-wallet-card-helper{margin-left:-12px}
+ .mq-card-icon{margin-bottom:7px}.mq-card-icon svg{width:25px;height:25px}.mq-wallet-card strong{font-size:16px}.mq-card-copy{font-size:10px;margin-top:5px;line-height:1.5}.mq-card-cta{font-size:11px;padding:7px;margin-top:8px;width:95px}
+ .mq-wallet-pocket{top:103px}.mq-wallet-art{filter:drop-shadow(0 10px 8px #29466825)}
+ .mq-wallet-card.is-extracting{transform:translateY(-22px) rotate(0) scale(1.02)}
+ .mq-wallet-swipe-hint{display:block;text-align:center;font-size:11px;color:#687a95;margin:0 0 15px}
+ .mq-wallet-disclosure{font-size:10px;line-height:1.6}.mq-mobile-records .health-main{padding:0}
+}
+/* Keep physical card placement separate from optional motion. */
+.mq-wallet-top{grid-template-columns:minmax(0,1.2fr) minmax(0,2fr);gap:40px}
+#patient-portal-app .mq-wallet-greeting h1,.mq-wallet-greeting h1{font-size:clamp(32px,2.5vw,40px);font-weight:700;letter-spacing:-.035em;line-height:1.38;margin-bottom:20px}
+.mq-wallet-title-line{white-space:normal;text-wrap:balance}
+.mq-wallet-hello{font-size:17px;color:#53647d;max-width:380px;text-wrap:pretty}
+.mq-wallet-panel{background:#ffffff80;border-color:#e6ebf2;padding:20px 22px;box-shadow:none}
+.mq-wallet-panel-head h2{font-size:19px;font-weight:600;letter-spacing:-.025em}
+.mq-wallet-link{font-size:14px;min-height:44px;padding:10px 4px;color:#3f5c85}
+.mq-wallet-row{min-height:60px;gap:5px 10px;padding:12px 0}
+.mq-wallet-row strong{font-size:16px;letter-spacing:-.02em}
+.mq-wallet-row small{font-size:14px;color:#586b85;line-height:1.5;font-variant-numeric:tabular-nums}
+#patient-portal-app .sidebar .nav-button{font-size:16px;font-weight:500}
+#patient-portal-app .mq-wallet-card{transform:translateY(var(--lift,0px)) rotate(var(--angle,0deg))}
+@media(hover:hover) and (prefers-reduced-motion:no-preference){#patient-portal-app .mq-wallet-card:hover{transform:translateY(calc(var(--lift,0px) - 18px)) rotate(0deg)}}
+@media(prefers-reduced-motion:no-preference){#patient-portal-app .mq-wallet-card.is-extracting{transform:translateY(-90px) rotate(0) scale(1.04)}}
+@media(max-width:1100px){.mq-wallet-top{grid-template-columns:1fr;gap:24px}}
+@media(max-width:520px){
+ #patient-portal-app .mq-wallet-greeting h1,.mq-wallet-greeting h1{font-size:30px;line-height:1.35;margin-bottom:12px}
+ .mq-wallet-hello{font-size:16px;line-height:1.65}
+ .mq-wallet-overview{margin-top:20px;gap:12px}
+ .mq-wallet-panel{padding:10px 15px}.mq-wallet-panel-head h2{font-size:17px}
+ .mq-wallet-link{font-size:13px}.mq-wallet-row{min-height:56px;padding:9px 0}
+ .mq-wallet-row strong{font-size:15px}.mq-wallet-row small{font-size:13px}
+}
+@media(prefers-reduced-motion:reduce){
+ .mq-wallet-card{transition:none}
+ #patient-portal-app .mq-wallet-card,.mq-wallet-card:hover,.mq-wallet-card:focus-visible,.mq-wallet-card.is-extracting{transform:translateY(var(--lift,0px)) rotate(var(--angle,0deg))!important}
+ .mq-wallet-screen-enter{animation:none}
+}

@@ -3,12 +3,36 @@ import argparse
 import json
 import os
 import pathlib
+import re
 import shlex
 import time
 from datetime import datetime, timezone
 import paramiko
 
 ROOT=pathlib.Path(__file__).resolve().parent.parent
+
+def expiry_reference(trace):
+    if (trace.get('result') != 'PASS' or trace.get('expiration') != 'PASS'
+            or trace.get('scope') != 'FRESH_PHANTOM_MOBILE_UI_REAL_TIME_EXPIRY'
+            or trace.get('ownedConsentCleanup') != [{'status': 'PASS'}]):
+        raise ValueError('SUCCESSFUL_OWNED_EXPIRY_RECEIPT_REQUIRED')
+    owned=trace.get('ownedReceipts', [])
+    status=trace.get('expiryStatusReceipt', {})
+    checks={row.get('test'):row.get('status') for row in trace.get('checks', [])}
+    if (status.get('httpStatus') != 200 or status.get('status') != 'EXPIRED'
+            or not all(status.get(field) is True for field in ['consentMatches','ticketMatches','expiryMatches'])
+            or checks.get('REAL_DEADLINE_QR_REMOVAL_EXACT_SERVER_EXPIRY_AND_REDEMPTION_DENY') != 'PASS'):
+        raise ValueError('BOUND_SERVER_EXPIRY_AND_REDEMPTION_REQUIRED')
+    if len(owned) != 1:
+        raise ValueError('ONE_OWNED_TICKET_REQUIRED')
+    row=owned[0]
+    # makeId concatenates two unpadded Uint32 hex values (2..16 digits).
+    if (not re.fullmatch(r'consent_[a-f0-9]{2,16}', row.get('consentId', ''))
+            or not re.fullmatch(r'ticket_[a-f0-9]{2,16}', row.get('ticketId', ''))
+            or row.get('patientId') != 'HP-TEST-PHANTOM-001'
+            or row.get('sourceHospitalId') != 'HOSP-A' or row.get('targetHospitalId') != 'HOSP-B'):
+        raise ValueError('OWNED_PHANTOM_BINDING_REQUIRED')
+    return {key:row[key] for key in ['consentId','ticketId','patientId']}
 def drain_channel(channel, seconds=30):
     """Drain both SSH streams without exposing stderr or waiting indefinitely."""
     deadline=time.monotonic()+seconds
@@ -38,8 +62,10 @@ def main():
     parser=argparse.ArgumentParser()
     parser.add_argument('receipt', nargs='?')
     parser.add_argument('--negative-snapshot', help='Safe consent/session/jti reference JSON only; never a credential')
+    parser.add_argument('--ticket-expiry', action='store_true')
     args=parser.parse_args()
     if args.negative_snapshot:
+        if args.ticket_expiry: raise SystemExit('ONE_AUDIT_MODE_REQUIRED')
         if args.receipt: raise SystemExit('ONE_AUDIT_MODE_REQUIRED')
         reference={**json.loads(args.negative_snapshot),'snapshotOnly':True}
         receipt=None
@@ -49,9 +75,12 @@ def main():
         if not receipt.is_relative_to(ROOT/'artifacts/workstation') or receipt.name!='result.json' or not receipt.parent.name.startswith('b-browser-'):
             raise SystemExit('OWNED_BROWSER_RECEIPT_REQUIRED')
         trace=json.loads(receipt.read_text(encoding='utf8'))
-        if trace.get('result')!='PASS' or trace.get('phantom',{}).get('result')!='PASS':
+        if args.ticket_expiry:
+            reference=expiry_reference(trace)
+        elif trace.get('result')!='PASS' or trace.get('phantom',{}).get('result')!='PASS':
             raise SystemExit('SUCCESSFUL_PHANTOM_RECEIPT_REQUIRED')
-        reference=trace['phantom']['auditReference']
+        else:
+            reference=trace['phantom']['auditReference']
     client=paramiko.SSHClient()
     try:
         identity=pathlib.Path(os.environ['USERPROFILE'])/'.ssh/highpass-capstone-cloud'
@@ -62,7 +91,7 @@ def main():
         channel=client.get_transport().open_session(timeout=10)
         channel.settimeout(30)
         channel.exec_command(command)
-        program=(ROOT/'scripts/phantom-release-evidence.js').read_bytes()+b'\n'+(ROOT/'scripts/phantom-audit-readonly.js').read_bytes()
+        program=(ROOT/'scripts/ticket-expiry-audit-readonly.js').read_bytes() if args.ticket_expiry else (ROOT/'scripts/phantom-release-evidence.js').read_bytes()+b'\n'+(ROOT/'scripts/phantom-audit-readonly.js').read_bytes()
         channel.sendall(program)
         channel.shutdown_write()
         # Existing bounded drain reads stdout+stderr concurrently, avoids pipe deadlock.

@@ -1,0 +1,162 @@
+/* A paper card extracted from the home wallet; the original wallet remains below. */
+#patient-phr .health-layout.health-extracted-sheet,.mq-mobile-records .health-layout.health-extracted-sheet{display:block!important;max-width:1120px;margin:0 auto!important;border:0!important;background:none!important;box-shadow:none!important;padding:0!important;overflow:visible}
+.health-extracted-sheet .health-expanded-card{position:relative;display:grid;grid-template-columns:minmax(0,1fr);gap:24px;padding:24px 28px;background:linear-gradient(155deg,#edf5ff 0%,#f7faff 40%,#fff 85%);border:1px solid #cbdffb;border-radius:26px;box-shadow:0 14px 28px #22456812,inset 0 1px #fff;isolation:isolate}
+.health-expanded-card:has(.health-detail:not([hidden])){grid-template-columns:minmax(0,1fr) minmax(280px,380px)}
+.health-expanded-card:after{content:'';pointer-events:none;position:absolute;left:30%;right:30%;bottom:-5px;height:12px;border-radius:0 0 50% 50%;background:#fff;border-bottom:1px solid #cbdffb;z-index:-1}
+.health-expanded-card .health-heading{padding:0 190px 0 52px;margin-bottom:8px}
+.health-expanded-card .health-heading .health-wallet-back{margin-left:-52px;display:block;width:max-content}
+.health-expanded-card .health-sheet-symbol{position:absolute;left:0;top:68px;color:#3566b8}
+.health-sheet-symbol svg{width:36px;height:36px}
+#patient-phr .health-expanded-card .health-heading h1,.mq-mobile-records .health-expanded-card .health-heading h1{font-size:32px;line-height:1.3;letter-spacing:-.04em;margin:12px 0 8px}
+.health-expanded-card .health-heading .health-intro{font-size:16px;line-height:1.6}
+.health-expanded-card .health-compare-button{top:64px}
+.health-expanded-card .health-tools{display:flex;flex-wrap:wrap;margin:22px 0 18px;gap:8px}
+.health-expanded-card .health-filter{min-height:44px;padding:9px 17px}
+.health-expanded-card .health-search{margin-left:auto;flex:1;min-width:180px;max-width:350px;min-height:44px;background:#fff;border-radius:11px}
+.health-expanded-card .health-hero.health-hero{margin:0 0 20px;background:none!important;border:0!important;box-shadow:none!important;padding:0!important}
+.health-extracted-sheet.health-wallet-sheet .health-expanded-card .health-hero .health-featured{display:grid;grid-template-columns:132px minmax(0,1fr);padding:18px!important;gap:24px;border-radius:16px;box-shadow:none;background:#fff;border:1px solid #e0e9f5}
+.health-expanded-card .health-featured-frame{grid-column:1;grid-row:1;min-height:112px;max-height:132px;border-radius:10px;align-self:center}
+.health-expanded-card .health-featured-copy{grid-column:2;grid-row:1;min-width:0;padding-right:255px;position:relative}
+.health-expanded-card .health-featured h2{font-size:24px;margin:0 0 6px}
+.health-expanded-card .health-kicker{display:none}
+.health-expanded-card .health-featured-meta{font-size:14px;margin:0}
+.health-expanded-card .health-featured .health-note{font-size:13px;margin:8px 0 0;line-height:1.5}
+.health-expanded-card .health-featured-actions{position:absolute;right:0;top:50%;transform:translateY(-50%);margin:0;gap:10px}
+.health-expanded-card .health-featured-actions .btn{min-height:44px;padding:10px 16px;font-size:14px}
+.health-expanded-card .health-preview-label{font-size:10px;padding:12px 8px}
+.health-expanded-card .health-records-bar{margin:20px 0 12px}
+.health-expanded-card .health-records-bar h2{font-size:19px}
+.health-extracted-sheet.health-wallet-sheet .health-expanded-card .health-recent-grid{gap:14px}
+.health-expanded-card .health-recent-grid .health-record{padding:16px;min-height:110px;border-radius:13px;align-items:center;background:#fff}
+.health-expanded-card .health-recent-grid .health-record-copy small{display:none}
+.health-expanded-card .health-recent-grid .health-record-copy strong{font-size:16px!important}
+.health-expanded-card .health-recent-grid .health-record-copy>span{font-size:12px;display:block;margin-top:5px}
+.health-expanded-card .health-disclaimer{margin:16px 0 0;font-size:11px}
+.health-expanded-card .health-detail{margin:0;max-height:none}
+.health-expanded-card:has(.health-detail:not([hidden])) .health-featured-copy{padding-right:0}
+.health-expanded-card:has(.health-detail:not([hidden])) .health-featured-actions{position:static;transform:none;margin-top:12px}
+.health-expanded-card:has(.health-detail:not([hidden])) .health-recent-grid{grid-template-columns:1fr!important}
+/* Original front-facing leather image, central strap and three remaining menu cards. */
+.health-extracted-sheet .mq-wallet-dock{position:relative;width:min(100%,760px);height:auto;aspect-ratio:1.88;margin:24px auto 0;isolation:isolate;font-family:inherit}
+.mq-wallet-dock .mq-wallet-cards{position:absolute;left:9%;right:8%;top:0;height:54%;display:grid;grid-template-columns:1.28fr 1fr 1fr;gap:8px;overflow:visible;padding:0;align-items:start}
+.mq-wallet-dock .mq-wallet-card{height:100%;min-height:0;padding:22px 12px 62px;border-radius:14px;margin:0;--lift:0px;box-shadow:inset 0 2px #ffffffd9,2px 2px 3px #263b5820,6px 5px 14px #1b325d20}
+.mq-wallet-dock .mq-wallet-card-requests{display:grid;grid-template-columns:27px 1fr;text-align:left;gap:4px 6px;padding:24px 14px 60px;--angle:-4deg}
+.mq-wallet-dock .mq-wallet-card-sharing{--angle:2deg}.mq-wallet-dock .mq-wallet-card-helper{--angle:3deg}
+.mq-wallet-dock .mq-wallet-card strong{font-size:20px;white-space:normal;line-height:1.3}
+.mq-wallet-dock .mq-card-icon{margin:0 auto 10px}.mq-wallet-dock .mq-card-icon svg{width:27px;height:27px}
+.mq-wallet-dock .mq-card-copy{font-size:12px;margin:8px 0 0;line-height:1.5}
+.mq-wallet-dock .mq-card-cta{font-size:12px;min-height:34px;width:110px;padding:8px;margin-top:10px}
+.mq-wallet-dock .mq-wallet-pocket{top:29%;left:0;right:0;z-index:3;pointer-events:none}
+.mq-wallet-dock button:focus-visible{outline:3px solid #3566b8;outline-offset:4px}
+.mq-wallet-screen-enter:has(.health-expanded-card){animation:none}
+.mq-wallet-screen-enter .health-expanded-card{animation:mq-record-card-expand 240ms cubic-bezier(.2,.75,.25,1) both;transform-origin:50% 100%}
+@keyframes mq-record-card-expand{from{opacity:.4;transform:translateY(32px) scale(.96)}to{opacity:1;transform:none}}
+@media(max-width:1100px){
+ .health-expanded-card .health-featured-copy{padding-right:0}.health-expanded-card .health-featured-actions{position:static;transform:none;margin-top:12px}
+ .health-expanded-card:has(.health-detail:not([hidden])){grid-template-columns:1fr}
+}
+@media(max-width:650px){
+ .health-extracted-sheet .health-expanded-card{padding:18px 14px;border-radius:20px;gap:18px}
+ .health-expanded-card .health-heading{padding:0 0 0 38px}
+ .health-expanded-card .health-heading .health-wallet-back{margin-left:-38px}
+ .health-expanded-card .health-sheet-symbol{top:64px}.health-sheet-symbol svg{width:27px;height:27px}
+ #patient-phr .health-expanded-card .health-heading h1,.mq-mobile-records .health-expanded-card .health-heading h1{font-size:25px;line-height:1.35}
+ .health-expanded-card .health-heading .health-intro{font-size:14px;line-height:1.65}
+ .health-expanded-card .health-compare-button{position:static;width:calc(100% + 38px);margin:16px 0 0 -38px;min-height:44px}
+ .health-expanded-card .health-tools{gap:7px;margin:18px 0}.health-expanded-card .health-filter{padding:9px 12px;font-size:13px}
+ .health-expanded-card .health-search{min-width:100%;max-width:none;margin:0;box-sizing:border-box}
+ .health-extracted-sheet.health-wallet-sheet .health-expanded-card .health-hero .health-featured{grid-template-columns:84px minmax(0,1fr);gap:12px;padding:14px!important}
+ .health-expanded-card .health-featured-frame{grid-column:1;grid-row:1;min-height:98px;max-height:128px}
+ .health-expanded-card .health-featured-copy{grid-column:2;grid-row:1;padding:0}
+ .health-expanded-card .health-featured h2{font-size:20px}.health-expanded-card .health-featured-meta{font-size:12px;line-height:1.5}
+ .health-expanded-card .health-featured .health-note{display:none}
+ .health-expanded-card .health-featured-actions{gap:6px;flex-direction:column;margin-top:10px;align-items:stretch}
+ .health-expanded-card .health-featured-actions .btn{min-height:44px;padding:9px 10px;font-size:13px}
+ .health-expanded-card .health-records-bar{gap:6px}.health-expanded-card .health-records-bar h2{font-size:17px}
+ .health-extracted-sheet.health-wallet-sheet .health-expanded-card .health-recent-grid{grid-template-columns:1fr;gap:9px}
+ .health-expanded-card .health-recent-grid .health-record{min-height:84px;padding:14px;gap:12px}
+ .health-extracted-sheet .mq-wallet-dock{aspect-ratio:1.5;margin-top:24px;width:100%}
+ .mq-wallet-dock .mq-wallet-cards{left:6%;right:6%;top:0;height:66%;gap:4px;grid-template-columns:1.18fr 1fr 1fr;scroll-snap-type:none}
+ .mq-wallet-dock .mq-wallet-card{padding:13px 6px 52px;border-radius:10px;flex:none;scroll-snap-align:none;--lift:0px}
+ .mq-wallet-dock .mq-wallet-card-requests{display:block;text-align:center;padding:14px 5px 52px}
+ .mq-wallet-dock .mq-wallet-card strong{font-size:13px;letter-spacing:-.05em}
+ .mq-wallet-dock .mq-card-icon{margin:0 auto 8px}.mq-wallet-dock .mq-card-icon svg{width:22px;height:22px}
+ .mq-wallet-dock .mq-card-copy{display:none}
+ .mq-wallet-dock .mq-card-cta{min-height:30px;width:62px;max-width:95%;font-size:10px;padding:6px;margin:8px auto 0}
+ .mq-wallet-dock .mq-wallet-pocket{top:39%}
+}
+@media(prefers-reduced-motion:reduce){.mq-wallet-screen-enter .health-expanded-card{animation:none}.mq-wallet-dock .mq-wallet-card{transition:none}}
+/* The lavender sharing card uses the same extracted-paper / original-wallet grammar. */
+#patient-portal-app .sharing-page.sharing-extracted-sheet{padding:36px 0 48px;max-width:1120px}
+.sharing-extracted-sheet .sharing-expanded-card{position:relative;padding:28px;background:linear-gradient(145deg,#f4f0ff,#f9f8ff 60%,#f1f3ff);border:1px solid #ddd7fa;border-radius:26px;box-shadow:0 14px 28px #22456812;min-width:0}
+#patient-portal-app .sharing-expanded-card .page-head{margin:12px 0 26px;position:relative;padding-right:290px}
+#patient-portal-app .sharing-expanded-card .page-head h1{font-size:30px;line-height:1.4;letter-spacing:-.04em;display:flex;align-items:center;gap:15px;margin:12px 0 6px}
+.sharing-expanded-card .page-head h1 svg,.sharing-expanded-card .section-title svg{width:32px;height:32px;flex:none;color:#7150ac}
+.sharing-expanded-card .page-head p{font-size:15px;margin:0;color:#60708d}
+.sharing-preparation-steps{position:absolute;right:0;top:0;display:flex;gap:20px;padding:0;list-style:none;counter-reset:step;font-size:12px;color:#62718e}
+.sharing-preparation-steps li{counter-increment:step;text-align:center}.sharing-preparation-steps li:before{content:counter(step);display:block;margin:0 auto 8px;width:28px;line-height:28px;border-radius:50%;border:1px solid #c6bce5;background:#fff}
+.sharing-preparation-steps [aria-current]{color:#69409e;font-weight:650}.sharing-preparation-steps [aria-current]:before{background:#69409e;color:#fff}
+.sharing-extracted-sheet .sharing-open-wallet.sharing-open-wallet{padding:0;border:0;background:none;box-shadow:none;overflow:visible}
+.sharing-extracted-sheet .sharing-open-wallet:before,.sharing-extracted-sheet .sharing-leather-tab,.sharing-extracted-sheet .sharing-new:before,.sharing-extracted-sheet .sharing-summary:before,.sharing-extracted-sheet .sharing-new:after,.sharing-extracted-sheet .sharing-summary:after{display:none!important}
+.sharing-extracted-sheet .sharing-paper{background:none;padding:0;border:0;box-shadow:none;transform:none}
+.sharing-extracted-sheet .sharing-compose{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(280px,1fr);gap:28px}
+.sharing-extracted-sheet .sharing-compose .sharing-new{padding:0;background:none;border:0;box-shadow:none;transform:none}
+.sharing-extracted-sheet .sharing-new>p:first-of-type{color:#60708d;font-size:13px}
+.sharing-extracted-sheet .sharing-draft{gap:14px}.sharing-extracted-sheet label{font-size:13px;color:#52617c;line-height:1.6;min-width:0}
+.sharing-extracted-sheet select,.sharing-extracted-sheet input{box-sizing:border-box;max-width:100%;width:100%;min-height:48px;background:#fff;color:#192638;border:1px solid #dcdff1;border-radius:11px;padding:11px;font:inherit}
+.sharing-extracted-sheet .sharing-conditions{grid-template-columns:repeat(2,minmax(0,1fr));margin-top:22px}
+.sharing-extracted-sheet .sharing-summary.sharing-summary{padding:24px;border:1px solid #fff;background:#ffffff94;border-radius:20px;box-shadow:none;transform:none}
+.sharing-extracted-sheet .sharing-summary h2{color:#56358d;margin-top:0}.sharing-extracted-sheet .sharing-summary-route{font-size:18px;line-height:1.6;color:#334369}
+.sharing-extracted-sheet .sharing-summary dl{background:white;padding:16px;border-radius:14px;display:grid;grid-template-columns:80px minmax(0,1fr);gap:10px;font-size:13px;line-height:1.6}
+.sharing-extracted-sheet .sharing-summary dd{margin:0;overflow-wrap:anywhere}.sharing-extracted-sheet .sharing-summary dt{color:#697994}
+.sharing-extracted-sheet #sharing-prepare{width:100%;min-height:48px;border-radius:11px}.sharing-extracted-sheet .sharing-existing{margin-top:28px;border-top:1px solid #dddff0;padding-top:20px}
+.sharing-extracted-sheet .sharing-pass{box-shadow:none;border-radius:16px;margin-bottom:14px}.sharing-extracted-sheet .sharing-pass-body{padding:20px}.sharing-extracted-sheet .sharing-pass-stub{padding:20px;background:#edf0fa;border-color:#d7ddf0}
+.sharing-extracted-sheet .sharing-pass-stub>svg,.sharing-extracted-sheet .sharing-pass-stub>h3,.sharing-extracted-sheet .sharing-pass-stub>p{display:none}
+.sharing-extracted-sheet .sharing-route{font-size:22px!important;margin-bottom:14px}.sharing-extracted-sheet .sharing-note{font-size:11px}
+.sharing-extracted-sheet .sharing-existing.sharing-existing{padding:20px 0 0;background:none;border:0;border-top:1px solid #dddff0;box-shadow:none}
+.sharing-extracted-sheet .sharing-existing .sharing-pass{grid-template-columns:minmax(0,1fr) 180px}
+.sharing-extracted-sheet .sharing-existing .sharing-status{margin-bottom:8px;font-size:12px}.sharing-extracted-sheet .sharing-existing .sharing-route{font-size:18px!important;margin-bottom:12px}
+.sharing-extracted-sheet .sharing-existing .sharing-exam{grid-template-columns:28px 1fr;margin-bottom:8px;gap:3px 10px}.sharing-extracted-sheet .sharing-existing .sharing-exam svg{width:24px;height:24px}.sharing-extracted-sheet .sharing-existing .sharing-exam h3{font-size:17px}.sharing-extracted-sheet .sharing-existing .sharing-exam p{font-size:12px}
+.sharing-extracted-sheet .sharing-existing .sharing-meta{padding-top:10px}.sharing-extracted-sheet .sharing-existing .sharing-pass-body>p.sharing-note{margin-top:10px}
+.sharing-extracted-sheet .mq-wallet-dock{position:relative;width:min(100%,760px);height:auto;aspect-ratio:1.88;margin:24px auto 0;isolation:isolate}
+.mq-wallet-dock .mq-wallet-card-records{--angle:2deg}
+.mq-wallet-screen-enter:has(.sharing-expanded-card){animation:none}.mq-wallet-screen-enter .sharing-expanded-card{animation:mq-record-card-expand 240ms cubic-bezier(.2,.75,.25,1) both;transform-origin:50% 100%}
+#tab-share.sharing-extracted-sheet .sharing-expanded-card{padding:20px 14px}
+#tab-share.sharing-extracted-sheet .section-title{font-size:23px;line-height:1.4;display:flex;align-items:center;gap:10px}
+#tab-share.sharing-extracted-sheet .section-sub{font-size:14px;line-height:1.6;color:#60708d}
+#tab-share.sharing-extracted-sheet #share-wizard-wrap{background:none;border:0;box-shadow:none;padding:0}
+#tab-share.sharing-extracted-sheet .wizard-step-pane{background:#ffffffb8;border:1px solid #e0dcf4;border-radius:16px;padding:18px!important;min-height:0!important;box-shadow:none;transform:none}
+#tab-share.sharing-extracted-sheet .wizard-step-pane:after{display:none}
+#tab-share.sharing-extracted-sheet .step-dot{color:#62718e}#tab-share.sharing-extracted-sheet .step-dot.active{color:#69409e;background:#eee6ff}
+#tab-share.sharing-extracted-sheet .share-tab-switch{margin:20px 0}#tab-share.sharing-extracted-sheet .subtab-btn{min-height:44px}
+#tab-share.sharing-extracted-sheet .wizard-box-title{color:#293653;font-size:20px}#tab-share.sharing-extracted-sheet .wizard-box-desc{color:#62718e;line-height:1.6}
+@media(max-width:850px){.sharing-extracted-sheet .sharing-compose{grid-template-columns:1fr}#patient-portal-app .sharing-expanded-card .page-head{padding-right:0}.sharing-preparation-steps{position:static;justify-content:flex-start;margin:20px 0 0}}
+@media(max-width:650px){#patient-portal-app .sharing-page.sharing-extracted-sheet{padding:20px 0 36px}.sharing-extracted-sheet .sharing-expanded-card{padding:18px 14px;border-radius:20px}#patient-portal-app .sharing-expanded-card .page-head h1{font-size:25px}.sharing-extracted-sheet .sharing-draft{grid-template-columns:1fr}.sharing-extracted-sheet .sharing-conditions{grid-template-columns:1fr}.sharing-extracted-sheet .sharing-pass,.sharing-extracted-sheet .sharing-existing .sharing-pass{grid-template-columns:1fr}.sharing-extracted-sheet .mq-wallet-dock{aspect-ratio:1.5;width:100%}.sharing-extracted-sheet .sharing-summary.sharing-summary{padding:18px}}
+@media(prefers-reduced-motion:reduce){.mq-wallet-screen-enter .sharing-expanded-card{animation:none}}
+/* Mint extracted helper card; evidence and patient permissions remain unchanged. */
+#patient-health-helper.helper-extracted-sheet{max-width:1120px;margin:auto;padding:32px 0 48px;--helper-ink:#192638;--helper-muted:#526780}
+.helper-extracted-sheet .helper-expanded-card{padding:28px;border:1px solid #cfe5df;border-radius:26px;background:linear-gradient(145deg,#edf8f3,#f6faf8);box-shadow:0 14px 28px #22456812}
+.helper-extracted-sheet .helper-heading{margin:16px 0 24px}.helper-extracted-sheet .helper-heading h1{display:flex;align-items:center;gap:12px;font-size:32px;letter-spacing:-.04em;color:#192638}.helper-heading h1 svg{width:32px;height:32px;flex:none;color:#277461}
+.helper-extracted-sheet .helper-eyebrow{display:none}.helper-extracted-sheet .helper-context{background:#ffffff9c;border:1px solid #dbe9e4;border-radius:14px;padding:16px;margin-bottom:20px}
+.helper-extracted-sheet .helper-grid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(280px,1fr);gap:24px;align-items:start}
+.helper-extracted-sheet .helper-workspace{min-width:0}.helper-extracted-sheet .helper-conversation{background:#fff;border:1px solid #dbe7e3;border-radius:20px;padding:24px;min-width:0;box-shadow:none}
+.helper-extracted-sheet .helper-comparison-drawer{margin-bottom:14px;background:#ffffffb0;border:1px solid #dbe7e3;border-radius:14px;padding:14px}.helper-comparison-drawer>summary{cursor:pointer;color:#334b67;font-weight:600;min-height:32px}.helper-comparison-drawer .helper-comparison{margin-top:14px}
+.helper-extracted-sheet .helper-pocket{background:#e5edf6;border:1px solid #c7d5e7;border-radius:20px;padding:22px;color:#192638;box-shadow:inset 0 1px 0 #fff}
+.helper-extracted-sheet .helper-pocket h2{color:#192638;font-size:21px;letter-spacing:-.03em}.helper-extracted-sheet .helper-pocket-subtitle{color:#526780;font-size:13px;line-height:1.65}
+.helper-extracted-sheet .helper-card,.helper-extracted-sheet .helper-card--saved,.helper-extracted-sheet .helper-card--suggested{background:#fff;border:1px solid #c7d5e7;border-radius:14px;color:#192638;box-shadow:0 5px 10px #2445680b}
+.helper-extracted-sheet .helper-card textarea{background:#fff;color:#192638}.helper-extracted-sheet .helper-card button{color:#334e73;min-height:44px}.helper-extracted-sheet .helper-card p{color:#192638}
+.helper-extracted-sheet .helper-add-form input,.helper-extracted-sheet select{min-height:48px;box-sizing:border-box;max-width:100%}.helper-extracted-sheet .helper-add-form button{min-height:48px}.helper-extracted-sheet .helper-introduction{background:#f3f8f6;border-radius:14px}
+.helper-extracted-sheet .mq-wallet-dock{position:relative;width:min(100%,760px);height:auto;aspect-ratio:1.88;margin:28px auto 0;isolation:isolate}
+.helper-mobile-notes>summary{padding:16px;background:#e5edf6;color:#192638;border:1px solid #c7d5e7;border-radius:14px;font-weight:600;cursor:pointer;min-height:48px;box-sizing:border-box}
+#tab-helper:has(.helper-extracted-sheet)>.wallet-helper-back{display:none}
+#patient-health-helper.helper-extracted-sheet .helper-grid{grid-template-columns:minmax(0,1.7fr) minmax(280px,1fr);gap:24px}
+#patient-health-helper.helper-extracted-sheet .helper-pocket{background:#e5edf6;border:1px solid #c7d5e7;box-shadow:inset 0 1px 0 #fff;padding:22px;border-radius:20px;color:#192638}
+#patient-health-helper.helper-extracted-sheet .helper-card{background:#fff;border:1px solid #c7d5e7;color:#192638}
+#patient-health-helper.helper-extracted-sheet .helper-pocket h2{font-size:21px;color:#192638}
+#patient-health-helper.helper-extracted-sheet .helper-heading h1{font-size:32px;color:#192638}
+#patient-health-helper.helper-extracted-sheet .helper-context{background:#ffffff9c;border:1px solid #dbe9e4;padding:16px}
+#patient-health-helper.helper-extracted-sheet .helper-conversation{background:#fff;border:1px solid #dbe7e3;padding:24px;border-radius:20px}
+@media(max-width:850px){.helper-extracted-sheet .helper-grid{grid-template-columns:1fr}}
+@media(max-width:650px){#patient-health-helper.helper-extracted-sheet{padding:12px 0 28px}.helper-extracted-sheet .helper-expanded-card{padding:18px 14px;border-radius:20px}.helper-extracted-sheet .helper-heading h1{font-size:26px}.helper-extracted-sheet .helper-conversation{padding:18px 14px}.helper-extracted-sheet .helper-pocket{padding:18px 14px}.helper-extracted-sheet .mq-wallet-dock{aspect-ratio:1.5;width:100%}.helper-extracted-sheet .helper-add-form{flex-wrap:wrap}.helper-extracted-sheet .helper-add-form input{min-width:0;width:100%}}
+@media(max-width:850px){#patient-health-helper.helper-extracted-sheet .helper-grid{grid-template-columns:1fr}}
+@media(max-width:650px){#patient-health-helper.helper-extracted-sheet .helper-heading h1{font-size:26px}#patient-health-helper.helper-extracted-sheet .helper-conversation,#patient-health-helper.helper-extracted-sheet .helper-pocket{padding:18px 14px}}

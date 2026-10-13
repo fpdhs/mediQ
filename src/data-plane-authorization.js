@@ -14,7 +14,7 @@ export function isLegacyImageOperation(pathname) {
 export function parseDataPlaneRequest(input, publicBaseUrl) {
   const base = new URL(publicBaseUrl);
   if (base.protocol !== "https:" || base.username || base.password || base.pathname !== "/" || base.search || base.hash) throw new Error("DATA_PLANE_HTTPS_ORIGIN_REQUIRED");
-  if (!input || input.method !== "GET" || typeof input.path !== "string" || input.path.length > 1024 || /[%\\#]/u.test(input.path)) throw new Error("DATA_PLANE_ROUTE_INVALID");
+  if (!input || !["GET", "POST"].includes(input.method) || typeof input.path !== "string" || input.path.length > 1024 || /[%\\#]/u.test(input.path)) throw new Error("DATA_PLANE_ROUTE_INVALID");
   const url = new URL(input.path, base);
   if (!input.path.startsWith("/dicomweb/") || url.origin !== base.origin) throw new Error("DATA_PLANE_ROUTE_INVALID");
   const uid = "([0-9]+(?:\\.[0-9]+)+)";
@@ -22,18 +22,20 @@ export function parseDataPlaneRequest(input, publicBaseUrl) {
     [new RegExp(`^/dicomweb/studies$`), "studies"],
     [new RegExp(`^/dicomweb/studies/${uid}/series$`), "series"],
     [new RegExp(`^/dicomweb/studies/${uid}/series/${uid}/instances$`), "instances"],
-    [new RegExp(`^/dicomweb/studies/${uid}/series/${uid}/instances/${uid}(?:/(metadata|rendered|download))?$`), "instance"],
+    [new RegExp(`^/dicomweb/studies/${uid}/series/${uid}/instances/${uid}(?:/(metadata|rendered|download|import))?$`), "instance"],
     [new RegExp(`^/dicomweb/studies/${uid}/series/${uid}/instances/${uid}/frames/([1-9][0-9]{0,5})$`), "frame"],
   ];
   for (const [pattern, kind] of routes) {
     const match = url.pathname.match(pattern);
     if (!match) continue;
+    const importing = kind === "instance" && match[4] === "import";
+    if (importing !== (input.method === "POST")) throw new Error("DATA_PLANE_ROUTE_INVALID");
     if (match.slice(1, 4).some(value => value && value.length > 64)) throw new Error("DATA_PLANE_UID_INVALID");
     const queries = [...url.searchParams];
     if (queries.length && (kind !== "studies" || queries.length !== 1 || queries[0][0] !== "StudyInstanceUID" || !new RegExp(`^${uid}$`).test(queries[0][1]) || queries[0][1].length > 64)) throw new Error("DATA_PLANE_QUERY_INVALID");
     return { kind, studyInstanceUid: match[1] ?? url.searchParams.get("StudyInstanceUID") ?? null,
       seriesInstanceUid: match[2] ?? null, sopInstanceUid: match[3] ?? null,
-      requestedAction: match[4] === "download" ? "DOWNLOAD" : "VIEW", externalUrl: url.href };
+      requestedAction: importing || match[4] === "download" ? "DOWNLOAD" : "VIEW", importing, externalUrl: url.href };
   }
   throw new Error("DATA_PLANE_ROUTE_INVALID");
 }
@@ -51,6 +53,8 @@ export async function authorizeDataPlane(service, input, configuration) {
   try {
     if (!configuration.sourceHospitalId || !configuration.publicBaseUrl) throw new Error("DATA_PLANE_NOT_CONFIGURED");
     route = parseDataPlaneRequest(input, configuration.publicBaseUrl);
+    if (route.importing && configuration.pacsImportEnabled !== true) return denied(403, "PACS_IMPORT_DISABLED");
+    if (route.importing && input.authorizationScheme !== 'DPoP') return denied(403, 'PACS_IMPORT_PROOF_REQUIRED');
     if (!isIP(input.clientIp) || !["DPoP", "Bearer"].includes(input.authorizationScheme) || typeof input.token !== "string" || input.token.length > 16384 || (input.dpopProof && (typeof input.dpopProof !== "string" || input.dpopProof.length > 16384))) throw new Error("DATA_PLANE_CONTEXT_INVALID");
   } catch {
     return denied(400, "DATA_PLANE_REQUEST_INVALID");
@@ -84,7 +88,7 @@ export async function authorizeDataPlane(service, input, configuration) {
     targetHospitalId: claims.targetHospitalId, studyInstanceUid: claims.studyInstanceUid,
     allowedSeriesUids, permission: consent.permission === "VIEW_ONLY" ? "VIEW_ONLY" : claims.permission,
     expiresAt: claims.expiresAt, auditSessionId: claims.auditSessionId };
-  const grant = { ...scope, receiptId: randomUUID(), path: input.path, clientIp: input.clientIp,
+  const grant = { ...scope, receiptId: randomUUID(), path: input.path, method: input.method, clientIp: input.clientIp,
     purpose: claims.purpose, deadline: Math.min(Date.parse(claims.expiresAt), Date.parse(service.clock()) + 30000) };
   const encoded = Buffer.from(JSON.stringify(grant)).toString("base64url");
   const mac = createHmac("sha256", service.tokenSecret).update("data-plane-receipt-v1:" + encoded).digest("base64url");
@@ -110,7 +114,8 @@ export async function revalidateDataPlaneReceipt(service, receipt, configuration
     if (parts[1].length !== expected.length || !timingSafeEqual(Buffer.from(parts[1]), Buffer.from(expected))) throw new Error("INVALID_REPORT");
     grant = JSON.parse(Buffer.from(parts[0], "base64url").toString("utf8"));
     if (!Number.isSafeInteger(grant.deadline) || now >= grant.deadline || grant.deadline > now + 30000 || grant.sourceHospitalId !== configuration.sourceHospitalId || !Array.isArray(grant.allowedSeriesUids)) throw new Error("INVALID_REPORT");
-    route = parseDataPlaneRequest({ method: "GET", path: grant.path }, configuration.publicBaseUrl);
+    route = parseDataPlaneRequest({ method: grant.method ?? "GET", path: grant.path }, configuration.publicBaseUrl);
+    if (route.importing && configuration.pacsImportEnabled !== true) throw new Error("PACS_IMPORT_DISABLED");
   } catch { return denied("DATA_PLANE_RECEIPT_INVALID"); }
   const token = service.store.get("dicomAccessTokenLogs").find(item => item.tokenId === grant.tokenId);
   const hospitals = service.store.get("hospitals");

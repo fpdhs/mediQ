@@ -124,6 +124,7 @@ test("FIX-004: source error cannot become a synthetic successful archive", async
   try {
     await assert.rejects(importStudyToHospitalBPacs({
       studyInstanceUid: "1.2.3", kek: randomBytes(32), baseDestDir: dir,
+      consent: {consentId:'source-test',status:'ACTIVE',permission:'DOWNLOAD_ALLOWED',validFrom:'2020-01-01',validUntil:'2099-01-01'},
       studyData: { series: [{ seriesInstanceUid: "1.2.3.1", instances: [{ sopInstanceUid: "1.2.3.1.1" }] }] },
       orthancClient: { wadoInstance: async () => { throw new Error("SOURCE_DOWN"); } },
       allowSynthetic: true,

@@ -10,6 +10,13 @@ test('presentation overlay packages the current patient, clinician, viewer and m
   const required = [
     'public/index.html', 'public/app.js', 'public/capstone-auth.js',
     'public/ui/patient.js', 'public/ui/patient-home-premium.css',
+    'public/ui/patient-visit-pass.css',
+    'public/ui/patient-share-review.css', 'public/ui/patient-share-review.js',
+    'public/ui/patient-library.css', 'public/ui/patient-library.js',
+    'public/ui/patient-sharing.css', 'public/ui/patient-sharing.js',
+    'public/ui/patient-history.css', 'public/ui/patient-history.js',
+    'public/ui/patient-health.css', 'public/ui/patient-health.js',
+    'public/images/mediq-synthetic-liver-ultrasound-v1.png',
     'public/ui/clinician.js', 'public/ui/clinician-desk.css',
     'public/ui/viewer-studio.js', 'public/ui/viewer-studio.css',
     'public/mobile/index.html', 'public/mobile/app.js', 'public/mobile/sw.js',

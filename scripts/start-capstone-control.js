@@ -23,4 +23,16 @@ if (process.env.HIPASS_CAPSTONE_MOCK_IDP === "1") {
 }
 if (process.env.HIPASS_CONTROL_PLANE_ONLY !== "1" || process.env.HIPASS_DPOP_REQUIRED !== "1" || process.env.HIPASS_STORE !== "postgres" || process.env.NODE_ENV !== "production" || process.env.AUTH_MODE !== "TEST") throw new Error("Capstone cloud boundary configuration required");
 loadCapstonePatientRuntimeSecrets(process.env);
+if (process.env.HIPASS_CAPSTONE_HCC_CATALOG === '1') {
+  const filename = process.env.HIPASS_HCC_SOURCE_GATEWAY_TOKEN_FILE;
+  if (!filename) throw new Error('HIPASS_HCC_SOURCE_GATEWAY_TOKEN_FILE required');
+  const token = readFileSync(filename, 'utf8').trim();
+  if (token.length < 32 || token.length > 256 || /[\r\n\0]/.test(token)
+    || ['POSTGRES_PASSWORD', 'DICOM_TOKEN_SECRET', 'TEST_JWT_SECRET', 'HIPASS_INGRESS_SECRET',
+      'HIPASS_DATA_PLANE_SERVICE_TOKEN', 'HIPASS_KEY_RELEASE_SERVICE_TOKEN', 'HIPASS_PATIENT_SELF_VIEW_SERVICE_TOKEN',
+      'HIPASS_PATIENT_KEY_RELEASE_SERVICE_TOKEN', 'HIPASS_CAPSTONE_LOGIN_KEY'].some(name => process.env[name] === token)) {
+    throw new Error('Distinct HCC source credential required');
+  }
+  process.env.HIPASS_HCC_SOURCE_GATEWAY_TOKEN = token;
+}
 await import("./start-postgres.js");

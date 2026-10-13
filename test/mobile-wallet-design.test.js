@@ -19,6 +19,7 @@ test('wallet hero uses authenticated context and actual study metadata, with saf
   for(const hasStudy of [false,true]){
     const nodes=new Map();const node=id=>{if(!nodes.has(id))nodes.set(id,{});return nodes.get(id);};
     const context=vm.createContext({capstoneAuth:{context:{patientName:'합성 시험 환자',defaultStudyUid:'1.2.3'}},state:{patientName:'합성 시험 환자',studies:hasStudy?[{studyInstanceUid:'1.2.3',description:'서버 제공 CT',studyDate:'2026-10-01',sourceHospitalId:'HOSP-A',modality:'CT'}]:[],consents:[]},document:{getElementById:node,querySelector:selector=>node(selector.slice(1))},renderHomeRecentList(){}});
+    context.walletHome=null;
     vm.runInContext(code+';renderHomeScreen();',context);
     assert.equal(node('wallet-patient-name').textContent,'합성 시험 환자님,');
     assert.equal(node('btn-home-quick-share').disabled,!hasStudy);
@@ -29,7 +30,7 @@ test('wallet hero uses authenticated context and actual study metadata, with saf
 test('four-tab navigation preserves secondary records/vault and existing consent/QR control IDs',()=>{
  const html=readFileSync('public/mobile/index.html','utf8');
  const nav=html.slice(html.indexOf('<nav class="mobile-nav"'));
- assert.deepEqual([...nav.matchAll(/data-tab="([^"]+)"/g)].map(m=>m[1]),['home','studies','share','profile']);
+ assert.deepEqual([...nav.matchAll(/data-tab="([^"]+)"/g)].map(m=>m[1]),['home','records','share','helper']);
  for(const id of ['btn-wizard-confirm-submit','qr-box-wrap','qr-countdown-text','btn-revoke-qr','tab-records','tab-vault','tab-profile'])assert.equal([...html.matchAll(new RegExp(`id="${id}"`,'g'))].length,1,id);
  assert.ok(html.includes('data-tab="records"'));assert.ok(html.includes('data-tab="vault"'));
 });

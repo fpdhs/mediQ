@@ -1,0 +1,48 @@
+# Candidate only. Do NOT run before host encrypted-mount verification, dedicated
+# B mTLS issuance, pinned image scan and A/B/Control contract alignment.
+# No raw PACS ports; no Control/cloud volume; no overwrite/automatic cleanup.
+services:
+  b-orthanc:
+    image: ${HIPASS_B_ORTHANC_IMAGE:?pinned reviewed Orthanc image required}
+    command: /etc/orthanc
+    volumes:
+      - ./orthanc/hospital-b-receiver.json:/etc/orthanc/orthanc.json:ro
+      - type: bind
+        source: ${HIPASS_B_PACS_ENCRYPTED_MOUNT:?verified B-local encrypted filesystem required}
+        target: /var/lib/orthanc/db
+        bind:
+          create_host_path: false
+    networks: [b_pacs_private]
+    restart: unless-stopped
+    healthcheck:
+      test: [CMD, /usr/local/bin/busybox, wget, -T, '3', -q, -O, /dev/null, 'http://127.0.0.1:8042/system']
+      interval: 10s
+      timeout: 5s
+      retries: 12
+  b-pacs-mtls:
+    image: ${HIPASS_B_RECEIVER_IMAGE:?pinned reviewed receiver image required}
+    command: [scripts/start-b-pacs-mtls.js]
+    environment:
+      B_PACS_TLS_CERT_FILE: /run/secrets/b-pacs-server.crt
+      B_PACS_TLS_KEY_FILE: /run/secrets/b-pacs-server.key
+      B_PACS_TLS_CA_FILE: /run/secrets/ca.crt
+    volumes:
+      - ${HIPASS_B_PACS_SECRETS_DIR:?B root-protected secrets required}/b-pacs-server.crt:/run/secrets/b-pacs-server.crt:ro
+      - ${HIPASS_B_PACS_SECRETS_DIR}/b-pacs-server.key:/run/secrets/b-pacs-server.key:ro
+      - ${HIPASS_B_PACS_SECRETS_DIR}/ca.crt:/run/secrets/ca.crt:ro
+      - type: bind
+        source: ${HIPASS_B_PACS_ENCRYPTED_MOUNT:?verified B-local encrypted filesystem required}
+        target: /run/pacs-storage-check
+        read_only: true
+        bind:
+          create_host_path: false
+    networks: [b_pacs_private, b_pacs_receiver]
+    depends_on:
+      b-orthanc: {condition: service_healthy}
+    restart: unless-stopped
+networks:
+  b_pacs_private:
+    internal: true
+  b_pacs_receiver:
+    internal: true
+    name: highpass_b_pacs_receiver

@@ -1,17 +1,32 @@
+import { mountDemoEntry } from './ui/demo-entry.js';
+import { signInWithEntra, validateEntraBrowserConfig } from './entra-auth.js';
 // Presenter key and actor JWTs remain in memory. No URL/localStorage/sessionStorage.
+export function requireCapstoneScenario(status, config) {
+  if (status === 401 || status === 403) throw new Error('LOGIN_PREFLIGHT_DENIED');
+  if (status === 404) throw new Error('LOGIN_RUNTIME_NOT_READY');
+  if (status !== 200 || !config || typeof config.mainScenario !== 'boolean' || config.synthetic !== true) {
+    throw new Error('SCENARIO_UNAVAILABLE');
+  }
+  return config;
+}
+
 export async function initializeCapstoneAuth() {
   if (document.documentElement.dataset.capstone !== "1") return null;
   const form = document.createElement("form");
   form.id = "capstone-login";
   const style = document.createElement('link'); style.rel = 'stylesheet'; style.href = '/ui/capstone-login.css'; document.head.append(style);
-  form.innerHTML = `<div class="mediq-login-shell"><section class="mediq-login-story">
+  form.innerHTML = `<div class="mediq-login-shell"><section class="mediq-wallet-story" aria-label="내 의료영상 지갑">
+    <a class="mediq-wallet-wordmark" href="/hipass/" aria-label="Medi Q 홈">Medi <span>Q</span></a>
+    <div class="mediq-wallet-copy"><h1>내 영상은,<br>내가 챙길게요.</h1><p>다음 진료를 위한 첫 걸음.</p></div>
+    <p class="mediq-wallet-caption">홍길동 · 56세의 가상 시연</p>
+  </section><section class="mediq-login-story">
     <a class="mediq-login-brand" href="/hipass/" aria-label="Medi Q 홈"><span class="mediq-login-logo" role="img" aria-label="Medi Q"></span></a>
     <span class="mediq-login-tag">합성 환자 시연</span><h1>내 영상을 가지고,<br>다음 진료로.</h1>
     <p class="mediq-login-intro">다시 찍기 전에, 내가 찍은 CT를 안전하게 연결하세요.</p>
     <div class="mediq-login-patient"><span class="mediq-login-avatar" aria-hidden="true">Q</span><div><strong>내 의료영상</strong><p>내가 확인하고, 내가 승인하는 공유</p></div><span class="mediq-login-exam">Medi Q</span></div>
     <div class="mediq-login-journey"><div><span>검사한 병원</span><strong>A대학병원</strong></div><span aria-hidden="true">→</span><div><span>다음 진료</span><strong>B대학병원</strong></div></div>
     <p class="mediq-login-note">합성 데이터만 사용하는 캡스톤 시연입니다. 실제 본인확인·병원 인증 서비스가 아닙니다.</p>
-  </section><section class="mediq-login-entry" aria-labelledby="mediq-login-title"><h2 id="mediq-login-title">다시 만나 반가워요.</h2><p>로그인하고 다음 진료를 준비하세요.</p>
+  </section><section class="mediq-login-entry" aria-labelledby="mediq-login-title"><span class="mediq-wallet-label">환자 로그인</span><h2 id="mediq-login-title">다음 진료를 준비해요.</h2><p>로그인하고 내 영상과 공유 요청을 확인하세요.</p>
     <div id="mediq-account-fields"><label for="capstone-login-username">아이디</label><input id="capstone-login-username" name="username" autocomplete="username" maxlength="32" required placeholder="아이디를 입력하세요" autocapitalize="none" spellcheck="false">
     <label for="capstone-login-password">비밀번호</label><input id="capstone-login-password" name="password" type="password" autocomplete="current-password" maxlength="128" required placeholder="비밀번호를 입력하세요"></div>
     <label class="mediq-presenter-toggle"><input id="mediq-presenter-mode" type="checkbox"> 발표자·의료진 시연 접근 키 사용</label>
@@ -62,6 +77,11 @@ export async function initializeCapstoneAuth() {
   form.querySelector('#mediq-signup-close').addEventListener('click', () => signup.close());
   function applyMode() {
     const presenter = presenterMode.checked;
+    form.classList.toggle('mediq-wallet-login', !presenter);
+    form.querySelector('#capstone-login-error').textContent = '';
+    form.querySelector('#capstone-login-help').textContent = presenter
+      ? '발표자에게 받은 시연 접근 키로 로그인합니다.'
+      : '환자 시연 계정으로 로그인합니다.';
     form.querySelector('#mediq-account-fields').hidden = presenter;
     form.querySelector('#mediq-presenter-fields').hidden = !presenter;
     username.disabled = password.disabled = presenter;
@@ -86,19 +106,111 @@ export async function initializeCapstoneAuth() {
   for (const button of form.querySelectorAll('[data-entry-role]')) button.addEventListener('click', () => setRole(button.dataset.entryRole));
   setRole(entryRole);
   applyMode();
+  const landing = mountDemoEntry(form, role => {
+    entryRole = role;
+    presenterMode.checked = role === 'DOCTOR';
+    applyMode();
+    form.querySelector('#mediq-login-title').textContent = role === 'DOCTOR' ? 'B대학병원 의료진 로그인' : '다음 진료를 준비해요.';
+    (presenterMode.checked ? key : username).focus();
+  });
+  form.querySelectorAll('.mediq-social button').forEach((button, index) => {
+    button.textContent = ['Google', '네이버', '카카오'][index];
+    button.setAttribute('aria-label', `${button.textContent} 로그인 · 연동 준비 중`);
+  });
+  const authConfigError = document.createElement('p');
+  authConfigError.setAttribute('role', 'alert');
+  authConfigError.className = 'mediq-login-help';
+  authConfigError.hidden = true;
+  form.querySelector('.mediq-entry-copy').append(authConfigError);
+  let entraConfigResponse;
+  try {
+    entraConfigResponse = await fetch('/api/capstone-demo/auth-config', { cache: 'no-store', signal: AbortSignal.timeout(10000) });
+  } catch {
+    authConfigError.hidden = false;
+    authConfigError.textContent = '인증 설정을 확인하지 못했습니다. 연결을 확인하고 새로고침해 주세요.';
+    submit.disabled = true;
+    return await new Promise(() => {});
+  }
+  if (entraConfigResponse.status !== 404) {
+    let entraConfig;
+    try {
+      if (!entraConfigResponse.ok) throw new Error('ENTRA_CONFIG_UNAVAILABLE');
+      entraConfig = validateEntraBrowserConfig(await entraConfigResponse.json(), location.origin);
+    } catch {
+      authConfigError.hidden = false;
+      authConfigError.textContent = '안전한 로그인 설정을 확인하지 못했습니다. 발표자에게 배포 설정을 확인해 달라고 요청해 주세요.';
+      submit.disabled = true;
+      return await new Promise(() => {});
+    }
+
+    form.querySelector('#mediq-account-fields').hidden = true;
+    username.disabled = password.disabled = true;
+    username.required = password.required = false;
+    presenterMode.disabled = true;
+    presenterMode.closest('label').hidden = true;
+    form.querySelector('#mediq-presenter-fields').hidden = true;
+    form.querySelector('#mediq-signup-open').hidden = true;
+    form.querySelector('.mediq-social').hidden = true;
+    form.querySelector('.mediq-entry-caption').textContent = '허용된 합성 시연 계정만 접근할 수 있습니다. 역할은 서버의 합성 사용자 매핑으로 결정됩니다.';
+    form.querySelector('.mediq-entry-actions').replaceChildren();
+    const entraButton = document.createElement('button');
+    entraButton.type = 'submit';
+    entraButton.textContent = 'Microsoft Entra로 계속';
+    form.querySelector('.mediq-entry-actions').append(entraButton);
+    const entraError = authConfigError;
+    entraError.hidden = false;
+    form.querySelector('#mediq-login-title').textContent = '합성 시연 계정으로 로그인해요.';
+    submit.textContent = 'Microsoft Entra로 계속';
+    const entraSession = await new Promise(resolve => {
+      form.addEventListener('submit', async event => {
+        event.preventDefault();
+        entraError.textContent = '';
+        entraButton.disabled = true;
+        submit.disabled = true;
+        try {
+          const msalModule = await import('/vendor/msal-browser.js');
+          const session = await signInWithEntra({ config: entraConfig, msalModule, appOrigin: location.origin });
+          for (const [node, wasInert] of inactive) if (node.isConnected) node.inert = wasInert;
+          document.documentElement.style.overflow = previousOverflow;
+          form.remove();
+          const badge = document.createElement('div');
+          badge.textContent = 'CAPSTONE · 합성 데이터 · Entra ID · 비운영 환경';
+          badge.style.cssText = 'position:relative;background:#eff6ff;color:#1e40af;padding:8px 16px;font-size:12px;line-height:1.5;text-align:center';
+          document.body.prepend(badge);
+          resolve(session);
+        } catch (error) {
+          entraError.textContent = error?.code === 'CAPSTONE_SESSION_EXPIRED'
+            ? '인증이 만료되었습니다. 다시 로그인해 주세요.'
+            : '로그인할 수 없습니다. 허용된 합성 시연 계정과 연결 상태를 확인해 주세요.';
+        } finally {
+          if (form.isConnected) {
+            entraButton.disabled = false;
+            submit.disabled = false;
+          }
+        }
+      });
+    });
+    return entraSession;
+  }
   try {
     const response = await fetch('/api/capstone-demo/scenario', { cache: 'no-store', signal: AbortSignal.timeout(10000) });
-    const config = response.ok ? await response.json() : response.status === 404 ? { mainScenario: false } : null;
-    if (!config) throw new Error('SCENARIO_UNAVAILABLE');
+    const config = requireCapstoneScenario(response.status, response.ok ? await response.json() : null);
     if (!config.mainScenario) {
       select.replaceChildren(new Option('기존 합성 환자', 'DEFAULT'), new Option('CT·MR 팬텀 환자', 'PHANTOM'), new Option('홍길동 · 56세 · 복부 CT', 'HCC_SYNTHETIC'));
+      select.value = 'HCC_SYNTHETIC';
       form.querySelector('#capstone-legacy-profiles').hidden = false;
       setRole(entryRole);
     }
     select.addEventListener('change', () => setRole(entryRole));
-    submit.disabled = false; (presenterMode.checked ? key : username).focus();
-  } catch {
-    form.querySelector('#capstone-login-error').textContent = '시연 서버에 연결하지 못했습니다. 연결을 확인하고 새로고침해 주세요.';
+    submit.disabled = false;
+    if (!landing.isOpen()) (presenterMode.checked ? key : username).focus();
+  } catch (error) {
+    submit.disabled = true;
+    form.querySelector('#capstone-login-error').textContent = error.message === 'LOGIN_PREFLIGHT_DENIED'
+      ? '로그인 사전확인이 거부되었습니다. 발표자에게 서버 버전과 인증 연결 설정을 확인해 달라고 요청해 주세요.'
+      : error.message === 'LOGIN_RUNTIME_NOT_READY'
+        ? '이 서버에는 시연 로그인이 준비되지 않았습니다. 발표자에게 인증 서버 설정을 확인해 달라고 요청해 주세요.'
+        : '시연 서버에 연결하지 못했습니다. 연결을 확인하고 새로고침해 주세요.';
   }
   const profiles = await new Promise(resolve => {
     form.addEventListener("submit", async event => {

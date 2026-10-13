@@ -1,5 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
 import { parseDataPlaneRequest, revalidateDataPlaneReceipt } from "./data-plane-authorization.js";
+import { HCC_SOURCE_CONTRACT } from './hcc-source-contract.js';
 
 const fields = ["packageId", "keyId", "wrappedKeyHash", "ciphertextHash", "manifestHash", "recipientHospitalId"];
 const digest = value => createHash("sha256").update(value).digest("hex");
@@ -65,6 +66,39 @@ export class ConsentBoundKeyRelease {
   async authorize(input) {
     try { return await this.#authorize(input); }
     catch (error) { await this.#deny(input?.releaseId); throw error; }
+  }
+
+  // B's authenticated report is evidence from B, not an independent Control
+  // pixel inspection. No binary payload is accepted or stored by Control.
+  async authorizeImport(input) {
+    try {
+      const { releaseId, receipt, packageBinding, phase, authenticatedHospitalId, evidence } = input;
+      if (this.configuration.pacsImportEnabled !== true || authenticatedHospitalId !== 'HOSP-B'
+        || !/^[a-f0-9-]{36}$/u.test(releaseId) || !['BEFORE_IMPORT', 'PACS_VERIFIED'].includes(phase)) throw new Error('KEY_RELEASE_PRINCIPAL_INVALID');
+      const snapshot = binding(packageBinding, this.configuration);
+      const record = await this.repository.read(releaseId);
+      if (!record?.consumed || record.receiptHash !== digest(receipt ?? '')
+        || fields.some(field => record.binding[field] !== snapshot[field])) throw new Error('KEY_RELEASE_BINDING_INACTIVE');
+      const authority = await revalidateDataPlaneReceipt(this.service, receipt, this.configuration);
+      if (authority.status !== 200 || !authority.route.importing || authority.grant.targetHospitalId !== authenticatedHospitalId
+        || ['tokenId', 'consentId', 'doctorId', 'auditSessionId', 'sourceHospitalId'].some(field => record[field] !== authority.grant[field])) throw new Error('KEY_RELEASE_POLICY_DENIED');
+      const required = ['manifestSha256', 'sha256', 'bytes', 'orthancId'];
+      if (!evidence || Object.keys(evidence).sort().join() !== required.sort().join()
+        || evidence.manifestSha256 !== HCC_SOURCE_CONTRACT.manifestSha256
+        || authority.route.studyInstanceUid !== HCC_SOURCE_CONTRACT.studyUid
+        || authority.route.seriesInstanceUid !== HCC_SOURCE_CONTRACT.seriesUid
+        || !/^[a-f0-9]{64}$/u.test(evidence.sha256) || !Number.isSafeInteger(evidence.bytes) || evidence.bytes < 132 || evidence.bytes > 8388608
+        || (phase === 'BEFORE_IMPORT' ? evidence.orthancId !== null : !/^[a-f0-9]{8}(?:-[a-f0-9]{8}){4}$/u.test(evidence.orthancId))) throw new Error('KEY_RELEASE_BINDING_INVALID');
+      await this.service.writeAudit({ actorType: 'GATEWAY', actorId: `b-pacs:${releaseId}`, hospitalId: 'HOSP-B',
+        action: phase === 'BEFORE_IMPORT' ? 'PACS_IMPORT_AUTHORIZED' : 'PACS_INSTANCE_VERIFIED', result: 'SUCCESS',
+        reason: JSON.stringify({ verification: 'AUTHENTICATED_B_REPORT', ...evidence }),
+        consentId: authority.grant.consentId, auditSessionId: authority.grant.auditSessionId,
+        sourceHospitalId: authority.grant.sourceHospitalId, targetHospitalId: 'HOSP-B',
+        studyInstanceUid: authority.route.studyInstanceUid, seriesInstanceUid: authority.route.seriesInstanceUid,
+        sopInstanceUid: authority.route.sopInstanceUid });
+      await this.service.store.save();
+      return true;
+    } catch (error) { await this.#deny(input?.releaseId); throw error; }
   }
 
   async #authorize({ releaseId, receipt, packageBinding, phase, authenticatedHospitalId }) {

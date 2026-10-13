@@ -28,6 +28,15 @@ function element(tag, className, text) {
   return node;
 }
 let presentationStudy, presentationActions;
+export function patientPassState(consent, now = Date.now()) {
+  if (!consent) return { state: 'NONE', label: '공유 승인 전', action: '공유 내용 확인' };
+  const start = Date.parse(consent.validFrom), end = Date.parse(consent.validUntil);
+  const state = consent.status === 'ACTIVE' && Number.isFinite(end) && end <= now ? 'EXPIRED'
+    : consent.status === 'ACTIVE' && (!Number.isFinite(start) || !Number.isFinite(end) || start > now) ? 'PENDING' : consent.status;
+  return ({ACTIVE: {state, label:'공유 동의 유효', action:'공유 내용 관리'}, REVOKED: {state, label:'공유 중단됨', action:'공유 내용 다시 확인'},
+    EXPIRED: {state, label:'공유 기간 만료', action:'공유 내용 다시 확인'}, PENDING: {state, label:'승인·유효기간 확인 필요', action:'공유 내용 확인'}})[state]
+    || {state:'UNKNOWN', label:'공유 상태 확인 필요', action:'공유 내용 확인'};
+}
 export function renderPresentationScenario(context, { study, consent, onView, onShare }) {
   if (!context?.scenario?.synthetic) return;
   const home = document.querySelector('#patient-portal-app [data-page="home"]');
@@ -35,30 +44,47 @@ export function renderPresentationScenario(context, { study, consent, onView, on
   presentationStudy = study; presentationActions = { onView, onShare };
   let panel = home.querySelector('#presentation-referral');
   if (!panel) {
-    panel = element('section', 'mediq-scenario'); panel.id = 'presentation-referral';
-    const title = element('h2', '', `${context.patientName}님의 다음 진료를 준비해요.`);
-    const summary = element('p', '', context.scenario.referralSummary);
-    const stages = element('ol', '');
-    for (const [title, description, id] of [['내 CT 확인', '다중시기 복부 CT · 4개 시리즈', 'scenario-ct-state'],
-      ['B대학병원에 공유 동의', '환자가 범위와 기간을 선택', 'scenario-consent-state'],
-      ['병원에서 접수·열람', '동의 후 QR로 병원 연결', 'scenario-receive-state']]) {
-      const step = element('li', ''); const detail = element('span', '', description); detail.id = id;
-      step.append(element('strong', '', title), detail); stages.append(step);
-    }
-    const actions = element('div', 'mediq-scenario-actions');
-    for (const [text, kind] of [['내 CT 보기', 'view'], ['전원 공유 준비', 'share']]) {
+    home.classList.add('pass-home');
+    panel = element('section', 'mediq-visit-pass'); panel.id = 'presentation-referral';
+    panel.setAttribute('aria-label', '나의 진료 패스');
+    const body = element('div','visit-pass-body');
+    const top = element('div','visit-pass-top');
+    const status = element('span','visit-pass-status'); status.id = 'scenario-consent-state'; status.setAttribute('role','status');
+    top.append(element('span','visit-pass-label','나의 진료 패스'), status);
+    const route = element('h2','visit-pass-route');
+    route.append(element('span','','A대학병원'),element('span','visit-pass-arrow','→'),element('span','','B대학병원'));
+    const exam = element('div','visit-pass-exam');
+    const art = element('span','visit-pass-exam-icon'); art.append(icon('archive'));
+    const info = element('div',''); const count = element('p',''); count.id='scenario-ct-state';
+    info.append(element('h3','','복부 CT'),count,element('p','visit-pass-disclaimer','합성 시연 영상 · 비진단용')); exam.append(art,info);
+    const actions = element('div', 'visit-pass-actions');
+    for (const [text, kind] of [['공유 내용 확인', 'share'], ['내 영상 보기', 'view']]) {
       const button = element('button', `btn${kind === 'share' ? ' primary' : ''}`, text); button.type = 'button';
       button.dataset.scenarioAction = kind;
       button.addEventListener('click', () => {
         if (presentationStudy) presentationActions[kind === 'view' ? 'onView' : 'onShare'](presentationStudy);
       }); actions.append(button);
     }
-    panel.append(title, summary, stages, actions, element('small', '', '홍길동 · 56세 · 합성 환자 / 진단은 발표용 가상 설정'));
+    body.append(top,route,exam,element('p','visit-pass-guidance','병원 · 목적 · 검사 범위 · 권한 · 기간을 확인하고 승인하세요.'),actions);
+    const stub=element('aside','visit-pass-stub'); const symbol=element('span','visit-pass-symbol'); symbol.append(icon('shield'));
+    const qr=element('div','visit-pass-qr'); qr.id='patient-pass-qr';
+    const qrState=element('p','visit-pass-qr-state','승인 후 QR 연결'); qrState.id='patient-pass-qr-state';
+    const qrAction=element('button','btn','QR 연결 확인'); qrAction.type='button';
+    qrAction.addEventListener('click',()=>document.querySelector('#patient-portal-app .side-foot [data-route="visit"]')?.click());
+    stub.append(symbol,element('h3','','내가 승인한 범위로'),element('p','','공유는 내가 결정해요.'),qr,qrState,qrAction);
+    panel.append(body,stub);
+    const stages = element('div','visit-pass-steps'); stages.setAttribute('aria-label','공유 절차 안내 · 실제 전송 완료 상태 아님');
+    stages.append(element('span','','공유 절차 안내'));
+    for(const title of ['영상 확인','공유 승인','QR 연결','병원 열람']) stages.append(element('span','',title));
+    const disclaimer=element('p','visit-pass-footnote','홍길동 · 56세 · 합성 환자. 간암 진단은 발표용 가상 설정이며 본 영상의 판독 결과가 아닙니다.');
     home.querySelector('.page-head')?.after(panel);
+    panel.after(stages,disclaimer);
   }
-  const state = consent?.status === 'ACTIVE' && Date.parse(consent.validUntil) <= Date.now() ? 'EXPIRED' : consent?.status;
-  panel.querySelector('#scenario-ct-state').textContent = study ? `${study.series?.length ?? 0}개 시리즈 · 승인 후 영상 열람` : 'CT 목록 등록 확인 중';
-  panel.querySelector('#scenario-consent-state').textContent = ({ ACTIVE: '동의 유효 · 범위와 기간 확인', REVOKED: '동의 철회됨 · 신규 접근 차단', EXPIRED: '동의 만료 · 다시 동의 필요', PENDING: '환자 승인 대기' })[state] || '아직 동의하지 않았습니다';
+  const model=patientPassState(consent); panel.dataset.consentState=model.state;
+  const instances=study?.series?.reduce((sum,series)=>sum+(series.instances?.length ?? series.instanceCount ?? 0),0);
+  panel.querySelector('#scenario-ct-state').textContent = study ? `${study.series?.length ?? 0}개 시리즈${instances ? ` · ${instances}장` : ' · 영상 수는 검사 상세에서 확인'}` : 'CT 목록 등록 확인 중';
+  panel.querySelector('#scenario-consent-state').textContent=model.label;
+  panel.querySelector('[data-scenario-action="share"]').textContent=model.action+' →';
   for (const button of panel.querySelectorAll('[data-scenario-action]')) button.disabled = !study;
 }
 let overviewSignature;
@@ -155,6 +181,9 @@ export function renderPatientQr({ label, payload, expiresAt }) {
   if (!box) return;
   if (status) status.textContent = label;
   if (expiry) expiry.textContent = expiresAt ? new Date(expiresAt).toLocaleString('ko-KR') : '—';
+  const passBox=document.querySelector('#patient-pass-qr'), passState=document.querySelector('#patient-pass-qr-state');
+  if(passState) passState.textContent=label;
+  if(passBox) passBox.replaceChildren();
   if (!payload) { box.replaceChildren(); return; }
   // Canvas holds pixels only; capability is not copied into DOM text/attributes.
   try {
@@ -165,5 +194,7 @@ export function renderPatientQr({ label, payload, expiresAt }) {
     const context = canvas.getContext('2d'); context.fillStyle = '#fff'; context.fillRect(0, 0, canvas.width, canvas.height); context.fillStyle = '#000';
     for (let y = 0; y < count; y++) for (let x = 0; x < count; x++) if (qr.isDark(y, x)) context.fillRect((x + margin) * cell, (y + margin) * cell, cell, cell);
     box.replaceChildren(canvas);
-  } catch { box.replaceChildren(); if (status) status.textContent = 'QR를 표시하지 못했습니다. 새로고침 후 다시 시도해 주세요.'; }
+    if(passBox) passBox.append(canvas.cloneNode(true));
+    if(passBox) { const copy=passBox.firstChild; copy.getContext('2d').drawImage(canvas,0,0); }
+  } catch { box.replaceChildren(); passBox?.replaceChildren(); if (status) status.textContent = 'QR를 표시하지 못했습니다. 새로고침 후 다시 시도해 주세요.'; if (passState) passState.textContent = 'QR를 표시하지 못했습니다.'; }
 }

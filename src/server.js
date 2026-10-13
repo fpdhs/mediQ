@@ -10,6 +10,7 @@ import {
   assertPatientPrincipal,
   authenticateRequest as authenticateBaseRequest,
   canReadAuditLogs,
+  createAuthenticationProvider,
   isPrivilegedAdmin,
   requireInternalServiceScope,
   requireRoles,
@@ -28,27 +29,55 @@ import { PrivacyTextInspectionService } from "./privacy-service.js";
 import { createPrivacyHttpHandler } from "./privacy-http-handler.js";
 import { createCapstoneMockIdp } from "./capstone-mock-idp.js";
 import { registerPhantomCatalog, isPhantomCatalogCommitted } from "./capstone-phantom-catalog.js";
-import { registerHccCatalog, isHccCatalogCommitted, HCC_PATIENT_ID } from './capstone-hcc-catalog.js';
+import { registerHccCatalog, isHccCatalogCommitted, HCC_PATIENT_ID, HCC_PRESENTATION, HCC_STUDY_UID } from './capstone-hcc-catalog.js';
+import { HCC_SOURCE_PATHS, issueHccChallenge, acceptHccReport } from './hcc-source-verification.js';
 import { createKeyReleaseHttpHandler, keyReleasePaths } from "./key-release-http-handler.js";
 import { PostgresKeyReleaseRepository } from "./consent-bound-key-release.js";
 import {patientKeyReleasePaths} from './patient-key-release-http-handler.js';
 import { createPatientSelfViewGrantRuntime } from './patient-self-view-grant-runtime.js';
 import { createPatientSelfViewGrantHttpHandler, createPatientGrantAuthenticationAudit } from './patient-self-view-grant-http-handler.js';
+import { HealthHelperRag } from './health-helper-rag.js';
+import { createAzureHelperModel } from './health-helper-azure.js';
+import { createOllamaHelperModel } from './health-helper-ollama.js';
+import { createHealthHelperHandler } from './health-helper-http.js';
+import {createSyntheticHealthHandler} from './synthetic-health-http.js';
+import {createSharedHealthHandler} from './shared-health-records.js';
+import {HCC_PATIENT_SUBJECT} from './capstone-hcc-catalog.js';
 
 const port = Number(process.env.PORT ?? 3000);
-function authenticateRequest(request) {
-  const principal = authenticateBaseRequest(request);
+async function authenticateRequest(request) {
+  const principal = await authenticateBaseRequest(request, process.env, authProvider);
   if (process.env.HIPASS_CAPSTONE_MAIN_SCENARIO === 'HCC' && principal.role === PrincipalRole.PATIENT && principal.patientId !== HCC_PATIENT_ID) {
     throw new AuthError(403, 'DEMO_PROFILE_ARCHIVED');
   }
   return principal;
 }
 validateAuthConfiguration(process.env);
+const authProvider = createAuthenticationProvider(process.env);
 validateIngressConfig(process.env);
 const store = createStoreFromEnv();
 await store.load();
 const service = new HipassService(store);
+if (process.env.HIPASS_ARCHIVE_RETENTION_ROOT && process.env.HIPASS_CONTROL_PLANE_ONLY === '1') throw new Error('ARCHIVE_STORAGE_FORBIDDEN_ON_CONTROL');
+const retentionSweep = () => service.reconcileHospitalArchiveRetention().catch(() => console.warn('ARCHIVE_RETENTION_RECONCILIATION_FAILED'));
+const retentionTimer = process.env.HIPASS_ARCHIVE_RETENTION_ROOT ? setInterval(retentionSweep, 30000) : null;
+retentionTimer?.unref();
+if (retentionTimer) await retentionSweep();
+const helperAudit = async input => {
+  await service.writeAudit(input); await store.save();
+};
+const localHelperModel = createOllamaHelperModel();
+const healthHelper = new HealthHelperRag({ model: localHelperModel ?? createAzureHelperModel(), audit: helperAudit,
+  mode: localHelperModel ? 'VISIT_PREPARATION' : 'SOURCE_GUIDANCE', timeoutMs: localHelperModel ? 60000 : 15000 });
+const routeHealthHelper = createHealthHelperHandler({helper:healthHelper, authenticate:authenticateRequest,
+  requestMeta, audit:helperAudit, requireTrustedIngress:Boolean(process.env.HIPASS_INGRESS_SECRET)});
+const routeSyntheticHealth=createSyntheticHealthHandler({authenticate:authenticateRequest,requestMeta,audit:helperAudit,
+  requireTrustedIngress:Boolean(process.env.HIPASS_INGRESS_SECRET),eligible:principal=>process.env.HIPASS_CAPSTONE_MAIN_SCENARIO==='HCC'
+    && principal.patientId===HCC_PATIENT_ID && principal.subject===HCC_PATIENT_SUBJECT && isHccCatalogCommitted(store)});
 const patientGrantRuntime = await createPatientSelfViewGrantRuntime({store,service});
+const routeSharedHealth=createSharedHealthHandler({authenticate:authenticateRequest,requestMeta,audit:helperAudit,
+  requireTrustedIngress:Boolean(process.env.HIPASS_INGRESS_SECRET),consents:()=>store.get('consents'),doctors:()=>store.get('doctors'),hospitals:()=>store.get('hospitals'),
+  eligible:()=>process.env.HIPASS_CAPSTONE_MAIN_SCENARIO==='HCC'&&isHccCatalogCommitted(store)});
 const routePatientGrant = createPatientSelfViewGrantHttpHandler({issuer:patientGrantRuntime?.issuer,
   authenticate:authenticateRequest,requestMeta,auditAuthenticationDenied:createPatientGrantAuthenticationAudit(service)});
 let routeKeyRelease = null;
@@ -67,12 +96,13 @@ if (process.env.HIPASS_CAPSTONE_KEY_RELEASE === "1") {
     publicBaseUrl: process.env.HIPASS_DATA_PLANE_PUBLIC_BASE_URL,
     recipientHospitalId: process.env.HIPASS_KEY_RELEASE_RECIPIENT_HOSPITAL_ID,
     keyId: process.env.HIPASS_KEY_RELEASE_VAULT_KEY_ID,
+    pacsImportEnabled: process.env.HIPASS_B_PACS_IMPORT_ENABLED === '1',
   } });
 }
 const capstoneMockIdp = createCapstoneMockIdp(process.env);
 const privacyService = new PrivacyTextInspectionService({ adapter: new OpfLocalAdapter() });
 const privacyRequestTimeoutMs = Number(process.env.HIPASS_PRIVACY_REQUEST_TIMEOUT_MS ?? 30000);
-const routePrivacy = createPrivacyHttpHandler({ service: privacyService, timeoutMs: privacyRequestTimeoutMs });
+const routePrivacy = createPrivacyHttpHandler({ service: privacyService, env: process.env, provider: authProvider, timeoutMs: privacyRequestTimeoutMs });
 const phrCursorSecret = process.env.PHR_CURSOR_SECRET ?? process.env.DICOM_TOKEN_SECRET;
 const phrReferenceSecret = process.env.PHR_REFERENCE_SECRET ?? phrCursorSecret;
 const phrService = new PhrService({
@@ -135,6 +165,18 @@ const server = createServer(async (request, response) => {
   } catch (error) {
     if (response.destroyed) return;
     if (error instanceof AuthError) {
+      const authenticationFailure = error.code === "AUTHENTICATION_REQUIRED"
+        || ["JWT_", "OIDC_", "JWKS_", "ENTRA_"].some(prefix => error.code.startsWith(prefix));
+      if (process.env.AUTH_MODE === "ENTRA_OIDC" && authenticationFailure) {
+        try {
+          await service.writeAudit({ actorType: "SYSTEM", actorId: "entra-unauthenticated", action: "LOGIN_FAILURE", result: "FAIL",
+            reasonCode: error.code, ipAddress: requestMeta(request).ipAddress });
+          await persistAuthenticationAudit();
+        } catch {
+          sendJson(response, 503, { error: "AUTHENTICATION_AUDIT_UNAVAILABLE" });
+          return;
+        }
+      }
       if (error.code === 'DEMO_PROFILE_ARCHIVED') {
         await service.writeAudit({ actorType: 'SYSTEM', actorId: 'capstone-main-scenario', action: 'ACCESS_DENIED', result: 'FAIL', reasonCode: error.code,
           ipAddress: requestMeta(request).ipAddress });
@@ -156,10 +198,54 @@ server.listen(port, process.env.HIPASS_LISTEN_HOST ?? '0.0.0.0', () => {
   console.log(`HiPass MVP is running at http://localhost:${port}`);
 });
 server.on('close',()=>{patientGrantRuntime?.close().catch(()=>console.warn('PATIENT_AUTHORITY_CLOSE_FAILED'));});
+server.on('close',()=>{if(retentionTimer)clearInterval(retentionTimer);});
+
+async function persistAuthenticationAudit() {
+  if (typeof store.saveRequiredAppendOnly === "function") {
+    if (store.appendOnlyChanges?.() == null) throw new AuthError(503, "AUTHENTICATION_AUDIT_UNAVAILABLE");
+    await store.saveRequiredAppendOnly();
+    return;
+  }
+  await store.save();
+}
 
 async function routeApi(request, response, url) {
   const segments = url.pathname.split("/").filter(Boolean);
   const method = request.method;
+
+  if (method === "GET" && url.pathname === "/api/capstone-demo/auth-config") {
+    if (process.env.AUTH_MODE !== "ENTRA_OIDC") return sendJson(response, 404, { error: "ENTRA_LOGIN_NOT_ENABLED" });
+    response.setHeader("cache-control", "no-store");
+    return sendJson(response, 200, {
+      provider: "ENTRA_OIDC",
+      synthetic: true,
+      tenantId: process.env.ENTRA_TENANT_ID,
+      clientId: process.env.ENTRA_SPA_CLIENT_ID,
+      redirectUri: process.env.ENTRA_REDIRECT_URI,
+      scopes: [`api://${process.env.ENTRA_API_AUDIENCE}/${process.env.ENTRA_API_SCOPE}`],
+    });
+  }
+
+  if (method === "GET" && url.pathname === "/api/capstone-demo/identity") {
+    if (process.env.AUTH_MODE !== "ENTRA_OIDC") return sendJson(response, 404, { error: "ENTRA_LOGIN_NOT_ENABLED" });
+    const principal = await authenticateRequest(request);
+    if (![PrincipalRole.PATIENT, PrincipalRole.DOCTOR].includes(principal.role)) throw new AuthError(403, "ENTRA_SYNTHETIC_ROLE_REQUIRED");
+    const hccScenario = process.env.HIPASS_CAPSTONE_MAIN_SCENARIO === "HCC" && isHccCatalogCommitted(store);
+    const patientId = principal.patientId ?? (hccScenario ? HCC_PATIENT_ID : "P-1001");
+    const demoContext = {
+      patientId,
+      patientName: hccScenario ? "홍길동" : "가상환자 1001",
+      defaultStudyUid: hccScenario ? HCC_STUDY_UID : "1.2.410.100.1.20260620.001",
+      entryRole: principal.role,
+      ...(hccScenario ? { scenario: HCC_PRESENTATION } : {}),
+    };
+    const meta = requestMeta(request, principal);
+    await service.writeAudit({ actorType: principal.role, actorId: principal.subject, hospitalId: principal.hospitalId,
+      action: "LOGIN_SUCCESS", result: "SUCCESS", reasonCode: "ENTRA_SYNTHETIC_ACTOR_MAPPED", ipAddress: meta.ipAddress });
+    await persistAuthenticationAudit();
+    response.setHeader("cache-control", "no-store");
+    return sendJson(response, 200, { authenticated: true, synthetic: true, actorId: principal.subject, role: principal.role, demoContext });
+  }
 
   if (method === 'GET' && url.pathname === '/api/capstone-demo/scenario') {
     if (!capstoneMockIdp) return sendJson(response, 404, { error: 'DEMO_IDP_NOT_ENABLED' });
@@ -207,10 +293,13 @@ async function routeApi(request, response, url) {
     return;
   }
 
+  if (await routeHealthHelper(request,response,url)) return;
+  if (await routeSyntheticHealth(request,response,url)) return;
+  if (await routeSharedHealth(request,response,url)) return;
   if (url.pathname.startsWith("/api/v1/me/phr/")) {
     const correlationId = phrCorrelationId(request);
     try {
-      const phrPrincipal = authenticateRequest(request);
+      const phrPrincipal = await authenticateRequest(request);
       await routePhr(request, response, url, phrPrincipal, correlationId);
     } catch (error) {
       sendPhrProblem(response, error, correlationId);
@@ -219,7 +308,7 @@ async function routeApi(request, response, url) {
   }
 
   if (await routePatientGrant(request,response,url)) return;
-  const principal = authenticateRequest(request);
+  const principal = await authenticateRequest(request);
 
   if (method === "POST" && url.pathname === "/api/capstone-demo/phantom-catalog") {
     response.setHeader("cache-control", "no-store");
@@ -232,7 +321,7 @@ async function routeApi(request, response, url) {
         const meta = requestMeta(request, principal);
         await service.writeAudit({ actorType: principal.role, actorId: meta.actorId, hospitalId: principal.hospitalId, action: 'SYNTHETIC_CATALOG_REGISTRATION_DENIED', result: 'FAIL', reasonCode: error instanceof AuthError || error instanceof ServiceValidationError ? error.code : 'CATALOG_REGISTRATION_UNAVAILABLE', ipAddress: meta.ipAddress });
         if (store.appendOnlyChanges?.() === null) throw new AuthError(503, 'CATALOG_DENIAL_AUDIT_UNAVAILABLE');
-        await store.save();
+        await store.saveRequiredAppendOnly();
       }
       if (error instanceof ServiceValidationError) return sendJson(response, error.statusCode, { error: error.code });
       throw error;
@@ -345,6 +434,10 @@ async function routeApi(request, response, url) {
     const validation = requireFields(body, ["patientId", "sourceHospitalId", "targetHospitalId", "purpose", "permission", "validUntil"]);
     if (validation) return sendError(response, 400, validation);
     assertPatientPrincipal(principal, body.patientId);
+    if(body.healthRecordIds?.length && !(process.env.HIPASS_CAPSTONE_MAIN_SCENARIO==='HCC'&&isHccCatalogCommitted(store))) {
+      await helperAudit({actorType:'PATIENT',actorId:principal.subject,action:'CONSENT_CREATE_FAILED',result:'FAIL',reasonCode:'HEALTH_RECORD_SCENARIO_REQUIRED'});
+      return sendJson(response,403,{error:'HEALTH_RECORD_SCENARIO_REQUIRED'});
+    }
     try {
       sendJson(response, 201, await service.createConsent(body, requestMeta(request, principal)));
     } catch (error) {
@@ -939,7 +1032,28 @@ async function routeDicomweb(request, response, url) {
 }
 
 async function routeGateway(request, response, url) {
-  const principal = authenticateRequest(request);
+  if (HCC_SOURCE_PATHS.includes(url.pathname)) {
+    let principal;
+    response.setHeader('cache-control', 'no-store');
+    try {
+      principal = await authenticateRequest(request);
+      requireInternalServiceScope(principal, 'gateway:hcc-source-verify');
+      if (request.method !== 'POST' || url.search) throw new AuthError(400, 'HCC_SOURCE_INVALID_REQUEST');
+      const operation = url.pathname.endsWith('/challenge') ? issueHccChallenge : acceptHccReport;
+      const result = await operation({ service, principal, env: process.env,
+        input: await readJson(request, { maxBytes: 4096, strictUtf8: true }) });
+      sendJson(response, 200, result); return;
+    } catch (error) {
+      if (process.env.HIPASS_CAPSTONE_HCC_CATALOG === '1' && !store.persistenceBlocked) {
+        await service.writeAudit({ actorType: principal?.role ?? 'SYSTEM', actorId: principal?.subject ?? 'unauthenticated-source-request', hospitalId: principal?.hospitalId ?? null,
+          action: 'HCC_SOURCE_REPORT_DENIED', result: 'FAIL', reasonCode: error instanceof AuthError ? error.code : 'HCC_SOURCE_UNAVAILABLE' });
+        if (store.appendOnlyChanges?.() == null) throw new AuthError(503, 'HCC_SOURCE_DENIAL_AUDIT_UNAVAILABLE');
+        await store.saveRequiredAppendOnly();
+      }
+      throw error;
+    }
+  }
+  const principal = await authenticateRequest(request);
   if(patientKeyReleasePaths.includes(url.pathname)){
     if(!patientGrantRuntime?.routeKeyRelease){request.resume();sendJson(response,503,{error:'PATIENT_KEY_RELEASE_DISABLED'});return;}
     await patientGrantRuntime.routeKeyRelease(request,response,url,principal);return;
@@ -963,6 +1077,7 @@ async function routeGateway(request, response, url) {
     const result = await operation(service, await readJson(request, { maxBytes: 32768, strictUtf8: true }), {
       sourceHospitalId: process.env.HIPASS_DATA_PLANE_SOURCE_HOSPITAL_ID,
       publicBaseUrl: process.env.HIPASS_DATA_PLANE_PUBLIC_BASE_URL,
+      pacsImportEnabled: process.env.HIPASS_B_PACS_IMPORT_ENABLED === '1',
     });
     response.setHeader("cache-control", "no-store");
     sendJson(response, result.status, result.body);

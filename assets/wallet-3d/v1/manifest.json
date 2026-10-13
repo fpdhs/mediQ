@@ -1,0 +1,19 @@
+{
+  "status": "DRAFT / UNASSIGNED",
+  "generator": "scripts/build-wallet-model.py",
+  "blender": "4.5.0",
+  "renderer": "Cycles CPU",
+  "samples": 40,
+  "method": "Original 3D mesh + procedural leather material + geometry stitching",
+  "not_css_or_svg": true,
+  "objects": 35,
+  "mesh_objects": 12,
+  "curve_objects": 18,
+  "web_deployed": false,
+  "files": {
+    "mediq-wallet.blend": "ee1ad44324c0f6b7c643e9bff446823d3efc867e9dfb0197aaba2fc8aac7c078",
+    "wallet-front-transparent.png": "3b02939db52155a80ab80bfec4f52795b6ef1d8658c46ff5bc1d0e5bb0c11a7a",
+    "wallet-hero.png": "59efd02e2503c46f74bbaadae4cfd20053a86dbef9cec3b54d2ec585123fd870",
+    "wallet-material-detail.png": "282ed4f330e2c64ce3939370a59a39581554980edeeeff24cb4fc3f302935e58"
+  }
+}

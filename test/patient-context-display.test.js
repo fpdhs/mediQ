@@ -16,7 +16,8 @@ test('mobile selected profile uses its server context literally, without another
     const state = { isAuthenticated: false };
     const name = '<img src=x onerror=unsafe>';
     let faqResets = 0;
-    const context = vm.createContext({ state, faqAssistant: { reset() { faqResets += 1; } }, capstoneAuth: { context: { patientId, patientName: name } },
+    let helperResets = 0;
+    const context = vm.createContext({ state, mobileRecords:null,walletHome:null,walletStudiesReady:false,walletConsentsReady:false,faqAssistant: { reset() { faqResets += 1; } }, healthHelper: {reset(){helperResets++;}}, capstoneAuth: { context: { patientId, patientName: name } },
       document: { querySelector(selector) {
         if (!nodes.has(selector)) nodes.set(selector, { textContent: '', value: '' });
         return nodes.get(selector);
@@ -25,6 +26,7 @@ test('mobile selected profile uses its server context literally, without another
     vm.runInContext(code, context);
     vm.runInContext(`handlePatientSelect(${JSON.stringify(patientId)})`, context);
     assert.equal(faqResets, 1, 'Patient changes must clear the FAQ conversation');
+    assert.equal(helperResets, 1, 'Patient changes must clear AI conversation and notes');
     assert.equal(state.patientId, patientId);
     assert.equal(nodes.get('#header-patient-name').textContent, `${name} (${patientId})`);
     assert.equal(nodes.get('#auth-patient-name').textContent, `${name} (${patientId})`);

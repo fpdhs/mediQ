@@ -1,4 +1,6 @@
-import { createHmac, createVerify, timingSafeEqual } from "node:crypto";
+import { createHmac, createVerify, randomUUID, timingSafeEqual } from "node:crypto";
+import { readFileSync } from "node:fs";
+import { isAbsolute } from "node:path";
 
 export const PrincipalRole = Object.freeze({
   PATIENT: "PATIENT",
@@ -13,8 +15,11 @@ export const AuthMode = Object.freeze({
   DEVELOPMENT_MOCK: "DEVELOPMENT_MOCK",
   TEST: "TEST",
   OIDC: "OIDC",
+  ENTRA_OIDC: "ENTRA_OIDC",
   PRODUCTION: "PRODUCTION",
 });
+
+const UUID_GUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu;
 
 export class AuthError extends Error {
   constructor(statusCode, code, message = code) {
@@ -40,6 +45,19 @@ export class InternalServiceProvider extends AuthenticationProvider {
     validatePrivacyServiceConfiguration(this.env);
     const serviceToken = request.headers["x-hipass-service-token"];
     if (serviceToken === undefined) return null;
+    const sourceToken = this.env.HIPASS_HCC_SOURCE_GATEWAY_TOKEN;
+    if (sourceToken && (Buffer.byteLength(sourceToken) < 32 || /[\r\n]/.test(sourceToken)
+      || [this.env.HIPASS_INTERNAL_SERVICE_TOKEN, this.env.HIPASS_DATA_PLANE_SERVICE_TOKEN,
+        this.env.HIPASS_PRIVACY_SERVICE_TOKEN, this.env.HIPASS_KEY_RELEASE_SERVICE_TOKEN,
+        this.env.HIPASS_PATIENT_SELF_VIEW_SERVICE_TOKEN, this.env.HIPASS_PATIENT_KEY_RELEASE_SERVICE_TOKEN].includes(sourceToken)
+      || this.env.HIPASS_DATA_PLANE_SOURCE_HOSPITAL_ID !== 'HOSP-A')) throw new AuthError(503, 'HCC_SOURCE_TOKEN_CONFIGURATION_INVALID');
+    if (typeof serviceToken === 'string' && sourceToken && safeEqual(serviceToken, sourceToken)) {
+      return normalizePrincipal({ subject: 'hcc-source-gateway', userId: 'hcc-source-gateway',
+        actorType: PrincipalRole.INTERNAL_SERVICE, role: PrincipalRole.INTERNAL_SERVICE, roles: [PrincipalRole.INTERNAL_SERVICE],
+        scopes: ['gateway:hcc-source-verify'], hospitalId: 'HOSP-A', patientId: null, doctorId: null,
+        sessionId: 'hcc-source-gateway', authenticatedAt: new Date().toISOString(),
+        authMethod: 'INTERNAL_SERVICE_TOKEN', authMode: 'INTERNAL_SERVICE_TOKEN' });
+    }
     const privacy = this.env.HIPASS_PRIVACY_SERVICE_TOKEN;
     const dataPlane = this.env.HIPASS_DATA_PLANE_SERVICE_TOKEN;
     const keyRelease = this.env.HIPASS_KEY_RELEASE_SERVICE_TOKEN;
@@ -147,6 +165,14 @@ export function validateAuthConfiguration(env = process.env) {
   if ([AuthMode.OIDC, AuthMode.PRODUCTION].includes(authMode)) {
     for (const key of ["JWT_ISSUER", "JWT_AUDIENCE", "JWT_PUBLIC_KEY"]) requiredEnv(env, key);
   }
+  if (authMode === AuthMode.ENTRA_OIDC) {
+    for (const key of ["ENTRA_TENANT_ID", "ENTRA_SPA_CLIENT_ID", "ENTRA_API_AUDIENCE", "ENTRA_API_SCOPE", "ENTRA_REDIRECT_URI", "HIPASS_ENTRA_ACTOR_MAP_FILE"]) requiredEnv(env, key);
+    requiredGuidEnv(env, "ENTRA_TENANT_ID");
+    requiredGuidEnv(env, "ENTRA_SPA_CLIENT_ID");
+    requiredGuidEnv(env, "ENTRA_API_AUDIENCE");
+    if (!/^[A-Za-z0-9._:-]{1,128}$/u.test(env.ENTRA_API_SCOPE)) throw new AuthError(500, "ENTRA_API_SCOPE_INVALID_CONFIGURATION");
+    validateEntraRedirectUri(env.ENTRA_REDIRECT_URI, env.HIPASS_PUBLIC_BASE_URL, nodeEnv);
+  }
   return { nodeEnv, authMode };
 }
 
@@ -156,6 +182,7 @@ export function createAuthenticationProvider(env = process.env) {
   if (mode === AuthMode.DEVELOPMENT_MOCK) return new DevelopmentMockProvider(env);
   if (mode === AuthMode.TEST) return new TestProvider(env);
   if (mode === AuthMode.OIDC || mode === AuthMode.PRODUCTION) return new OidcProvider(env);
+  if (mode === AuthMode.ENTRA_OIDC) return new EntraOidcProvider(env);
   throw new AuthError(500, "AUTH_MODE_UNSUPPORTED", `Unsupported AUTH_MODE: ${mode}`);
 }
 
@@ -226,6 +253,148 @@ export async function assertDoctorPrincipalAudited(principal, input, recordDenia
       throw new AuthError(503, "AUTHORIZATION_AUDIT_UNAVAILABLE");
     }
     throw error;
+  }
+}
+
+export class EntraOidcProvider extends AuthenticationProvider {
+  constructor(env = process.env, { actorMap = null, fetchImpl = globalThis.fetch, cache = null } = {}) {
+    super(env);
+    this.tenantId = requiredGuidEnv(env, "ENTRA_TENANT_ID");
+    this.spaClientId = requiredGuidEnv(env, "ENTRA_SPA_CLIENT_ID");
+    this.apiAudience = requiredGuidEnv(env, "ENTRA_API_AUDIENCE");
+    this.requiredScope = requiredEnv(env, "ENTRA_API_SCOPE");
+    if (!/^[A-Za-z0-9._:-]{1,128}$/u.test(this.requiredScope)) throw new AuthError(500, "ENTRA_API_SCOPE_INVALID_CONFIGURATION");
+    this.issuer = `https://login.microsoftonline.com/${this.tenantId}/v2.0`;
+    this.discoveryUrl = `${this.issuer}/.well-known/openid-configuration`;
+    this.actorMap = validateSyntheticActorMap(actorMap ?? readSyntheticActorMap(env), this.tenantId);
+    this.fetchImpl = fetchImpl;
+    this.cache = cache;
+  }
+
+  async authenticate(request) {
+    const token = getBearerTokenFromRequest(request);
+    if (!token) throw new AuthError(401, "AUTHENTICATION_REQUIRED", "Missing bearer token");
+    const { JwksCache, verifyJwtWithJwks } = await import("./oidc-jwks.js");
+    this.cache ??= new JwksCache({ fetchImpl: this.fetchImpl });
+    const claims = await verifyJwtWithJwks(token, {
+      discoveryUrl: this.discoveryUrl,
+      issuer: this.issuer,
+      audience: this.apiAudience,
+      cache: this.cache,
+      fetchImpl: this.fetchImpl,
+      allowedJwksHostname: "login.microsoftonline.com",
+    });
+    validateEntraAccessClaims(claims, {
+      tenantId: this.tenantId,
+      spaClientId: this.spaClientId,
+      apiAudience: this.apiAudience,
+      requiredScope: this.requiredScope,
+    });
+    const actor = this.actorMap.get(claims.oid.toLowerCase());
+    if (!actor) throw new AuthError(403, "ENTRA_ACTOR_NOT_MAPPED", "Identity is not assigned to a synthetic demo actor");
+    const roles = [actor.role];
+    return normalizePrincipal({
+      subject: actor.actorId,
+      userId: actor.actorId,
+      actorType: actor.role,
+      role: actor.role,
+      roles,
+      scopes: defaultScopesForRole(actor.role),
+      hospitalId: actor.hospitalId ?? null,
+      patientId: actor.patientId ?? null,
+      doctorId: actor.doctorId ?? null,
+      sessionId: claims.sid ?? claims.uti ?? randomUUID(),
+      authenticatedAt: new Date().toISOString(),
+      issuer: claims.iss,
+      audience: claims.aud,
+      expiresAtMs: claims.exp * 1000,
+      authMethod: "ENTRA_OIDC_ACCESS_TOKEN",
+      authMode: AuthMode.ENTRA_OIDC,
+    });
+  }
+}
+
+export function validateSyntheticActorMap(input, tenantId) {
+  if (!input || typeof input !== "object" || Array.isArray(input) || input.schemaVersion !== 1
+      || typeof input.tenantId !== "string" || input.tenantId.toLowerCase() !== tenantId
+      || !Array.isArray(input.actors) || input.actors.length !== 2) {
+    throw new AuthError(500, "ENTRA_ACTOR_MAP_INVALID_CONFIGURATION");
+  }
+  const actors = new Map();
+  const roles = new Set();
+  const actorIds = new Set();
+  for (const entry of input.actors) {
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) throw new AuthError(500, "ENTRA_ACTOR_MAP_INVALID_CONFIGURATION");
+    const allowedKeys = entry.role === PrincipalRole.PATIENT
+      ? ["objectId", "actorId", "role", "patientId"]
+      : entry.role === PrincipalRole.DOCTOR
+        ? ["objectId", "actorId", "role", "doctorId", "hospitalId"] : [];
+    if (!allowedKeys.length || Object.keys(entry).some(key => !allowedKeys.includes(key))
+        || allowedKeys.some(key => typeof entry[key] !== "string" || !entry[key])) {
+      throw new AuthError(500, "ENTRA_ACTOR_MAP_INVALID_CONFIGURATION");
+    }
+    const objectId = entry.objectId.toLowerCase();
+    if (!UUID_GUID.test(objectId) || !/^synthetic-[a-z0-9-]{1,64}$/u.test(entry.actorId)
+        || roles.has(entry.role) || actors.has(objectId) || actorIds.has(entry.actorId)) {
+      throw new AuthError(500, "ENTRA_ACTOR_MAP_INVALID_CONFIGURATION");
+    }
+    if (entry.role === PrincipalRole.PATIENT && !/^MEDIQ-SYN-[A-Z0-9-]{1,64}$/u.test(entry.patientId)) {
+      throw new AuthError(500, "ENTRA_ACTOR_MAP_INVALID_CONFIGURATION");
+    }
+    if (entry.role === PrincipalRole.DOCTOR && (!/^DOC-[A-Z0-9-]{1,64}$/u.test(entry.doctorId)
+        || !/^HOSP-[A-Z0-9-]{1,64}$/u.test(entry.hospitalId))) {
+      throw new AuthError(500, "ENTRA_ACTOR_MAP_INVALID_CONFIGURATION");
+    }
+    roles.add(entry.role);
+    actorIds.add(entry.actorId);
+    actors.set(objectId, Object.freeze({ ...entry }));
+  }
+  if (!roles.has(PrincipalRole.PATIENT) || !roles.has(PrincipalRole.DOCTOR)) {
+    throw new AuthError(500, "ENTRA_ACTOR_MAP_INVALID_CONFIGURATION");
+  }
+  return actors;
+}
+
+function readSyntheticActorMap(env) {
+  const file = requiredEnv(env, "HIPASS_ENTRA_ACTOR_MAP_FILE");
+  if (!isAbsolute(file)) throw new AuthError(500, "ENTRA_ACTOR_MAP_PATH_INVALID_CONFIGURATION");
+  try {
+    return JSON.parse(readFileSync(file, "utf8"));
+  } catch {
+    throw new AuthError(500, "ENTRA_ACTOR_MAP_INVALID_CONFIGURATION");
+  }
+}
+
+function validateEntraAccessClaims(claims, { tenantId, spaClientId, apiAudience, requiredScope }) {
+  if (claims.ver !== "2.0") throw new AuthError(401, "ENTRA_TOKEN_VERSION_INVALID");
+  if (typeof claims.tid !== "string" || claims.tid.toLowerCase() !== tenantId) throw new AuthError(401, "ENTRA_TENANT_INVALID");
+  if (typeof claims.aud !== "string" || claims.aud.toLowerCase() !== apiAudience) throw new AuthError(401, "ENTRA_AUDIENCE_INVALID");
+  if (typeof claims.azp !== "string" || claims.azp.toLowerCase() !== spaClientId) throw new AuthError(401, "ENTRA_CLIENT_INVALID");
+  if (typeof claims.oid !== "string" || !UUID_GUID.test(claims.oid)) throw new AuthError(401, "ENTRA_OBJECT_ID_INVALID");
+  if (!Number.isSafeInteger(claims.iat) || claims.iat < 0) throw new AuthError(401, "JWT_REGISTERED_CLAIMS_INVALID");
+  if (claims.idtyp === "app" || typeof claims.scp !== "string" || !claims.scp.split(/\s+/u).includes(requiredScope)) {
+    throw new AuthError(401, "ENTRA_DELEGATED_SCOPE_REQUIRED");
+  }
+}
+
+function requiredGuidEnv(env, key) {
+  const value = requiredEnv(env, key).toLowerCase();
+  if (!UUID_GUID.test(value)) throw new AuthError(500, `${key}_INVALID_CONFIGURATION`);
+  return value;
+}
+
+function validateEntraRedirectUri(redirectUri, publicBaseUrl, nodeEnv) {
+  let redirect;
+  try { redirect = new URL(redirectUri); } catch { throw new AuthError(500, "ENTRA_REDIRECT_URI_INVALID_CONFIGURATION"); }
+  const localHttp = nodeEnv !== "production" && redirect.protocol === "http:"
+    && ["localhost", "127.0.0.1", "::1"].includes(redirect.hostname);
+  if ((!localHttp && redirect.protocol !== "https:") || redirect.username || redirect.password || redirect.search || redirect.hash) {
+    throw new AuthError(500, "ENTRA_REDIRECT_URI_INVALID_CONFIGURATION");
+  }
+  if (publicBaseUrl) {
+    let publicOrigin;
+    try { publicOrigin = new URL(publicBaseUrl); } catch { throw new AuthError(500, "ENTRA_REDIRECT_URI_INVALID_CONFIGURATION"); }
+    if (redirect.origin !== publicOrigin.origin) throw new AuthError(500, "ENTRA_REDIRECT_ORIGIN_MISMATCH");
   }
 }
 

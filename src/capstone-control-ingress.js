@@ -2,8 +2,9 @@ import http from "node:http";
 import { signIngress } from "./ingress.js";
 import { keyReleasePaths } from "./key-release-http-handler.js";
 import { patientKeyReleasePaths } from './patient-key-release-http-handler.js';
+import { HCC_SOURCE_PATHS } from './hcc-source-contract.js';
 
-const servicePaths = ["/gateway/data-plane/authorize", "/gateway/data-plane/ready", ...keyReleasePaths,
+const servicePaths = [...HCC_SOURCE_PATHS, "/gateway/data-plane/authorize", "/gateway/data-plane/ready", ...keyReleasePaths,
   '/gateway/patient-self-view/authorize','/gateway/patient-self-view/ready',...patientKeyReleasePaths];
 
 // Metadata only. Image/Viewer transport has a separate hospital trust boundary.

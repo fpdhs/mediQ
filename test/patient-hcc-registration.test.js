@@ -24,10 +24,10 @@ function fixture({ writer = false, existing = false, mismatch = false, seriesMis
   } };
 }
 
-test('fixed HCC ownership registration defaults to rollback-only with no identity or audit inserts', async () => {
+test('fixed Hong Gildong ownership registration defaults to rollback-only with no identity or audit inserts', async () => {
   const client = fixture(), result = await registerPatientHcc(client, { datasetId: HCC_DATASET_ID });
   assert.equal(result.status, 'READY'); assert.equal(result.applied, false);
-  assert.equal(result.studyCount, 1); assert.equal(result.seriesCount, 4);
+  assert.equal(result.studyCount, 1); assert.equal(result.seriesCount, 1);
   assert.equal(client.calls.at(-1).text, 'ROLLBACK');
   assert.ok(!client.calls.some(row => row.text.includes('INSERT')));
 });
@@ -46,7 +46,7 @@ test('unknown dataset, live writers, existing identity, or metadata mismatch fai
 
 test('explicit apply creates one fixed synthetic account, one Study ownership ref, and one chained audit atomically', async () => {
   const client = fixture(), result = await registerPatientHcc(client, { datasetId: HCC_DATASET_ID, apply: true });
-  assert.equal(result.status, 'PASS'); assert.equal(result.studyCount, 1); assert.equal(result.seriesCount, 4);
+  assert.equal(result.status, 'PASS'); assert.equal(result.studyCount, 1); assert.equal(result.seriesCount, 1);
   assert.equal(result.review, 'DRAFT / UNASSIGNED'); assert.equal(client.calls.at(-1).text, 'COMMIT');
   const inserts = client.calls.filter(row => row.text.includes('INSERT'));
   assert.equal(inserts.length, 3);

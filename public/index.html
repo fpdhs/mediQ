@@ -14,8 +14,21 @@
   <link rel="stylesheet" href="/ui/brand.css">
   <link rel="stylesheet" href="/ui/workspace.css">
   <link rel="stylesheet" href="/ui/patient-home-premium.css">
+  <link rel="stylesheet" href="/ui/patient-visit-pass.css">
+  <link rel="stylesheet" href="/ui/patient-share-review.css">
+  <link rel="stylesheet" href="/ui/patient-library.css">
+  <link rel="stylesheet" href="/ui/patient-sharing.css">
+  <link rel="stylesheet" href="/ui/patient-history.css">
+  <link rel="stylesheet" href="/ui/patient-health.css">
+  <link rel="stylesheet" href="/ui/patient-helper.css">
   <link rel="stylesheet" href="/ui/clinician-desk.css">
+  <link rel="stylesheet" href="/ui/clinician-preparation.css">
+  <link rel="stylesheet" href="/ui/clinician-health.css">
   <link rel="stylesheet" href="/ui/viewer-studio.css">
+  <link rel="stylesheet" href="/ui/wallet-home.css">
+  <link rel="stylesheet" href="/ui/sharing-wallet-v2.css">
+  <link rel="stylesheet" href="/ui/clinician-demo-tools.css">
+  <link rel="stylesheet" href="/ui/image-journey.css">
   <script src="/qrcode.js"></script>
   <script src="/jsqr.js"></script>
 </head>
@@ -75,9 +88,10 @@
         <nav class="nav">
           <button class="nav-button active" data-route="home"><span class="nav-icon">⌂</span><span class="nav-text">홈</span></button>
           <button class="nav-button" data-route="images"><span class="nav-icon">▧</span><span class="nav-text">내 의료영상</span><span class="nav-chip">4대 임상</span></button>
-          <button class="nav-button" data-route="consent"><span class="nav-icon">📋</span><span class="nav-text">동의·공유</span></button>
+          <button class="nav-button" data-route="phr" data-view-target="patient-phr"><span class="nav-icon">✚</span><span class="nav-text">내 건강기록</span></button>
+          <button class="nav-button" data-route="sharing"><span class="nav-icon">📋</span><span class="nav-text">영상 공유</span></button>
           <button class="nav-button" data-route="activity"><span class="nav-icon">🧾</span><span class="nav-text">공유 이력</span></button>
-          <button class="nav-button" data-route="phr" data-view-target="patient-phr"><span class="nav-icon">✚</span><span class="nav-text">PHR 표준연계</span><span class="nav-chip">FHIR</span></button>
+          <button class="nav-button" data-route="helper"><span class="nav-icon" data-hp-icon="help"></span><span class="nav-text">건강도우미</span></button>
         </nav>
 
         <div class="side-foot">
@@ -247,24 +261,24 @@
           </section>
 
           <!-- 1.2 My Imaging Studies -->
-          <section class="page" data-page="images" hidden>
+          <section class="page image-library" data-page="images" hidden>
             <div class="page-head">
               <div>
-                <div class="eyebrow">Step 1. My Imaging Records</div>
-                <h1>1. 내 의료영상 확인</h1>
-                <p>출처 병원(가상 병원 A)의 실제 DICOM 영상 메타데이터입니다. 전송할 영상을 선택하면 즉시 수신 병원(가상 병원 B)으로 전송 동의를 진행할 수 있습니다.</p>
+                <h1>내 영상, 여기 있어요.</h1>
+                <p>내가 챙겨둔 검사를 살펴보고, 다음 진료에 필요한 영상만 공유하세요.</p>
               </div>
               <div class="head-actions">
-                <button id="toggle-easy-mode" class="btn" type="button">쉬운 모드 (우리말 설명)</button>
-                <button class="btn primary" data-route="consent">영상 전송 동의로 이동 →</button>
+                <button class="btn" type="button" data-route="home">홈으로 돌아가기</button>
               </div>
             </div>
-            <div class="notice" style="margin-bottom:18px">이 목록은 진단이나 정상·이상 여부를 판정하지 않으며, 의료영상 안전 전송을 위한 검사 메타데이터 카드입니다. 원하는 영상의 [이 영상 전송하기] 버튼을 누르면 동의 화면으로 자동 연결됩니다.</div>
             <div id="studies" class="stack" aria-live="polite"></div>
+            <section class="panel panel-pad hp-reference-help"><span class="premium-help-icon" data-hp-icon="book"></span><div><h2>영상 공유가 처음인가요?</h2><p>검사 확인부터 공유 중단까지 안내해 드립니다.</p></div><button class="hp-button" type="button" data-faq-open>이용 방법 보기</button></section>
           </section>
 
           <!-- 1.3 Personal Health Record (FHIR R4 PHR) -->
           <section class="page" id="patient-phr" data-page="phr" hidden>
+            <div id="patient-health-records"></div>
+            <details class="health-standard"><summary>표준 데이터 확인 · 기존 FHIR 조회</summary>
             <div class="page-head">
               <div>
                 <div class="eyebrow">FHIR R4 Personal Health Record</div>
@@ -295,24 +309,49 @@
               </div>
               <div id="phr-imaging-list" class="stack" aria-live="polite"></div>
             </div>
+            </details>
           </section>
+          <section class="page" data-page="helper" hidden><div id="patient-health-helper"></div></section>
 
           <!-- 1.4 Consent Management -->
-          <section class="page" data-page="consent" hidden>
+          <section class="page sharing-page" data-page="sharing" hidden>
+            <button class="health-wallet-back" type="button" data-route="home">‹ 내 지갑으로</button>
+            <div class="page-head"><h1>내 영상을, 필요한 병원에.</h1><p>공유할 검사와 병원을 선택해 주세요.</p></div>
+            <div class="sharing-open-wallet"><div class="sharing-paper"><span class="sharing-leather-tab" aria-hidden="true">Medi Q</span><div class="sharing-compose">
+            <section class="sharing-new"><h2>영상 전달 카드</h2><p>검사 선택 → 공유 설정 → 내용 확인</p>
+              <details id="sharing-study-picker" class="sharing-study-picker"><summary id="sharing-study-preview" class="sharing-study-preview" aria-label="공유할 검사 확인 및 변경"></summary><label>공유할 검사<select id="sharing-study" aria-label="새 공유 검사 선택"></select></label></details>
+              <div class="sharing-draft"><label>받는 병원<select id="sharing-target" aria-label="새 공유 수신 병원 선택"></select></label></div>
+              <div class="sharing-draft sharing-conditions"><label>공유 목적<select id="sharing-purpose" aria-label="새 공유 목적"><option value="TREATMENT">진료</option><option value="TRANSFER" selected>전원</option><option value="CONSULTATION">협진</option></select></label><label>허용 작업<select id="sharing-permission" aria-label="새 공유 허용 작업"><option value="VIEW_ONLY" selected>영상 열람만</option><option value="DOWNLOAD_ALLOWED">열람·다운로드 허용</option></select></label></div>
+              <p id="sharing-permission-hint" class="sharing-note">다운로드는 허용하지 않아요.</p>
+              <h3>공유 기간</h3><div id="sharing-period-options" class="sharing-period-options" role="group" aria-label="공유 기간 빠른 선택"></div>
+              <div class="sharing-draft sharing-conditions"><label>공유 시작<input id="sharing-from" type="datetime-local" aria-label="새 공유 시작 시각"></label><label>공유 종료<input id="sharing-until" type="datetime-local" aria-label="새 공유 종료 시각"></label></div>
+              <details class="sharing-environment"><summary>시연 환경 및 이용 안내</summary><p>시각은 현재 기기의 시간대 기준입니다. 연구용 공유는 별도 가명처리·반출 절차가 필요합니다.</p><p>MVP에 설정된 가상 병원 목록입니다. 병원의 등록·활성 상태와 이용 권한, 허용 기간은 서버에서 확인합니다.</p></details>
+            </section>
+            <aside class="sharing-summary"><span class="sharing-preparing">승인 전</span><h2 id="sharing-summary-title">받는 병원을 선택해 주세요</h2><p class="sharing-summary-route" id="sharing-summary-route">내 영상 → 받을 병원</p><h3 id="sharing-summary-exam" class="sharing-summary-exam">검사 선택</h3><dl id="sharing-summary-values"></dl><div class="sharing-summary-period"><span>공유 기간</span><strong id="sharing-summary-period"></strong><details><summary>정확한 시각 확인</summary><p id="sharing-summary-times"></p><p>현재 기기의 시간대 기준입니다.</p></details></div><div class="sharing-summary-action"><button id="sharing-prepare" type="button" class="btn primary" disabled>공유 내용 확인하기</button><p id="sharing-draft-status" role="status"></p><small>아직 공유되지 않았어요. 다음 단계에서 승인합니다.</small></div></aside></div>
+            </div></div><section class="sharing-existing"><h2>이미 공유한 영상</h2><div id="sharing-current"></div><details><summary>지난 공유 보기</summary><div id="sharing-past"></div></details></section>
+            <p class="sharing-note">합성 환자·비임상 시연 환경. 실제 영상 접근에는 서버 권한 검증이 필요합니다.</p>
+          </section>
+          <section class="page share-review" data-page="consent" hidden>
+            <button class="share-back" type="button" data-route="home">← 홈으로</button>
             <div class="page-head">
               <div>
-                <div class="eyebrow">Step 2. Patient Consent</div>
-                <h1>2. 영상 전송 동의 및 제출</h1>
-                <p>환자가 직접 제공 병원, 수신 병원, 대상 영상(Study), 목적, 기간, 권한을 설정하고 전송을 승인합니다.</p>
+                <h1><span id="share-patient-name">환자</span>님,<br>이 내용으로 공유할까요?</h1>
+                <p>받는 병원과 이용 범위를 확인해 주세요.</p>
               </div>
             </div>
+            <p id="share-previous-notice" class="share-notice" role="status" hidden></p>
+            <div class="share-ticket">
+              <section class="share-exam"><span class="share-ticket-icon" aria-hidden="true">▤</span><p>내가 공유할 검사</p><h2 id="share-exam-title">검사 확인 중</h2><p id="share-exam-meta"></p><p id="share-exam-count"></p><small>합성 시연 영상 · 비진단용</small></section>
+              <section class="share-destination"><p>이 검사를 받을 곳</p><h2 id="share-hospital"></h2><label>받는 병원<select id="target-hospital-select" class="select" aria-label="수신 병원 선택"><option value="HOSP-B" selected>B대학병원</option><option value="HOSP-C">가상 병원 C</option><option value="HOSP-A">A대학병원</option></select></label><p id="share-purpose"></p><span>승인된 범위에서만 이용할 수 있어요. 병원 변경 시 확인란을 다시 선택해야 합니다.</span></section>
+            </div>
+            <div id="share-health-picker"></div>
+            <p id="share-health-summary">함께 전달하는 건강기록 없음</p>
+            <div class="share-boundaries"><section><h3>✓ 허용하는 것</h3><p>선택한 검사 범위의 영상 열람</p><p id="share-allow-download"></p><p>수신 병원의 권한이 확인된 의료진 접근</p></section><section><h3>− 허용하지 않는 것</h3><p>선택하지 않은 검사·시리즈 접근</p><p id="share-deny-download"></p><p>기간 종료·공유 중단 후 새로운 접근</p></section></div>
+            <section class="share-period"><h3>공유 기간</h3><p id="share-period-value"></p><small>표시 시간은 현재 브라우저의 시간대 기준입니다.</small></section>
 
             <div class="dashboard-grid">
               <section class="panel panel-pad">
-                <div class="panel-head">
-                  <h2>공유 내용 확인</h2>
-                  <span class="status teal">Fail-Closed 통제</span>
-                </div>
+                <details class="share-edit"><summary>병원·검사 범위·권한·기간 변경</summary>
                 <div class="hp-consent-grid">
                   <label style="display:grid;gap:4px;">
                     <span style="font-size:12px;font-weight:700;">제공 병원 (Source Hospital)</span>
@@ -320,14 +359,6 @@
                       <option value="HOSP-A" selected>가상 병원 A (Orthanc PACS)</option>
                       <option value="HOSP-B">가상 병원 B</option>
                       <option value="HOSP-C">가상 병원 C</option>
-                    </select>
-                  </label>
-                  <label style="display:grid;gap:4px;">
-                    <span style="font-size:12px;font-weight:700;">수신 병원 (Target Hospital)</span>
-                    <select id="target-hospital-select" class="select" aria-label="수신 병원 선택">
-                      <option value="HOSP-B" selected>B대학병원</option>
-                      <option value="HOSP-C">가상 병원 C</option>
-                      <option value="HOSP-A">가상 병원 A</option>
                     </select>
                   </label>
                   <label style="display:grid;gap:4px;">
@@ -340,13 +371,14 @@
                       <option value="">Study 전체</option>
                     </select>
                   </label>
+                </div></details>
+                <section class="share-review-settings"><h3>이용 조건 다시 확인</h3><div class="hp-consent-grid">
                   <label style="display:grid;gap:4px;">
-                    <span style="font-size:12px;font-weight:700;">공유 목적 (Purpose)</span>
+                    <span style="font-size:12px;font-weight:700;">공유 목적</span>
                     <select id="access-purpose-select" class="select" aria-label="공유 목적 선택">
                       <option value="TREATMENT" selected>진료 (TREATMENT)</option>
                       <option value="TRANSFER">전원 (TRANSFER)</option>
                       <option value="CONSULTATION">협진 (CONSULTATION)</option>
-                      <option value="RESEARCH">연구 (RESEARCH)</option>
                     </select>
                   </label>
                   <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
@@ -367,11 +399,16 @@
                     </select>
                   </label>
 
+                </div>
+                </section>
+                  <label class="share-ack"><input id="share-review-ack" type="checkbox"> <span>받는 병원·검사 범위·권한·기간을 확인했습니다.</span></label>
+                  <p class="share-disclaimer">공유를 중단하면 이후 접근이 차단됩니다. 이미 열람하거나 허용된 방식으로 저장된 자료까지 회수되는 것은 아닙니다.</p>
                   <div class="hp-consent-actions">
-                    <button id="patient-consent" class="btn primary" type="button" style="flex:1;">동의하고 QR 발급</button>
+                    <button class="btn" type="button" data-route="home">돌아가기</button>
+                    <button id="patient-consent" class="btn primary" type="button" disabled>내용을 확인하고 공유 승인</button>
                     <button id="patient-revoke" class="btn" type="button" style="color:var(--red);border-color:var(--red-soft);">전송 동의 철회</button>
                   </div>
-                </div>
+                  <p class="share-caption" role="status" id="share-review-status">승인 후 서버 확인을 거쳐 QR가 발급됩니다.</p>
               </section>
 
               <aside class="stack">
@@ -424,27 +461,23 @@
 
           <!-- 1.7 Patient Access Receipts (SPEC-02) -->
           <section class="page" data-page="activity" hidden>
-            <div class="page-head">
-              <div>
-                <div class="eyebrow">Step 3. Transfer Status &amp; Receipts</div>
-                <h1>공유 동의와 이력</h1>
-                <p>내가 동의한 병원과 유효기간을 확인하고, 더 이상 공유하지 않을 때 동의를 철회할 수 있습니다.</p>
+            <div class="history-layout">
+              <div class="history-main">
+                <header class="history-heading"><h1>내 영상이 이어준 진료.</h1><p>내가 허용한 공유와 이용 조건을 확인하세요.</p></header>
+                <div class="history-tools">
+                  <div class="history-filters" role="group" aria-label="공유 이력 필터">
+                    <button type="button" data-history-filter="ALL" aria-pressed="true">전체</button>
+                    <button type="button" data-history-filter="ACTIVE" aria-pressed="false">유효한 공유</button>
+                    <button type="button" data-history-filter="ENDED" aria-pressed="false">종료된 공유</button>
+                  </div>
+                  <input id="history-search" type="search" placeholder="병원·검사 검색" aria-label="공유 이력 병원·검사 검색">
+                </div>
+                <button id="patient-receipts-refresh" class="btn small" type="button">기록 새로 확인</button>
+                <p id="history-feedback" class="history-feedback" role="status">본인 동의 정보입니다. 병원의 상세 접수·열람 기록은 아직 연동되지 않았습니다.</p>
+                <div id="history-list"></div>
               </div>
-              <div class="head-actions">
-                <button id="patient-receipts-refresh" class="btn small" type="button">새로고침</button>
-              </div>
+              <aside id="history-detail" class="history-detail" aria-label="선택한 공유 상세" hidden></aside>
             </div>
-
-            <!-- Active Transfer Banner (Real-time Consent & Instant Revoke) -->
-            <div id="patient-active-transfer-banner"></div>
-
-            <div class="panel-head" style="margin-top:20px;">
-              <div>
-                <h2>내 동의 기록</h2>
-                <div class="subtle">서버에서 확인한 본인 동의 상태입니다. 의료진의 상세 열람 이력은 별도 연결이 필요합니다.</div>
-              </div>
-            </div>
-            <div id="patient-receipts-list" class="stack" aria-live="polite"></div>
           </section>
 
           <!-- 1.8 Notifications -->
@@ -520,15 +553,31 @@
         </div>
 
         <div>
-          <div class="mq-page-kicker" id="mq-breadcrumb">Hospital Portal / Dashboard</div>
-          <div class="mq-page-title" id="mq-header-title">병원 워크스테이션 콘솔</div>
+          <div class="mq-page-kicker" id="mq-breadcrumb">Clinical Desk / Home</div>
+          <div class="mq-page-title" id="mq-header-title">진료 홈</div>
         </div>
 
         <div class="mq-context" aria-label="의료진 컨텍스트">
-          <details class="desk-utilities"><summary>도구</summary><div>
+          <button class="mq-btn demo-tools-trigger" id="open-clinician-tools" type="button" aria-haspopup="dialog" aria-controls="clinician-tools">▣ 시연도구</button>
+          <dialog id="clinician-tools" aria-labelledby="clinician-tools-title">
+          <header class="demo-tools-heading"><div><span class="demo-tools-eyebrow">합성 데이터 · 시연 환경</span><h2 id="clinician-tools-title">시연도구</h2></div><button class="demo-tools-close" type="button" aria-label="시연도구 닫기">×</button></header>
+          <p class="demo-tools-intro">발표에 필요한 확인 도구를 모았어요.</p>
+          <section class="demo-tools-section"><h3>화면 이동</h3><div class="demo-tools-switch"><button type="button" data-persona="PATIENT">환자 화면</button><button type="button" data-view-jump="dashboard">의료진 홈</button><button type="button" data-view-jump="admin">운영 관제</button></div><small>화면 이동 후에도 로그인한 계정의 권한이 적용됩니다.</small></section>
+          <section class="demo-tools-current"><span>현재 선택한 공유</span><strong id="demo-tools-patient">공유 정보를 확인하고 있습니다</strong><small id="demo-tools-consent">서버 응답 대기</small></section>
+          <section class="demo-tools-section"><h3>검증 도구</h3><div class="demo-tools-list">
+          <button type="button" data-view-jump="pacs-archive"><span class="demo-tool-icon" aria-hidden="true">▤</span><span><strong>전송 확인</strong><small>PACS 수신함 · 반입 결과</small></span><span aria-hidden="true">↗</span></button>
+          <button type="button" data-view-jump="exchange"><span class="demo-tool-icon" aria-hidden="true">⇄</span><span><strong>영상 보안 여정</strong><small>8개 관문으로 이해하는 보안 요소</small></span><span aria-hidden="true">↗</span></button>
+          <button type="button" data-view-jump="audit"><span class="demo-tool-icon" aria-hidden="true">≡</span><span><strong>보안 타임라인</strong><small>실제 기록 · 허용과 거부의 이유</small></span><span aria-hidden="true">↗</span></button>
+          </div></section>
+          <details class="demo-extra-tools"><summary>추가 시연 기능</summary><div>
+          <button id="btn-simulate-qr-scan" class="mq-btn" type="button">QR 인식 시뮬레이션</button>
           <a href="/mobile/" target="_blank" class="mq-btn small" style="text-decoration:none;display:inline-flex;align-items:center;gap:5px;background:#0284c7;color:#fff;font-weight:600;margin-right:8px;border:none;"><span>📱</span> 환자 모바일 앱</a>
           <button id="btn-trigger-break-glass" class="mq-btn small" type="button" style="display:inline-flex;align-items:center;gap:4px;background:#b91c1c;color:#fff;font-weight:700;margin-right:8px;border:none;"><span>🚨</span> 응급 비상 열람</button>
           </div></details>
+          <div id="demo-tools-status"></div>
+          <details class="demo-extra-tools" id="demo-tools-checklist"><summary>영상 열람 확인 기준</summary></details>
+          <button class="mq-btn demo-tools-refresh" id="demo-tools-refresh" type="button">↻ 상태 새로고침</button>
+          </dialog>
           <div class="mq-context-chip">B대학병원 · 의료진</div>
           <div class="mq-context-chip">합성 데이터 · 비운영 시연</div>
         </div>
@@ -538,138 +587,131 @@
         <aside class="mq-sidebar" aria-label="SaaS 화면 선택">
           <div class="mq-nav-group">
             <div class="mq-nav-label">의료진 워크스페이스</div>
-            <button class="mq-nav active" type="button" data-view="studies" aria-selected="true">진료 데스크</button>
-            <button class="mq-nav" type="button" data-view="viewer" aria-selected="false">영상 작업실</button>
-            <button class="mq-nav" type="button" data-view="qr" aria-selected="false"><span></span> QR 연결</button>
+            <button class="mq-nav active" type="button" data-view="dashboard" aria-selected="true" aria-current="page">진료 준비</button>
+            <button class="mq-nav" type="button" data-view="records" aria-selected="false">환자 기록</button>
+            <button class="mq-nav" type="button" data-view="viewer" aria-selected="false">환자 영상</button>
+            <button class="mq-nav" type="button" data-view="qr" aria-selected="false">공유 접수</button>
+            <button class="mq-nav" type="button" data-view="transfer" aria-selected="false">병원 보관함</button>
+          </div>
+
+          <div class="mq-nav-group" hidden>
+            <div class="mq-nav-label">보안 및 운영</div>
             <button class="mq-nav" type="button" data-view="exchange" aria-selected="false"><span></span> 교류 상태</button>
             <button class="mq-nav" type="button" data-view="audit" aria-selected="false"><span></span> 감사 이력</button>
             <button class="mq-nav" type="button" data-view="pacs-archive" aria-selected="false"><span></span> PACS 수신함</button>
-          </div>
-
-          <div class="mq-nav-group">
-            <div class="mq-nav-label">상태 및 관리</div>
-            <button class="mq-nav" type="button" data-view="dashboard" aria-selected="false"><span>📊</span> 종합 대시보드</button>
             <button class="mq-nav" type="button" data-view="admin" aria-selected="false"><span>🛡️</span> 플랫폼·보안 관리</button>
           </div>
         </aside>
 
         <main class="mq-main" id="clinician-main" tabindex="-1">
-          <!-- 2.5 SaaS Dashboard -->
-          <section class="mq-screen" data-screen="dashboard" hidden>
-            <div class="mq-toolbar">
-              <div class="mq-title">
-                <h2>Hospital B Clinical Dashboard</h2>
-                <p>외부 병원(가상 병원 A)으로부터 의뢰된 환자 영상 교류 현황을 실시간 모니터링합니다.</p>
+          <div id="demo-tool-return" hidden><span>시연도구 / <strong id="demo-tool-name"></strong></span><button type="button" class="mq-btn" data-view-jump="dashboard">진료 준비로 돌아가기</button></div>
+          <!-- Clinical home: an action-first clinician start page, separate from patient wallet UI. -->
+          <section class="mq-screen clinician-home" id="clinical-home" data-screen="dashboard">
+            <div class="clinical-home-hero">
+              <div class="clinical-home-intro">
+                <span class="clinical-home-kicker"><span class="clinical-home-kicker-mark" aria-hidden="true"></span> B대학병원 · 의료진</span>
+                <h2>다음 진료를 준비하세요.</h2>
+                <p>전달받은 기록과 영상을 한곳에서 확인하세요.</p>
+                <div class="clinical-home-actions">
+                  <button class="mq-btn mq-btn-primary" type="button" data-view-jump="studies">전달된 검사 확인 <span aria-hidden="true">↗</span></button>
+                  <button class="mq-btn" type="button" data-view-jump="qr">QR 접수 열기</button>
+                </div>
+                <div class="clinical-home-trust"><span aria-hidden="true">✓</span> 영상 열기 직전에도 서버가 권한을 다시 확인합니다</div>
               </div>
-              <div class="mq-actions">
-                <button class="mq-btn small" type="button" data-view-jump="pacs-archive" style="margin-right:6px;">📥 원내 PACS 수신함</button>
-                <button class="mq-btn mq-btn-primary" type="button" data-view-jump="exchange">교류 상태 상세</button>
-              </div>
+              <aside class="clinical-home-first-step" aria-label="영상 열람 전 확인 항목">
+                <div class="clinical-home-step-top"><span>영상 열기 전 확인</span><span class="clinical-home-lock-label">서버 검증</span></div>
+                <h3>네 가지가 맞아야<br>영상이 열립니다.</h3>
+                <ul class="clinical-home-checklist">
+                  <li><span aria-hidden="true">01</span><span><strong>받는 병원</strong><small>환자가 지정한 기관</small></span></li>
+                  <li><span aria-hidden="true">02</span><span><strong>진료 목적</strong><small>승인된 사용 목적</small></span></li>
+                  <li><span aria-hidden="true">03</span><span><strong>검사 범위</strong><small>Study · Series 권한</small></span></li>
+                  <li><span aria-hidden="true">04</span><span><strong>유효 시간</strong><small>동의와 단기 접근권한</small></span></li>
+                </ul>
+                <button type="button" data-view-jump="studies">검사와 동의 확인하기 <span aria-hidden="true">↗</span></button>
+              </aside>
             </div>
 
-            <div class="mq-grid">
-              <article class="mq-card mq-span-3">
-                <div class="mq-metric">
-                  <div>
-                    <div class="mq-label">영상검사 (Studies)</div>
-                    <div class="mq-metric-value" id="metric-studies">0</div>
-                    <div class="mq-muted">Orthanc 가상 PACS</div>
-                  </div>
-                  <div class="mq-iconbox">📁</div>
-                </div>
-              </article>
-              <article class="mq-card mq-span-3">
-                <div class="mq-metric">
-                  <div>
-                    <div class="mq-label">환자 동의 상태 (Consent)</div>
-                    <div class="mq-metric-value" id="saas-metric-consent-status" style="font-size:22px;">대기</div>
-                    <div class="mq-muted" id="saas-metric-consent-sub">환자 동의 확인 필요</div>
-                  </div>
-                  <div class="mq-iconbox">📋</div>
-                </div>
-              </article>
-              <article class="mq-card mq-span-3">
-                <div class="mq-metric">
-                  <div>
-                    <div class="mq-label">감사로그 (Audit)</div>
-                    <div class="mq-metric-value" id="metric-logs">0</div>
-                    <div class="mq-muted">기록된 보안 이벤트</div>
-                  </div>
-                  <div class="mq-iconbox">📜</div>
-                </div>
-              </article>
-              <article class="mq-card mq-span-3">
-                <div class="mq-metric">
-                  <div>
-                    <div class="mq-label">전송량 (Transfer)</div>
-                    <div class="mq-metric-value" id="metric-transfer">0 MB</div>
-                    <div class="mq-muted">누적 DICOM 전송량</div>
-                  </div>
-                  <div class="mq-iconbox">📶</div>
-                </div>
-              </article>
-
-              <article class="mq-card mq-span-8">
-                <div class="mq-card-head">
-                  <h3>최근 영상 교류 및 동의 현황 (실시간 연동)</h3>
-                  <button class="mq-link" type="button" data-view-jump="studies">전체 보기</button>
-                </div>
+            <section class="clinical-patient-board" aria-label="지금 준비할 환자">
+              <span>지금 준비할 환자</span><h3 id="home-selected-name">환자 정보를 확인하고 있습니다</h3>
+              <p id="home-selected-source">공유 정보를 확인해 주세요</p>
+              <div class="clinical-document-grid">
+                <button type="button" data-view-jump="studies"><span class="clinical-document-icon" aria-hidden="true">▣</span><span><strong id="home-selected-study">공유받은 영상</strong><small>영상 열람 전 권한 확인</small></span><span aria-hidden="true">↗</span></button>
+                <button type="button" data-view-jump="records"><span class="clinical-document-icon" aria-hidden="true">▤</span><span><strong>공유받은 건강기록</strong><small>승인된 검사 기록 확인</small></span><span aria-hidden="true">↗</span></button>
+              </div>
+            </section>
+            <section class="clinical-home-latest" aria-label="최근 공유와 바로가기">
+              <article class="clinical-home-latest-card">
+                <div class="clinical-home-section-heading"><div><span>최근 공유</span><h3>환자 동의와 영상 전달</h3></div><button class="mq-link" type="button" data-view-jump="exchange">공유·접근 상태 보기 <span aria-hidden="true">↗</span></button></div>
                 <div class="mq-table-wrap">
                   <table>
-                    <thead>
-                      <tr>
-                        <th>환자 ID</th>
-                        <th>출처 병원</th>
-                        <th>수신 병원</th>
-                        <th>목적</th>
-                        <th>권한</th>
-                        <th>동의 상태</th>
-                        <th>작업</th>
-                      </tr>
-                    </thead>
-                    <tbody id="saas-recent-exchange-rows">
-                      <tr>
-                        <td><strong data-scenario-patient>환자 확인 중</strong></td>
-                        <td>가상 병원 A</td>
-                        <td>가상 병원 B</td>
-                        <td>TREATMENT</td>
-                        <td>VIEW_ONLY</td>
-                        <td><span class="mq-badge mq-badge-warn">대기 (PENDING)</span></td>
-                        <td><button class="mq-btn small" type="button" data-view-jump="exchange">파이프라인 확인</button></td>
-                      </tr>
-                    </tbody>
+                    <thead><tr><th>환자 번호</th><th>보낸 병원</th><th>받는 병원</th><th>공유 목적</th><th>허용 범위</th><th>동의 상태</th><th>다음 행동</th></tr></thead>
+                    <tbody id="saas-recent-exchange-rows"><tr><td colspan="7">서버에서 선택된 공유 정보를 확인하고 있습니다.</td></tr></tbody>
                   </table>
                 </div>
               </article>
+              <aside class="clinical-home-quick-links" aria-label="의료진 메뉴 바로가기">
+                <span>다음 행동으로 빠르게</span>
+                <button type="button" data-view-jump="studies"><span class="clinical-quick-index" aria-hidden="true">01</span><span><strong>공유된 검사 보기</strong><small>환자가 허용한 영상 범위 확인</small></span><b aria-hidden="true">↗</b></button>
+                <button type="button" data-view-jump="records"><span class="clinical-quick-index" aria-hidden="true">02</span><span><strong>환자 기록 보기</strong><small>별도로 공유된 건강기록 확인</small></span><b aria-hidden="true">↗</b></button>
+              </aside>
+            </section>
 
-              <article class="mq-card mq-span-4">
-                <div class="mq-card-head">
-                  <h3>시스템 및 Gateway 상태</h3>
-                  <span class="mq-badge mq-badge-good">ONLINE</span>
-                </div>
-                <div class="mq-statline"><span>가상 병원 A Gateway</span><span class="mq-badge mq-badge-good">ONLINE</span></div>
-                <div class="mq-statline"><span>가상 병원 B Gateway</span><span class="mq-badge mq-badge-good">ONLINE</span></div>
-                <div class="mq-statline"><span>단기 토큰 발급기</span><span class="mq-badge mq-badge-good">ACTIVE (5분)</span></div>
-                <div class="mq-callout" style="margin-top:12px">
-                  <p>의료영상 원본은 클라우드 중앙에 저장되지 않으며, 출처 병원 Gateway를 통해 온디맨드로 스트리밍됩니다.</p>
-                </div>
-              </article>
-            </div>
+            <section class="clinical-home-flow" aria-label="진료 진행 순서">
+              <div class="clinical-home-section-heading"><div><span>한 번에 한 단계</span><h3>접수에서 영상까지, 헷갈리지 않게</h3></div><p>화면의 동의 표시는 서버 접근 허가를 대신하지 않습니다.</p></div>
+              <div class="clinical-home-flow-grid">
+                <button class="clinical-home-flow-step" type="button" data-view-jump="studies">
+                  <span class="clinical-flow-number">01</span><span class="clinical-flow-copy"><strong>검사 선택</strong><small>출처와 전달된 Study 확인</small></span><span class="clinical-flow-arrow" aria-hidden="true">↗</span>
+                </button>
+                <button class="clinical-home-flow-step" type="button" data-view-jump="exchange">
+                  <span class="clinical-flow-number">02</span><span class="clinical-flow-copy"><strong>동의·권한 확인</strong><small>기관·목적·기간·범위 재검증</small></span><span class="clinical-flow-arrow" aria-hidden="true">↗</span>
+                </button>
+                <button class="clinical-home-flow-step" type="button" data-view-jump="studies">
+                  <span class="clinical-flow-number">03</span><span class="clinical-flow-copy"><strong>영상 확인</strong><small>허용된 범위만 Viewer에서 열기</small></span><span class="clinical-flow-arrow" aria-hidden="true">↗</span>
+                </button>
+              </div>
+            </section>
+
+            <section class="clinical-home-status" aria-label="현재 연결 상태">
+              <div class="clinical-home-section-heading clinical-status-heading"><div><span>실시간 상태</span><h3>연결과 동의 현황</h3></div><span class="clinical-home-demo-tag">합성 데이터 · 비운영 시연</span></div>
+              <div class="clinical-home-metrics">
+                <article><span class="clinical-metric-label">전달된 검사</span><strong id="metric-studies">—</strong><small>현재 조회된 환자 목록</small></article>
+                <article><span class="clinical-metric-label">환자 동의</span><strong id="saas-metric-consent-status">확인 중</strong><small id="saas-metric-consent-sub">서버 응답을 기다리고 있습니다</small></article>
+                <article><span class="clinical-metric-label">감사 기록</span><strong id="metric-logs">—</strong><small>확인된 보안 이벤트</small></article>
+                <article><span class="clinical-metric-label">API · DB 상태</span><strong id="metric-health">확인 중</strong><small>실제 health 응답 기준</small></article>
+              </div>
+              <p class="clinical-home-status-note"><span aria-hidden="true">i</span> 상태가 확인되지 않으면 접근 가능으로 간주하지 않습니다. 검사 열람 시 서버에서 다시 검증합니다.</p>
+            </section>
+
           </section>
 
           <!-- 2.3 5-Step Exchange Pipeline -->
           <section class="mq-screen" data-screen="exchange" hidden>
+            <div id="image-journey" class="image-journey">
+              <header class="journey-heading"><div><h2>영상 보안 여정</h2><p>8개의 관문으로 이해하는 안전한 공유</p></div><div class="journey-notice"><strong>설명용 예시</strong><span>실제 실행 결과와 구분한 보안 절차 안내입니다.</span></div></header>
+              <section data-journey-overview class="journey-overview"><h3>8개의 관문으로 지키는 내 영상</h3><p>궁금한 관문을 골라 살펴보세요. 누구인지 확인하는 순간부터 공유가 끝날 때까지.</p><div data-journey-gallery class="journey-gallery"></div><button type="button" data-journey-start class="journey-start">첫 관문 살펴보기 →</button></section>
+              <div data-journey-controls class="journey-controls" hidden><div role="group" aria-label="설명할 영상 여정"><button type="button" data-journey-mode="view" aria-pressed="true">▷ 영상 열기</button><button type="button" data-journey-mode="store" aria-pressed="false">▤ 병원에 보관</button></div><div><button type="button" data-journey-home>전체 관문</button><button type="button" data-journey-reset>처음부터 설명</button><button type="button" data-journey-previous>이전 관문</button><button type="button" data-journey-next>다음 관문 →</button></div></div>
+              <div data-journey-detail class="journey-layout" hidden>
+                <div class="journey-stage">
+                  <figure class="journey-illustration"><img data-journey-image width="1536" height="1024" decoding="async" alt=""><p data-journey-image-error hidden>예시 이미지를 불러오지 못했습니다. 관문 설명은 아래에서 확인할 수 있습니다.</p><figcaption>보안 절차를 이해하기 위한 예시 이미지</figcaption></figure>
+                  <ol data-journey-steps class="journey-steps" aria-label="8개 보안 관문 선택"></ol>
+                </div>
+                <aside class="journey-explanation"><h3>지금 무슨 일이 일어나나요?</h3><div role="status" aria-live="polite"><span data-journey-status class="journey-current"></span><h4 data-journey-title></h4><p data-journey-description></p></div><dl class="journey-gate-facts"><dt>막는 것</dt><dd data-gate-block></dd><dt>적용 위치</dt><dd data-gate-where></dd><dt>기술 이름</dt><dd data-gate-tech></dd><dt>적용 범위와 확인 한계</dt><dd data-gate-limit></dd></dl><p>최신 배포 검증: 이 화면에서 확인하지 않음</p><p>원본은 A병원에 남아 있어요.</p><details><summary>기술 정보 펼치기</summary><p>Control은 동의·권한·최소 메타데이터를 관리합니다. 영상은 병원 Gateway 경로로 전달됩니다.</p><p>로컬 보관 시뮬레이터와 분산 Key Vault 경로는 다릅니다. 이 설명은 해당 환경의 암호화·무결성·감사 검증을 대신하지 않습니다.</p></details></aside>
+              </div>
+              <section class="journey-audit-rail"><h3>모든 주요 행위를 따라가는 기록</h3><p>동의 생성 · 접근 허용/거부 · 토큰 발급 · 영상 조회 · 보관/삭제</p><button type="button" data-view-jump="audit">보안 타임라인에서 확인</button><small>기존 열람 권한으로 조회합니다. 현재 설명과 동일 실행으로 자동 연결되지는 않습니다.</small></section><section class="journey-lifecycle"><h3>보관한 뒤에도, 보호는 계속됩니다 <small>보관 모드 안내</small></h3><ol><li>보관 완료</li><li>접근 가능 기간</li><li>만료·철회</li><li>접근 차단</li><li>삭제 처리</li><li>삭제 확인</li></ol><p>접근 차단과 삭제 완료는 서로 다른 상태입니다. 아래 단계는 실제 삭제 결과가 아닌 정책 설명입니다.</p></section>
+              <details data-journey-scenarios-panel class="journey-scenarios" hidden><summary>멈추는 상황도 설명해 볼까요?</summary><div role="group" aria-label="설명용 상황"><button type="button" data-journey-scenario="normal" aria-pressed="true">정상 흐름</button><button type="button" data-journey-scenario="denied" aria-pressed="false">권한 거부 예시</button><button type="button" data-journey-scenario="unavailable" aria-pressed="false">응답 실패 예시</button></div><p>설명만 전환합니다. 실제 토큰 변조·동의 철회·접근 요청을 실행하지 않습니다.</p></details>
+            </div>
+            <details class="journey-existing"><summary>기존 공유 정보와 실제 요청 도구</summary><p>아래 도구는 설명 재생과 별개입니다. 버튼을 누르면 기존 서버 검증 경로로 실제 요청합니다.</p>
             <div class="mq-toolbar">
               <div class="mq-title">
-                <h2>3. 5단계 교류 파이프라인 (Interactive Pipeline)</h2>
-                <p>환자 동의 → 정책 검증 → 단기 토큰 → DICOMweb 전송 → 감사 기록의 전 과정을 단계별로 검증합니다.</p>
+                <h2>선택한 공유의 현재 정보</h2>
+                <p>화면의 공유 정보만으로 전송·암호화·감사 완료를 판정하지 않습니다.</p>
               </div>
               <div class="mq-actions">
-                <span id="pipeline-overall-status" class="mq-badge mq-badge-warn">동의 대기</span>
+                <span id="pipeline-overall-status" class="mq-badge mq-badge-warn" hidden>동의 대기</span>
               </div>
             </div>
 
-            <div class="interactive-pipeline-card">
+            <div class="interactive-pipeline-card" hidden>
               <div class="panel-head">
                 <div>
                   <h3 style="margin:0;">Medi Q 의료영상 공유 흐름</h3>
@@ -713,7 +755,7 @@
               <article class="mq-card mq-span-4">
                 <div class="mq-card-head">
                   <h3>환자 매핑 (Patient)</h3>
-                  <span class="mq-badge mq-badge-good">VALID</span>
+                  <span class="mq-badge mq-badge-unknown">표시 정보</span>
                 </div>
                 <div class="mq-statline"><span class="mq-muted">환자</span><strong data-scenario-patient>로그인 후 표시</strong></div>
                 <div class="mq-statline"><span class="mq-muted">수신 병원</span><strong>B대학병원</strong></div>
@@ -748,15 +790,17 @@
                 </div>
               </article>
             </div>
+            </details>
           </section>
 
           <!-- 2.1 Received Studies (Primary Clinical Workspace) -->
-          <section class="mq-screen" id="clinical-desk" data-screen="studies">
+          <section class="mq-screen" data-screen="records" hidden><div id="clinician-health-records"></div></section>
+          <section class="mq-screen" id="clinical-desk" data-screen="studies" hidden>
             <div class="mq-toolbar">
               <div class="mq-title">
                 <span class="desk-greeting">B대학병원 · 진료 데스크</span>
-                <h2>다음 진료, 매끄럽게.</h2>
-                <p>환자의 영상과 승인을 연결해 진료 준비를 이어가세요.</p>
+                <h2>전달된 자료로, 다음 진료를 준비해요.</h2>
+                <p>검사를 고르고, 공유 범위를 확인한 뒤 영상을 열어보세요.</p>
               </div>
               <div class="mq-actions">
                 <button id="load-studies" class="mq-btn" type="button">상태 새로고침</button>
@@ -774,7 +818,7 @@
               </section>
               <div class="mq-clinical-list">
                 <div class="mq-card">
-                  <div class="desk-section-head"><h3>환자의 검사</h3><span>확인할 검사를 선택하세요</span></div>
+                  <div class="desk-section-head"><h3>전달받은 검사</h3><span>서버가 제공한 목록</span></div>
                   <div class="mq-clinical-filters">
                     <label>검사 검색<input id="clinician-search" type="search" placeholder="검사명, CT·MRI, 검사일, 출처 병원" autocomplete="off"></label>
                     <label>동의 상태<select id="clinician-filter"><option value="all">전체</option><option value="active">동의 유효</option><option value="attention">확인 필요</option></select></label>
@@ -784,9 +828,14 @@
                   <div id="doctor-series" class="stack" style="margin-top:16px;"></div>
                 </div>
               </div>
+              <aside class="prep-guide" aria-label="진료 준비 순서와 함께 볼 기록">
+                <section><h3>오늘의 진료 순서</h3><p>권한 확인부터 영상 열람까지, 필요한 단계만 따라가세요.</p><ol><li>환자와 출처 병원 확인</li><li>동의 목적·기간·범위 확인</li><li>접근 확인 후 영상 열기</li></ol><button class="mq-btn" type="button" data-view-jump="qr">공유 접수 확인</button></section>
+                <section class="prep-record-note"><h3>함께 볼 건강기록</h3><p>환자가 별도로 승인한 기록만 확인할 수 있습니다.</p><button class="mq-btn" type="button" data-view-jump="records">환자 기록 확인</button></section>
+                <section><h3>환자가 준비한 질문</h3><p>진료 질문 공유는 아직 연결되지 않았습니다. 개인 대화나 메모를 자동으로 가져오지 않습니다.</p></section>
+              </aside>
               <section class="desk-activity" aria-label="선택 검사 최근 이력"><div class="desk-section-head"><h3>이 검사에서 일어난 일</h3><button class="mq-btn" type="button" data-view-jump="audit">전체 이력</button></div><div id="desk-recent-activity"><p>선택한 검사의 기록을 확인하고 있습니다.</p></div></section>
             </div>
-            <dialog id="desk-details-dialog" aria-labelledby="desk-details-title"><div class="desk-drawer-heading"><div><span>현재 선택한 검사</span><h2 id="desk-details-title">공유 내용</h2></div><button id="desk-close-details" class="mq-btn" type="button" aria-label="공유 내용 닫기">닫기</button></div><p class="mq-clinical-note">동의와 실제 접근 허용은 별도로 확인합니다.</p><div id="clinician-study-detail"></div><div class="desk-drawer-actions"><button class="mq-btn" type="button" data-view-jump="qr">QR 병원 연결</button><button class="mq-btn" type="button" data-view-jump="transfer">PACS 반입 절차</button></div></dialog>
+            <dialog id="desk-details-dialog" aria-labelledby="desk-details-title"><div class="desk-drawer-heading"><div><span>현재 선택한 검사</span><h2 id="desk-details-title">공유 내용</h2></div><button id="desk-close-details" class="mq-btn" type="button" aria-label="공유 내용 닫기">닫기</button></div><p class="mq-clinical-note">동의와 실제 접근 허용은 별도로 확인합니다.</p><div id="clinician-study-detail"></div><div class="desk-drawer-actions"><button class="mq-btn" type="button" data-view-jump="qr">QR 병원 연결</button><button class="mq-btn" type="button" data-view-jump="transfer">병원 보관함</button></div></dialog>
           </section>
 
           <!-- 2.2 Cloud DICOM Viewer -->
@@ -876,67 +925,98 @@
           </section>
 
           <!-- 2.5 PACS Import (STOW-RS) -->
-          <section class="mq-screen" data-screen="transfer" hidden>
+          <section class="mq-screen import-workbench" data-screen="transfer" hidden>
             <div class="mq-toolbar">
               <div class="mq-title">
-                <h2>로컬 암호화 보관 시뮬레이터</h2>
-                <p>개발용 로컬 보관 기능입니다. 실제 STOW-RS 전송과 수신 PACS 등록은 NOT VERIFIED입니다.</p>
+                <h2>필요한 영상, 정해진 시간만.</h2>
+                <p>병원 보관함 · 로컬 암호화 보관 시연</p>
               </div>
               <div class="mq-actions">
                 <span id="pacs-import-status-pill" class="mq-badge mq-badge-unknown">대기</span>
-                <button class="mq-btn small" type="button" data-view-jump="pacs-archive" style="margin-left:8px;">원내 PACS 수신함 가기 📥</button>
+                <button class="mq-btn small" type="button" data-view-jump="pacs-archive">전송 확인 열기</button>
               </div>
             </div>
 
-            <div class="mq-grid">
-              <article class="mq-card mq-span-7">
+            <div class="import-workbench-grid">
+              <article class="import-checksheet">
+                <div class="vault-folder" aria-label="이번에 보관할 검사">
+                  <span class="vault-folder-tab">선택한 검사</span>
+                  <div class="vault-paper" aria-hidden="true"></div>
+                  <div class="vault-folder-face"><span id="vault-folder-modality">영상</span><h3 id="vault-folder-title">검사를 선택하세요</h3><small>환자가 허용한 범위 그대로</small></div>
+                </div>
+                <div class="import-step-label">01 · 보관 조건</div>
+                <h3 id="pacs-import-context">선택한 검사를 확인하세요</h3>
+                <p>진료 준비에서 선택한 검사와 동의를 사용합니다. 여기서 공유 범위를 넓히지 않습니다.</p>
                 <div class="mq-card-head">
-                  <h3>Mandatory Preflight Checks</h3>
-                  <button id="btn-preflight-check" class="mq-btn small" type="button">사전 검증 실행</button>
+                  <h4>실행 전 체크리스트</h4>
+                  <button id="btn-preflight-check" class="mq-btn small" type="button">조건 다시 확인</button>
                 </div>
-                <div class="pacs-check-grid">
-                  <div class="pacs-check-item"><span class="pacs-check-icon">✓</span><span>환자 동의 확인 (ACTIVE)</span></div>
-                  <div class="pacs-check-item"><span class="pacs-check-icon">✓</span><span>수신 병원 소속 일치 (HOSP-B)</span></div>
-                  <div class="pacs-check-item"><span class="pacs-check-icon">✓</span><span>출처 Gateway 가용성 (ONLINE)</span></div>
-                  <div class="pacs-check-item"><span class="pacs-check-icon">!</span><span>실제 수신 PACS 등록 미검증</span></div>
-                </div>
-                <div id="pacs-import-log" class="inline-notice" style="margin-top:14px;">Preflight 검증을 실행하세요.</div>
+                <ul id="pacs-local-checks" class="import-check-list"></ul>
+                <div class="import-boundary"><strong>화면 점검 ≠ 서버 승인</strong><p>Gateway 연결·현재 권한·무결성은 이 체크리스트로 검증되지 않습니다. 실행 시 기존 서버가 권한과 범위를 다시 검증합니다.</p></div>
+                <button class="mq-btn small" type="button" data-view-jump="dashboard">검사·공유 선택으로 돌아가기</button>
               </article>
 
-              <article class="mq-card mq-span-5">
-                <div class="mq-card-head">
-                  <h3>전송 무결성 및 수신 상태</h3>
-                </div>
-                <div class="mq-statline"><span>SHA-256 무결성</span><strong id="pacs-integrity-status">검증 대기</strong></div>
+              <article class="import-receipt">
+                <div class="import-step-label">02 · 요청과 결과</div>
+                <h3>언제까지 보관하나요?</h3>
+                <div class="vault-deadline"><span>이번 요청의 공유 종료</span><strong id="vault-consent-deadline">공유를 선택해 주세요</strong><small>보관 요청 시 서버가 확인한 종료 시각으로 고정합니다.</small></div>
+                <p>동의 철회·만료 후 접근을 차단하고 삭제를 처리합니다. 삭제 실패는 별도 상태로 표시합니다.</p>
+                <p class="vault-local-note">현재는 로컬 시뮬레이터입니다. VM B 저장·실제 PACS 등록 완료를 의미하지 않습니다.</p>
+                <details class="vault-receipt-details"><summary>작업 영수증 · 기술 정보</summary>
+                <div class="mq-statline"><span>서버 보고 해시</span><strong id="pacs-integrity-status">실행 전</strong></div>
                 <div class="mq-statline"><span>수신 병원 B 상태</span><strong id="pacs-destination-status">대기</strong></div>
                 <div class="mq-statline"><span>전송 결과</span><strong id="pacs-transfer-status">대기</strong></div>
-                <button id="btn-pacs-import-run" class="mq-btn mq-btn-primary" type="button" style="width:100%;margin-top:16px;" disabled>PACS 전송 실행</button>
-                <button id="btn-goto-pacs-archive" class="mq-btn small" type="button" data-view-jump="pacs-archive" style="width:100%;margin-top:8px;display:none;">원내 PACS 수신함 확인하기 📥</button>
+                </details>
+                <label class="import-confirm"><input id="pacs-import-confirm" type="checkbox">선택한 검사를 로컬에 보관하는 시뮬레이션임을 확인했습니다.</label>
+                <button id="btn-pacs-import-run" class="mq-btn mq-btn-primary" type="button" disabled>로컬 보관 요청</button>
+                <div id="pacs-import-log" class="import-result" role="status">조건 확인 후 요청할 수 있습니다.</div>
+                <button id="btn-goto-pacs-archive" class="mq-btn small" type="button" data-view-jump="pacs-archive" style="display:none;">보관 목록에서 결과 확인</button>
               </article>
             </div>
+            <section id="hospital-vault-list" class="vault-inventory" aria-labelledby="vault-list-heading">
+              <div class="vault-list-heading"><div><span class="import-step-label">03 · 보관 목록</span><h3 id="vault-list-heading">보관한 영상, 한눈에.</h3></div><button id="vault-refresh" class="mq-btn small" type="button">목록 새로고침</button></div>
+              <div class="vault-filters" role="group" aria-label="보관 상태 필터">
+                <button type="button" data-vault-filter="all" aria-pressed="true">전체</button>
+                <button type="button" data-vault-filter="stored" aria-pressed="false">보관 중</button>
+                <button type="button" data-vault-filter="deleting" aria-pressed="false">삭제 처리</button>
+                <button type="button" data-vault-filter="ended" aria-pressed="false">삭제 완료</button>
+                <button type="button" data-vault-filter="review" aria-pressed="false">확인 필요</button>
+              </div>
+              <p data-vault-status role="status">목록을 확인해 주세요.</p><ul data-vault-items></ul>
+            </section>
           </section>
 
           <!-- 2.5.1 Hospital B PACS Archive Workstation Screen -->
-          <section class="mq-screen" data-screen="pacs-archive" hidden>
+          <section class="mq-screen transfer-tracking-screen" data-screen="pacs-archive" hidden>
             <div class="mq-toolbar">
               <div class="mq-title">
-                <h2>6. B병원 원내 PACS 영구 아카이브 수신함 (HOSP-B Local Archive)</h2>
-                <p>환자의 명시적 동의(DOWNLOAD_ALLOWED)에 의해 원내 PACS 스토리지(<code>data/hospital-b-pacs/</code>)로 영구 이관·임포트된 정규 DICOM 아카이브입니다.</p>
+                <h2>전송 확인</h2>
+                <p>영상 열람부터 병원 보관까지, 확인된 단계만 정확하게.</p>
               </div>
               <div class="mq-actions" style="display:flex;gap:8px;align-items:center;">
-                <span class="mq-badge mq-badge-good" id="pacs-archive-path-badge">📁 data/hospital-b-pacs</span>
-                <span class="mq-badge mq-badge-good">🛡️ SHA-256 검증</span>
-                <span class="mq-badge mq-badge-good">🔒 AES-256-GCM 암호화 보관</span>
-                <button id="btn-refresh-pacs-archive" class="mq-btn mq-btn-primary small" type="button">🔄 새로고침</button>
+                <button id="btn-refresh-pacs-archive" class="mq-btn small" type="button">상태 다시 확인</button>
               </div>
             </div>
 
-            <!-- KPI Summary Cards -->
+            <article id="transfer-tracking" class="transfer-tracking">
+              <div class="tracking-heading"><span class="tracking-label">선택한 공유</span><h3 data-track="title" role="status">보관 기록을 확인하고 있어요.</h3><p data-track="study"></p></div>
+              <div class="tracking-route" aria-label="선택한 공유의 병원 경로">
+                <div class="tracking-hospital"><span>보내는 곳</span><strong data-track="source">제공 병원 미확인</strong><small>원본 영상 보관</small></div>
+                <div class="tracking-bridge"><span aria-hidden="true">→</span><small>동의 범위 안에서<br>서버 권한 확인</small></div>
+                <div class="tracking-hospital tracking-destination"><span>받는 곳</span><strong data-track="target">받는 병원 미확인</strong><small>열람과 반입을 구분</small></div>
+              </div>
+              <ol class="tracking-steps" data-track-steps aria-label="확인 단계"></ol>
+              <div class="tracking-evidence"><span aria-hidden="true">ⓘ</span><p data-track="note"></p></div>
+              <div class="tracking-actions"><button class="mq-btn" type="button" data-view-jump="dashboard">선택한 공유 확인</button><button class="mq-btn" type="button" data-track-tool data-view-jump="transfer" hidden>병원 보관함 열기</button><small>여기서는 전송을 자동 실행하지 않습니다.</small></div>
+              <div class="tracking-inventory">B병원 로컬 보관 목록 <strong data-track="count">—</strong>건 <span>전체 목록 · 선택한 공유의 전송 건수 아님</span></div>
+            </article>
+            <details class="tracking-details"><summary>로컬 보관 목록 및 기술 정보</summary>
+            <!-- Inventory totals, not delivery progress -->
             <div class="mq-grid" style="margin-bottom:16px;">
               <article class="mq-card mq-span-3">
                 <div class="mq-metric">
                   <div>
-                    <div class="mq-label">영구 보관 검사 (Studies)</div>
+                    <div class="mq-label">로컬 보관 검사</div>
                     <div class="mq-metric-value" id="kpi-archive-studies">0</div>
                     <div class="mq-muted">B병원 원내 아카이브</div>
                   </div>
@@ -958,7 +1038,7 @@
                   <div>
                     <div class="mq-label">원내 스토리지 점유량</div>
                     <div class="mq-metric-value" id="kpi-archive-bytes">0.0 MB</div>
-                    <div class="mq-muted">물리 디스크 실측 용량</div>
+                    <div class="mq-muted">서버 보고 용량</div>
                   </div>
                   <div class="mq-iconbox">💾</div>
                 </div>
@@ -967,7 +1047,7 @@
                 <div class="mq-metric">
                   <div>
                     <div class="mq-label">기밀성 &amp; 무결성 (AEAD)</div>
-                    <div class="mq-metric-value" id="kpi-archive-integrity" style="color:var(--green);font-size:20px;">100% 암호화·무결</div>
+                    <div class="mq-metric-value" id="kpi-archive-integrity" style="font-size:20px;">미검증</div>
                     <div class="mq-muted">AES-256-GCM Envelope</div>
                   </div>
                   <div class="mq-iconbox">🔒</div>
@@ -979,11 +1059,11 @@
             <div class="mq-card mq-span-12">
               <div class="mq-card-head" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
                 <div>
-                  <h3 style="margin:0;">원내 영구 보관 영상 검사 목록 (Archived Studies)</h3>
+                  <h3 style="margin:0;">로컬 보관 기록</h3>
                   <div class="subtle" style="font-size:12px;color:#64748b;margin-top:2px;">로컬 암호화 보관 시뮬레이션 · C-STORE/STOW-RS 등록 증적 아님</div>
                 </div>
                 <div>
-                  <button class="mq-btn small" type="button" data-view-jump="transfer">PACS 전송 콘솔 이동</button>
+                  <span class="mq-badge">시뮬레이터 목록</span>
                 </div>
               </div>
 
@@ -1011,22 +1091,33 @@
                 </table>
               </div>
             </div>
+            </details>
           </section>
 
           <!-- 2.6 QR Medical Image Handoff Scanner -->
-          <section class="mq-screen" data-screen="qr" hidden>
+          <section class="mq-screen share-reception" data-screen="qr" hidden>
             <div class="mq-toolbar">
               <div class="mq-title">
-                <h2>QR Medical Image Handoff 현장 접수</h2>
-                <p>환자가 모바일에서 생성한 1회용 티켓을 현장 스캔하여 단기 토큰으로 즉시 교환합니다.</p>
+                <h2>환자가 보낸 공유를 연결하세요.</h2>
+                <p>QR을 스캔하거나 전달받은 연결 정보를 입력해 접수합니다.</p>
               </div>
               <div class="mq-actions">
-                <span id="qr-handoff-status" class="mq-badge mq-badge-warn">스캐너 대기</span>
+                <span id="qr-handoff-status" class="mq-badge mq-badge-warn" role="status">접수 대기</span>
               </div>
             </div>
 
+            <ol class="reception-steps"><li>연결 정보 입력</li><li>서버에서 공유 확인</li><li>승인된 영상 열기</li></ol>
             <div class="qr-scanner-layout">
               <article class="mq-card">
+                <h3>연결 정보로 접수</h3>
+                <p>환자에게 받은 공유 링크 또는 연결 코드를 붙여넣으세요.</p>
+                <form id="qr-manual-form">
+                  <label for="qr-manual-input">공유 링크 또는 연결 코드</label>
+                  <input id="qr-manual-input" type="text" maxlength="2048" autocomplete="off" spellcheck="false" placeholder="공유 링크 또는 연결 코드 붙여넣기" aria-describedby="qr-input-help" required>
+                  <p id="qr-input-help">접수 시 일회용 연결 정보가 사용됩니다. 만료되었거나 이미 사용한 정보는 다시 접수할 수 없습니다.</p>
+                  <button id="qr-manual-submit" class="mq-btn mq-btn-primary" type="submit">공유 확인하고 접수</button>
+                </form>
+                <details class="reception-camera"><summary>카메라로 QR 스캔하기</summary>
                 <div class="qr-scanner-frame" style="position:relative;overflow:hidden;background:#0f172a;min-height:220px;display:flex;align-items:center;justify-content:center;">
                   <video id="qr-camera-stream" playsinline style="width:100%;height:100%;object-fit:cover;display:none;position:absolute;top:0;left:0;border-radius:12px;z-index:1;"></video>
                   <canvas id="qr-canvas-preview" style="display:none;"></canvas>
@@ -1037,20 +1128,21 @@
                 </div>
                 <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
                   <button id="btn-toggle-camera-scan" class="mq-btn small" type="button" style="flex:1;">📷 카메라 스캐너 켜기</button>
-                  <button id="btn-simulate-qr-scan" class="mq-btn small mq-btn-primary" type="button" style="flex:1;">QR 인식 시뮬레이션</button>
-                  <button id="btn-reset-qr-scan" class="mq-btn small" type="button">리셋</button>
+                  <button id="btn-reset-qr-scan" class="mq-btn small" type="button">입력 초기화</button>
                 </div>
+                </details>
               </article>
 
               <article class="mq-card">
                 <div class="mq-card-head">
-                  <h3>QR 바인딩 검증 결과</h3>
+                  <h3>공유 확인 결과</h3>
                 </div>
                 <div class="mq-statline"><span>티켓 식별자</span><strong id="qr-scanned-ref">대기 중</strong></div>
-                <div class="mq-statline"><span>환자 바인딩</span><strong id="qr-scanned-patient">QR 확인 후 표시</strong></div>
-                <div class="mq-statline"><span>동의 상태</span><strong id="qr-scanned-consent">확인 중</strong></div>
-                <div class="mq-statline"><span>발급 토큰</span><strong id="qr-scanned-token">미발급</strong></div>
-                <div id="qr-handoff-message" class="inline-notice" style="margin-top:14px;">환자의 모바일 화면 또는 종이 안내장의 일회용 QR을 스캔하세요.</div>
+                <div class="mq-statline"><span>환자</span><strong id="qr-scanned-patient">서버 확인 후 표시</strong></div>
+                <div class="mq-statline"><span>동의 상태</span><strong id="qr-scanned-consent">확인 전</strong></div>
+                <div class="mq-statline"><span>영상 접근</span><strong id="qr-scanned-token">확인 전</strong></div>
+                <div id="qr-handoff-message" class="inline-notice" role="status" style="margin-top:14px;">연결 정보를 입력하면 환자 동의와 병원·검사 범위를 확인합니다.</div>
+                <div class="reception-help"><h4>접수가 되지 않나요?</h4><p>만료·사용 완료: 환자에게 새 연결 정보를 요청하세요.</p><p>병원·공유 범위 불일치: 환자가 지정한 수신 병원과 공유 내용을 확인하세요.</p><p>연결 오류: 접수 여부를 확인한 후 다시 시도하세요.</p></div>
               </article>
             </div>
           </section>
@@ -1059,14 +1151,16 @@
           <section class="mq-screen" data-screen="audit" hidden>
             <div class="mq-toolbar">
               <div class="mq-title">
-                <h2>4. 보안 감사·Provenance 로그 (Chain of Custody)</h2>
-                <p>누가, 언제, 어떤 환자의 영상에 접근하고 거부되었는지 기록된 불변 감사 로그입니다.</p>
+                <h2>안전한 공유에는, 기록이 남습니다.</h2>
+                <p>보안 타임라인 · 누가, 무엇을 요청했고, 어떻게 처리됐을까요?</p>
               </div>
               <div class="mq-actions">
                 <select id="audit-result-filter" class="mq-select" aria-label="결과 필터">
                   <option value="">모든 결과</option>
                   <option value="ALLOWED">허용 (ALLOWED)</option>
                   <option value="DENIED">거부 (DENIED)</option>
+                  <option value="SUCCESS">성공 (SUCCESS)</option>
+                  <option value="ERROR">오류 (ERROR)</option>
                 </select>
                 <select id="audit-action-filter" class="mq-select" aria-label="행위 필터">
                   <option value="">모든 액션</option>
@@ -1076,10 +1170,16 @@
                   <option value="ACCESS_CHECK">ACCESS_CHECK</option>
                   <option value="TICKET_REDEEMED">TICKET_REDEEMED</option>
                 </select>
+                <button id="audit-refresh" class="mq-btn" type="button">기록 새로고침</button>
               </div>
             </div>
 
-            <div class="mq-card mq-span-12">
+            <section id="security-timeline" class="security-timeline">
+              <div class="audit-scope"><label>실행별 기록 <select data-audit-session aria-label="실행별 기록"></select></label><p data-audit-status role="status">기록을 조회해 주세요.</p></div>
+              <div class="audit-layout"><ol data-audit-events aria-label="시간순 감사 기록"></ol><aside data-audit-detail aria-label="선택한 기록 해설"></aside></div>
+              <details class="audit-integrity"><summary>기록의 연결·무결성 확인</summary><p>검증 미연결 · 이 화면은 감사 조회 API가 제공한 기록을 표시합니다. 해시 연결 검증을 실행하지 않았으며 로그의 완전성·불변성·시스템 전체 안전성을 보증하지 않습니다.</p></details>
+            </section>
+            <div class="mq-card mq-span-12" hidden>
               <div class="mq-table-wrap">
                 <table>
                   <thead>
@@ -1258,5 +1358,7 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script type="module" src="/app.js"></script>
+  <script type="module" src="/ui/clinician-demo-tools.js"></script>
+  <script type="module" src="/ui/image-journey.js"></script>
 </body>
 </html>

@@ -10,9 +10,18 @@ export function requireHttpsOrigin(value) {
 }
 
 // Always verifies CA + hostname; there is no HTTP/insecure fallback.
-export function boundedHttps(origin, pathname, { tls, method = "GET", headers = {}, body, maxBytes = 33554432, timeoutMs = 10000 }) {
+export function boundedHttps(origin, pathname, options) {
+  return boundedHttpsRequest(origin, pathname, options, 10000);
+}
+// Narrow metadata-only helper transport; DICOM/Gateway budgets stay unchanged.
+export function boundedHelperHttps(origin, pathname, options) {
+  if (origin !== 'https://10.90.88.1' || pathname !== '/api/v1/me/health-helper/questions'
+    || options.method !== 'POST' || !Number.isSafeInteger(options.maxBytes) || options.maxBytes > 32768) throw new Error('HELPER_TRANSPORT_SCOPE_INVALID');
+  return boundedHttpsRequest(origin, pathname, options, 65000);
+}
+function boundedHttpsRequest(origin, pathname, { tls, method = "GET", headers = {}, body, maxBytes = 33554432, timeoutMs = 10000 }, deadlineLimit) {
   requireHttpsOrigin(origin);
-  if (!Number.isSafeInteger(maxBytes) || maxBytes < 1 || maxBytes > 33554432 || !Number.isSafeInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 10000) throw new Error("GATEWAY_LIMIT_INVALID");
+  if (!Number.isSafeInteger(maxBytes) || maxBytes < 1 || maxBytes > 33554432 || !Number.isSafeInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > deadlineLimit) throw new Error("GATEWAY_LIMIT_INVALID");
   return new Promise((resolve, reject) => {
     const target = new URL(pathname, origin);
     if (target.origin !== origin || !pathname.startsWith("/")) return reject(new Error("GATEWAY_PATH_INVALID"));
@@ -78,7 +87,7 @@ export function createDataPlaneHandler({ publicBaseUrl, controlOrigin, orthancOr
       if (!Array.isArray(grant.allowedSeriesUids) || typeof grant.receipt !== "string" || !/^[0-9]+(?:\.[0-9]+)+$/u.test(grant.studyInstanceUid) || grant.studyInstanceUid.length > 64 || !Number.isFinite(Date.parse(grant.expiresAt)) || Date.now() >= Date.parse(grant.expiresAt)) throw new Error("INVALID_AUTHORIZATION");
       if (route.studyInstanceUid && route.studyInstanceUid !== grant.studyInstanceUid) return json(403, "SCOPE_MISMATCH");
       if (route.seriesInstanceUid && grant.allowedSeriesUids.length && !grant.allowedSeriesUids.includes(route.seriesInstanceUid)) return json(403, "SCOPE_MISMATCH");
-      let path = route.kind === "studies" ? `/dicom-web/studies?StudyInstanceUID=${grant.studyInstanceUid}` : new URL(route.externalUrl).pathname.replace(/^\/dicomweb\//u, "/dicom-web/").replace(/\/download$/u, "");
+      let path = route.kind === "studies" ? `/dicom-web/studies?StudyInstanceUID=${grant.studyInstanceUid}` : new URL(route.externalUrl).pathname.replace(/^\/dicomweb\//u, "/dicom-web/").replace(/\/(?:download|import)$/u, "");
       diagnostic.stage("ORTHANC_READ");
       const result = await transport(orthancOrigin, path, { tls: orthancTls, headers: { accept: ["studies", "series", "instances"].includes(route.kind) || request.url.endsWith("/metadata") ? "application/dicom+json" : request.url.endsWith("/rendered") ? "image/png" : "multipart/related; type=application/dicom" }, timeoutMs: 10000 });
       if (result.status !== 200) {

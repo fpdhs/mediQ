@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 import {spawnSync} from 'node:child_process';
 import { createCapstoneProofClient } from '../src/capstone-dpop-client.js';
 import { verifyPhantomPixels } from './phantom-browser-evidence.js';
+import {isConsentReceiptId,isTicketReceiptId} from './lib/capstone-receipt-id.js';
 
 const origin = 'https://192.168.111.149:9443';
 const patientId = 'HP-TEST-PHANTOM-001';
@@ -16,6 +17,8 @@ const proof = createCapstoneProofClient(origin);
 const owned = [];
 const runStarted=performance.now();
 const expiryMode=process.env.HIPASS_BROWSER_MOBILE_QR_EXPIRY==='1';
+const sessionExpiryUiMode=process.env.HIPASS_BROWSER_SESSION_EXPIRY_UI==='1';
+if(sessionExpiryUiMode && !expiryMode) throw new Error('SESSION_EXPIRY_UI_REQUIRES_REAL_QR_EXPIRY');
 const verticalMode=process.env.HIPASS_BROWSER_VERTICAL_FLOW==='1';
 const result = { result: 'NOT VERIFIED', scope: 'FRESH_PHANTOM_MOBILE_UI_QR_USED_REVOKED',
   cameraScan: 'NOT VERIFIED', nativeBiometrics: 'NOT VERIFIED', expiration: 'NOT VERIFIED', checks: [] };
@@ -78,13 +81,21 @@ async function issue() {
   while(receipts.created.length===createCount && Date.now()<end) await new Promise(r=>setTimeout(r,100));
   requireCheck(receipts.created.length===createCount+1,'UNIQUE_CREATION_RECEIPT_REQUIRED');
   const consent=await body(receipts.created[createCount]);
-  requireCheck(/^consent_[a-f0-9]{16}$/.test(consent.consentId??'') && consent.patientId===patientId && consent.sourceHospitalId==='HOSP-A' && consent.targetHospitalId==='HOSP-B' && consent.status==='ACTIVE' && consent.permission==='VIEW_ONLY' && consent.scopes?.length===1 && consent.scopes[0].studyInstanceUid===studyUid,'CONSENT_BINDING_REQUIRED');
-  owned.push(consent);
+  // Retain safe binding observations, not a raw response or any capability.
+  result.consentBindingObservation={idFormatValid:isConsentReceiptId(consent.consentId),
+    patientMatches:consent.patientId===patientId,sourceMatches:consent.sourceHospitalId==='HOSP-A',
+    targetMatches:consent.targetHospitalId==='HOSP-B',active:consent.status==='ACTIVE',
+    viewOnly:consent.permission==='VIEW_ONLY',scopeCount:consent.scopes?.length??null,
+    studyMatches:consent.scopes?.[0]?.studyInstanceUid===studyUid};
+  // A scope assertion failure must not orphan a positively owned receipt.
+  if(result.consentBindingObservation.idFormatValid&&result.consentBindingObservation.patientMatches
+    &&result.consentBindingObservation.sourceMatches&&result.consentBindingObservation.targetMatches) owned.push(consent);
+  requireCheck(isConsentReceiptId(consent.consentId) && consent.patientId===patientId && consent.sourceHospitalId==='HOSP-A' && consent.targetHospitalId==='HOSP-B' && consent.status==='ACTIVE' && consent.permission==='VIEW_ONLY' && consent.scopes?.length===1 && consent.scopes[0].studyInstanceUid===studyUid,'CONSENT_BINDING_REQUIRED');
   result.ownedReceipts = owned.map(row => ({consentId:row.consentId,patientId:row.patientId,sourceHospitalId:row.sourceHospitalId,targetHospitalId:row.targetHospitalId}));
   while(receipts.ticket.length===ticketCount && Date.now()<end) await new Promise(r=>setTimeout(r,100));
   requireCheck(receipts.ticket.length===ticketCount+1,'UNIQUE_TICKET_RECEIPT_REQUIRED');
   const ticket=await body(receipts.ticket[ticketCount]);
-  requireCheck(ticket.consentId===consent.consentId && /^ticket_[a-f0-9]{16}$/.test(ticket.ticketId??''),'TICKET_BINDING_REQUIRED');
+  requireCheck(ticket.consentId===consent.consentId && isTicketReceiptId(ticket.ticketId),'TICKET_BINDING_REQUIRED');
   result.ownedReceipts[result.ownedReceipts.length-1].ticketId=ticket.ticketId;
   const url=new URL(ticket.qr?.payload);
   requireCheck(url.protocol==='https:' && !url.search && !url.hash && !url.username && !url.password && /^\/t\/[A-Za-z0-9_-]{43}$/.test(url.pathname),'OPAQUE_QR_REQUIRED');
@@ -104,7 +115,8 @@ try {
     const path=new URL(event.response.url).pathname;
     if(path==='/api/capstone-demo/login' && event.response.status===200) receipts.login=event.requestId;
     if(path==='/api/consents' && event.response.status===201) receipts.created.push(event.requestId);
-    if(/^\/api\/consents\/consent_[a-f0-9]{16}\/handoff-ticket$/.test(path) && event.response.status===201) receipts.ticket.push(event.requestId);
+    const ticketMatch=/^\/api\/consents\/([^/]+)\/handoff-ticket$/.exec(path);
+    if(ticketMatch&&isConsentReceiptId(ticketMatch[1])&&event.response.status===201) receipts.ticket.push(event.requestId);
   });
   await until(`!!document.querySelector('#capstone-login-key')`);
   if(verticalMode) {
@@ -267,6 +279,13 @@ try {
   } else if(expiryMode) {
     const started=Date.now(), expiresAt=Date.parse(first.ticket.qr.expiresAt);
     requireCheck(Number.isFinite(expiresAt) && expiresAt>started && expiresAt-started<=900000,'BOUNDED_REAL_TICKET_DEADLINE_REQUIRED');
+    if(sessionExpiryUiMode) {
+      const authDeadline=Date.parse(login.expiresAt);
+      requireCheck(Number.isFinite(authDeadline) && authDeadline>started && authDeadline<expiresAt,'DISTINCT_AUTH_AND_QR_DEADLINES_REQUIRED');
+      await until(`document.querySelector('#qr-status-pill')?.textContent.includes('시연 인증 만료') && document.querySelector('#qr-status-pill')?.textContent.includes('다시 로그인') && !!document.querySelector('#qr-box-wrap svg')`,authDeadline-started+20000);
+      requireCheck(Date.now()>=authDeadline && Date.now()<expiresAt,'AUTH_NOTICE_WITHIN_ORIGINAL_QR_WINDOW_REQUIRED');
+      result.checks.push({test:'REAL_AUTH_EXPIRY_NOTICE_WITH_ORIGINAL_QR_DEADLINE',status:'PASS'});
+    }
     await until(`Date.now()>=${expiresAt} && document.querySelector('#qr-status-pill').textContent.includes('EXPIRED') && !document.querySelector('#qr-box-wrap svg')`,expiresAt-started+20000);
     result.checks.push({test:'REAL_CLIENT_DEADLINE_QR_REMOVED',status:'PASS'});
     result.expiryWaitMs=Date.now()-started;

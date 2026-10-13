@@ -12,6 +12,27 @@ async function start(t, transport, configuration = {}) {
   const origin = `http://127.0.0.1:${server.address().port}`;
   return (pathname, options) => fetch(origin + pathname, { ...options, signal: AbortSignal.timeout(3000) });
 }
+test('only exact helper POST has finite 65s/32KiB budget; image and other API budgets remain unchanged',async t=>{
+  const calls=[];const get=await start(t,async(...args)=>{calls.push(args);return {status:200,contentType:'application/json',body:Buffer.from('{}')};});
+  await get('/api/v1/me/health-helper/questions',{method:'POST',headers:{origin:'https://192.168.111.149:9443'}});
+  assert.equal(calls[0][2].timeoutMs,65000);assert.equal(calls[0][2].maxBytes,32768);
+  for(const p of ['/api/health','/dicomweb/studies','/api/v1/me/health-helper/questions?x=1'])await get(p);
+  for(const args of calls.slice(1)){assert.equal(args[2].timeoutMs,10000);assert.equal(args[2].maxBytes,33554432);}
+});
+
+test('wallet WebP is public artwork with a bounded size; clinical and query paths remain blocked', async t => {
+  const get = await start(t, () => { throw new Error('Unexpected upstream'); });
+  const response = await get('/images/mediq-login-wallet.webp');
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get('content-type'), 'image/webp');
+  assert.equal(response.headers.get('x-content-type-options'), 'nosniff');
+  const bytes = Buffer.from(await response.arrayBuffer());
+  assert.equal(bytes.subarray(0,4).toString(), 'RIFF');
+  assert.ok(bytes.length <= 2097152);
+  for (const route of ['/assets/clinical/private.webp', '/images/mediq-login-wallet.webp?token=test']) {
+    assert.ok([400,404].includes((await get(route)).status));
+  }
+});
 
 test('patient self-hosted font is an exact public asset; arbitrary fonts and secrets stay blocked', async t => {
   const get=await start(t,()=>{throw new Error('Unexpected upstream');});

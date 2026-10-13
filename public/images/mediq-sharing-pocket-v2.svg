@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="700" height="90" viewBox="0 0 700 90" preserveAspectRatio="none">
+ <defs><linearGradient id="p" x2="0" y2="1"><stop stop-color="#386da7"/><stop offset="1" stop-color="#194271"/></linearGradient><filter id="g"><feTurbulence baseFrequency=".7" numOctaves="3" seed="17"/><feDiffuseLighting surfaceScale="1.5" lighting-color="#7194bd"><feDistantLight azimuth="235" elevation="48"/></feDiffuseLighting><feComposite in="SourceGraphic" operator="arithmetic" k1="0" k2=".88" k3=".12" k4="0"/><feComposite in2="SourceAlpha" operator="in"/></filter></defs>
+ <path d="M3 4 Q350 39 697 4 L697 67 Q697 87 677 87 H23 Q3 87 3 67Z" fill="url(#p)" filter="url(#g)" stroke="#173757" stroke-width="2"/>
+ <path d="M5 6 Q350 41 695 6" fill="none" stroke="#93b4d6" stroke-width="2"/>
+ <path d="M13 17 Q350 51 687 17 V65 Q687 77 675 77 H25 Q13 77 13 65Z" fill="none" stroke="#a2b7cc" stroke-dasharray="4 4"/>
+</svg>

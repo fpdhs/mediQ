@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
+import { archiveRetentionDecision, archiveStudyDirectory, captureArchiveRetention } from './archive-retention.js';
 import { getCuratedDicomStore } from "./curated-dicom-store.js";
 import { buildSyntheticDicomBuffer } from "./orthanc-client.js";
 import {
@@ -37,6 +38,8 @@ export async function importStudyToHospitalBPacs({
   baseDestDir = path.resolve("data/hospital-b-pacs"),
   kek = null,
   allowSynthetic = false,
+  consent = null,
+  clock = () => new Date().toISOString(),
 }) {
   if (!studyInstanceUid) {
     throw new PacsImportError("STUDY_UID_REQUIRED", "StudyInstanceUID is required for PACS import");
@@ -50,7 +53,8 @@ export async function importStudyToHospitalBPacs({
   }
 
   // 1. Ensure target PACS directory exists
-  const studyDestDir = path.join(baseDestDir, studyInstanceUid);
+  const retention = captureArchiveRetention(consent, clock());
+  const studyDestDir = archiveStudyDirectory(baseDestDir, studyInstanceUid);
   if (fs.existsSync(studyDestDir)) {
     throw new PacsImportError("ARCHIVE_ALREADY_EXISTS", "Existing archive is preserved; replacement requires explicit migration");
   }
@@ -253,6 +257,7 @@ export async function importStudyToHospitalBPacs({
 
     // AES-256-GCM Envelope Encryption
     const encResult = encryptDicomBuffer(dicomBuffer, dek, item.sopInstanceUid);
+    dicomBuffer.fill(0);
     hasher.update(encResult.plainSha256);
     totalBytes += encResult.plainBytes;
 
@@ -300,6 +305,7 @@ export async function importStudyToHospitalBPacs({
     totalBytes,
     sha256: combinedSha256,
     importedAt,
+    retention,
     instances: instanceReceipts,
   };
 
@@ -321,6 +327,7 @@ export async function importStudyToHospitalBPacs({
     destinationVerification: false,
     destinationPath: path.relative(process.cwd(), studyDestDir).replace(/\\/g, "/"),
     importedAt,
+    retention,
   };
 }
 
@@ -329,16 +336,17 @@ export async function importStudyToHospitalBPacs({
  */
 export function listHospitalBArchivedStudies(baseDestDir = path.resolve("data/hospital-b-pacs")) {
   if (!fs.existsSync(baseDestDir)) return [];
+  archiveStudyDirectory(baseDestDir, '1.2.3');
 
   const studyDirs = fs.readdirSync(baseDestDir).filter((d) => {
     const full = path.join(baseDestDir, d);
-    return fs.statSync(full).isDirectory();
+    return /^[0-9]+(?:\.[0-9]+)+$/.test(d) && fs.lstatSync(full).isDirectory() && !fs.lstatSync(full).isSymbolicLink();
   });
 
   const archives = [];
   for (const sUid of studyDirs) {
     const manifestPath = path.join(baseDestDir, sUid, "manifest.json");
-    if (fs.existsSync(manifestPath)) {
+    if (fs.existsSync(manifestPath) && !fs.lstatSync(manifestPath).isSymbolicLink()) {
       try {
         const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
         archives.push(manifest);
@@ -374,19 +382,27 @@ export function readArchivedDicomBuffer({
   sopInstanceUid,
   baseDestDir = path.resolve("data/hospital-b-pacs"),
   kek = null,
+  consent = null,
+  now = new Date().toISOString(),
 }) {
-  const manifestPath = path.join(baseDestDir, studyInstanceUid, "manifest.json");
+  const directory = archiveStudyDirectory(baseDestDir, studyInstanceUid);
+  const manifestPath = path.join(directory, "manifest.json");
+  if (fs.existsSync(manifestPath) && fs.lstatSync(manifestPath).isSymbolicLink()) throw new PacsImportError('ARCHIVE_SYMLINK_DENIED', 'Unsafe manifest');
   if (!fs.existsSync(manifestPath)) {
     throw new PacsImportError("MANIFEST_NOT_FOUND", `Archived study manifest not found: ${studyInstanceUid}`);
   }
 
   const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+  const retention = archiveRetentionDecision(manifest, consent, now);
+  if (!retention.allowed) throw new PacsImportError(retention.reason, 'Archive retention does not permit decryption');
   const instMeta = manifest.instances?.find((i) => i.sopInstanceUid === sopInstanceUid);
   const targetSeriesUid = seriesInstanceUid || instMeta?.seriesInstanceUid;
+  if (!instMeta || targetSeriesUid !== instMeta.seriesInstanceUid || ![targetSeriesUid,sopInstanceUid].every(v=>typeof v==='string' && v.length<=64 && /^[0-9]+(?:\.[0-9]+)+$/.test(v))) throw new PacsImportError('ARCHIVE_SCOPE_MISMATCH','Archive object scope mismatch');
 
   // 1. If encrypted at rest
   if (manifest.encryptedAtRest && manifest.keyEnvelope) {
     const encFile = path.join(baseDestDir, studyInstanceUid, targetSeriesUid, `${sopInstanceUid}.dcm.enc`);
+    if (fs.lstatSync(path.dirname(encFile)).isSymbolicLink() || (fs.existsSync(encFile) && fs.lstatSync(encFile).isSymbolicLink())) throw new PacsImportError('ARCHIVE_SYMLINK_DENIED','Unsafe object');
     if (!fs.existsSync(encFile)) {
       throw new PacsImportError("ENCRYPTED_FILE_NOT_FOUND", `Encrypted DICOM file not found on disk: ${encFile}`);
     }
@@ -394,14 +410,11 @@ export function readArchivedDicomBuffer({
     const activeKek = kek || getHospitalMasterKek(manifest.targetHospitalId);
     const dek = unwrapDek(manifest.keyEnvelope, activeKek, studyInstanceUid);
 
-    return decryptDicomBuffer(cipherBuffer, dek, instMeta.nonce, instMeta.tag, sopInstanceUid);
+    try { return decryptDicomBuffer(cipherBuffer, dek, instMeta.nonce, instMeta.tag, sopInstanceUid); }
+    finally { dek.fill(0); }
   }
 
-  // 2. Legacy plaintext fallback (.dcm)
-  const plainFile = path.join(baseDestDir, studyInstanceUid, targetSeriesUid, `${sopInstanceUid}.dcm`);
-  if (fs.existsSync(plainFile)) {
-    return fs.readFileSync(plainFile);
-  }
+  // No plaintext fallback for consent-bound storage.
 
   throw new PacsImportError("DCM_FILE_NOT_FOUND", `Archived DICOM file not found: ${sopInstanceUid}`);
 }

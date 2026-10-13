@@ -2,9 +2,17 @@
 // Patient-Controlled Medical Imaging & MyData Mobility Client
 // Security Contract: Zero browser plaintext storage (no localStorage/sessionStorage), Fail-Closed
 import { initializeCapstoneAuth } from "/capstone-auth.js";
-import {openPatientPixelViewer} from '/patient-pixel-viewer.js';
+import {openPatientPixelViewer,createPatientPixelSession} from '/patient-pixel-viewer.js';
+import {createWalletHome,createHelperSurface} from '/ui/wallet-home.js';
+import {createSharingSurface} from '/ui/patient-sharing.js';
+import {createPatientHealth,healthRecords} from '/ui/patient-health.js';
+import {createHealthRecordClient} from '/ui/health-record-client.js';
+let walletHome=null, mobileHealth=null, mobileRecords=null;
+let walletStudiesReady=false,walletConsentsReady=false;
 import {createFaqAssistant} from '/ui/faq-assistant.js';
+import {createMobileHealthHelper} from '/mobile/health-helper.js';
 let faqAssistant=null;
+let healthHelper=null;
 let capstoneAuth = null;
 const syncChannel = typeof BroadcastChannel !== "undefined" ? new BroadcastChannel("HI_PASS_SYNC_CHANNEL") : null;
 const secondarySyncChannel = typeof BroadcastChannel !== "undefined" ? new BroadcastChannel("hipass_sync") : null;
@@ -78,6 +86,25 @@ async function initializeMobileApp() {
   setupSyncChannel();
   registerServiceWorker();
   setupAuth();
+  createSharingSurface(document.querySelector('#tab-share'),route=>{switchTab(({requests:'share'})[route]||route);if(route==='requests')document.querySelector('#btn-share-sub-manage')?.click();window.scrollTo({top:0,behavior:'instant'});},true);
+  walletHome=createWalletHome({root:document.querySelector('#tab-home'),navigate:route=>{
+    switchTab(({requests:'share',history:'share',sharing:'share'})[route]||route);
+    if(['requests','history'].includes(route))document.querySelector('#btn-share-sub-manage')?.click();
+    window.scrollTo({top:0,behavior:'instant'});
+    const destination=document.querySelector('.tab-pane.active');destination?.classList.add('mq-wallet-screen-enter');
+    const heading=destination?.querySelector('h1,h2');heading?.setAttribute('tabindex','-1');heading?.focus({preventScroll:true});
+    setTimeout(()=>destination?.classList.remove('mq-wallet-screen-enter'),280);
+  }});
+  const recordsPane=document.querySelector('#tab-records');recordsPane.classList.add('wallet-records-host');
+  const recordsRoot=document.createElement('div');recordsRoot.className='mq-mobile-records';recordsPane.prepend(recordsRoot);
+  mobileHealth=createPatientHealth({root:recordsRoot,onSharing:()=>switchTab('share'),onRequests:()=>{switchTab('share');document.querySelector('#btn-share-sub-manage')?.click();},onView:openCineViewer,onShare:study=>{
+    state.shareSelectedItems.clear();state.shareSelectedItems.add(study.studyInstanceUid);switchTab('share');setWizardStep(2);
+  },patientName:()=>capstoneAuth?.context?.patientName||state.patientName,onHome:()=>switchTab('home'),openPreview:(study,signal)=>createPatientPixelSession({patientId:state.patientId,study,headers:patientHeaders(),signal}),onCompare:()=>switchTab('helper')});
+  mobileRecords=createHealthRecordClient({headers:patientHeaders,available:()=>state.isAuthenticated&&Boolean(capstoneAuth?.context.scenario),onChange:()=>{renderHomeScreen();renderRecordsScreen();updateShareSelectCheckboxes();}});
+  healthHelper=createMobileHealthHelper(document.querySelector('#patient-health-helper'), {
+    headers:patientHeaders, isUnlocked:()=>state.isAuthenticated,
+  });
+  createHelperSurface(document.querySelector('#patient-health-helper'),route=>{switchTab(({sharing:'share',requests:'share'})[route]||route);if(route==='requests')document.querySelector('#btn-share-sub-manage')?.click();window.scrollTo({top:0,behavior:'instant'});},true);
   faqAssistant=createFaqAssistant({root:document.querySelector('.mobile-shell'),surface:'mobile',navigate:route=>{
     if(route==='share-manage'){switchTab('share');document.querySelector('#btn-share-sub-manage')?.click();}
     else switchTab(route);
@@ -117,7 +144,7 @@ function setupNavigation() {
     profile.append(home.querySelector('#home-share-widget'));
     help.after(home.querySelector('.wallet-extra'));
   }
-  const paths={home:'M3 10 12 3 21 10 M5 9v12h5v-7h4v7h5V9',studies:'M4 3h16v18H4z M8 8h8 M8 12h8 M8 16h5',share:'M5 3h14v18H5z M8 7h8 M8 12h8 M8 17h5',profile:'M8 7a4 4 0 1 0 8 0a4 4 0 1 0-8 0 M4 21v-2a8 8 0 0 1 16 0v2z'};
+  const paths={home:'M3 10 12 3 21 10 M5 9v12h5v-7h4v7h5V9',studies:'M4 3h16v18H4z M8 8h8 M8 12h8 M8 16h5',records:'M4 3h16v18H4z M8 8h8 M8 12h8 M8 16h5',helper:'M4 4h16v13H9l-5 4z M8 9h8 M8 13h5',share:'M5 3h14v18H5z M8 7h8 M8 12h8 M8 17h5',profile:'M8 7a4 4 0 1 0 8 0a4 4 0 1 0-8 0 M4 21v-2a8 8 0 0 1 16 0v2z'};
   for(const button of document.querySelectorAll('.mobile-nav [data-tab]')){
     const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
     for(const [key,value] of Object.entries({viewBox:'0 0 24 24',width:'24',height:'24','aria-hidden':'true'}))svg.setAttribute(key,value);
@@ -183,7 +210,9 @@ function setupNavigation() {
 }
 
 function switchTab(tabName) {
+  if (tabName === 'helper' && !state.isAuthenticated) return;
   state.currentTab = tabName;
+  mobileHealth?.setActive(tabName==='records');
   document.querySelectorAll(".tab-pane").forEach((pane) => {
     pane.classList.toggle("active", pane.id === `tab-${tabName}`);
   });
@@ -194,11 +223,13 @@ function switchTab(tabName) {
   });
 
   if (state.isAuthenticated) {
+    if (tabName === 'helper') healthHelper?.refresh();
     if (tabName === "home") renderHomeScreen();
     if (tabName === "studies") renderStudiesList();
-    if (tabName === "records") renderRecordsScreen();
+    if (tabName === "records") {renderRecordsScreen();void mobileRecords?.load();}
     if (tabName === "share") {
       updateShareSelectCheckboxes();
+      void mobileRecords?.load();
       renderShareManageScreen();
     }
     if (tabName === "vault") {
@@ -210,7 +241,7 @@ function switchTab(tabName) {
 
 function registerServiceWorker() {
   if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
+    const register = () => {
       navigator.serviceWorker
         .register("/mobile/sw.js", { scope: "/mobile/" })
         .then((reg) => {
@@ -219,7 +250,10 @@ function registerServiceWorker() {
         .catch((err) => {
           console.warn("[MediQ PWA] Service Worker registration failed:", err);
         });
-    });
+    };
+    // Signed login may finish after window.load. Still register the current shell.
+    if (document.readyState === 'complete') register();
+    else window.addEventListener('load', register, {once:true});
   }
 }
 
@@ -371,6 +405,10 @@ async function handleLockApp() {
 
   state.isAuthenticated = false;
   faqAssistant?.reset();
+  healthHelper?.reset();
+  mobileRecords?.reset();
+  walletHome?.reset();
+  walletStudiesReady=false;walletConsentsReady=false;
   state.authMethod = null;
   state.authenticatedAt = null;
 
@@ -418,6 +456,8 @@ async function handleLockApp() {
   state.consents = [];
   state.activeStudy = null;
   state.activeTicket = null;
+  mobileHealth?.setActive(false);
+  mobileHealth?.update([],false,[]);
   stopTicketStatusPolling();
   if (state.countdownTimer) clearInterval(state.countdownTimer);
   closeCineViewer();
@@ -435,6 +475,10 @@ async function handleLockApp() {
 
 function handlePatientSelect(patientId) {
   faqAssistant?.reset();
+  healthHelper?.reset();
+  mobileRecords?.reset();
+  walletHome?.reset();
+  walletStudiesReady=false;walletConsentsReady=false;
   state.patientId = patientId;
   const names = {
     "HP-TEST-PHANTOM-001": "합성 팬텀 환자",
@@ -467,6 +511,7 @@ async function loadInitialData() {
   if (!state.isAuthenticated) return;
   initMockMedicalRecords();
   await Promise.all([loadStudies(), loadConsents(), loadVaultInfo(), loadDeviceInfo()]);
+  void mobileRecords?.load();
   renderHomeScreen();
   renderStudiesList();
   renderRecordsScreen();
@@ -481,8 +526,11 @@ async function loadStudies() {
       signal: AbortSignal.timeout(10000),
     });
     const studies = await res.json();
+    if(!res.ok||!Array.isArray(studies))throw new Error('STUDIES_UNAVAILABLE');
+    walletStudiesReady=true;
     state.studies = Array.isArray(studies) ? studies : [];
   } catch (err) {
+    walletStudiesReady=false;
     state.studies = [];
   }
   renderStudiesList();
@@ -497,8 +545,11 @@ async function loadConsents() {
       signal: AbortSignal.timeout(10000),
     });
     const consents = await res.json();
+    if(!res.ok||!Array.isArray(consents))throw new Error('CONSENTS_UNAVAILABLE');
+    walletConsentsReady=true;
     state.consents = Array.isArray(consents) ? consents : [];
   } catch {
+    walletConsentsReady=false;
     state.consents = [];
   }
 }
@@ -608,6 +659,7 @@ function initMockMedicalRecords() {
 // Screen 1: Home (MediQ HomeScreen)
 // --------------------------------------------------------------------------
 function renderHomeScreen() {
+  walletHome?.update({name:capstoneAuth?.context?.patientName||state.patientName,records:healthRecords(state.studies,Boolean(capstoneAuth?.context.scenario),mobileRecords?.records()||[]),consents:state.consents,ready:walletStudiesReady&&walletConsentsReady,error:state.isAuthenticated&&(!walletStudiesReady||!walletConsentsReady)});
   const display = (id,value) => { const node=document.getElementById(id); if(node)node.textContent=value; };
   display('wallet-patient-name', `${capstoneAuth?.context?.patientName ?? state.patientName}님,`);
   display('wallet-profile-name', state.patientName);
@@ -1061,6 +1113,7 @@ function drawCurrentCineFrame() {
 // Screen 3: Health Records & Prescriptions (MediQ RecordsScreens)
 // --------------------------------------------------------------------------
 function renderRecordsScreen() {
+  if(mobileHealth){mobileHealth.update(state.studies,Boolean(capstoneAuth?.context.scenario),mobileRecords?.records()||[]);return;}
   const container = document.querySelector("#records-content-container");
   if (!container) return;
 
@@ -1162,12 +1215,16 @@ function setupShareWizard() {
     state.shareTargetHospital = hospSelect ? hospSelect.value : "HOSP-B";
     const durSelect = document.querySelector("#select-validity-duration");
     state.shareTargetDuration = durSelect ? durSelect.value : "24h";
+    const selectedPurpose=document.querySelector('#select-share-purpose')?.value;
+    if(!['TREATMENT','TRANSFER'].includes(selectedPurpose)){showToast('공유 목적을 확인해 주세요.');return;}
+    state.sharePurpose=selectedPurpose;
+    document.querySelector('#confirm-purpose-label').textContent=selectedPurpose==='TRANSFER'?'전원':'진료';
 
     const confirmHosp = document.querySelector("#confirm-hosp-label");
     if (confirmHosp) confirmHosp.textContent = hospSelect ? hospSelect.options[hospSelect.selectedIndex].text : "가상 병원 B";
     const confirmCount = document.querySelector("#confirm-items-count");
     const selectedStudies=state.studies.filter(item=>state.shareSelectedItems.has(item.studyInstanceUid));
-    const selectedRecords=state.clinicalRecords.filter(item=>state.shareSelectedItems.has(item.id));
+    const selectedRecords=(mobileRecords?.records()??[]).filter(item=>state.shareSelectedItems.has(item.id));
     if (confirmCount) confirmCount.textContent = [...selectedStudies.map(item=>item.description || item.modality || '검사'),...selectedRecords.map(item=>item.title || '합성 진료기록')].join(', ') || '공유할 항목 선택 필요';
     const sourceLabel=document.querySelector('#confirm-source-label');
     if(sourceLabel)sourceLabel.textContent=state.sourceHospitalId || '제공 기관 확인 필요';
@@ -1206,6 +1263,8 @@ function setWizardStep(step) {
   });
   document.querySelectorAll(".step-dot").forEach((dot) => {
     dot.classList.toggle("active", Number(dot.dataset.step) <= step);
+    if (Number(dot.dataset.step) === step) dot.setAttribute('aria-current','step');
+    else dot.removeAttribute('aria-current');
   });
 }
 
@@ -1221,18 +1280,16 @@ function updateShareSelectCheckboxes() {
       sub: `${s.modality || "DICOM"} · ${s.sourceHospitalId || "가상 병원 A"} (촬영일: ${s.studyDate || "2026-06-20"})`,
     });
   });
-  state.clinicalRecords.forEach((c) => {
+  (mobileRecords?.records()??[]).forEach((c) => {
     items.push({
       id: c.id,
       title: c.title,
-      sub: `${c.hospital} (${c.diagnosis})`,
+      sub: `${c.hospital} · ${c.date} · 합성 건강기록`,
     });
   });
 
-  // Default select first item if none selected
-  if (state.shareSelectedItems.size === 0 && items.length > 0) {
-    state.shareSelectedItems.add(items[0].id);
-  }
+  // Never select health records automatically. Discard stale/unknown choices.
+  for(const id of state.shareSelectedItems)if(!items.some(item=>item.id===id))state.shareSelectedItems.delete(id);
 
   container.innerHTML = items.map((item) => `
     <label class="share-check-card">
@@ -1249,6 +1306,7 @@ function updateShareSelectCheckboxes() {
       const id = chk.dataset.shareCheck;
       if (chk.checked) state.shareSelectedItems.add(id);
       else state.shareSelectedItems.delete(id);
+      if(state.shareWizardStep===3)setWizardStep(1);
     });
   });
 }
@@ -1265,16 +1323,18 @@ async function handleExecuteShareTicket() {
   try {
     // Reject unknown durations before issuing any consent or ticket request.
     const validUntil = mobileConsentValidUntil(state.shareTargetDuration);
+    if(!['TREATMENT','TRANSFER'].includes(state.sharePurpose))throw new Error('INVALID_SHARE_PURPOSE');
     // 1. Gather Selected Scopes
     const scopes = [];
+    const healthRecordIds=[];
     state.shareSelectedItems.forEach((id) => {
       const isStudy = state.studies.some((s) => s.studyInstanceUid === id);
       if (isStudy) {
         scopes.push({ studyInstanceUid: id });
-      } else {
-        scopes.push({ clinicalRecordId: id });
-      }
+      } else if((mobileRecords?.records()??[]).some(r=>r.id===id))healthRecordIds.push(id);
+      else throw new Error('INVALID_SHARE_SELECTION');
     });
+    if(!scopes.length){showToast('이 시연에서는 영상과 함께 건강기록을 공유합니다. 영상을 선택해 주세요.');setWizardStep(1);return;}
 
     // 2. Issue Active Consent
     const targetHosp = state.shareTargetHospital || "HOSP-B";
@@ -1286,10 +1346,11 @@ async function handleExecuteShareTicket() {
         patientId: state.patientId,
         sourceHospitalId: state.sourceHospitalId,
         targetHospitalId: targetHosp,
-        purpose: "TREATMENT",
+        purpose: state.sharePurpose,
         permission: "VIEW_ONLY",
         validUntil,
-        scopes: scopes.length > 0 ? scopes : [{ studyInstanceUid: state.studies[0]?.studyInstanceUid }],
+        scopes,
+        healthRecordIds,
       }),
     });
 

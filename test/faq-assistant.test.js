@@ -37,6 +37,6 @@ test('web/mobile entry points reuse module and reset on role, lock, account chan
   const sw=await readFile(new URL('../public/mobile/sw.js',import.meta.url),'utf8');for(const asset of ['faq-assistant.js','faq-catalog.js','faq-assistant.css'])assert.ok(sw.includes(asset));
   const html=await readFile(new URL('../public/mobile/index.html',import.meta.url),'utf8');
   const nav=html.slice(html.indexOf('<nav class="mobile-nav"'));
-  assert.deepEqual([...nav.matchAll(/data-tab="([^"]+)"/g)].map(match=>match[1]),['home','studies','share','profile']);
+  assert.deepEqual([...nav.matchAll(/data-tab="([^"]+)"/g)].map(match=>match[1]),['home','records','share','helper']);
   for(const tab of ['records','vault'])assert.ok(html.includes(`data-tab="${tab}"`), 'secondary screen remains reachable');
 });

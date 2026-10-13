@@ -12,6 +12,8 @@ function controllerContext(postJson) {
     demo: { patientId: "synthetic", doctorId: "doctor", sourceHospitalId: "A", targetHospitalId: "B", purpose: "TREATMENT", permission: "VIEW_ONLY" },
     latestConsentId: "chosen", selectedStudyUid: "1.2.3", selectedSeriesUid: "", consentViewRevision: 0,
     consentMutationPending: false, tokenRequestPending: false, patientConsentReady: true,
+    shareReview: { allowed: () => true },
+    healthSharePicker: {ids:()=>[]},
     latestToken: null, latestTokenInfo: null, latestTicketNonce: null, viewerStatus: { textContent: "" },
     consentValidFromInput: { value: "2026-10-09" }, consentValidUntilInput: { value: "2026-10-10" },
     toIsoFromLocal: value => value, postJson: (path, body) => { calls.push(path); return postJson(path, body); },
@@ -29,6 +31,15 @@ function controllerContext(postJson) {
     + section("async function requestDoctorToken", "async function openViewer"), context);
   return { context, events, calls };
 }
+
+test("unchecked sharing review creates no consent, QR or audit-side mutation request", async () => {
+  const {context,calls,events}=controllerContext(async()=>({}));
+  context.shareReview.allowed=()=>false;
+  assert.equal((await vm.runInContext('createPatientConsent()',context)).error,'CONSENT_REVIEW_REQUIRED');
+  assert.equal(calls.length,0);
+  assert.equal(events.length,0);
+  assert.equal(context.consentMutationPending,false);
+});
 
 test("pending consent creation permits one mutation only and blocks token/revoke before server acknowledgement", async () => {
   let release;

@@ -67,7 +67,7 @@ export function createCapstoneImageEncryptor({ keyId, tokenProvider, control, ke
 }
 
 export function createCapstoneImageDecryptor({ keyId, tokenProvider, control, publicBaseUrl, recipientHospitalId, keyTransport, now = () => new Date() }) {
-  return { async open(result, requestPath) {
+  return { async open(result, requestPath, { method = "GET" } = {}) {
     if (result.contentType !== encryptedDicomType || !Buffer.isBuffer(result.body) || result.body.length > 12 * 1024 * 1024) throw new Error("ENCRYPTED_TRANSFER_REQUIRED");
     const payload = JSON.parse(result.body.toString("utf8"));
     if (Object.keys(payload).sort().join() !== ["version", "receipt", "contentType", "wrapped", "envelope", "chunks", "releaseId"].sort().join()
@@ -76,7 +76,8 @@ export function createCapstoneImageDecryptor({ keyId, tokenProvider, control, pu
       || payload.wrapped?.keyId !== keyId || payload.envelope?.destinationInstitutionRef !== recipientHospitalId) throw new Error("ENCRYPTED_TRANSFER_INVALID");
     const binding = packageBinding(payload);
     const context = receiptContext(payload.receipt);
-    const route = parseDataPlaneRequest({ method: "GET", path: requestPath }, publicBaseUrl);
+    const route = parseDataPlaneRequest({ method, path: requestPath }, publicBaseUrl);
+    if ((context.method ?? "GET") !== method) throw new Error("ENCRYPTED_TRANSFER_SCOPE_MISMATCH");
     if (context.path !== requestPath || context.targetHospitalId !== recipientHospitalId || !route.sopInstanceUid) throw new Error("ENCRYPTED_TRANSFER_SCOPE_MISMATCH");
     const chunks = payload.chunks.map(chunk => ({ ...chunk, ciphertext: decode(chunk.ciphertext, limit), nonce: decode(chunk.nonce, 12), tag: decode(chunk.tag, 16) }));
     if (chunks.reduce((total, chunk) => total + chunk.ciphertext.length, 0) > limit) throw new Error("ENCRYPTED_TRANSFER_INVALID");
@@ -104,7 +105,8 @@ export function createCapstoneImageDecryptor({ keyId, tokenProvider, control, pu
             || manifest.objects[0].chunkStart !== 0 || manifest.objects[0].chunkEnd !== chunks.length - 1) throw new Error("ENCRYPTED_TRANSFER_INTEGRITY_FAILED");
         } finally { for (const chunk of verified.plaintextChunks) chunk.fill(0); }
       } });
-      return { contentType: payload.contentType, body: plaintext };
+      return { contentType: payload.contentType, body: plaintext,
+        ...(route.importing ? { importContext: { receipt: payload.receipt, releaseId: payload.releaseId, packageBinding: binding } } : {}) };
     } catch (error) { plaintext?.fill(0); throw error; }
   } };
 }

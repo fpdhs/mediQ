@@ -6,8 +6,15 @@
   "type": "module",
   "packageManager": "pnpm@11.7.0",
   "scripts": {
+    "prestart": "pnpm run build:entra-client",
+    "prestart:local": "pnpm run build:entra-client",
     "start": "node src/server.js",
     "start:local": "node scripts/start-local.js",
+    "build:entra-client": "node scripts/build-entra-client.js",
+    "ui:clinician:stage": "python scripts/clinician-bundle-stage.py",
+    "ui:clinician:check": "python scripts/clinician-ui.py check",
+    "ui:clinician:build": "python scripts/clinician-ui.py build",
+    "ui:clinician:release": "python scripts/clinician-ui.py release",
     "start:json": "node src/server.js",
     "start:postgres": "node scripts/start-postgres.js",
     "test": "node --test --test-concurrency=4",
@@ -51,5 +58,9 @@
   },
   "engines": {
     "node": ">=20"
+  },
+  "devDependencies": {
+    "@azure/msal-browser": "^5.25.0",
+    "esbuild": "^0.28.2"
   }
 }

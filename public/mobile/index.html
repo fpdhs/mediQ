@@ -19,6 +19,11 @@
   <link rel="stylesheet" href="/ui/mobile.css">
   <link rel="stylesheet" href="/ui/faq-assistant.css">
   <link rel="stylesheet" href="/ui/brand.css">
+  <link rel="stylesheet" href="/ui/patient-helper.css">
+  <link rel="stylesheet" href="/mobile/health-helper.css">
+  <link rel="stylesheet" href="/ui/patient-health.css">
+  <link rel="stylesheet" href="/ui/wallet-home.css">
+  <link rel="stylesheet" href="/ui/sharing-wallet-v2.css">
   <script src="/qrcode.js"></script>
   <script src="/mobile/app.js" type="module"></script>
 </head>
@@ -161,6 +166,10 @@
         <div id="home-recent-list" class="recent-list-wrap">
           <!-- Dynamic cards injected via app.js -->
         </div>
+        <button type="button" class="wallet-health-helper" data-tab="helper">
+          <span><strong>내 기록을 알기 쉽게</strong><small>건강도우미와 다음 진료 질문을 챙겨요</small></span>
+          <span aria-hidden="true">↗</span>
+        </button>
         <button type="button" class="wallet-help" data-faq-open>공유가 처음이신가요? <span aria-hidden="true">→</span></button>
 
         <!-- MyData Institution Link Footer Info -->
@@ -224,53 +233,54 @@
       <!-- Tab 4: 4-Step Share Flow & Manage (MediQ ShareScreens)             -->
       <!-- ================================================================= -->
       <section id="tab-share" class="tab-pane">
+        <button type="button" class="health-wallet-back" data-tab="home">‹ 내 지갑으로</button>
         <div class="section-head">
           <div class="section-title">
-            <span>동의와 병원 연결</span>
+            <span>내 영상을, 필요한 병원에.</span>
           </div>
-          <p class="section-sub">기록을 선택하고 수신 병원을 지정하여 1회용 QR 코드를 발급받으세요.</p>
+          <p class="section-sub">공유할 검사와 병원을 선택해 주세요.</p>
         </div>
 
         <!-- Share Subnav: New Share vs Share History -->
         <div class="share-tab-switch">
-          <button id="btn-share-sub-wizard" class="subtab-btn active" type="button">새 1회용 공유 생성</button>
-          <button id="btn-share-sub-manage" class="subtab-btn" type="button">공유 관리 · 이동 로그</button>
+          <button id="btn-share-sub-wizard" class="subtab-btn active" type="button">새 공유 준비</button>
+          <button id="btn-share-sub-manage" class="subtab-btn" type="button">공유 내역</button>
         </div>
 
         <!-- Sub-View A: 4-Step Share Wizard (MediQ ShareSelect ~ ShareResult) -->
         <div id="share-wizard-wrap">
           <!-- Wizard Step Indicator -->
-          <div class="wizard-stepper">
-            <div class="step-dot active" data-step="1">1. 기록 선택</div>
+          <div class="wizard-stepper" role="list" aria-label="영상 공유 단계">
+            <div class="step-dot active" data-step="1" role="listitem" aria-current="step">1. 검사</div>
             <div class="step-line"></div>
-            <div class="step-dot" data-step="2">2. 병원 설정</div>
+            <div class="step-dot" data-step="2" role="listitem">2. 병원</div>
             <div class="step-line"></div>
-            <div class="step-dot" data-step="3">3. 동의 확인</div>
+            <div class="step-dot" data-step="3" role="listitem">3. 승인</div>
             <div class="step-line"></div>
-            <div class="step-dot" data-step="4">4. QR 완료</div>
+            <div class="step-dot" data-step="4" role="listitem">4. QR</div>
           </div>
 
           <!-- Wizard Step 1: Record Selection (ShareSelectScreen) -->
           <div id="wizard-step-1" class="wizard-step-pane active">
             <div class="wizard-box-title">공유할 기록을 선택해 주세요</div>
-            <p class="wizard-box-desc">선택한 기록만 B병원 진료실에 한시적으로 열람 권한이 부여됩니다.</p>
+            <p class="wizard-box-desc">선택한 기록만, 지정한 병원에. 다음 화면에서 내용을 확인하고 승인해 주세요.</p>
             <div id="share-select-items" class="share-items-checklist">
               <!-- Checkboxes dynamically populated -->
             </div>
             <button id="btn-wizard-to-2" class="btn btn-primary" type="button" style="margin-top:14px;">
-              다음: 수신 병원 설정 (1/4)
+              받는 병원 선택하기
             </button>
           </div>
 
           <!-- Wizard Step 2: Target Hospital Config (ShareConfigScreen) -->
           <div id="wizard-step-2" class="wizard-step-pane">
-            <div class="wizard-box-title">수신 의료기관 및 의사 지정</div>
-            <p class="wizard-box-desc">영상을 전송할 대상 병원과 담당 진료과를 선택해 주세요.</p>
+            <div class="wizard-box-title">어느 병원에 공유할까요?</div>
+            <p class="wizard-box-desc">받는 병원과 공유 조건을 선택하세요. 아직 공유되지 않았어요.</p>
             
             <div class="config-field-group">
               <label class="config-label">수신 병원</label>
               <select id="select-target-hospital" class="config-select">
-                <option value="HOSP-B" selected>가상 병원 B (상급종합병원)</option>
+                <option value="HOSP-B" selected>B대학병원</option>
                 <option value="HOSP-C">가상 병원 C (전문 클리닉)</option>
                 <option value="HOSP-SNU">가상 병원 D (시연 식별자 HOSP-SNU)</option>
                 <option value="HOSP-SEV">가상 병원 E (시연 식별자 HOSP-SEV)</option>
@@ -284,6 +294,10 @@
               </div>
             </div>
 
+            <div class="config-field-group">
+              <label class="config-label" for="select-share-purpose">공유 목적</label>
+              <select id="select-share-purpose" class="config-select"><option value="TREATMENT">진료</option><option value="TRANSFER" selected>전원</option></select>
+            </div>
             <div class="config-field-group">
               <label class="config-label">공유 유효 기간</label>
               <select id="select-validity-duration" class="config-select">
@@ -306,7 +320,7 @@
 
             <div style="display:flex;gap:8px;margin-top:14px;">
               <button id="btn-wizard-back-to-1" class="btn btn-secondary" type="button" style="flex:1;">이전</button>
-              <button id="btn-wizard-to-3" class="btn btn-primary" type="button" style="flex:2;">다음: 동의 확인 (2/4)</button>
+              <button id="btn-wizard-to-3" class="btn btn-primary" type="button" style="flex:2;">공유 내용 확인하기</button>
             </div>
           </div>
 
@@ -326,7 +340,7 @@
               </div>
               <div class="summary-row">
                 <span>공유 목적</span>
-                <strong>진료</strong>
+                <strong id="confirm-purpose-label">전원</strong>
               </div>
               <div class="summary-row">
                 <span>열람 권한</span>
@@ -556,12 +570,17 @@
       </div>
     </div>
 
-    <!-- Bottom Tab Navigation (5 MediQ Tabs) -->
+    <section id="tab-helper" class="tab-pane" aria-label="모바일 건강도우미">
+      <button type="button" class="wallet-helper-back" data-tab="home">‹ 홈으로</button>
+      <div id="patient-health-helper"></div>
+    </section>
+    <!-- Bottom Tab Navigation (existing four tabs preserved) -->
     <section id="tab-profile" class="tab-pane wallet-profile">
       <h2>내 정보</h2><p id="wallet-profile-name">로그인 후 표시</p><p>합성 데이터 · 개발용 인증 · 비운영 환경</p>
       <div class="header-meta"><strong id="header-patient-name">로그인 후 표시</strong><span id="header-auth-badge" class="badge">시연 로그인</span></div>
       <button id="btn-lock-app" class="btn btn-secondary" type="button">앱 잠금 · 로그아웃</button>
       <button class="btn btn-secondary" type="button" data-tab="records">진료·건강기록 시연</button>
+      <button class="btn btn-secondary" type="button" data-tab="helper">건강도우미 · 진료 질문 준비</button>
       <button class="btn btn-secondary" type="button" data-tab="vault">보관함·단말 보안 상태</button>
       <button class="btn btn-secondary" type="button" data-faq-open>이용 도움말</button>
       <a href="/" class="wallet-profile-link">의료진 웹으로 이동 · 별도 인증 필요</a>
@@ -571,17 +590,17 @@
         <span class="icon">🏠</span>
         <span>홈</span>
       </button>
-      <button class="nav-item" type="button" data-tab="studies">
+      <button class="nav-item" type="button" data-tab="records">
         <span class="icon">🩻</span>
-        <span>영상검사</span>
+        <span>내 건강기록</span>
       </button>
       <button class="nav-item" type="button" data-tab="share">
         <span class="icon">📱</span>
-        <span>공유 내역</span>
+        <span>영상 공유</span>
       </button>
-      <button class="nav-item" type="button" data-tab="profile">
+      <button class="nav-item" type="button" data-tab="helper">
         <span class="icon">🛡️</span>
-        <span>내 정보</span>
+        <span>건강도우미</span>
       </button>
     </nav>
   </div>

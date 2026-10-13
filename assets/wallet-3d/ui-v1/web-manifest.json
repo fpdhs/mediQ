@@ -1,0 +1,34 @@
+{
+  "review": "DRAFT / UNASSIGNED",
+  "sourceModel": "assets/wallet-3d/v3/mediq-wallet.blend",
+  "modelSha256": "8a7b95c8a4e036cab9fec5a9cf05725b5dac75dd74774286d4e14bea6caf57a6",
+  "renderScript": "scripts/render-wallet-ui.py",
+  "encoding": "lossless WebP",
+  "mobile": "right leaf crop, same camera and mesh",
+  "files": {
+    "mediq-wallet-model-back.webp": {
+      "sha256": "ba0f6e804ae6c168f9f1d80390b2a1fb0aff5b34e30b1cabd0fe96189637f6c1",
+      "bytes": 1656448,
+      "width": 1800,
+      "height": 1100
+    },
+    "mediq-wallet-model-mobile-back.webp": {
+      "sha256": "e98426d6221ec6dfc818b1891604d176145287692340f20f83d4a912643af9a4",
+      "bytes": 856456,
+      "width": 900,
+      "height": 1100
+    },
+    "mediq-wallet-model-front.webp": {
+      "sha256": "11266f43e203724eedc2b94d41b1940ce13a5be038ad5cfa5a9579c842c51d3c",
+      "bytes": 700616,
+      "width": 1800,
+      "height": 1100
+    },
+    "mediq-wallet-model-mobile-front.webp": {
+      "sha256": "266ea0eb6621174608de3dad0fdd230a57ac5b33c4138523bd42be2bf56fed13",
+      "bytes": 362274,
+      "width": 900,
+      "height": 1100
+    }
+  }
+}

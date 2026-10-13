@@ -2,7 +2,7 @@
 // Security Principle: Only static client assets (HTML, CSS, JS, Icons) are cached.
 // Sensitive clinical data and API endpoints (/api/*) are NEVER stored in cache.
 
-const CACHE_NAME = "hipass-mediq-shell-v11";
+const CACHE_NAME = "hipass-mediq-shell-v39";
 
 const APP_SHELL_ASSETS = [
   "/mobile/",
@@ -17,9 +17,39 @@ const APP_SHELL_ASSETS = [
   "/ui/brand.css",
   "/brand/mediq-source.png",
   "/mobile/app.js",
+  "/mobile/health-helper.js",
+  "/mobile/health-helper.css",
+  "/ui/patient-helper.js",
+  "/ui/patient-helper.css",
+  "/ui/health-comparison.js",
+  "/ui/health-comparison.css",
+  "/ui/health-record-client.js",
+  "/ui/wallet-home.js",
+  "/ui/wallet-home.css",
+  "/ui/wallet-open.css",
+  "/ui/wallet-bifold.css",
+  "/ui/wallet-record-sheet.css",
+  "/ui/sharing-wallet-v2.css",
+  "/images/mediq-wallet-model-back.webp",
+  "/images/mediq-wallet-model-front.webp",
+  "/images/mediq-wallet-model-mobile-back.webp",
+  "/images/mediq-wallet-model-mobile-front.webp",
+  "/images/mediq-wallet-bifold-v1.webp",
+  "/ui/patient-health.js",
+  "/ui/patient-sharing.js",
+  "/ui/patient-health.css",
+  "/ui/patient-library.js",
+  "/ui/patient.js",
   "/qrcode.js",
   "/capstone-auth.js",
   "/ui/capstone-login.css",
+  "/ui/demo-entry.js",
+  "/ui/demo-entry.css",
+  "/images/mediq-hong-gildong-landing.png",
+  "/images/mediq-login-wallet.webp",
+  "/images/mediq-wallet-front-v1.webp",
+  "/images/mediq-wallet-leather-v1.webp",
+  "/images/mediq-synthetic-abdominal-ct.png",
   "/patient-pixel-viewer.js",
   "/mobile/manifest.json",
   "/mobile/icon-192.png",

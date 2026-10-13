@@ -1,5 +1,33 @@
 # Capstone Demo Runbook
 
+## 현재 시연 기준 — 2026-10-10 KST
+
+13:32 KST: 홍길동56세/A대학병원 CT→B대학병원 전원 시나리오의 로그인·초기화 **후보**를 준비했다. 공개 사이트는 여전히 기존fa5f/11a23 조합이며 실제 초기화·새 CT 표시·배포는 미실행이다. 과거 팬텀 PASS를 승계하지 않는다. 정확한 후보·활성화/복구는 [HCC 시나리오 기록](implementation/synthetic-hcc-study-transfer-2026-10-10.md#latest-hong-gildong-main-scenario-candidate--2026-10-10-1332-kst), 상태 권위 위치는 [발표 환경 통합 상태](implementation/mediq-presentation-integration-status-2026-10-09.md)다. 아래 결과는 과거 조합 이력이다.
+
+로컬 후보 검증: `node scripts/verify-hcc-scenario-login.js` (실제 Chrome 로그인 컴포넌트만), `node scripts/verify-hcc-scenario-reset.js` (별도 tmpfs SQL만), `node scripts/verify-hcc-scenario-candidates.js` (이미지-소스 해시만). 이 명령은 실제 VM 환자를 초기화하거나 CT 종단 시연을 실행하지 않는다.
+
+10:45 KST 갱신: 현재 B Portal은 `sha256:fa5f382a79f30bce50580c5128599a8567e32407bc4a95ea242f05888ab0dc7e`다. 인증 만료 안내 정적3파일 변경의 적용·dcc15 복구·fa5f 재적용5검사 PASS이며 Cloud11a23/A/PACS/DB는 보존했다. 아래 dcc15/11a23 전체 흐름 PASS는 이전 조합 이력이다. 새 배포의 실제5분 인증 만료 안내와10분 QR 서버 만료 검증은 exec25011/CDP9352에서 RUNNING이며 최종 결과·owned 정리 NOT VERIFIED다. 재실행이나 서비스 재시작 대신 같은 handle의 종료를 확인한다.
+
+현재 상태의 권위 위치는 [발표 환경 통합 상태](implementation/mediq-presentation-integration-status-2026-10-09.md)의 맨 위 절이다. B Portal은 `sha256:dcc15c29e5344265a74908a41d33c48fe5ca5ceb06057107d4a9098c20b340b1`, Cloud Control은 `sha256:11a23eea8a6181b697beec13827addc5b8b391eb5314e190243e083c5c48b92b`다. A Gateway/PACS, ingress 및 PostgreSQL은 보존했다. 아래 10월9일의 이미지·미완료 설명은 당시 이력이며 최신 실행 결과로 승계하지 않는다.
+
+최신 조합에서 같은 합성 환자의 모바일 명시적 동의→QR 연결 버튼→실제 의료진 접수→256×256 CT/MR 픽셀·다음 슬라이스→모바일 철회→신규 접근 거부를 각각 검증했다. 각 실행의 정상/철회7검사·음성9조건 및 별도 감사6검사가 PASS다. 실제 카메라 스캔, 네이티브 생체인증, 모든12장 픽셀 표시, B PACS 반입 또는 전체 v3 완료를 의미하지 않는다. 환자 본인 열람과 FAQ는 별도 웹/모바일4조합에서 검증했다.
+
+VM/VPN/개발 CA/Cloud가 준비되고 사용하지 않는 CDP port를 선택한 뒤 저장소 루트에서 실행한다. 접근 키는 기존 도구가 메모리와 anonymous stdin으로만 처리한다.
+
+```powershell
+./scripts/run-browser-authorization-trace.ps1 -Port 9351 -Capstone -MobileQr -VerticalFlow -PhantomModality CT -BrowserUrl 'https://192.168.111.149:9443/hipass/'
+# CT 명령의 종료와 owned cleanup을 확인한 뒤 동일 명령의 modality를 MR로 바꿔 실행한다.
+python scripts/capstone-phantom-audit-check.py 'artifacts/workstation/<그 실행이 반환한 정확한 b-browser 디렉터리>/result.json'
+python scripts/patient-public-browser-ops.py --modality CT --surface web --faq
+# FAQ의 나머지 조합: MR/web, CT/mobile, MR/mobile. 각 exact receipt를 별도 감사 도구에 전달한다.
+```
+
+실제10분 QR 만료 실행61057은 exit0/PASS/632.986초로 종료했다. 서버 EXPIRED 및 실제 사용 TICKET_EXPIRED, owned 동의 cleanup을 확인했고, 별도 감사5검사도 PASS(token0/key release0/금지 SUCCESS0/chain7374)다. exact browser receipt는 `artifacts/workstation/b-browser-2026-10-10T01-23-00.606051+00-00/result.json`이며 감사 명령은 `python scripts/capstone-phantom-audit-check.py --ticket-expiry '<exact-result.json>'`다. QR 제거만으로 서버 차단 PASS를 선언하지 않는다. 대기 중 시연 인증 만료가 일반 상태 조회 실패로 표시되는 UX 문제는 별도 미해결이다. 인증/QR TTL을 늘리거나 자동 재로그인하여 숨기지 않는다.
+
+재시작/반복 시연은 다음 미완료 작업이다. 재시작 준비 시 현재 B4개/Cloud8개 Compose 파일과 역할별 이미지, secret mounts, DB/PACS identities를 다시 캡처하고 정확한 서비스만 대상으로 한다. 과거 baseline-pinned rollout 도구를 현재 재시작 명령으로 재사용하지 않는다. `down -v`, migration, seed 재적재 및 전역 프로세스 정리는 금지한다. 복구 범위와 실제 결과는 [Release Runbook](operations/release-runbook.md)의 현재 절을 따른다. 신규 실행 증적은 DRAFT / UNASSIGNED이며 전체 MVP 완료는 아직 선언하지 않는다.
+
+## 과거 시연 기록 — 아래 상태는 각 관측 시점에 한정
+
 ## 현재 상태와 단일 흐름 재현 — 2026-10-09 KST
 
 현재 배포·검증 범위·실패의 권위 위치는 [발표 환경 통합 상태](implementation/mediq-presentation-integration-status-2026-10-09.md)의 현재 절이다. 아래 과거 ‘현재 이미지’/‘실행 중’ 설명은 당시 이력이다.

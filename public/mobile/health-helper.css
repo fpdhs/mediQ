@@ -1,0 +1,29 @@
+/* Mobile wallet adapter: shared helper logic, restrained blue and sage notes. */
+.wallet-health-helper{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;padding:20px;margin:24px 0 8px;border:1px solid #d4e0d1;border-radius:18px;background:#e8efe6;color:#243831;text-align:left;font:inherit;cursor:pointer;min-height:80px}
+.wallet-health-helper strong{display:block;font-size:18px;letter-spacing:-.03em}.wallet-health-helper small{display:block;font-size:13px;line-height:1.6;margin-top:6px;color:#52674f}.wallet-health-helper>span:last-child{font-size:24px}
+.wallet-helper-back{border:0;background:transparent;color:#3566b8;font:inherit;padding:8px 0;min-height:48px}
+#tab-helper #patient-health-helper{padding:12px 0 24px;--question-pocket:#dfe9dd;--question-card:#fafcf8;--question-ink:#243831;--question-blue:#3566b8}
+#tab-helper .helper-heading{padding-right:0;margin-bottom:24px}#tab-helper .helper-heading h1{font-size:30px;line-height:1.3}#tab-helper .helper-heading>p{font-size:15px;line-height:1.6}
+#tab-helper .helper-new-chat{position:static;margin-top:12px;min-height:48px}
+#tab-helper .helper-grid{grid-template-columns:minmax(0,1fr);gap:20px}
+#tab-helper .helper-context{padding:16px;gap:12px}#tab-helper .helper-record-select{max-width:none;width:100%;min-width:0;font-size:16px}
+#tab-helper .helper-conversation{min-height:0;min-width:0;padding:18px;border-radius:20px}
+#tab-helper .helper-introduction{padding:20px 0 28px}#tab-helper .helper-introduction h2{font-size:24px}#tab-helper .helper-introduction p{font-size:15px}
+#tab-helper .helper-answers{max-height:none;overflow:visible;min-width:0}#tab-helper .helper-answer,#tab-helper .helper-user-message{font-size:16px;line-height:1.7}
+#tab-helper .helper-conversation>.helper-add-form{margin-top:18px;flex-wrap:wrap}#tab-helper .helper-conversation .helper-manual-input{flex-basis:100%;font-size:16px;min-width:0}
+#tab-helper .helper-conversation .helper-button--primary{width:100%}#tab-helper .helper-button{min-height:48px}
+#tab-helper .helper-pocket{padding:20px;min-width:0;border-radius:22px}#tab-helper .helper-pocket h2{font-size:24px}#tab-helper .helper-pocket-label{letter-spacing:.08em}
+#tab-helper .helper-card--suggested{padding:16px;transform:none;align-items:flex-start;flex-wrap:wrap}#tab-helper .helper-card--suggested p{flex-basis:100%}
+#tab-helper .helper-question-input,#tab-helper .helper-manual-input{font-size:16px}#tab-helper .helper-manual-input{min-width:0;max-width:100%;box-sizing:border-box}
+#tab-helper .helper-pocket .helper-add-form{flex-direction:column}#tab-helper .helper-notes-dialog{max-height:80dvh;overflow:auto}
+.wallet-health-helper:focus-visible,.wallet-helper-back:focus-visible{outline:3px solid #3566b8;outline-offset:3px}
+#tab-helper .helper-heading{margin-bottom:20px}#tab-helper .helper-heading h1{font-size:29px;letter-spacing:-.045em}
+#tab-helper .helper-context-note,#tab-helper .helper-context-hint{flex-basis:100%;line-height:1.65}
+#tab-helper .helper-chat-title{font-size:22px}#tab-helper .helper-progress{gap:6px;font-size:11px}
+#tab-helper .helper-intents{gap:8px}#tab-helper .helper-intent{font-size:13px;padding:9px 12px}
+#tab-helper .helper-introduction{padding:24px 0}#tab-helper .helper-introduction h2{font-size:23px}
+#tab-helper .helper-card--suggested{display:grid;grid-template-columns:20px minmax(0,1fr);gap:8px 10px}
+#tab-helper .helper-card--suggested p{font-size:16px}#tab-helper .helper-card-actions{grid-column:2}
+#tab-helper .helper-notes-jump{display:block;width:100%;margin:18px 0 0;min-height:48px}
+#tab-helper .helper-evidence-drawer summary{min-height:48px;font-size:14px}
+#tab-helper .helper-pocket{scroll-margin-top:20px;margin-bottom:env(safe-area-inset-bottom,0px)}

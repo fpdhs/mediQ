@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { generateKeyPairSync, publicEncrypt, privateDecrypt, constants, randomBytes } from "node:crypto";
+import { generateKeyPairSync, publicEncrypt, privateDecrypt, constants, randomBytes, createHash, sign, randomUUID } from "node:crypto";
 import { mkdtemp, rm } from "node:fs/promises";
 import path from "node:path";
 import { tmpdir } from "node:os";
@@ -10,22 +10,36 @@ import { authorizeDataPlane, parseDataPlaneRequest } from "../src/data-plane-aut
 import { ConsentBoundKeyRelease } from "../src/consent-bound-key-release.js";
 import { createCapstoneImageEncryptor, createCapstoneImageDecryptor, encryptedDicomType } from "../src/capstone-encrypted-transfer.js";
 
-async function setup(t, { unwrapControlDelayMs = 0 } = {}) {
+async function setup(t, { unwrapControlDelayMs = 0, importing = false } = {}) {
   const directory = await mkdtemp(path.join(tmpdir(), "hp-encrypted-route-"));
   t.after(() => rm(directory, { recursive: true, force: true }));
   const store = new JsonStore(path.join(directory, "db.json")); await store.load();
   const current = new Date();
   const service = new HipassService(store, () => current.toISOString(), { tokenSecret: randomBytes(32).toString("hex") });
   const config = { sourceHospitalId: "HOSP-A", recipientHospitalId: "HOSP-B", publicBaseUrl: "https://192.168.111.149:9443",
-    keyId: `https://capstone-demo.vault.azure.net/keys/demo/${"a".repeat(32)}` };
+    keyId: `https://capstone-demo.vault.azure.net/keys/demo/${"a".repeat(32)}`, pacsImportEnabled: importing };
   // Seed consent expires before this future test clock; keep synthetic bounds explicit.
   const consent = store.get("consents").find(row => row.consentId === "CONSENT-DEMO-ACTIVE");
   consent.validFrom = new Date(current.getTime() - 1000).toISOString();
   consent.validUntil = new Date(current.getTime() + 60000).toISOString();
   const study = "1.2.410.100.1.20260620.001", series = study + ".1";
-  const requestPath = `/dicomweb/studies/${study}/series/${series}/instances/${series}.1/rendered`;
-  const issued = await service.requestDicomAccessToken({ consentId: consent.consentId, doctorId: "DOC-B-01", requestingHospitalId: "HOSP-B", purpose: "TREATMENT", requestedAction: "VIEW", studyInstanceUid: study, seriesInstanceUid: series });
-  const granted = await authorizeDataPlane(service, { method: "GET", path: requestPath, token: issued.accessToken, authorizationScheme: "Bearer", clientIp: "192.0.2.1" }, config);
+  const requestPath = `/dicomweb/studies/${study}/series/${series}/instances/${series}.1/${importing ? 'import' : 'rendered'}`;
+  if (importing) consent.permission = 'DOWNLOAD_ALLOWED';
+  const issued = await service.requestDicomAccessToken({ consentId: consent.consentId, doctorId: "DOC-B-01", requestingHospitalId: "HOSP-B", purpose: "TREATMENT", requestedAction: importing ? 'DOWNLOAD' : "VIEW", studyInstanceUid: study, seriesInstanceUid: series });
+  const input = { method: importing ? 'POST' : 'GET', path: requestPath, token: issued.accessToken, authorizationScheme: "Bearer", clientIp: "192.0.2.1" };
+  if (importing) {
+    const proofKeys = generateKeyPairSync('ec', { namedCurve: 'P-256' }), jwk = proofKeys.publicKey.export({ format: 'jwk' });
+    const claims = service.verifyAccessTokenSignature(input.token).claims;
+    claims.cnf = { jkt: createHash('sha256').update(JSON.stringify({ crv: jwk.crv, kty: jwk.kty, x: jwk.x, y: jwk.y })).digest('base64url') };
+    input.token = service.signAccessToken(claims);
+    store.get('dicomAccessTokenLogs').find(x => x.tokenId === claims.jti).tokenHash = 'sha256:' + createHash('sha256').update(input.token).digest('hex');
+    input.authorizationScheme = 'DPoP';
+    const encode = obj => Buffer.from(JSON.stringify(obj)).toString('base64url');
+    const data = `${encode({ typ: 'dpop+jwt', alg: 'ES256', jwk })}.${encode({ jti: randomUUID(), htm: 'POST', htu: config.publicBaseUrl + requestPath,
+      iat: current.getTime() / 1000 | 0, ath: createHash('sha256').update(input.token).digest('base64url') })}`;
+    input.dpopProof = data + '.' + sign('sha256', Buffer.from(data), { key: proofKeys.privateKey, dsaEncoding: 'ieee-p1363' }).toString('base64url');
+  }
+  const granted = await authorizeDataPlane(service, input, config);
   assert.equal(granted.status, 200);
   const rows = new Map(); // Explicit fixture, NOT a persistence/real Vault claim.
   const repository = { persistent: true, async create(row) { rows.set(row.releaseId, row); }, async read(id) { return rows.get(id); },
@@ -53,9 +67,18 @@ async function setup(t, { unwrapControlDelayMs = 0 } = {}) {
   const a = createCapstoneImageEncryptor(dependencies);
   const b = createCapstoneImageDecryptor({ ...dependencies, publicBaseUrl: config.publicBaseUrl, recipientHospitalId: "HOSP-B" });
   const body = Buffer.from("synthetic image response only");
-  const seal = () => a.seal({ body, contentType: "image/png", route: parseDataPlaneRequest({ method: "GET", path: requestPath }, config.publicBaseUrl), grant: granted.body });
+  const seal = () => a.seal({ body, contentType: importing ? 'application/dicom' : "image/png", route: parseDataPlaneRequest({ method: input.method, path: requestPath }, config.publicBaseUrl), grant: granted.body });
   return { a, b, seal, body, store, current, requestPath, setAfterUnwrap: callback => { afterUnwrap = callback; } };
 }
+
+test('POST import retains DOWNLOAD + method/path-bound crypto and one-use release', async t => {
+  const { seal, b, requestPath, body } = await setup(t, { importing: true });
+  const result = await seal();
+  await assert.rejects(b.open(result, requestPath), /ROUTE_INVALID|SCOPE_MISMATCH/);
+  const decoded = await b.open(result, requestPath, { method: 'POST' });
+  assert.deepEqual(decoded.body, body); assert.ok(decoded.importContext.releaseId); decoded.body.fill(0);
+  await assert.rejects(b.open(result, requestPath, { method: 'POST' }), /KV_POLICY_DENIED/);
+});
 
 test("encrypted hospital transport uses live consent wrap/pre/post authority and one-time RSA/AES roundtrip", async t => {
   const { seal, b, body, requestPath } = await setup(t);

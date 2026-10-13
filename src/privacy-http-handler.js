@@ -3,7 +3,7 @@ import { PrivacyProcessingError } from "./privacy-contracts.js";
 import { PrivacyRequestBudget, readPrivacyJson } from "./privacy-request-budget.js";
 import { sendJson } from "./http-utils.js";
 
-export function createPrivacyHttpHandler({ service, env = process.env, timeoutMs = 30000 }) {
+export function createPrivacyHttpHandler({ service, env = process.env, provider = null, timeoutMs = 30000 }) {
   new PrivacyRequestBudget(timeoutMs).dispose();
   return async function handlePrivacy(request, response, url) {
     const budget = new PrivacyRequestBudget(timeoutMs);
@@ -14,7 +14,7 @@ export function createPrivacyHttpHandler({ service, env = process.env, timeoutMs
       await budget.run(async () => {
         let principal;
         try {
-          principal = authenticateRequest(request, env);
+          principal = await authenticateRequest(request, env, provider);
           requireInternalServiceScope(principal, "privacy:inspect");
         } catch (error) {
           if (error instanceof AuthError) throw new PrivacyProcessingError(error.statusCode === 401 ? 401 : 403, "AUTH_REQUIRED");

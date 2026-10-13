@@ -43,7 +43,7 @@ test("Gateway dedicated credential is forwarded only to exact service endpoints,
     request.on("data", () => {});
     return request;
   });
-  for (const path of ["/gateway/data-plane/authorize", "/gateway/data-plane/ready", "/gateway/data-plane/package/prepare", "/gateway/data-plane/package/authorize", "/api/health", "/gateway/data-plane/package/authorize?token=forbidden"]) {
+  for (const path of ["/gateway/hcc-source/challenge", "/gateway/hcc-source/report", "/gateway/data-plane/authorize", "/gateway/data-plane/ready", "/gateway/data-plane/package/prepare", "/gateway/data-plane/package/authorize", "/api/health", "/gateway/data-plane/package/authorize?token=forbidden"]) {
     const incoming = new PassThrough();
     incoming.url = path;
     incoming.method = "POST";
@@ -54,8 +54,8 @@ test("Gateway dedicated credential is forwarded only to exact service endpoints,
     outgoing.emit("close");
     incoming.end();
   }
-  for (const item of captured.slice(0, 4)) assert.equal(item.headers["x-hipass-service-token"], "synthetic-service-principal");
-  for (const item of captured.slice(4)) assert.equal(item.headers["x-hipass-service-token"], undefined);
+  for (const item of captured.slice(0, 6)) assert.equal(item.headers["x-hipass-service-token"], "synthetic-service-principal");
+  for (const item of captured.slice(6)) assert.equal(item.headers["x-hipass-service-token"], undefined);
   for (const item of captured) {
     assert.equal(item.headers["x-forwarded-for"], "10.90.88.2");
     assert.notEqual(item.headers["x-hipass-ingress-signature"], "spoofed");

@@ -1,0 +1,7 @@
+# Activate after source import, fixed catalog/ownership registration, and legacy
+# capability retirement. The explicit main profile blocks old patient sessions.
+services:
+  control:
+    environment:
+      HIPASS_CAPSTONE_HCC_CATALOG: '1'
+      HIPASS_CAPSTONE_MAIN_SCENARIO: HCC

@@ -19,6 +19,9 @@ models/openai-privacy-filter/
 *.safetensors
 evidence/generated/
 .agents/
+.playwright-cli/
+output/clinician-health-regression-*.log
 .codex/
+public/vendor/
 npm-debug.log*
 docker-compose.override.yml

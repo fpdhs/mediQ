@@ -79,6 +79,7 @@ test("PACS At-Rest Encryption: AES-256-GCM Envelope Encryption and On-Demand Dec
       sopInstanceUid: inst.sopInstanceUid,
       baseDestDir: destDir,
       kek,
+      consent,
     });
 
     assert.ok(Buffer.isBuffer(plainBuffer));
@@ -101,6 +102,7 @@ test("PACS At-Rest Encryption: AES-256-GCM Envelope Encryption and On-Demand Dec
           sopInstanceUid: inst.sopInstanceUid,
           baseDestDir: destDir,
           kek,
+          consent,
         });
       },
       (err) => {
@@ -121,6 +123,7 @@ test("PACS At-Rest Encryption: AES-256-GCM Envelope Encryption and On-Demand Dec
           sopInstanceUid: inst.sopInstanceUid,
           baseDestDir: destDir,
           kek: bogusKek,
+          consent,
         });
       },
       (err) => {
