@@ -3,7 +3,6 @@ import hashlib
 import importlib.util
 import json
 import pathlib
-import subprocess
 import time
 from datetime import datetime, timezone
 

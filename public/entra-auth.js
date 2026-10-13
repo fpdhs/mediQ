@@ -3,7 +3,7 @@ const SCOPE = /^api:\/\/([0-9a-f-]{36})\/([A-Za-z0-9._:-]{1,128})$/iu;
 const SYNTHETIC_ACTOR = /^synthetic-[a-z0-9-]{1,64}$/u;
 const PATIENT_ID = /^MEDIQ-SYN-[A-Z0-9-]{1,64}$/u;
 const DOCTOR_PATIENT_ID = /^(?:MEDIQ-SYN-[A-Z0-9-]{1,64}|P-[0-9]{1,8})$/u;
-const DICOM_UID = /^(?:0|[1-9][0-9]{0,8})(?:\.(?:0|[1-9][0-9]{0,8}))+$/u;
+const DICOM_UID = /^[0-9]+(?:\.[0-9]+)+$/u;
 
 export function validateEntraBrowserConfig(config, appOrigin) {
   if (!config || typeof config !== "object" || Array.isArray(config)
@@ -128,7 +128,7 @@ export function validateEntraSyntheticIdentity(identity) {
       || context.entryRole !== identity.role
       || typeof context.patientId !== "string"
       || typeof context.patientName !== "string" || !context.patientName
-      || typeof context.defaultStudyUid !== "string" || !DICOM_UID.test(context.defaultStudyUid)
+      || typeof context.defaultStudyUid !== "string" || context.defaultStudyUid.length > 64 || !DICOM_UID.test(context.defaultStudyUid)
       || (identity.role === "PATIENT" && !PATIENT_ID.test(context.patientId))
       || (identity.role === "DOCTOR" && !DOCTOR_PATIENT_ID.test(context.patientId))) {
     throw new Error("ENTRA_IDENTITY_INVALID");

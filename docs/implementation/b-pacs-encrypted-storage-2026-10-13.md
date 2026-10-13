@@ -94,4 +94,6 @@ VM 비밀번호는 concealed stdin, Azure token은 로그인된 운영자 CLI에
 
 ## 다음 작업 한 개
 
+2026-10-13 10:51 KST 후속: [공유 Vault 보호·복구 검토](b-pacs-key-recovery-review-2026-10-13.md)에서 실제 read-only 설정/권한/복구 자료를 재확인했다. purge protection 활성화/현재7일 유지 권고, 비가역 Vault 전체 변경의 실제 승인은 대기 중이다. AuditEvent 진단 설정 부재도 신규 FAIL로 기록했다. 재부팅·별도 Vault 복원은 실행하지 않았다.
+
 **저장 키의 공유 Vault purge-protection 적용 여부와 복구 검토를 확정하고 B 수신 PACS 배포 gate를 준비한다.** 이후 전용 mTLS, 고정·스캔된 이미지, DB directory 최소권한, audit/retention/rollback을 연결해야 한다. 저장소 생성 성공을 PACS 수신 완료·700장 종단 완료·MVP/v3 완료로 승격하지 않는다.

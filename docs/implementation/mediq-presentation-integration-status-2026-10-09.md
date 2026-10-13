@@ -1,5 +1,11 @@
 # Medi Q 발표 환경 통합 상태와 실행 순서
 
+## 2026-10-13 10:51 KST 저장 키 복구 검토 — 공유 Vault 비가역 변경 승인 대기
+
+**DRAFT / UNASSIGNED; 기술 권고는 purge protection 활성화/기존7일 유지, 실제 설정 변경 없음.** [검토·영향·복구 절차](b-pacs-key-recovery-review-2026-10-13.md). 실제 private/RBAC/soft-delete readback PASS, purge protection 미설정 FAIL, **Key Vault AuditEvent 진단 설정0개 FAIL**. 저장 키의 잔여 임시 assignment0개, 두 encrypted 복구 자료 hash/KEK binding/LUKS header PASS. workstation ARM keys list는 ForbiddenByConnection으로 현재 Data Plane key metadata NOT VERIFIED이며 우회하지 않았다. 증적 artifacts/azure/b-key-recovery-review-20261013T015144Z/result.json, read-only 검토 exit0/7,591ms. 검토 실행 성공을 보안 Gate 전체 PASS로 해석하지 않는다.
+
+활성화는 공유 Vault 전체에 적용되고 되돌릴 수 없다. 기존7일 보존 기간도 생성 후 변경 불가이며90일을 원하면 별도 Vault/이관 승인이 필요하다. **다음 작업 한 개: 공유 Vault의7일 purge protection 활성화 승인 확인**. 실제 B 재부팅·별도 Vault 복원·ciphertext volume backup·감사 event·B PACS·700장·브라우저는 계속 NOT VERIFIED. VM/서비스/키/권한/데이터 변경, commit/push 없음. 아래 의료진 UI 작업 상태는 별도 트랙이며 보존했다.
+
 ## 2026-10-13 의료진 화면 단일 소스 관리 — 코드 반영 / B 교체 미실행
 
 사용자 지시에 따라 의료진 로컬/웹 화면의 수정 원본을 `public/index.html#hospital-saas-app`과 의존 파일로 통일했다. [관리·실행 절차](../operations/clinician-ui-management.md). 전체 root, 원본 CSS 순서와 공용 JS/import/이미지/폰트를 같은 묶음으로 생성하며 sourceRevision으로 관리한다. 기존 홈/보안 여정의 별도 부분 배포 entry point는 종료하고 통합 stage/build/check/release 경로를 사용한다. 기존 helper·증적은 보존한다. API/DB/인증·권한/암호화 정책 및 요구사항 baseline 변경 없음. 관련 FR-010~013 / FR-032~036, 공용 모듈의 환자 동의·공유 회귀 포함.
