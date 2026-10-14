@@ -34,43 +34,60 @@
 
 ---
 
-## 🖼️ Service Preview & Key UI Screens
+## 🖼️ Service Preview & Detailed Screenshot Evidence
 
+### 1. 메인 진입점 및 역할별 로그인 화면 (Authentication & Access Gates)
 <table width="100%">
   <tr>
     <td width="50%" align="center">
-      <b>1. 환자 포털 홈 & 검사 기록</b><br/>
-      <img src="docs/assets/images/01_patient_portal_home.png" alt="환자 포털 홈" width="100%"/><br/>
-      <sub>자신의 영상검사 목록 및 실시간 상태 확인</sub>
+      <b>1. 서비스 메인 랜딩 화면</b><br/>
+      <img src="docs/assets/images/01_main_landing.png" alt="서비스 메인 랜딩 화면" width="100%"/><br/>
+      <sub>A대학병원에서 B대학병원까지 환자 주도 공유 진입점</sub>
     </td>
     <td width="50%" align="center">
-      <b>2. 환자 동의 생성 & 여정 관리</b><br/>
-      <img src="docs/assets/images/02_patient_consent_journey.png" alt="동의 여정" width="100%"/><br/>
-      <sub>수신 병원, 열람 목적, 유효기간, Study 범위 지정</sub>
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" align="center">
-      <b>3. 프롬프트 격리 AI 건강도우미</b><br/>
-      <img src="docs/assets/images/03_health_helper_rag_drawer.png" alt="건강도우미 질의응답 서랍" width="100%"/><br/>
-      <sub>2-Layer 의도 분류 기반 의료 지식 설명 서랍</sub>
-    </td>
-    <td width="50%" align="center">
-      <b>4. 검사 결과 및 수치 추이 비교</b><br/>
-      <img src="docs/assets/images/04_health_record_comparison.png" alt="건강 기록 비교" width="100%"/><br/>
-      <sub>검사일자별 수치 비교 및 이상 소견 안내</sub>
+      <b>2. 환자 전용 로그인 화면</b><br/>
+      <img src="docs/assets/images/02_patient_login.png" alt="환자 로그인 화면" width="100%"/><br/>
+      <sub>내 의료지갑 열람 및 Microsoft Entra ID 계정 연동</sub>
     </td>
   </tr>
   <tr>
     <td width="50%" align="center">
-      <b>5. 의료진 OHIF DICOM 뷰어</b><br/>
-      <img src="docs/assets/images/05_clinician_dicom_viewer_ct.jpg" alt="의료진 CT 뷰어" width="100%"/><br/>
-      <sub>5분 단기 토큰을 통한 WADO-RS 프레임 Lazy Loading</sub>
+      <b>3. 의료진 전용 로그인 화면</b><br/>
+      <img src="docs/assets/images/03_clinician_login.png" alt="의료진 로그인 화면" width="100%"/><br/>
+      <sub>환자 동의 기반 타 병원 영상 열람 권한 획득 입구</sub>
     </td>
     <td width="50%" align="center">
-      <b>6. 보안 관제 콘솔 & 불변 감사로그</b><br/>
-      <img src="docs/assets/images/06_security_audit_console.png" alt="보안 콘솔 및 감사로그" width="100%"/><br/>
-      <sub>토큰 발급, 접근 거부, 열람 이력 실시간 감사 추적</sub>
+      <b>4. 보안 운영자 전용 로그인 화면</b><br/>
+      <img src="docs/assets/images/04_security_admin_login.png" alt="보안 운영자 로그인 화면" width="100%"/><br/>
+      <sub>3단계 인증 절차(인증 → 권한 확인 → 관제) 기반 보안 게이트</sub>
+    </td>
+  </tr>
+</table>
+
+### 2. 핵심 워크플로우 및 서비스 검증 증적 (Core Service Workflows)
+<table width="100%">
+  <tr>
+    <td width="50%" align="center">
+      <b>5. 환자 동의 생성 & 공유 지갑</b><br/>
+      <img src="docs/assets/images/06_patient_consent_wallet.png" alt="환자 동의 생성 지갑" width="100%"/><br/>
+      <sub>수신 병원, 열람 목적, 유효기간, 허용 Study/Series 범위 지정</sub>
+    </td>
+    <td width="50%" align="center">
+      <b>6. AI 건강도우미 RAG & 근거 서랍</b><br/>
+      <img src="docs/assets/images/05_health_helper_rag.png" alt="AI 건강도우미 RAG 워크벤치" width="100%"/><br/>
+      <sub>프롬프트 격리 질의응답 및 미국 국립의학도서관(MedlinePlus) 원문 근거 연동</sub>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" align="center">
+      <b>7. 의료진 OHIF DICOM CT 뷰어</b><br/>
+      <img src="docs/assets/images/07_clinician_dicom_viewer.jpg" alt="의료진 DICOM CT 뷰어" width="100%"/><br/>
+      <sub>5분 유효 단기 토큰을 통한 WADO-RS 프레임 Lazy Loading 스트리밍</sub>
+    </td>
+    <td width="50%" align="center">
+      <b>8. 보안 관제 콘솔 & 불변 감사로그</b><br/>
+      <img src="docs/assets/images/08_security_audit_console.png" alt="보안 관제 및 감사로그 콘솔" width="100%"/><br/>
+      <sub>토큰 발급, 접근 허용/거부, 이상행위 실시간 감사 추적 대시보드</sub>
     </td>
   </tr>
 </table>
