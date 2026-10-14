@@ -1,6 +1,11 @@
 // Uploaded translations are development evidence, never clinical/content approval.
 import {readFile} from 'node:fs/promises';
 import {sha256} from './health-helper-medlineplus.js';
+import {morphoAnalyze} from './health-helper-korean-morpho.js';
+import {classifyTopicAndIntent, INTENTS} from './health-helper-intent-classifier.js';
+
+export {morphoAnalyze} from './health-helper-korean-morpho.js';
+export {classifyTopicAndIntent, INTENTS} from './health-helper-intent-classifier.js';
 const POLICY='https://medlineplus.gov/about/using/usingcontent/';
 const RIGHTS=new Set(['public_domain_us_confirmed_scope','Health topic summaries identified as public domain by the source policy; not a blanket license for all linked content.']);
 const hasKorean=text=>typeof text==='string'&&/[\uac00-\ud7a3]/u.test(text);
@@ -20,13 +25,40 @@ const asksForListCount=question=>/몇\s*(?:가지|개|항목)/u.test(question);
 const koreanSearchSuffixes=['으로부터','에게서는','에게서','에게는','에서는','으로는','이라는','이라고','이라면','라면','이란','란','인가요','일까요','습니까','합니다','됩니다',
  '해줘요','해주세요','시켜서','시켜','이에요','예요','에요','나요','까요','으로','에서','에게','한테','에는','이랑','하고','이라','라는',
  '입니다','습니다','하는','하면','하며','했던','되면','지만','처럼','까지','부터','보다','은','는','이','가','을','를','와','과','의','에','로','도','만','게','한','히','지','하'];
+export function normalizeKoreanQuery(text){
+ if(typeof text!=='string')return '';
+ let cleaned=text.normalize('NFC').trim();
+ cleaned=cleaned.replace(/^[?!\s.,~]+|[?!\s.,~]+$/gu,'');
+ let prev;
+ do{
+  prev=cleaned;
+  cleaned=cleaned
+   .replace(/\s*(?:에\s*대해(?:서(?:는)?)?|에\s*관해(?:서(?:는)?)?|에\s*대하여|에\s*관하여|이라는\s*(?:것|건)|라는\s*(?:것|건)|에\s*대해)\s*$/u,'')
+   .replace(/\s*(?:알려\s*(?:주세요|줘요|줘|주실래요|주시기\s*바랍니다|달라)|설명\s*(?:해주세요|해줘요|해줘|부탁드려요)|궁금\s*(?:해요|합니다|해))\s*$/u,'')
+   .replace(/\s*(?:무엇인가요|무엇입니까|무엇인가|무엇인지|뭐인가요|뭔가요|뭔지|뭐예요|무엇인지\s*알려줘|어떤\s*것인가요|어떤\s*건가요)\s*$/u,'')
+   .replace(/(?:란|이란|이라는|라는|은|는|이|가|을|를|의|에|과|와|도|만|으로|로)\s*$/u,'')
+   .trim();
+ }while(cleaned!==prev&&cleaned.length>1);
+ return cleaned;
+}
+
 function koreanSearchTerms(text){
  const normalizedText=text.replace(/많은\s*(?:이들|사람)(?:에게|한테)?/gu,'대부분에게')
   .replace(/별(?:다른)?\s*문제가\s*없(?:는|어요|습니다)/gu,'문제가 되지 않는')
   .replace(/윗부분/gu,'위쪽');
  return [...new Set((normalizedText.match(/[가-힣]+/gu)??[]).map(value=>{
   let term=value.normalize('NFC');
-  for(const suffix of koreanSearchSuffixes){if(term.length>suffix.length&&term.endsWith(suffix)){term=term.slice(0,-suffix.length);break;}}
+  for(let pass=0;pass<3;pass++){
+   let changed=false;
+   for(const suffix of koreanSearchSuffixes){
+    if(term.length>suffix.length&&term.endsWith(suffix)){
+     term=term.slice(0,-suffix.length);
+     changed=true;
+     break;
+    }
+   }
+   if(!changed)break;
+  }
   if(term.length>2&&term.endsWith('하'))term=term.slice(0,-1);
   return term;
  }).filter(term=>term.length>0&&!koreanSearchStopTerms.has(term)))];
@@ -50,7 +82,7 @@ function koreanDefinitionLookupIndex(corpus){
  const index={postings,documentFrequency,topicCount:topicIds.size};koreanDefinitionLookupCache.set(corpus,index);return index;
 }
 function retrieveKoreanMatchedEvidence(question,corpus){
- const asksDefinition=/(?:무엇|뭐|어떤|무슨|어디|어느|설명|뜻)/u.test(question);
+ const asksDefinition=/(?:무엇|뭐|뜻|정의|목적|왜|어떤|알려|궁금|설명|뭔|어떻|어디|어느|무슨)/u.test(question);
  const asksDiseaseDefinition=/(?:어떤|무슨).{0,12}(?:질환|질병|병)/u.test(question)
   ||/혈액.{0,24}산소.{0,16}(?:운반|전달).{0,12}(?:못|않).{0,12}(?:무엇|뭐)/u.test(question);
  const asksCause=/(?:원인|이유|왜|어째서|때문|유발|일으키|초래)/u.test(question);
@@ -430,12 +462,17 @@ const completeSentences=text=>text.match(/[^.!?。！？]+[.!?。！？]+/gu)??[
 function exactTitleExplanation(question,chunks){
  const normalized=normalize(question).replace(/[.!?？。]+$/gu,'');
  const suffixes=['에대해서설명해주세요','에대해설명해주세요','에대해서설명해줘','에대해설명해줘',
-  '에대한설명','설명해주시겠어요','설명해주세요','설명해줘','설명'];
+  '에대한설명','설명해주시겠어요','설명해주세요','설명해줘','설명',
+  '에대해서알려주세요','에대해알려주세요','에대해서알려줘','에대해알려줘','에대해서알려달라','에대해알려달라',
+  '알려주세요','알려줘요','알려줘','알려달라',
+  '에대해서궁금해요','에대해궁금해요','궁금해요','궁금합니다','궁금해'];
  const suffix=suffixes.find(value=>normalized.endsWith(value));
- if(!suffix)return null;
- const requestedTitle=normalized.slice(0,-suffix.length);
- if(!requestedTitle)return null;
- const matches=(chunks??[]).filter(chunk=>chunk.demoIndexStatus==='PASS'&&normalize(chunk.title_ko??'')===requestedTitle
+ const requestedTitle=suffix?normalized.slice(0,-suffix.length):normalize(normalizeKoreanQuery(question));
+ const morphoCandidates=morphoAnalyze(question).nounCandidates.map(normalize);
+ const candidateTitles=new Set([requestedTitle,...morphoCandidates].filter(Boolean));
+ if(!candidateTitles.size)return null;
+ const matches=(chunks??[]).filter(chunk=>chunk.demoIndexStatus==='PASS'
+  &&(candidateTitles.has(normalize(chunk.title_ko??''))||(chunk.aliases??[]).some(alias=>candidateTitles.has(normalize(alias))))
   &&typeof chunk.text_ko==='string'&&sha256(chunk.text_ko)===chunk.textSha256&&hasKorean(chunk.text_ko));
  const identities=new Set(matches.map(chunk=>`${chunk.doc_id}:${chunk.topic}`));
  if(identities.size!==1)return null;

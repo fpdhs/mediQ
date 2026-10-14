@@ -25,3 +25,7 @@ output/clinician-health-regression-*.log
 public/vendor/
 npm-debug.log*
 docker-compose.override.yml
+scratch/
+apps/**/build/
+apps/**/.gradle/
+

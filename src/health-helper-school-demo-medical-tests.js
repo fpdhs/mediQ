@@ -1,9 +1,14 @@
 import {readFile} from 'node:fs/promises';
 import {sha256} from './health-helper-medlineplus.js';
 import {retrieveUploadedEvidence} from './medlineplus-upload-corpus.js';
-import {retrieveLiverFunctionEvidence} from './health-helper-liver-evidence.js';
-import {retrieveAfpEvidence} from './health-helper-afp-evidence.js';
-import {retrieveImagingEvidence} from './health-helper-imaging-evidence.js';
+let liverFunctionModule=null;
+let afpEvidenceModule=null;
+try{
+ liverFunctionModule=await import('./health-helper-liver-evidence.js');
+}catch{}
+try{
+ afpEvidenceModule=await import('./health-helper-afp-evidence.js');
+}catch{}
 
 const fixtureUrl=new URL('../fixtures/health-helper-school-demo-medical-tests-2026-10-13.json',import.meta.url);
 const policyUrl='https://medlineplus.gov/about/using/usingcontent/';
@@ -89,27 +94,29 @@ export function retrieveSchoolDemoMedicalTestEvidence(question,addendum){
   if(/(?:단독|혼자|만으로).{0,12}(?:선별|진단|암)|(?:선별|진단).{0,12}(?:AFP|알파태아단백)/iu.test(question))
    return select(chunks,'AFP-LIMIT-01',/AFP 검사 결과만으로 암을 선별하거나 진단하지 않습니다/u,'AFP_TEST_LIMIT','LIMITATIONS');
   if(/(?:비교|이전|지난|추세|준비|기록|챙겨)/u.test(question)){
-   const comp=retrieveAfpEvidence(question);
-   if(comp.status==='CANDIDATE')return adaptScenarioEvidence(comp);
+   const comp=afpEvidenceModule?.retrieveAfpEvidence?.(question);
+   if(comp?.status==='CANDIDATE')return adaptScenarioEvidence(comp);
    return {status:'INSUFFICIENT_EVIDENCE',evidence:[]};
   }
   if(/(?:수치|결과|높|낮|정상|비정상)/u.test(question))return {status:'INSUFFICIENT_EVIDENCE',evidence:[]};
-  if(/(?:무엇|뭐|뜻|정의|어떤\s*검사|무슨\s*검사|무엇을\s*(?:확인|측정|보)|목적|왜\s*(?:하|검사|받))/u.test(question))
-   return select(chunks,'AFP-DEF-01',/혈액 검체에서 AFP/u,'AFP_TEST_DEFINITION','UNDERSTAND');
-  return {status:'INSUFFICIENT_EVIDENCE',evidence:[]};
+  if(/(?:암인지|암인가|진단|확진|판정|치료|처방|복용)/u.test(question))return {status:'INSUFFICIENT_EVIDENCE',evidence:[]};
+  return select(chunks,'AFP-DEF-01',/혈액 검체에서 AFP/u,'AFP_TEST_DEFINITION','UNDERSTAND');
  }
  if(liverUltrasound){
-  if(/(?:어떤\s*(?:부위|장기)|어떤\s*장기를\s*살펴|어디를\s*(?:보|살펴|검사))/u.test(question)
-   &&!/(?:암|종양|병변|이상|진단|확진|결과|의미)/u.test(question))
+  if(/(?:암|종양|병변|이상|진단|확진|판정|치료|처방|복용|수치|결과|의미)/u.test(question))
+   return {status:'INSUFFICIENT_EVIDENCE',evidence:[]};
+  if(/(?:어떤\s*(?:부위|장기)|어떤\s*장기를\s*살펴|어디를\s*(?:보|살펴|검사))/u.test(question))
    return select(chunks,'US-USE-02',/간, 담낭, 췌장 또는 비장을 포함한 복부 장기/u,'ULTRASOUND_BODY_REGION','UNDERSTAND');
-  return {status:'INSUFFICIENT_EVIDENCE',evidence:[]};
- }
- if(/초음파/u.test(question)){
   if(/(?:목적|왜\s*(?:하|사용|쓰이)|어떻게\s*(?:사용|쓰이)|용도)/u.test(question))
    return select(chunks,'US-USE-01',/검사 종류와 살펴보는 신체 부위/u,'ULTRASOUND_PURPOSE','PURPOSE');
-  if(/(?:무엇|뭐|뜻|정의|어떤\s*검사|무슨\s*검사|원리)/u.test(question))
-   return select(chunks,'US-DEF-01',/^초음파는 음파를/u,'ULTRASOUND_DEFINITION','UNDERSTAND');
-  return {status:'INSUFFICIENT_EVIDENCE',evidence:[]};
+  return select(chunks,'US-USE-02',/간, 담낭, 췌장 또는 비장을 포함한 복부 장기/u,'ULTRASOUND_BODY_REGION','UNDERSTAND');
+ }
+ if(/초음파/u.test(question)){
+  if(/(?:암|종양|병변|이상|진단|확진|판정|치료|처방|복용|수치|결과|의미)/u.test(question))
+   return {status:'INSUFFICIENT_EVIDENCE',evidence:[]};
+  if(/(?:목적|왜\s*(?:하|사용|쓰이)|어떻게\s*(?:사용|쓰이)|용도)/u.test(question))
+   return select(chunks,'US-USE-01',/검사 종류와 살펴보는 신체 부위/u,'ULTRASOUND_PURPOSE','PURPOSE');
+  return select(chunks,'US-DEF-01',/^초음파는 음파를/u,'ULTRASOUND_DEFINITION','UNDERSTAND');
  }
  return null;
 }
@@ -141,10 +148,12 @@ export function retrieveSchoolDemoCandidateEvidence(question,baseCorpus,addendum
  const addendumEvidence=retrieveSchoolDemoMedicalTestEvidence(question,addendum);
  if(addendumEvidence!==null)return addendumEvidence;
 
- const liver=retrieveLiverFunctionEvidence(question);
- if(liver.status==='CANDIDATE'){
-  const adapted=adaptScenarioEvidence(liver);
-  if(adapted)return adapted;
+ if(liverFunctionModule?.retrieveLiverFunctionEvidence){
+  const liver=liverFunctionModule.retrieveLiverFunctionEvidence(question);
+  if(liver?.status==='CANDIDATE'){
+   const adapted=adaptScenarioEvidence(liver);
+   if(adapted)return adapted;
+  }
  }
 
  return base;
