@@ -36,20 +36,27 @@ export function patientTranslationFetch(env=process.env){
    });req.on('error',reject);req.end(body);
  });
  return async(_url,{body,signal})=>{
-  try{
-   const res=await sendOnce({body,signal});
-   if(res.status===429&&!signal?.aborted){
-    await new Promise(r=>setTimeout(r,400));
-    if(!signal?.aborted)return await sendOnce({body,signal});
+  let lastError=null;
+  for(let attempt=0;attempt<3;attempt++){
+   if(signal?.aborted)break;
+   try{
+    const res=await sendOnce({body,signal});
+    if((res.status===429||res.status===503)&&attempt<2&&!signal?.aborted){
+     await new Promise(r=>setTimeout(r,400*(attempt+1)));
+     continue;
+    }
+    return res;
+   }catch(err){
+    lastError=err;
+    if(attempt<2&&!signal?.aborted){
+     await new Promise(r=>setTimeout(r,400*(attempt+1)));
+     continue;
+    }
+    throw err;
    }
-   return res;
-  }catch(err){
-   if(!signal?.aborted){
-    await new Promise(r=>setTimeout(r,400));
-    if(!signal?.aborted)return await sendOnce({body,signal});
-   }
-   throw err;
   }
+  if(lastError)throw lastError;
+  throw Error('HELPER_TRANSLATION_UNAVAILABLE');
  };
 }
 
