@@ -14,6 +14,11 @@ export function shareReviewModel({ study, seriesUid = '', source, target, purpos
 export function createShareReview({root, read, onBack}) {
   if (!root) return {refresh(){}, allowed(){return false;}};
   const ack = root.querySelector('#share-review-ack'), button = root.querySelector('#patient-consent');
+  root.querySelector('#share-select-exam')?.addEventListener('click', () => {
+    const editor=root.querySelector('.share-edit');
+    if(editor)editor.open=true;
+    root.querySelector('#patient-study-select')?.focus();
+  });
   let signature = '', busy = false;
   const put = (id,text) => { root.querySelector(id).textContent = text; };
   const hospital = id => ({'HOSP-A':'A대학병원','HOSP-B':'B대학병원','HOSP-C':'가상 병원 C'}[id] ?? '병원 확인 필요');

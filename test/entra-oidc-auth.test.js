@@ -16,6 +16,7 @@ const API_AUDIENCE = "33333333-3333-4333-8333-333333333333";
 const PATIENT_OID = "44444444-4444-4444-8444-444444444444";
 const DOCTOR_OID = "55555555-5555-4555-8555-555555555555";
 const UNKNOWN_OID = "66666666-6666-4666-8666-666666666666";
+const SECURITY_ADMIN_OID = "77777777-7777-4777-8777-777777777777";
 const ISSUER = `https://login.microsoftonline.com/${TENANT_ID}/v2.0`;
 const DISCOVERY_URL = `${ISSUER}/.well-known/openid-configuration`;
 const JWKS_URL = "https://login.microsoftonline.com/common/discovery/v2.0/keys";
@@ -32,7 +33,7 @@ const actorMap = {
 const { privateKey, publicKey } = generateKeyPairSync("rsa", { modulusLength: 2048 });
 const publicJwk = { ...publicKey.export({ format: "jwk" }), kid: "entra-test-key", alg: "RS256", use: "sig", key_ops: ["verify"] };
 
-function createProvider({ jwksUri = JWKS_URL, keys = [publicJwk], discoveryIssuer = ISSUER, fetchImpl = null } = {}) {
+function createProvider({ jwksUri = JWKS_URL, keys = [publicJwk], discoveryIssuer = ISSUER, fetchImpl = null, actors = actorMap } = {}) {
   const requests = [];
   const fetcher = fetchImpl ?? (async url => {
     requests.push(String(url));
@@ -49,7 +50,7 @@ function createProvider({ jwksUri = JWKS_URL, keys = [publicJwk], discoveryIssue
     ENTRA_API_AUDIENCE: API_AUDIENCE,
     ENTRA_API_SCOPE: "access_as_user",
   };
-  return { provider: new EntraOidcProvider(env, { actorMap, fetchImpl: fetcher }), requests };
+  return { provider: new EntraOidcProvider(env, { actorMap: actors, fetchImpl: fetcher }), requests };
 }
 
 function token(claims = {}, { kid = "entra-test-key", alg = "RS256" } = {}) {
@@ -83,6 +84,7 @@ test("Entra OIDC maps only validated tenant/object IDs to fixed synthetic patien
   assert.equal(patient.authMode, AuthMode.ENTRA_OIDC);
   assert.equal(patient.authMethod, "ENTRA_OIDC_ACCESS_TOKEN");
   assert.equal(patient.subject, "synthetic-patient-hcc");
+  assert.equal(patient.entraObjectId, PATIENT_OID);
   assert.equal(patient.role, "PATIENT");
   assert.equal(patient.patientId, "MEDIQ-SYN-HCC-001");
   assert.deepEqual(patient.roles, ["PATIENT"]);
@@ -110,6 +112,20 @@ test("Entra provider enforces tenant, client, API audience, delegated scope, and
     await expectAuthError(provider.authenticate({ headers: { authorization: `Bearer ${token(signedClaims)}` } }), 401, code);
   }
   await expectAuthError(provider.authenticate({ headers: { authorization: `Bearer ${token({ oid: UNKNOWN_OID, role: "PLATFORM_ADMIN" })}` } }), 403, "ENTRA_ACTOR_NOT_MAPPED");
+});
+
+test("accepted security reviewer maps only to SECURITY_ADMIN without inheriting patient or hospital context", async () => {
+  const securityActors = { ...actorMap, actors: [...actorMap.actors,
+    { objectId: SECURITY_ADMIN_OID, actorId: "synthetic-security-auditor", role: "SECURITY_ADMIN" }] };
+  const { provider } = createProvider({ actors: securityActors });
+  const securityAdmin = await provider.authenticate({ headers: { authorization: `Bearer ${token({
+    oid: SECURITY_ADMIN_OID, role: "PLATFORM_ADMIN", patientId: "PATIENT-SPOOF", hospitalId: "HOSP-A",
+  })}` } });
+  assert.equal(securityAdmin.role, "SECURITY_ADMIN");
+  assert.deepEqual(securityAdmin.roles, ["SECURITY_ADMIN"]);
+  assert.equal(securityAdmin.subject, "synthetic-security-auditor");
+  assert.equal(securityAdmin.patientId, null);
+  assert.equal(securityAdmin.hospitalId, null);
 });
 
 test("Entra OIDC rejects wrong issuer, audience, expiry, timestamps, and unsupported algorithms", async () => {

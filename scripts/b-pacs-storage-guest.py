@@ -24,6 +24,9 @@ DIRECTORY = pathlib.Path('/opt/highpass/b-pacs-storage')
 BACKING = DIRECTORY / 'volume-8g.luks'
 MANIFEST = DIRECTORY / 'storage.json'
 MOUNT = pathlib.Path('/opt/highpass/b-pacs-encrypted')
+ORTHANC_STORAGE = MOUNT / 'orthanc-db'
+ORTHANC_UID = 10001
+ORTHANC_GID = 10001
 MAPPING = 'highpass-b-pacs'
 DEVICE = '/dev/mapper/' + MAPPING
 SIZE = 8 * 1024**3
@@ -143,6 +146,35 @@ def mount_volume():
     if source != DEVICE:
         raise ValueError('MOUNT_SOURCE_MISMATCH')
     os.chmod(MOUNT, 0o700)
+    ensure_orthanc_storage()
+
+
+def validate_orthanc_storage(mount_stat, directory_stat, is_symlink=False):
+    if (is_symlink or not stat.S_ISDIR(directory_stat.st_mode)
+        or directory_stat.st_dev != mount_stat.st_dev
+        or directory_stat.st_uid != ORTHANC_UID or directory_stat.st_gid != ORTHANC_GID
+        or stat.S_IMODE(directory_stat.st_mode) != 0o700):
+        raise ValueError('ORTHANC_ENCRYPTED_DATA_DIRECTORY_INVALID')
+
+
+def set_orthanc_storage_owner(path):
+    if not hasattr(os, 'chown'):
+        raise ValueError('ORTHANC_OWNER_CHANGE_UNAVAILABLE')
+    os.chown(path, ORTHANC_UID, ORTHANC_GID)
+
+
+def ensure_orthanc_storage():
+    if MOUNT.is_symlink() or not os.path.ismount(MOUNT):
+        raise ValueError('PACS_ENCRYPTED_MOUNT_REQUIRED')
+    mount_stat = MOUNT.stat()
+    try:
+        directory_stat = ORTHANC_STORAGE.lstat()
+    except FileNotFoundError:
+        ORTHANC_STORAGE.mkdir(mode=0o700)
+        set_orthanc_storage_owner(ORTHANC_STORAGE)
+        os.chmod(ORTHANC_STORAGE, 0o700)
+        directory_stat = ORTHANC_STORAGE.lstat()
+    validate_orthanc_storage(mount_stat, directory_stat, ORTHANC_STORAGE.is_symlink())
 
 
 def create(token, key_id):
@@ -213,6 +245,7 @@ def create(token, key_id):
         # Keep tiny owned recovery probe; no deletion of any existing asset.
         return dict(status='PASS', backingBytes=BACKING.stat().st_size, luksUuid=manifest['luksUuid'],
                     keyId=key_id, loop=loop, mount=str(MOUNT), wrongKey='PASS', keyVaultReopen='PASS',
+                    orthancStorage=str(ORTHANC_STORAGE), orthancUid=ORTHANC_UID, orthancGid=ORTHANC_GID,
                     recoveryProbeHash=digest, rawKeyPersisted=False, automaticBootUnlock=False,
                     encryptedBackupCreated=True, backupRestoreRehearsal='NOT VERIFIED',
                     filesystem=json.loads(run(['findmnt', '-J', '-o', 'TARGET,SOURCE,FSTYPE,OPTIONS', '--mountpoint', str(MOUNT)])))
@@ -239,6 +272,27 @@ def create_key(token):
     return {'keyId': key_id, 'status': 'PASS'}
 
 
+def verify_key(token):
+    secure_file(MANIFEST)
+    secure_file(BACKING)
+    manifest = validate_manifest(json.loads(MANIFEST.read_text()))
+    if BACKING.stat().st_size != SIZE or run(['cryptsetup', 'luksUUID', str(BACKING)]) != manifest['luksUuid']:
+        raise ValueError('PINNED_STORAGE_IDENTITY_REQUIRED')
+    key = unwrap(token, manifest)
+    wrong = bytearray(os.urandom(32))
+    command = ['cryptsetup', 'open', '--test-passphrase', '--type', 'luks2', '--key-file', '-', str(BACKING)]
+    try:
+        run(command, data=key, seconds=60)
+        denied = subprocess.run(command, input=wrong, capture_output=True, timeout=60)
+        if denied.returncode != 2:
+            raise ValueError('WRONG_STORAGE_KEY_DENIAL_NOT_VERIFIED')
+        return dict(status='PASS', action='verify-key', luksUuid=manifest['luksUuid'],
+                    keyVaultUnwrap=True, actualLuksKeyVerified=True, wrongKeyDenied=True, rawKeyPersisted=False)
+    finally:
+        key[:] = b'\0' * len(key)
+        wrong[:] = b'\0' * len(wrong)
+
+
 def recover(token):
     secure_file(MANIFEST)
     manifest = validate_manifest(json.loads(MANIFEST.read_text()))
@@ -251,7 +305,9 @@ def recover(token):
         loop = loop_attach()
         open_and_mount(loop, key, manifest['luksUuid'])
         mount_volume()
-        return dict(status='PASS', action='recover', luksUuid=manifest['luksUuid'], keyId=manifest['keyId'], mount=str(MOUNT), rawKeyPersisted=False)
+        return dict(status='PASS', action='recover', luksUuid=manifest['luksUuid'], keyId=manifest['keyId'],
+                    mount=str(MOUNT), orthancStorage=str(ORTHANC_STORAGE), orthancUid=ORTHANC_UID,
+                    orthancGid=ORTHANC_GID, rawKeyPersisted=False)
     finally:
         key[:] = b'\0' * len(key)
 
@@ -307,6 +363,8 @@ def main():
         result = create(request['token'], request['keyId'])
     elif request['action'] == 'recover':
         result = recover(request['token'])
+    elif request['action'] == 'verify-key':
+        result = verify_key(request['token'])
     else:
         raise ValueError('UNKNOWN_ACTION')
     print(json.dumps(result))

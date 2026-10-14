@@ -179,6 +179,14 @@ export function createPatientQrController({ readStatus, render, now = Date.now, 
 export function renderPatientQr({ label, payload, expiresAt }) {
   const box = document.querySelector('#patient-qr-code'), status = document.querySelector('#patient-qr-state'), expiry = document.querySelector('#visit-packet-expiry');
   if (!box) return;
+  let copyButton=document.querySelector('#patient-qr-copy');
+  if(!copyButton){copyButton=element('button','hp-button','시연용 연결 코드 복사');copyButton.id='patient-qr-copy';copyButton.type='button';box.after(copyButton);}
+  copyButton.hidden=!payload;
+  copyButton.onclick=async()=>{
+    if(!payload||Date.parse(expiresAt)<=Date.now())return;
+    try {await navigator.clipboard.writeText(new URL(payload).pathname.split('/').at(-1));copyButton.textContent='복사됨 · 의료진 시연도구에 붙여넣으세요';}
+    catch {if(status)status.textContent='복사 권한이 없습니다. QR 촬영으로 접수해 주세요.';}
+  };
   if (status) status.textContent = label;
   if (expiry) expiry.textContent = expiresAt ? new Date(expiresAt).toLocaleString('ko-KR') : '—';
   const passBox=document.querySelector('#patient-pass-qr'), passState=document.querySelector('#patient-pass-qr-state');

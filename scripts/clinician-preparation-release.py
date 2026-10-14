@@ -36,6 +36,8 @@ def run(args,seconds=120):
 def main():
     p=argparse.ArgumentParser();p.add_argument('--stage',action='store_true');p.add_argument('--tools',action='store_true');p.add_argument('--folder');p.add_argument('--image');p.add_argument('--scan');p.add_argument('--apply',action='store_true');a=p.parse_args()
     files=TOOLS_FILES if a.tools else FILES
+    if a.tools and 'data-demo-tools-open' in (ROOT/'public/index.html').read_text(encoding='utf8'):
+        raise RuntimeError('SHARED_DEMO_TOOLS_REQUIRE_COMPLETE_WEB_RELEASE')
     password=getpass.getpass('B VM password (concealed, never saved): ')
     c=align.check.connect('B',password)
     try:

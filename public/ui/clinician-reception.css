@@ -1,0 +1,126 @@
+.share-reception[data-screen="dashboard"]{max-width:1280px;margin:auto;padding:24px!important}
+.share-reception .mq-title h2{font-size:clamp(24px,2.5vw,34px);letter-spacing:-.045em;line-height:1.3}
+.share-reception .mq-title p{color:#526781;line-height:1.7}
+.share-reception .reception-steps{display:flex;gap:12px;list-style:none;padding:0;margin:24px 0}
+.share-reception .reception-steps li{flex:1;padding:14px 18px;background:#eaf1f8;border-radius:12px;color:#294a6c;font-weight:600}
+.share-reception .qr-scanner-layout{display:grid;grid-template-columns:1.15fr 1fr;gap:24px;align-items:start}
+.share-reception .qr-scanner-layout>.mq-card{padding:26px;border-radius:22px;border:1px solid #dbe5ef;box-shadow:0 8px 24px #15395408;min-width:0}
+.share-reception .qr-scanner-layout>.mq-card:last-child{background:#f4f8fc}
+.share-reception .qr-scanner-frame{min-height:290px!important;margin-top:20px;border-radius:18px;background:radial-gradient(ellipse at center,#244968,#101e33)!important}
+.share-reception .qr-laser-line{animation:none!important}
+.share-reception .qr-scanner-frame{width:100%!important;min-width:0!important;box-sizing:border-box}
+.share-reception .mq-btn,.share-reception summary{min-height:44px}
+.share-reception .reception-import{margin-top:20px;border-top:1px solid #dbe5ef;padding-top:14px}
+.share-reception summary{display:flex;align-items:center;cursor:pointer;font-weight:700;color:#285aa0}
+.share-reception .reception-import label{display:block;margin:12px 0 8px}
+.share-reception input{max-width:100%;box-sizing:border-box}
+.share-reception input[type="text"]{width:100%;min-height:46px}
+.share-reception .reception-import p,.share-reception .reception-next p{font-size:13px;color:#566c83;line-height:1.7}
+.share-reception .reception-next{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.share-reception .reception-next p{width:100%;margin:4px 0}
+.share-reception .mq-statline strong{overflow-wrap:anywhere;text-align:right}
+.share-reception :focus-visible{outline:3px solid #3673bb;outline-offset:3px}
+#clinical-home>div[hidden]{display:none!important}
+#clinical-home{--rd-ink:#1b3437;--rd-muted:#586b70;--rd-teal:#08776c;--rd-line:#d7e3e3;color:var(--rd-ink)}
+#clinical-home *{box-sizing:border-box;letter-spacing:0}
+#clinical-home .rd-heading{display:flex;justify-content:space-between;gap:16px;align-items:center;margin:0 0 20px}
+#clinical-home .rd-heading h2{font-size:30px;line-height:1.3;margin:4px 0 0;font-weight:800;color:var(--rd-ink)}
+#clinical-home .rd-eyebrow{font-size:12px;font-weight:700;color:var(--rd-teal);margin:0;line-height:1.5}
+.rd-controls{display:flex;gap:8px;align-items:center}
+#clinical-home .rd-button{font:inherit;font-size:14px;font-weight:700;min-height:44px;padding:10px 16px;border-radius:8px;background:#fff;border:1px solid #bdcece;color:var(--rd-ink);cursor:pointer;line-height:1.5;white-space:normal}
+#clinical-home .rd-primary{background:var(--rd-teal);color:#fff;border-color:var(--rd-teal)}
+#clinical-home .rd-refresh{width:44px;height:44px;padding:0;font-size:26px;flex-shrink:0}
+#clinical-home .rd-button:hover:not(:disabled){box-shadow:0 3px 9px #173b3820;background:#edf7f4}
+#clinical-home .rd-primary:hover:not(:disabled){background:#075f58}
+#clinical-home button:disabled{opacity:.6;cursor:wait}
+#clinical-home :focus-visible{outline:3px solid #7b55bd;outline-offset:3px}
+#clinical-home .rd-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) 190px;align-items:center;background:#eaf5f2c9;border:1px solid #cddfdc;border-radius:8px;min-height:140px;padding:12px 20px;backdrop-filter:blur(14px);box-shadow:inset 0 1px 0 #fff}
+.rd-metric{position:relative;min-width:0;padding:8px 18px;border-right:1px solid #c9ddd8}
+.rd-metric span{display:block;font-size:14px;color:var(--rd-muted);margin-bottom:8px;font-weight:600}
+.rd-metric strong{font-size:36px;line-height:1.1;color:var(--rd-ink);font-variant-numeric:tabular-nums}
+.rd-metric small{font-size:13px;color:var(--rd-muted);margin-left:6px}
+.rd-metric-valid strong{color:var(--rd-teal)}
+.rd-metric-recheck strong{color:#a05b17}
+.rd-summary-art{width:100%;height:125px;object-fit:contain;display:block}
+#clinical-home .rd-status{padding:0;margin:14px 0 22px;color:var(--rd-muted);font-size:13px;line-height:1.6;background:none}
+#clinical-home .rd-layout{display:grid;grid-template-columns:minmax(260px,.95fr) minmax(0,1.55fr);gap:28px;align-items:start}
+#clinical-home .rd-inbox{min-width:0}
+#clinical-home .rd-inbox h3{font-size:18px;margin:0 0 16px;color:var(--rd-ink)}
+.rd-search-label{display:block;font-size:12px;font-weight:600;color:var(--rd-muted);margin-bottom:16px}
+#clinical-home .rd-search{display:block;width:100%;min-height:44px;background:#fff;border:1px solid #bdcece;border-radius:8px;padding:10px 12px;margin-top:7px;font:inherit;font-size:14px;color:var(--rd-ink)}
+.rd-list{display:flex;flex-direction:column;gap:0;max-height:630px;overflow-y:auto;padding:3px}
+#clinical-home .rd-receipt{display:flex;flex-direction:column;gap:10px;text-align:left;background:#fff;padding:18px 16px;border:0;border-left:4px solid transparent;border-bottom:1px solid var(--rd-line);border-radius:0;color:var(--rd-ink);cursor:pointer;min-height:140px;flex-shrink:0;width:100%;font:inherit;font-size:14px}
+#clinical-home .rd-receipt[aria-pressed="true"]{border-left-color:var(--rd-teal);background:#e6f4ef;box-shadow:inset 0 0 0 1px #b5d9cc}
+.rd-receipt-top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}
+.rd-receipt-top strong{font-size:17px;overflow-wrap:anywhere}
+.rd-receipt small{color:var(--rd-muted);font-size:12px}
+.rd-route{font-size:13px;color:var(--rd-muted);overflow-wrap:anywhere}
+.rd-badge{display:inline-flex;align-items:center;font-size:12px;line-height:1.4;font-weight:700;padding:5px 8px;border-radius:5px;flex-shrink:0}
+.rd-valid{color:#0c6756;background:#d5efe3}
+.rd-warning{color:#885012;background:#fff0d8}
+.rd-exam-tags{display:flex;gap:6px;flex-wrap:wrap;min-height:26px}
+.rd-modality{display:inline-flex;align-items:center;justify-content:center;min-width:40px;min-height:26px;background:#e8eff0;color:#35585e;border-radius:5px;font-size:12px;font-weight:800;padding:5px 8px}
+.rd-ct{background:#eee7fa;color:#674296}
+#clinical-home .rd-detail{min-width:0;padding:0 0 0 28px;border:0;border-left:1px solid var(--rd-line);border-radius:0;background:transparent;box-shadow:none}
+.rd-detail-heading{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.rd-detail-heading .rd-eyebrow{flex-basis:100%}
+#clinical-home .rd-detail h3{font-size:24px;line-height:1.4;margin:0;color:var(--rd-ink);overflow-wrap:anywhere}
+.rd-detail-heading .rd-badge{margin-left:auto}
+.rd-hospital-route{padding:16px 0;margin:0;border-bottom:1px solid var(--rd-line);font-size:15px;font-weight:700;line-height:1.6;overflow-wrap:anywhere}
+.rd-info{margin:12px 0 24px}
+.rd-info-row{display:grid;grid-template-columns:90px minmax(0,1fr);gap:16px;padding:12px 0;border-bottom:1px solid #e0e8e7;font-size:14px;line-height:1.6}
+.rd-info-row dt{color:var(--rd-muted)}
+.rd-info-row dd{margin:0;font-weight:600;overflow-wrap:anywhere;text-align:right}
+#clinical-home .rd-studies-title{font-size:16px;color:var(--rd-ink);margin:0 0 8px}
+#clinical-home .rd-study{margin:0;padding:20px 0;border-top:1px solid var(--rd-line);background:none;border-radius:0}
+.rd-study-heading{display:flex;align-items:center;gap:12px;min-width:0}
+.rd-study-heading .rd-modality{min-height:44px;min-width:48px;flex-shrink:0}
+#clinical-home .rd-study h4{font-size:16px;color:var(--rd-ink);line-height:1.5;margin:0;overflow-wrap:anywhere}
+#clinical-home .rd-study p{font-size:13px;color:var(--rd-muted);margin:4px 0 0}
+.rd-study-actions{display:grid;grid-template-columns:1fr 1.25fr;gap:10px;margin-top:16px}
+#clinical-home .rd-note{font-size:12px;line-height:1.7;color:var(--rd-muted);border-top:1px solid var(--rd-line);padding-top:16px;margin:8px 0 0}
+#clinical-home .rd-empty{font-size:14px;line-height:1.8;color:var(--rd-muted);padding:20px 0;margin:0}
+.rd-warning-message{color:#885012;background:#fff0d8;padding:16px;border-radius:8px;font-size:14px;line-height:1.8}
+@media(max-width:1000px){#clinical-home .rd-summary{grid-template-columns:repeat(3,minmax(0,1fr));padding:16px 4px;min-height:120px}.rd-summary-art{display:none}.rd-metric:last-of-type{border-right:0}#clinical-home .rd-layout{grid-template-columns:1fr;gap:28px}#clinical-home .rd-detail{padding:24px 0 0;border-left:0;border-top:1px solid var(--rd-line)}.rd-list{max-height:430px}}
+@media(max-width:480px){#clinical-home .rd-heading h2{font-size:24px}#clinical-home .rd-heading{gap:8px}#clinical-home .rd-button{padding:10px 12px;font-size:13px}#clinical-home .rd-refresh{padding:0;font-size:26px}.rd-metric{padding:8px 12px}.rd-metric span{font-size:12px}.rd-metric strong{font-size:30px}.rd-metric small{margin-left:4px;font-size:12px}.rd-study-actions{grid-template-columns:1fr}.rd-detail-heading .rd-badge{margin-left:0}.rd-info-row{grid-template-columns:74px minmax(0,1fr);gap:10px}}
+@media(max-width:760px){.share-reception[data-screen="dashboard"]{padding:16px!important}.share-reception .qr-scanner-layout{grid-template-columns:1fr}.share-reception .reception-steps{gap:6px}.share-reception .reception-steps li{font-size:12px;padding:10px 8px}.share-reception .qr-scanner-layout>.mq-card{padding:18px}.share-reception .qr-scanner-frame{min-height:240px!important}}
+/* Scoped specificity deliberately beats the older clinical-workspace skin. */
+#hospital-saas-app .share-reception{--reception-ink:#142a49;--reception-blue:#2563eb;--reception-muted:#536983;max-width:1400px;color:var(--reception-ink)}
+#hospital-saas-app .share-reception .mq-toolbar{margin-bottom:12px}
+#hospital-saas-app .share-reception .mq-title h2{font-size:clamp(26px,3vw,40px);font-weight:800;line-height:1.3}
+#hospital-saas-app .share-reception .mq-title p{font-size:16px;margin-top:12px}
+#hospital-saas-app .share-reception .reception-steps{display:flex;background:transparent;border:0;padding:0;margin:24px 0;gap:12px}
+#hospital-saas-app .share-reception .reception-steps li{background:#e7eff9;border:0;border-radius:30px;font-size:14px;padding:12px 18px;flex:0 1 auto}
+#hospital-saas-app .share-reception .qr-scanner-layout{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);align-items:stretch}
+#hospital-saas-app .share-reception .qr-scanner-layout>.mq-card{border:1px solid #d9e3ef;border-radius:24px;padding:28px;box-shadow:0 12px 40px #142a4909;background:#fff}
+#hospital-saas-app .share-reception .qr-scanner-layout>.mq-card:first-child{background:linear-gradient(145deg,#1c375c,#101f36);color:#fff;border:0}
+#hospital-saas-app .share-reception .qr-scanner-layout>.mq-card:first-child>p{color:#c9d7e8}
+#hospital-saas-app .share-reception h3{font-size:22px;margin-top:0}
+#hospital-saas-app .share-reception .qr-scanner-frame{background:transparent!important;min-height:300px!important;border-radius:18px}
+#hospital-saas-app .share-reception .qr-laser-line{display:none}
+#hospital-saas-app .share-reception .qr-corners-box{width:240px;height:240px;border-color:#73b4ff;z-index:2;pointer-events:none}
+#hospital-saas-app .share-reception .qr-corners-box>span{display:none}
+#hospital-saas-app .share-reception .qr-corners-box{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);border:0;box-shadow:none;border-radius:20px;background:linear-gradient(#77b8ff,#77b8ff) left top/38px 4px no-repeat,linear-gradient(#77b8ff,#77b8ff) left top/4px 38px no-repeat,linear-gradient(#77b8ff,#77b8ff) right top/38px 4px no-repeat,linear-gradient(#77b8ff,#77b8ff) right top/4px 38px no-repeat,linear-gradient(#77b8ff,#77b8ff) left bottom/38px 4px no-repeat,linear-gradient(#77b8ff,#77b8ff) left bottom/4px 38px no-repeat,linear-gradient(#77b8ff,#77b8ff) right bottom/38px 4px no-repeat,linear-gradient(#77b8ff,#77b8ff) right bottom/4px 38px no-repeat}
+#hospital-saas-app .share-reception .reception-receipt h4{font-size:clamp(24px,2.5vw,32px);line-height:1.4;margin:24px 0 12px}
+#hospital-saas-app .share-reception .reception-receipt p{font-size:16px;line-height:1.7}
+#hospital-saas-app .share-reception .reception-scan-idle{position:relative;z-index:0;text-align:center;font-size:15px}
+.reception-scan-idle{display:flex;flex-direction:column;gap:18px;align-items:center;color:#dbe9ff;font-size:16px;pointer-events:none}
+.reception-qr-symbol{font-size:100px;line-height:1;color:#dbe9ff}
+#hospital-saas-app .share-reception .mq-btn{min-height:48px;border-radius:12px;padding:12px 18px;font-size:16px}
+#hospital-saas-app .share-reception #btn-toggle-camera-scan{background:var(--reception-blue);color:#fff;border:0;min-width:180px}
+#hospital-saas-app .share-reception .reception-import-button{background:#fff;color:#235db4;flex:1;min-width:160px}
+#hospital-saas-app .share-reception #btn-reset-qr-scan{order:3;background:transparent;color:#d8e7fa;border:1px solid #7085a0;font-size:13px}
+#hospital-saas-app .share-reception .reception-import{border-color:#526580;color:#edf4ff}
+#hospital-saas-app .share-reception .reception-import summary{color:#dbe9ff;font-size:14px}
+#hospital-saas-app .share-reception .reception-import p{color:#cbd8e9}
+#hospital-saas-app .share-reception .reception-import input{background:#fff;color:var(--reception-ink)}
+.reception-receipt{min-height:290px}.reception-receipt h4{font-size:32px;margin:24px 0 8px;letter-spacing:-.03em}.reception-receipt>p{color:var(--reception-muted);line-height:1.6}
+.reception-confirmed{display:inline-flex;border-radius:24px;background:#e5f4ee;color:#146c53;padding:8px 14px;font-size:14px;font-weight:700}
+.reception-route{margin:24px 0;font-weight:700;color:var(--reception-ink)!important}
+.reception-exam{padding:20px;background:#f2f6fc;border:1px solid #dce6f2;border-radius:14px;font-weight:700;margin:16px 0;line-height:1.6}
+.reception-detail-row{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid #e5ebf3;font-size:15px}.reception-detail-row strong{text-align:right;overflow-wrap:anywhere}.reception-detail-row span{color:var(--reception-muted)}
+.reception-wait-symbol{margin:24px auto 0;background:#eef4fb;color:#6580a2;border-radius:24px;width:84px;height:84px;display:grid;place-items:center;font-size:24px;font-weight:800}
+#hospital-saas-app .share-reception .reception-next{display:block;margin-top:24px}.reception-next button{width:100%}.reception-next button:disabled{opacity:.55;cursor:not-allowed}
+#hospital-saas-app .share-reception .reception-help{margin-top:18px;background:#f3f6fa;border-radius:12px;font-size:13px}
+.reception-identifiers{margin-top:16px}.reception-identifiers summary{font-size:14px}.reception-identifiers .mq-statline{font-size:13px}
+@media(max-width:760px){#hospital-saas-app .share-reception .qr-scanner-layout{grid-template-columns:1fr}#hospital-saas-app .share-reception .qr-scanner-layout>.mq-card{padding:20px}#hospital-saas-app .share-reception .reception-steps{flex-wrap:wrap;gap:6px}#hospital-saas-app .share-reception .reception-steps li{font-size:12px;padding:10px 12px}#hospital-saas-app .share-reception #btn-toggle-camera-scan{min-width:0}.reception-receipt{min-height:0}}

@@ -730,7 +730,7 @@ export class HipassService {
     return { consentId, ticketId, status, expiresAt: ticket.expiresAt };
   }
 
-  async issueConsentHandoffTicket(consentId, patientId, requestMeta = {}) {
+  async issueConsentHandoffTicket(consentId, patientId, requestMeta = {}, {replaceExisting=false} = {}) {
     const consent = this.getConsent(consentId);
     if (!consent) return null;
     if (!patientId || consent.patientId !== patientId) {
@@ -748,7 +748,7 @@ export class HipassService {
     const existing = this.store.get("transferTickets").find((ticket) => (
       ticket.consentId === consentId && ticket.status === TransferTicketStatus.ISSUED
     ));
-    if (existing) {
+    if (existing && !replaceExisting) {
       throw new ServiceValidationError("HANDOFF_TICKET_ALREADY_ISSUED", "An active handoff ticket already exists for this consent");
     }
 
@@ -783,7 +783,11 @@ export class HipassService {
       redeemedDoctorId: null,
       redeemedHospitalId: null,
     };
+    // No await between invalidating old capabilities and installing the new one.
+    const replaced = replaceExisting ? this.store.get("transferTickets").filter(t=>t.consentId===consentId&&t.status===TransferTicketStatus.ISSUED) : [];
+    for(const old of replaced){old.status=TransferTicketStatus.REVOKED;old.revokedAt=now;}
     this.store.get("transferTickets").push(ticket);
+    for(const old of replaced)await this.writeAudit({actorType:ActorType.PATIENT,actorId:patientId,patientId,consentId,ticketId:old.ticketId,auditSessionId:old.auditSessionId,sourceHospitalId:consent.sourceHospitalId,targetHospitalId:consent.targetHospitalId,action:AuditAction.TICKET_REVOKED,result:'SUCCESS',reason:'TICKET_REPLACED',ipAddress:requestMeta.ipAddress,userAgent:requestMeta.userAgent});
     await this.writeAudit({
       auditSessionId: ticket.auditSessionId,
       actorType: ActorType.PATIENT,

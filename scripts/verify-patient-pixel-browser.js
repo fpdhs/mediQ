@@ -10,7 +10,7 @@ import path from 'node:path';
 import assert from 'node:assert/strict';
 
 const runId=randomBytes(6).toString('hex'),root=path.resolve('tmp','patient-pixel-browser-'+runId);
-const out=path.resolve('artifacts/workstation','patient-pixel-browser-'+runId);
+const out=path.resolve('output/playwright','patient-pixel-browser-'+runId);
 const checks=[],start=Date.now(),authentication=randomBytes(32).toString('hex'),signingKey=randomBytes(32);
 let server,browser,cdp,origin,mode='NORMAL',imageReads=0,imagePending=false,security=false,cleanup=false,stage='setup',failureCode;
 const networkErrors=[],scriptErrors=[];
@@ -67,6 +67,7 @@ try{
       if(request.url.endsWith('/rendered')){imageReads++;imagePending=true;const send=()=>{imagePending=false;if(response.destroyed)return;response.writeHead(200,{'content-type':'image/png'});response.end(mode==='CORRUPT'?Buffer.from('INVALID'):pictures[request.url.includes('/1.2.3.1.2/')?1:0]);};
         if(mode==='LATE'){const timer=setTimeout(()=>{pendingTimers.delete(timer);send();},1200);pendingTimers.add(timer);}else send();return;}
     }
+    if(request.url==='/ui/patient-pixel-viewer.css'){response.writeHead(200,{'content-type':'text/css'});response.end(await readFile('public/ui/patient-pixel-viewer.css'));return;}
     request.resume();json(response,404,{error:'NOT_FOUND'});
   });server.requestTimeout=5000;server.headersTimeout=6000;
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));origin='https://127.0.0.1:'+server.address().port;
@@ -98,23 +99,31 @@ try{
     await cdp.send('Input.dispatchMouseEvent',{type:'mouseReleased',button:'left',clickCount:1,...point});
   };
   const click=()=>clickAt('#launch');
-  const snapshot=()=>evaluate("(()=>{const d=document.querySelector('#patient-pixel-viewer'),i=d?.querySelector('img');return {open:!!d?.open,visible:!!i&&!i.hidden,decoded:i?.naturalWidth??0,status:d?.querySelector('[role=status]')?.textContent,urls:window.fixtureUrls(),focused:document.activeElement?.id}})()");
+  const snapshot=()=>evaluate("(()=>{const d=document.querySelector('#patient-pixel-viewer'),i=d?.querySelector('img');return {open:!!d?.open,visible:!!i&&!i.hidden,decoded:i?.naturalWidth??0,status:d?.querySelector('[role=status]')?.textContent,counter:d?.querySelector('output')?.textContent,urls:window.fixtureUrls(),focused:document.activeElement?.id}})()");
   observe=snapshot;
-  const close=()=>clickAt('#patient-pixel-viewer button:last-child');
+  const close=()=>clickAt('#patient-pixel-close');
   stage='normal';await click();await until(async()=>{const s=await snapshot();return s.visible&&s.decoded===2;});
-  assert.match((await snapshot()).status,/1 \/ 2/);
+  assert.match((await snapshot()).counter,/1 \/ 2/);
   const first=await evaluate("(()=>{const c=document.createElement('canvas');c.width=c.height=2;const x=c.getContext('2d');x.drawImage(document.querySelector('#patient-pixel-viewer img'),0,0);return Array.from(x.getImageData(0,0,2,2).data).join(',')})()");
-  await clickAt('#patient-pixel-viewer button:nth-child(2)');await until(async()=>/2 \/ 2/.test((await snapshot()).status));
+  await clickAt('#patient-pixel-next');await until(async()=>/2 \/ 2/.test((await snapshot()).counter));
   const second=await evaluate("(()=>{const c=document.createElement('canvas');c.width=c.height=2;const x=c.getContext('2d');x.drawImage(document.querySelector('#patient-pixel-viewer img'),0,0);return Array.from(x.getImageData(0,0,2,2).data).join(',')})()");assert.notEqual(first,second);
   checks.push('DECODED_SYNTHETIC_FIXTURE_TWO_DIFFERENT_PIXELS_AND_NEXT_SLICE');
   const shot=await cdp.send('Page.captureScreenshot',{format:'png'});await writeFile(path.join(out,'viewer.png'),Buffer.from(shot.data,'base64'));
+  for(const width of [390,1440]){
+    await cdp.send('Emulation.setDeviceMetricsOverride',{width,height:860,deviceScaleFactor:1,mobile:false});
+    await delay(100);
+    const layout=await evaluate("(()=>{const d=document.querySelector('#patient-pixel-viewer');return {width:d.clientWidth,scroll:d.scrollWidth,canvas:getComputedStyle(d.querySelector('.patient-pixel-canvas')).backgroundColor,close:document.querySelector('#patient-pixel-close').getBoundingClientRect().height}})()");
+    assert.ok(layout.scroll<=layout.width);assert.equal(layout.canvas,'rgb(0, 0, 0)');assert.ok(layout.close>=44);
+    const screenshot=await cdp.send('Page.captureScreenshot',{format:'png'});await writeFile(path.join(out,`viewer-${width}.png`),Buffer.from(screenshot.data,'base64'));
+    checks.push(`DARK_VIEWER_${width}_NO_HORIZONTAL_OVERFLOW_TOUCH_TARGET`);
+  }
   await close();assert.equal((await snapshot()).urls,0);assert.equal((await snapshot()).focused,'launch');checks.push('CLOSE_REVOKES_OBJECT_URL_AND_RESTORES_FOCUS');
   await click();await until(async()=>(await snapshot()).visible);
   await cdp.send('Input.dispatchKeyEvent',{type:'keyDown',key:'Escape',code:'Escape',windowsVirtualKeyCode:27});
   await cdp.send('Input.dispatchKeyEvent',{type:'keyUp',key:'Escape',code:'Escape',windowsVirtualKeyCode:27});
   await until(async()=>!(await snapshot()).open);assert.equal((await snapshot()).urls,0);checks.push('ESCAPE_CLEARS_PIXELS');
   for(const scenario of ['DENY','WRONG_SCOPE','CORRUPT','EXPIRED']){stage=scenario;mode=scenario;const before=imageReads;await click();
-    await until(async()=>{const s=await snapshot();return !s.visible&&/열람할 수 없습니다|불러오지 못했습니다|만료/.test(s.status??'');});
+    await until(async()=>{const s=await snapshot();return !s.visible&&/권한을 확인하지 못했습니다|불러오지 못했습니다|열람 시간이 끝났습니다|일치하지 않아/.test(s.status??'');});
     if(['DENY','WRONG_SCOPE'].includes(scenario))assert.equal(imageReads,before);
     assert.equal((await snapshot()).urls,0);await close();checks.push(scenario+'_NO_VISIBLE_PIXELS_OR_FALLBACK');
   }

@@ -1,7 +1,7 @@
-/* The selected sharing screen keeps its deployed type scale. Other menus use shared tokens. */
+/* One type scale across every patient task, including sharing and approval. */
 #patient-portal-app {
   --hp-patient-page-title:32px;
-  --hp-patient-section-title:22px;
+  --hp-patient-section-title:20px;
   --hp-patient-subsection-title:18px;
   --hp-patient-body:16px;
   --hp-patient-label:14px;
@@ -27,7 +27,7 @@
   #patient-phr .health-heading h1,
   #patient-phr .health-main h1,
   .mq-wallet-greeting h1
-):not(.sharing-page *) {
+) {
   font-family:var(--hp-font);
   font-size:var(--hp-patient-page-title);
   font-weight:700;
@@ -43,7 +43,7 @@
   .helper-heading > p:last-child,
   .health-heading .health-intro,
   .image-library .page-head p
-):not(.sharing-page *) {
+) {
   font-family:var(--hp-font);
   font-size:var(--hp-patient-body);
   line-height:var(--hp-patient-body-leading);
@@ -62,7 +62,7 @@
   .helper-introduction h2,
   .share-ticket h2,
   .history-detail-head h2
-):not(.sharing-page *) {
+) {
   font-family:var(--hp-font);
   font-size:var(--hp-patient-section-title);
   font-weight:650;
@@ -79,14 +79,14 @@
   .history-timeline h3,
   .library-sharing h3,
   .helper-pocket h3
-):not(.sharing-page *) {
+) {
   font-family:var(--hp-font);
   font-size:var(--hp-patient-subsection-title);
   line-height:var(--hp-patient-heading-leading);
   letter-spacing:0;
 }
 
-#patient-portal-app :is(.sharing-route,.visit-pass-route,.history-route,.sharing-summary-exam):not(.sharing-page *) {
+#patient-portal-app :is(.sharing-route,.visit-pass-route,.history-route,.sharing-summary-exam) {
   font-family:var(--hp-font);
   font-size:var(--hp-patient-section-title);
   font-weight:650;
@@ -95,23 +95,23 @@
   overflow-wrap:anywhere;
 }
 
-#patient-portal-app :is(.page-head,.history-heading,.helper-heading,.health-heading):not(.sharing-page *) {
+#patient-portal-app :is(.page-head,.history-heading,.helper-heading,.health-heading) {
   font-family:var(--hp-font);
 }
 
-#patient-portal-app :is(.btn,.hp-button,.helper-button,.health-filter):not(.sharing-page *) {
-  font-family:var(--hp-font);
-  font-size:15px;
-}
-
-#patient-portal-app :is(input:not([type="checkbox"]),select,textarea):not(.sharing-page *) {
+#patient-portal-app :is(.btn,.hp-button,.helper-button,.health-filter) {
   font-family:var(--hp-font);
   font-size:16px;
 }
 
-@media (max-width:767px) {
+#patient-portal-app :is(input:not([type="checkbox"]),select,textarea) {
+  font-family:var(--hp-font);
+  font-size:16px;
+}
+
+@media (max-width:650px) {
   #patient-portal-app {
-    --hp-patient-page-title:28px;
-    --hp-patient-section-title:20px;
+    --hp-patient-page-title:26px;
+    --hp-patient-section-title:18px;
   }
 }

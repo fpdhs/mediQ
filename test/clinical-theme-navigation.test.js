@@ -11,6 +11,7 @@ test('A/B navigation uses exclusive screens and preserves selection without requ
   let recordsActive=false;
   const ctx=vm.createContext({document:{querySelector(selector){return selector==='#hospital-saas-app'?app:null;}},stopCinePlayback(){},loadHospitalBPacsArchive(){},selectedStudyUid:'study-preserved',currentPersona:'DOCTOR',clinicianHealth:{setActive:on=>{recordsActive=on;}}});
   ctx.stopCameraQrScan = () => {};
+  ctx.receptionDesk = null;
   vm.runInContext(fn,ctx);
   for(const name of ['viewer','records','studies','qr','viewer']){
     vm.runInContext(`navigateHospitalScreen('${name}')`,ctx);
@@ -26,13 +27,14 @@ test('clinician sign-in opens the action-first home without claiming unverified 
   const home=html.match(/<section class="mq-screen clinician-home" id="clinical-home"[\s\S]*?<\/section>\s*<!-- 2\.3 5-Step Exchange Pipeline -->/)?.[0];
   assert.ok(home,'clinician home section exists');
   assert.match(source,/navigateHospitalScreen\("dashboard"\)/);
-  assert.match(html,/id="clinical-home" data-screen="dashboard"/);
+  assert.match(html,/id="clinical-home" data-screen="qr" hidden/);
+  assert.match(html,/class="mq-screen share-reception" data-screen="dashboard">/);
   assert.match(html,/id="clinical-desk" data-screen="studies" hidden/);
   assert.match(home,/id="cq-access-state"[^>]*>서버 검증 전/);
   assert.match(home,/권한 확인 후 영상 열기/);
   assert.match(home,/cq-queue/);
   assert.match(home,/cq-detail/);
-  assert.match(home,/다음 진료, 바로 이어가세요/);
+  assert.match(home,/<h2>진료 데스크<\/h2>/);
   assert.doesNotMatch(home,/clinical-home-hero|지갑/);
   const stylesheet=readFileSync(new URL('../public/ui/clinician-home.css',import.meta.url),'utf8');
   assert.match(stylesheet,/@media\(max-width:700px\)/);

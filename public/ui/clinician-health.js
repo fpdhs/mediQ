@@ -10,6 +10,7 @@ export function compareSharedRecords(current,records){
 export function createClinicianHealth(root,{headers,available,onImages,request=fetch}){
   if(!root)return {setActive(){},reset(){}};
   let revision=0,controller,timer,shares=[],data=null,selected='',filter='ALL',query='',active=false;
+  let receptionConsent=null;
   const invalidate=()=>{revision++;controller?.abort();clearTimeout(timer);};
   const status=message=>{root.replaceChildren(node('p',message,'chr-status'));};
   const button=(text,fn,cls)=>{const b=node('button',text,cls);b.type='button';b.addEventListener('click',fn);return b;};
@@ -42,8 +43,8 @@ export function createClinicianHealth(root,{headers,available,onImages,request=f
     const generation=revision;status('환자가 공유한 기록을 확인하고 있어요.');
     try{
       const result=await get('',generation);if(!result)return;
-      if(!Array.isArray(result.shares)||result.shares.length>10000)throw Error('INVALID_RESPONSE');shares=result.shares;
-      if(!shares.length){status('아직 공유받은 건강기록이 없어요. 환자가 영상 공유 승인에서 건강기록을 선택해야 합니다.');return;}
+      if(!Array.isArray(result.shares)||result.shares.length>10000)throw Error('INVALID_RESPONSE');shares=receptionConsent?result.shares.filter(s=>s.consentId===receptionConsent):result.shares;
+      if(!shares.length){status(receptionConsent?'선택한 접수에 공유된 건강기록이 없습니다. 다른 접수의 기록으로 자동 전환하지 않습니다.':'아직 공유받은 건강기록이 없어요. 환자가 영상 공유 승인에서 건강기록을 선택해야 합니다.');return;}
       await loadShare(shares[0].consentId);
     }catch{if(generation===revision){status('공유 목록을 확인하지 못했어요.');root.append(button('다시 확인',load));}}
   }
@@ -92,5 +93,5 @@ export function createClinicianHealth(root,{headers,available,onImages,request=f
       const image=node('img');image.src='/images/mediq-synthetic-liver-ultrasound-v1.png';image.alt='합성 간 초음파 시연 이미지';detail.append(image,node('p','합성 이미지 예시이며 실제 초음파 판독 결과를 제공하지 않습니다.'));
     }
   }
-  return {setActive(value){active=value;if(value)void load();else{invalidate();data=null;shares=[];status('의료진 로그인이 필요해요.');}},reset(){active=false;invalidate();data=null;shares=[];selected='';query='';filter='ALL';status('의료진 로그인이 필요해요.');}};
+  return {selectReception(id){invalidate();receptionConsent=id;data=null;shares=[];},setActive(value){active=value;if(value)void load();else{invalidate();data=null;shares=[];status('의료진 로그인이 필요해요.');}},reset(){receptionConsent=null;active=false;invalidate();data=null;shares=[];selected='';query='';filter='ALL';status('의료진 로그인이 필요해요.');}};
 }

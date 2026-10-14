@@ -1,3 +1,4 @@
+import { loginReturnUrl } from './login-navigation.js';
 const GUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu;
 const SCOPE = /^api:\/\/([0-9a-f-]{36})\/([A-Za-z0-9._:-]{1,128})$/iu;
 const SYNTHETIC_ACTOR = /^synthetic-[a-z0-9-]{1,64}$/u;
@@ -69,6 +70,31 @@ export async function signInWithEntra({ config, msalModule, fetchImpl = globalTh
   } catch {
     throw new Error("ENTRA_LOGIN_FAILED");
   }
+  return sessionFromResult(result, fetchImpl, now);
+}
+
+// MSAL redirect requires tab-scoped sessionStorage. Clear its cache immediately
+// after response handling; the application's accepted access token stays in memory.
+export async function createEntraRedirectLogin({config, msalModule, appOrigin, pathname=globalThis.location?.pathname, fetchImpl=globalThis.fetch, now=Date.now}) {
+  const trusted=validateEntraBrowserConfig(config,appOrigin);
+  const client=new msalModule.PublicClientApplication({
+    auth:{clientId:trusted.clientId,authority:`https://login.microsoftonline.com/${trusted.tenantId}`,redirectUri:trusted.redirectUri},
+    cache:{cacheLocation:'sessionStorage'},
+    system:{loggerOptions:{piiLoggingEnabled:false,loggerCallback:()=>{}}},
+  });
+  await client.initialize();
+  return {
+    async resume(){
+      let result;
+      try {result=await client.handleRedirectPromise();}
+      finally {await client.clearCache();}
+      return result?sessionFromResult(result,fetchImpl,now):null;
+    },
+    async start(loginIntent = null){await client.loginRedirect({scopes:trusted.scopes,redirectUri:trusted.redirectUri,redirectStartPage:loginReturnUrl(appOrigin,pathname,loginIntent),prompt:'select_account'});},
+  };
+}
+
+async function sessionFromResult(result, fetchImpl, now) {
   if (typeof result?.accessToken !== "string" || !result.accessToken
       || !(result.expiresOn instanceof Date) || !Number.isFinite(result.expiresOn.getTime())
       || result.expiresOn.getTime() <= now()) {
@@ -119,19 +145,22 @@ export function validateEntraSyntheticIdentity(identity) {
       || Object.keys(identity).some((key) => !allowedTopLevel.includes(key))
       || identity.authenticated !== true || identity.synthetic !== true
       || !SYNTHETIC_ACTOR.test(identity.actorId)
-      || !["PATIENT", "DOCTOR"].includes(identity.role)) {
+      || !["PATIENT", "DOCTOR", "SECURITY_ADMIN"].includes(identity.role)) {
     throw new Error("ENTRA_IDENTITY_INVALID");
   }
   const context = identity.demoContext;
-  const allowedContext = ["patientId", "patientName", "defaultStudyUid", "entryRole", "scenario"];
+  const allowedContext = identity.role === 'SECURITY_ADMIN'
+    ? ['entryRole']
+    : ["patientId", "patientName", "defaultStudyUid", "entryRole", "scenario"];
   if (!context || typeof context !== "object" || Array.isArray(context)
       || Object.keys(context).some((key) => !allowedContext.includes(key))
       || context.entryRole !== identity.role
-      || typeof context.patientId !== "string"
-      || typeof context.patientName !== "string" || !context.patientName
-      || typeof context.defaultStudyUid !== "string" || context.defaultStudyUid.length > 64 || !DICOM_UID.test(context.defaultStudyUid)
-      || (identity.role === "PATIENT" && !PATIENT_ID.test(context.patientId))
-      || (identity.role === "DOCTOR" && !DOCTOR_PATIENT_ID.test(context.patientId))) {
+      || (identity.role === 'SECURITY_ADMIN' && Object.keys(context).length !== 1)
+      || (identity.role !== 'SECURITY_ADMIN' && (typeof context.patientId !== "string"
+        || typeof context.patientName !== "string" || !context.patientName
+        || typeof context.defaultStudyUid !== "string" || context.defaultStudyUid.length > 64 || !DICOM_UID.test(context.defaultStudyUid)
+        || (identity.role === "PATIENT" && !PATIENT_ID.test(context.patientId))
+        || (identity.role === "DOCTOR" && !DOCTOR_PATIENT_ID.test(context.patientId))))) {
     throw new Error("ENTRA_IDENTITY_INVALID");
   }
   return identity;

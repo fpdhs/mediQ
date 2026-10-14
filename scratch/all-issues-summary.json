@@ -1,0 +1,1253 @@
+{
+  "totalHoldIssues": 111,
+  "holdIssues": [
+    {
+      "docId": "medlineplus-health-topics-en-6308",
+      "titleKo": "당화혈색소(A1C)",
+      "titleEn": "A1C",
+      "issueType": "원문 확인 필요",
+      "reason": "원문이 당뇨병 범위를 above 6.5%로 표현해 정확히 6.5%인 값의 분류가 제시된 범위에서 빠집니다. 번역은 원문대로 6.5% 초과를 유지했으며 원문 경계값의 확인이 필요합니다.",
+      "sourceExpression": "Type 2 diabetes is above 6.5%",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-1437",
+      "titleKo": "급성 림프구성 백혈병",
+      "titleEn": "Acute Lymphocytic Leukemia",
+      "issueType": "원문 확인 필요",
+      "reason": "원문이 항암제 투여 위치를 injected into the spinal cord로 표현합니다. 번역은 척수에 주입한다는 원문 표현을 유지했으며, 정확한 투여 공간을 의료전문가가 확인하기 전에는 시술 지침으로 사용하지 않도록 원문 검토가 필요합니다.",
+      "sourceExpression": "Treatment during both phases also usually includes central nervous system (CNS) prophylaxis therapy. This therapy helps prevent the spread of leukemia cells to the brain and spinal cord. It may be high dose chemotherapy or chemotherapy injected into the spinal cord. It also sometimes includes radiation therapy.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-1692",
+      "titleKo": "알파-1 항트립신 결핍증",
+      "titleEn": "Alpha-1 Antitrypsin Deficiency",
+      "issueType": "원문 확인 필요",
+      "reason": "보충요법 설명의 원문에 ATT protein이라고 적혀 있어 같은 문서에서 사용한 AAT protein과 약어가 다릅니다. 원문 확인 전 임의로 AAT로 수정하지 않고 ATT를 그대로 옮겼습니다.",
+      "sourceExpression": "Augmentation therapy, which is a lifelong treatment. It raises the levels of the AAT protein in your lungs, using ATT protein taken from the blood of donors. It helps slow down lung damage. It cannot prevent liver damage.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-23",
+      "titleKo": "관절염",
+      "titleEn": "Arthritis",
+      "issueType": "원문 확인 필요",
+      "reason": "원문은 다른 부위에서 관절로 퍼진 감염을 infectious arthritis라고 설명한 뒤 reactive arthritis를 그 한 유형으로 분류합니다. 반응성 관절염의 분류 및 감염과의 관계는 원문 제공처 또는 의료전문가의 확인이 필요하여 원문 표현을 유지하고 보류했습니다. 외부 의료 최신성 검증은 수행하지 않았습니다.",
+      "sourceExpression": "Infectious arthritis is an infection that has spread from another part of your body to the joint. Reactive arthritis is one type.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-158",
+      "titleKo": "세균 감염",
+      "titleEn": "Bacterial Infections",
+      "issueType": "원문 확인 필요",
+      "reason": "원문은 체내 세균 세포가 인간 세포보다 약 10배 많다고 정량적으로 단정합니다. 이 비율의 사실적 타당성과 근거는 별도 원문 제공처 또는 의료전문가 확인이 필요하다고 판단하여, 숫자를 임의로 바꾸지 않고 원문대로 번역한 뒤 보류했습니다. 외부 의료 최신성 검증을 완료한 것은 아닙니다.",
+      "sourceExpression": "Bacteria are tiny organisms (living things) that have only one cell. Under a microscope, they look like balls, rods, or spirals. They can be found almost everywhere on Earth. There are lots of bacteria in and on your body. In fact, your body has about 10 times more bacteria cells than human cells.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-1211",
+      "titleKo": "수혈과 헌혈",
+      "titleEn": "Blood Transfusion and Donation",
+      "issueType": "원문 확인 필요",
+      "reason": "원문은 적혈구가 산소를 조직·장기로, 그리고 그곳에서 운반한다고 표현합니다(to and from tissues and organs). 산소 운반 방향의 설명은 원문 제공처 또는 의료전문가 확인이 필요하여 원문을 그대로 옮기고 보류했습니다. 원문에 없는 이산화탄소로 대체하지 않았습니다.",
+      "sourceExpression": "Red blood cells - cells that carry oxygen to and from tissues and organs",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-3",
+      "titleKo": "유방암",
+      "titleEn": "Breast Cancer",
+      "issueType": "원문 확인 필요",
+      "reason": "원문은 암이 유방 밖으로 퍼지는 경우를 invasive라고 정의합니다. 침윤성과 유방 밖 전이를 구분하는 설명인지 원문 제공처 또는 의료전문가 확인이 필요하여, 원문의 outside the breast를 유관·소엽 바깥으로 임의 수정하지 않고 그대로 번역한 뒤 보류했습니다.",
+      "sourceExpression": "Sometimes the cancer does not spread any further. This is called \"in situ.\" If the cancer spreads outside the breast, the cancer is called \"invasive.\" It may just spread to nearby tissues and lymph nodes. Or the cancer may metastasize (spread to other parts of the body) through the lymph system or the blood.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-3159",
+      "titleKo": "제왕절개 분만",
+      "titleEn": "Cesarean Delivery",
+      "issueType": "원문 확인 필요",
+      "reason": "원문 수술 단계는 Cut the umbilical cord and the placenta라고 되어 있어 탯줄과 태반을 모두 자른다고 읽힙니다. 태반 처리 동작의 정확한 표현을 원문 제공처 또는 의료전문가가 확인해야 하므로, 태반 제거로 임의 변경하지 않고 원문을 유지한 뒤 보류했습니다.",
+      "sourceExpression": "Cut the umbilical cord and the placenta.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-1535",
+      "titleKo": "아동 치아 건강",
+      "titleEn": "Child Dental Health",
+      "issueType": "원문 확인 필요",
+      "reason": "원문의 불소치약 사용 기준은 2세부터 완두콩 크기이며, 더 이른 시작은 치과의사·의사 제안을 조건으로 합니다. 어린이의 구체적인 연령별 사용량은 원문 제공처 또는 치과 전문가 확인이 필요한 권고로 판단하여 원문 수치와 조건을 그대로 보존하고 보류했습니다. 현재 지침을 외부에서 검증한 것은 아닙니다.",
+      "sourceExpression": "Start using a pea-sized amount of fluoride toothpaste when they are two years old. You might start sooner, if a dentist or doctor suggests it.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-3162",
+      "titleKo": "아동 정신건강",
+      "titleEn": "Child Mental Health",
+      "issueType": "원문 확인 필요",
+      "reason": "원문 fear of things he or she did not used to be not afraid of에는 not이 중복되어, 이전에 두려워하지 않던 대상인지 두려워하던 대상인지 문맥과 부정 구조가 충돌합니다. 부정을 임의로 삭제하지 않은 직역을 저장했으며 원문 제공처 확인 전 사용을 보류합니다.",
+      "sourceExpression": "Social withdrawal or fear of things he or she did not used to be not afraid of",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-5893",
+      "titleKo": "출산 관련 문제",
+      "titleEn": "Childbirth Problems",
+      "issueType": "원문 확인 필요",
+      "reason": "원문은 breech를 아기가 발부터 나오는 경우로 설명합니다. 둔위의 범위를 이 설명으로 한정해도 되는지 원문 제공처 또는 산과 전문가 확인이 필요하여 원문을 그대로 번역하고 보류했습니다. 엉덩이가 먼저 나오는 경우를 번역문에 임의로 추가하지 않았습니다.",
+      "sourceExpression": "Problems with the position of the baby, such as breech, in which the baby is going to come out feet first",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-501",
+      "titleKo": "어린이 건강",
+      "titleEn": "Children's Health",
+      "issueType": "원문 수치 단위 누락",
+      "reason": "원문에 온도 단위가 제시되지 않았으므로 102만 보존했습니다. 화씨나 섭씨로 임의 확정하지 않았으며 원문 단위 확인이 필요합니다. 의료 최신성 또는 전문가 검증은 수행하지 않았습니다.",
+      "sourceExpression": "Fever higher than 102",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-26",
+      "titleKo": "콜레스테롤",
+      "titleEn": "Cholesterol",
+      "issueType": "원문 간 검사 일정 차이",
+      "reason": "콜레스테롤 원문 26은 19세 이하와 20~65세를 구분하고 소아 재검사를 5년마다 제시합니다. 수치 안내 원문 6781은 21세 이하와 21~65세를 구분하고 9~11세 및 17~21세의 검사를 제시합니다. 두 원문의 연령 범위와 일정 차이를 그대로 보존했으며 어떤 권고를 적용할지 원문 제공처 또는 전문가 확인이 필요합니다. 대조 대상: 6781-S0063~6781-S0066. 외부 의료 최신성 검증은 수행하지 않았습니다.",
+      "sourceExpression": "For people who are age 19 or younger:",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-6781",
+      "titleKo": "콜레스테롤 수치: 알아야 할 사항",
+      "titleEn": "Cholesterol Levels: What You Need to Know",
+      "issueType": "원문 간 검사 일정 차이",
+      "reason": "콜레스테롤 원문 26은 19세 이하와 20~65세를 구분하고 소아 재검사를 5년마다 제시합니다. 수치 안내 원문 6781은 21세 이하와 21~65세를 구분하고 9~11세 및 17~21세의 검사를 제시합니다. 두 원문의 연령 범위와 일정 차이를 그대로 보존했으며 어떤 권고를 적용할지 원문 제공처 또는 전문가 확인이 필요합니다. 대조 대상: 26-S0038~26-S0043. 외부 의료 최신성 검증은 수행하지 않았습니다.",
+      "sourceExpression": "For people who are age 21 or younger:",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-1608",
+      "titleKo": "만성 기관지염",
+      "titleEn": "Chronic Bronchitis",
+      "issueType": "원문 치료 적응증 확인 필요",
+      "reason": "원문은 세균성 또는 바이러스성 폐 감염 때 항생제를 사용하는 것으로 기술합니다. 바이러스성 감염에 대한 항생제 사용 조건이 별도로 제시되지 않아 원문을 그대로 옮기고 원문 제공처 또는 의료 전문가 확인 대상으로 보류했습니다. 번역자가 세균성 동반 감염 등의 조건을 추가하지 않았으며 의료 최신성 검증은 수행하지 않았습니다.",
+      "sourceExpression": "Antibiotics if you get a bacterial or viral lung infection",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-5995",
+      "titleKo": "만성 통증",
+      "titleEn": "Chronic Pain",
+      "issueType": "원문 내 기간 경계 차이",
+      "reason": "S0003은 만성 통증을 three months보다 오래 지속되는 통증으로, S0018은 three months or longer로 설명합니다. 원문의 3개월 초과와 3개월 이상이라는 경계 차이를 각각 보존했으며 정확한 기간 기준 확인이 필요합니다. 원문 제공처 또는 전문가 확인 전 보류하며 외부 의료 최신성 검증은 수행하지 않았습니다.",
+      "sourceExpression": "Chronic pain lasts three months or longer or when pain continues after your body has healed. If the cause of your pain is unknown, your health care provider may:",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-6143",
+      "titleKo": "폐허탈(Collapsed Lung)",
+      "titleEn": "Collapsed Lung",
+      "issueType": "원문 질환 정의·분류 확인 필요",
+      "reason": "원문은 폐허탈을 흉막강의 공기 유입으로 설명한 뒤 전체 허탈을 기흉, 일부 폐에만 영향이 있는 경우를 무기폐라고 구분합니다. 서로 다른 개념의 구분과 범위를 허탈 정도만으로 정의해도 되는지 원문 제공처 또는 전문가 확인이 필요합니다. 원문을 그대로 번역했으며 정의를 임의 수정하거나 의학적 보충 설명을 본문에 추가하지 않았습니다. 외부 의료 최신성 검증은 수행하지 않았습니다.",
+      "sourceExpression": "A collapsed lung happens when air enters the pleural space, the area between the lung and the chest wall. If it is a total collapse, it is called pneumothorax. If only part of the lung is affected, it is called atelectasis.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-4916",
+      "titleKo": "대장내시경검사",
+      "titleEn": "Colonoscopy",
+      "issueType": "원문 검사 범위 확인 필요",
+      "reason": "원문은 가상 대장내시경이 직장과 결장의 일부(part of your colon)를 본다고 기술합니다. 검사 범위가 일부로 제한된다는 설명이 적절한지 원문 제공처 또는 전문가 확인이 필요하여 원문 범위를 그대로 옮기고 보류했습니다. 전체 결장으로 임의 확대하지 않았으며 외부 의료 최신성 검증은 수행하지 않았습니다.",
+      "sourceExpression": "A virtual colonoscopy also looks inside your rectum and part of your colon. But it does not use a scope. Instead, it is an x-ray test. Another name for this test is CT colonography.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-88",
+      "titleKo": "대장암",
+      "titleEn": "Colorectal Cancer",
+      "issueType": "원문 병변 정의 확인 필요",
+      "reason": "원문은 선종을 현미경에서 비정상적으로 보이거나(or) 크기가 1cm 이상인 대장용종으로 정의합니다. 크기만으로 선종을 구분할 수 있다는 의미가 될 수 있어 원문 제공처 또는 전문가 확인이 필요합니다. or 조건과 1cm 이상을 그대로 번역했으며 정의를 임의 수정하지 않았습니다. 외부 의료 최신성 검증은 수행하지 않았습니다.",
+      "sourceExpression": "Having a history of adenomas. Adenomas are colorectal polyps (growths) that look abnormal under a microscope or are 1 centimeter or larger. Adenomas are not cancer, but they can sometimes turn into cancer over time.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-1543",
+      "titleKo": "기침",
+      "titleEn": "Cough",
+      "issueType": "원문 최신성 또는 의학적 의미 확인 필요",
+      "reason": "원문은 만성 기침을 2~3주보다 오래 지속되는 기침으로 정의함. 기간 기준의 적용 대상과 현재 분류를 확인하지 못했으므로 원문 수치를 보존하고 의학적 판단 보류.",
+      "sourceExpression": "Coughing is a reflex that keeps your throat and airways clear. Although it can be annoying, coughing helps your body heal or protect itself. Coughs can be either acute or chronic. Acute coughs begin suddenly and usually last no more than 2 to 3 weeks. Acute coughs are the kind you most often get with a cold, flu, or acute bronchitis. Chronic coughs last longer than 2 to 3 weeks. Causes of chronic cough include:",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-1242",
+      "titleKo": "크로이츠펠트-야코프병",
+      "titleEn": "Creutzfeldt-Jakob Disease",
+      "issueType": "원문 최신성 또는 의학적 의미 확인 필요",
+      "reason": "감염된 쇠고기 섭취와 변종 CJD에 관해 직접 증거가 없다는 원문의 서술은 최신성 확인이 필요함. 현행 공식 근거 대조는 수행하지 않았으며 원문을 그대로 번역함.",
+      "sourceExpression": "Cattle can get a disease related to CJD called bovine spongiform encephalopathy (BSE) or \"mad cow disease.\" There is concern that people can get a variant of CJD from eating beef from an infected animal, but there is no direct proof to support this.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-119",
+      "titleKo": "크론병",
+      "titleEn": "Crohn's Disease",
+      "issueType": "원문 최신성 또는 의학적 의미 확인 필요",
+      "reason": "원문은 NSAIDs를 크론병 증상·합병증에 도움이 되는 약물의 예로 제시하지만, 실제 확인한 NIDDK의 Treatment for Crohn’s Disease는 NSAIDs가 증상을 악화시킬 수 있어 피하라고 안내함. 공식 자료 사이의 치료 안내 충돌을 확인했으며 원문은 수정하지 않고 HOLD로 보존함.",
+      "sourceExpression": "Medicines for Crohn's include various medicines that decrease the inflammation. Many of these medicines do this by reducing the activity of your immune system. Certain medicines can also help with symptoms or complications, such as nonsteroidal anti-inflammatory drugs and anti-diarrheal medicines. If your Crohn's causes an infection, you may need antibiotics.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-1591",
+      "titleKo": "크립토스포리디움증",
+      "titleEn": "Cryptosporidiosis",
+      "issueType": "원문 최신성 또는 의학적 의미 확인 필요",
+      "reason": "원문은 기생충을 삼키는 경로 외에 오염된 손으로 눈이나 코를 만지는 경로를 제시함. 이 기생충의 실제 감염 경로와의 일치 여부를 확인하지 못하여 원문을 보존하고 의학적 판단 보류.",
+      "sourceExpression": "You can become infected with Crypto by swallowing the parasite if it is in your food, drinking water, or water that you swim in. You can also get infected when you touch something that has been contaminated, and then you touch your eyes, mouth, or nose. Another way that Crypto can spread is through sexual contact.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-5562",
+      "titleKo": "섬망",
+      "titleEn": "Delirium",
+      "issueType": "source_medical_assertion_review_needed",
+      "reason": "원문이 치매는 환각을 일으키지 않는다고 예외 없이 서술합니다. 치매의 유형별 예외를 검토할 필요가 있어 의학적 판단을 보류합니다. 이 작업에서는 별도 최신 근거를 확인하지 않았으며 원문을 수정하지 않고 번역했습니다.",
+      "sourceExpression": "Dementia develops slowly and does not cause hallucinations. It usually starts with memory loss. The symptoms don't change often, like they can with delirium. Dementia almost never gets better.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-211",
+      "titleKo": "설사",
+      "titleEn": "Diarrhea",
+      "issueType": "source_temperature_unit_unspecified",
+      "reason": "원문은 102 degrees라고만 표기하며 화씨·섭씨를 명시하지 않습니다. 임의로 단위를 보충하거나 환산하지 않고 degrees를 보존했습니다. 진료 행동과 관련된 온도이므로 원문 단위 확인 전에는 채택을 보류합니다.",
+      "sourceExpression": "A fever of 102 degrees or higher",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-3593",
+      "titleKo": "식이 지방",
+      "titleEn": "Dietary Fats",
+      "issueType": "source_currentness_review_needed",
+      "reason": "2026년 작업 시점에서 과거인 2018년 규제 변경을 원문이 미래형으로 설명합니다. 번역은 원문 시제를 유지했으며 현재 규제·의학적 최신성은 확인되지 않아 재사용 판정을 보류합니다.",
+      "sourceExpression": "Trans fats. These are found in vegetable shortenings, some margarines, crackers, cookies, snack foods, and other foods made with or fried in partially hydrogenated oils (PHOs). By 2018, most U.S. companies will not be allowed to add PHOs to food.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-3623",
+      "titleKo": "폐기종",
+      "titleEn": "Emphysema",
+      "issueType": "source_antibiotic_indication_review_needed",
+      "reason": "원문이 세균성 또는 바이러스성 폐감염에 항생제를 제시하지만 세균 동시감염 등 추가 조건을 설명하지 않습니다. 항생제 적용 대상을 오해할 수 있어 의학적 판단을 보류합니다. 원문 문장은 그대로 번역했으며 별도 최신 지침 확인은 이 번역 작업에서 시행하지 않았습니다.",
+      "sourceExpression": "Antibiotics if you get a bacterial or viral lung infection",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-258",
+      "titleKo": "진균 감염",
+      "titleEn": "Fungal Infections",
+      "issueType": "source_medical_assertion_review_needed",
+      "reason": "원문은 전체 진균 종류의 약 절반이 해롭다고 수량화하지만 harmful의 대상이나 근거가 제시되지 않음. 의학적 사실로 확정하기 전 원문 근거 확인 필요. 최신 독립 근거를 확인한 것은 아니며 원문 표현을 그대로 번역함.",
+      "sourceExpression": "If you have ever had athlete's foot or a yeast infection, you can blame a fungus. A fungus is a primitive organism. Mushrooms, mold and mildew are examples. Fungi live in air, in soil, on plants and in water. Some live in the human body. Only about half of all types of fungi are harmful.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-1454",
+      "titleKo": "유전자와 유전자치료",
+      "titleEn": "Genes and Gene Therapy",
+      "issueType": "source_currentness_review_needed",
+      "reason": "CRISPR-Cas9 기술의 임상 사용을 미래 가능성으로 표현하고 있어 2026년 작업 시점의 승인·사용 현황과 별도 대조가 필요함. 승인 현황을 실제 확인한 것은 아니므로 원문을 변경하지 않고 최신성 판단을 보류함.",
+      "sourceExpression": "Genome editing (also called gene editing). Instead of adding new genetic material into cells, this approach changes the DNA that's already in your cells. A well-known example is CRISPR-Cas9. This promising technique is still being studied and may soon be used to treat genetic disorders.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-264",
+      "titleKo": "통풍",
+      "titleEn": "Gout",
+      "issueType": "source_terminology_inconsistency",
+      "reason": "같은 원문 세그먼트에서 질환명은 calcium pyrophosphate arthritis이나 축적 물질은 calcium phosphate로 표기됨. 용어 차이를 임의로 고치지 않고 각각 피로인산칼슘/인산칼슘으로 보존함. 정확한 원문 의도와 의학적 의미 확인 필요.",
+      "sourceExpression": "Calcium pyrophosphate arthritis, sometimes called pseudogout, is a related disease. It causes similar symptoms and is sometimes confused with gout. But it is caused by a buildup of calcium phosphate, not uric acid.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-272",
+      "titleKo": "머릿니",
+      "titleEn": "Head Lice",
+      "issueType": "source_topic_term_mismatch",
+      "reason": "머릿니(head lice)의 전파 설명 도중 원문이 pubic lice(사면발이)를 사용함. 이를 머릿니로 임의 수정하지 않았으며 원문 오기 또는 의도된 다른 종류 설명인지 확인 필요.",
+      "sourceExpression": "Lice move by crawling, because they cannot hop or fly. They spread by close person-to-person contact. Rarely, they can spread through sharing personal belongings such as hats or hairbrushes. Personal hygiene and cleanliness have nothing to do with getting head lice. You also cannot get pubic lice from animals. Head lice do not spread disease.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-5704",
+      "titleKo": "건강한 노화",
+      "titleEn": "Healthy Aging",
+      "issueType": "ambiguous_source_word",
+      "reason": "정신건강 실천 예시에서 원문이 meditation이 아닌 mediation을 사용함. 명상을 의도한 오기인지 확인되지 않아 중재(mediation)로 원문 단어를 보존하고 의미 판단을 보류함.",
+      "sourceExpression": "Making your mental health a priority. Work on improving your mental health, for example by practicing mediation, relaxation techniques, or gratitude. Know the warning signs of a problem and ask for help if you are struggling.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-279",
+      "titleKo": "심장판막질환",
+      "titleEn": "Heart Valve Diseases",
+      "issueType": "source_anatomical_scope_review_needed",
+      "reason": "원문이 coronary artery disease가 특히 aorta에 영향을 준다고 기술하여 관상동맥과 대동맥의 해부학적 범위 확인 필요. 원문을 다른 질환명으로 고치지 않았으며 최신 독립 근거를 확인한 것은 아님.",
+      "sourceExpression": "Coronary artery disease, especially when it affects the aorta (the large artery that carries blood from the heart to the body).",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-1686",
+      "titleKo": "A형 간염",
+      "titleEn": "Hepatitis A",
+      "issueType": "incomplete_source_phrase",
+      "reason": "원문 문장이 people who have another liver로 끝나 위험 대상이 불완전하게 기술됨. liver disease 등 확보되지 않은 단어를 추정하여 보충하지 않고 원문 구절을 병기함. 누락 원문 확인 후 재검토 필요.",
+      "sourceExpression": "In rare cases, hepatitis A may lead to liver failure. This is more common in adults over age 50 and in people who have another liver.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-1286",
+      "titleKo": "C형 간염",
+      "titleEn": "Hepatitis C",
+      "issueType": "source_treatment_timing_review_needed",
+      "reason": "급성 C형 간염의 치료를 만성 전환 여부 확인까지 기다릴 수 있다는 원문의 치료 시점 설명은 적용 조건과 현행 권고 대조가 필요함. 최신 치료 지침을 실제 확인하지 않았으며 원문 의미를 그대로 번역함.",
+      "sourceExpression": "If you have acute hepatitis C, your provider may wait to see if your infection becomes chronic before starting treatment.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-6084",
+      "titleKo": "딸꾹질",
+      "titleEn": "Hiccups",
+      "issueType": "source_unqualified_safety_claim",
+      "reason": "다음 목록의 종이봉투 호흡 등을 포함한 가정요법이 해롭지 않다고 원문이 조건 없이 기술함. 대상·금기·안전성의 별도 의학 검토 필요. 최신 안전 근거를 확인한 것은 아니며 원문 주장을 변경하지 않음.",
+      "sourceExpression": "Hiccups usually go away on their own after a few minutes. You have probably heard different suggestions about how to cure hiccups. There is no proof that they work, but they are not harmful, so you could try them. They include:",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-34",
+      "titleKo": "고혈압",
+      "titleEn": "High Blood Pressure",
+      "issueType": "기타",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-1",
+      "titleKo": "인간면역결핍바이러스(HIV)",
+      "titleEn": "HIV",
+      "issueType": "cross_document_source_scope_difference",
+      "reason": "HIV 원문은 PrEP를 매일 복용하는 약물로 설명하지만 이번에 직접 대조한 문서 7347-S0003은 2개월/6개월 간격 주사도 설명함. 자료 간 제형·투여 빈도 범위 차이가 있으므로 버전 및 최신성 확인 필요. 외부 지침으로 인증한 것은 아니며 두 원문 모두 보존함.",
+      "sourceExpression": "PrEP (pre-exposure prophylaxis) is for people who don't already have HIV but are at very high risk of getting it. PrEP is daily medicine that can reduce this risk.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-1470",
+      "titleKo": "HIV와 임신",
+      "titleEn": "HIV and Pregnancy",
+      "issueType": "source_infant_feeding_guidance_review_needed",
+      "reason": "HIV 감염인의 모유수유를 일괄 금지하고 미국 기관 권고를 인용하는 원문은 치료·바이러스 억제 조건 및 최신 기관 권고의 별도 확인이 필요함. 최신 권고를 확인하지 않았으며 원문은 그대로 번역함.",
+      "sourceExpression": "Not breastfeeding. Breast milk can have HIV in it. In the United States, infant formula is safe and readily available. So the Centers for Disease Control and Prevention and the American Academy of Pediatrics recommend that if you have HIV, you should feed your baby formula instead of breastfeeding.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-7347",
+      "titleKo": "HIV 노출 전 예방요법(PrEP)과 노출 후 예방요법(PEP)",
+      "titleEn": "HIV: PrEP and PEP",
+      "issueType": "source_regimen_specific_followup_review_needed",
+      "reason": "S0003에서 2개월/6개월 주사 제형도 설명하나 S0022는 검사 주기와 매일 복용을 일괄 기술함. 제형별 적용 대상과 추적 검사 일정의 별도 확인 필요. 최신 독립 근거 미확인, 원문 보존.",
+      "sourceExpression": "You must have an HIV test every 3 months while taking PrEP, so you'll have regular follow-up visits with your provider. If you are having trouble taking PrEP every day or if you want to stop taking PrEP, talk to your provider.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-6807",
+      "titleKo": "식이요법으로 콜레스테롤 수치를 낮추는 방법",
+      "titleEn": "How to Lower Cholesterol with Diet",
+      "issueType": "원문 의학적 적용 범위 확인 필요",
+      "reason": "원문은 오메가-3 지방산이 LDL을 낮출 수 있다고 제형·대상 조건 없이 기술한다. 이 효과의 적용 범위와 최신 근거는 별도로 확인하지 않았으며 의학적 판단을 보류한다. 원문의 표현은 그대로 번역했다.",
+      "sourceExpression": "Eat foods that are high in omega-3 fatty acids. These special fats can lower LDL and triglyceride levels. They can also help control blood pressure and may lower your risk of heart rhythm problems. If you have heart disease, they may lower your risk of heart attack. Omega-3 fatty acids can be found in:",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-6661",
+      "titleKo": "당뇨병 예방법",
+      "titleEn": "How to Prevent Diabetes",
+      "issueType": "원문 인슐린 저항성 정의 범위 확인 필요",
+      "reason": "원문은 인슐린이 충분히 만들어지지 않는 경우와 잘 이용되지 않는 경우를 함께 기술한 뒤 이를 인슐린 저항성이라고 한다. 인슐린 분비 부족과 저항성의 구분이 필요한지 의학적 확인을 보류하며, 원문의 정의를 임의로 고치지 않았다.",
+      "sourceExpression": "If you have type 2 diabetes, your body doesn't make enough insulin or doesn't use it well. This is called insulin resistance. Insulin is a hormone that helps glucose get into your cells. Glucose is your cells' main source of energy and comes from the foods you eat. If your body is resistant to insulin, then insulin can't get enough glucose into your cells. This then leads to glucose staying in your blood, leading to high blood glucose levels.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-6450",
+      "titleKo": "고혈압 예방법",
+      "titleEn": "How to Prevent High Blood Pressure",
+      "issueType": "원문 응급 판단 조건 확인 필요",
+      "reason": "원문 고혈압 위기 표는 수축기 180 초과와 이완기 120 초과를 and로 연결한다. 이 응급 판단 조건에서 두 기준을 모두 요구하는지에 관한 의학적 적용 범위와 최신성은 별도 확인이 필요하다. 원문의 and를 그리고로 보존했으며 or로 임의 수정하지 않았다.",
+      "sourceExpression": "and",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-1715",
+      "titleKo": "사람유두종바이러스(HPV)",
+      "titleEn": "HPV",
+      "issueType": "원문 용어 표기 확인 필요",
+      "reason": "이 문장의 원문은 Low-risk HPVM으로 표기되어 있다. 같은 문서의 HPV와 달리 HPVM은 별도로 정의되지 않아 오기 가능성이 있으나 원문을 임의로 HPV로 바꾸지 않고 보존했다. 원문 정정 여부 확인이 필요하다.",
+      "sourceExpression": "Low-risk HPVM can cause warts on or around your genitals, anus, mouth, or throat.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-6177",
+      "titleKo": "갑상선기능항진증",
+      "titleEn": "Hyperthyroidism",
+      "issueType": "원문 치료 영향 범위 확인 필요",
+      "reason": "원문은 방사성 요오드 치료가 다른 신체 조직에는 영향을 주지 않는다고 단정한다. 이 표현의 의학적 적용 범위와 예외는 별도 근거 대조를 하지 않았으므로 판단을 보류한다. 번역에서는 원문의 단정을 임의로 완화하거나 수정하지 않았다.",
+      "sourceExpression": "Radioiodine therapy is a common and effective treatment for hyperthyroidism. It involves taking radioactive iodine by mouth as a capsule or liquid. This slowly destroys the cells of the thyroid gland that produce thyroid hormone. It does not affect other body tissues. Almost everyone who has radioactive iodine treatment later develops hypothyroidism. This is because the thyroid hormone-producing cells have been destroyed. But hypothyroidism is easier to treat and causes fewer long-term health problems than hyperthyroidism.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-3750",
+      "titleKo": "영아·신생아 영양",
+      "titleEn": "Infant and Newborn Nutrition",
+      "issueType": "SOURCE_MEDICAL_REVIEW_REQUIRED",
+      "reason": "모유에 필요한 모든 비타민과 무기질이 들어 있다는 원문의 포괄적 서술은 영아의 별도 영양소 보충 필요성에 관한 검토가 필요함. 번역에서는 원문을 그대로 보존함.",
+      "sourceExpression": "Food provides the energy and nutrients that babies need to be healthy. For a baby, breast milk is best. It has all the necessary vitamins and minerals. Infant formulas are available for babies whose mothers are not able to or decide not to breastfeed.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-5668",
+      "titleKo": "감염성 관절염",
+      "titleEn": "Infectious Arthritis",
+      "issueType": "SOURCE_MEDICAL_REVIEW_REQUIRED",
+      "reason": "원문이 반응성 관절염을 감염성 관절염의 한 유형으로 설명함. 관절의 직접 감염과 감염 후 반응의 구분에 관해 원문 의학 분류 검토가 필요하며 번역에서 원문을 고치지 않음.",
+      "sourceExpression": "One type of infectious arthritis is reactive arthritis. The reaction is to an infection somewhere else in your body. The joint is usually the knee, ankle, or toe. Sometimes, reactive arthritis is set off by an infection in the bladder, or in the urethra, which carries urine out of the body. In women, an infection in the vagina can cause the reaction. For both men and women, it can start with bacteria passed on during sex. Another form of reactive arthritis starts with eating food or handling something that has bacteria on it.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-6055",
+      "titleKo": "불면증",
+      "titleEn": "Insomnia",
+      "issueType": "기타",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-4452",
+      "titleKo": "황달",
+      "titleEn": "Jaundice",
+      "issueType": "SOURCE_MEDICAL_REVIEW_REQUIRED",
+      "reason": "원문이 빌리루빈을 헤모글로빈 안에 있는 화학물질로 기술함. 빌리루빈과 헤모글로빈 분해의 관계에 관한 원문 설명의 정확성 검토가 필요하며 번역에서는 수정하지 않음.",
+      "sourceExpression": "Jaundice causes your skin and the whites of your eyes to turn yellow. Too much bilirubin causes jaundice. Bilirubin is a yellow chemical in hemoglobin, the substance that carries oxygen in your red blood cells. As red blood cells break down, your body builds new cells to replace them. The old ones are processed by the liver. If the liver cannot handle the blood cells as they break down, bilirubin builds up in the body and your skin may look yellow.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-1526",
+      "titleKo": "레지오넬라 폐렴",
+      "titleEn": "Legionnaires' Disease",
+      "issueType": "SOURCE_WORDING_REVIEW_REQUIRED",
+      "reason": "수원 예시의 원문 decorative foundations는 문맥상 어휘 확인이 필요함. fountains로 임의 확정하지 않고 원문 영문을 번역에 병기했으며 원문 수정 없이 보류함.",
+      "sourceExpression": "Avoid exposure to water sources such as decorative foundations or hot tubs if you don't know how well they are maintained.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-5620",
+      "titleKo": "백혈병",
+      "titleEn": "Leukemia",
+      "issueType": "SOURCE_TYPO_REVIEW_REQUIRED",
+      "reason": "원문 Chromic leukemia는 앞 문맥의 Chronic leukemia를 뜻하는 오탈자로 보이며 번역은 만성 백혈병으로 해석함. 원문 단어 확인이 필요하여 보류하고 원문 데이터는 변경하지 않음.",
+      "sourceExpression": "Other leukemia symptoms can be different from type to type. Chromic leukemia may not cause symptoms at first.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-313",
+      "titleKo": "황반변성",
+      "titleEn": "Macular Degeneration",
+      "issueType": "SOURCE_MEDICAL_REVIEW_REQUIRED",
+      "reason": "황반변성 치료가 시력을 회복시키지 않는다고 단정하는 원문 서술은 질환 유형과 치료별 결과를 고려한 최신성 검토가 필요함. 번역은 원문을 그대로 보존함.",
+      "sourceExpression": "Regular comprehensive eye exams can detect macular degeneration before the disease causes vision loss. Treatment can slow vision loss. It does not restore vision.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-315",
+      "titleKo": "말라리아",
+      "titleEn": "Malaria",
+      "issueType": "SOURCE_MEDICAL_REVIEW_REQUIRED",
+      "reason": "말라리아를 네 기생충·네 유형으로 한정하는 원문 분류의 최신성 확인이 필요함. 원문의 숫자와 서술은 그대로 번역함.",
+      "sourceExpression": "Malaria is a serious disease caused by a parasite. You get it when an infected mosquito bites you. Malaria is a major cause of death worldwide, but it is almost wiped out in the United States. The disease is mostly a problem in developing countries with warm climates. If you travel to these countries, you are at risk. There are four different types of malaria caused by four related parasites. The most deadly type occurs in Africa south of the Sahara Desert.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-939",
+      "titleKo": "마르판 증후군",
+      "titleEn": "Marfan Syndrome",
+      "issueType": "SOURCE_MEDICAL_REVIEW_REQUIRED",
+      "reason": "원문이 결합조직 자체를 단백질로 규정하는 문장의 정확성 검토가 필요함. 결합조직과 구성 단백질을 번역에서 임의로 구분·교정하지 않고 원문대로 보존함.",
+      "sourceExpression": "Marfan syndrome is a disorder that affects connective tissue. Connective tissues are proteins that support skin, bones, blood vessels, and other organs. One of these proteins is fibrillin. A problem with the fibrillin gene causes Marfan syndrome.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-318",
+      "titleKo": "홍역",
+      "titleEn": "Measles",
+      "issueType": "SOURCE_MEDICAL_REVIEW_REQUIRED",
+      "reason": "홍역의 치료가 없다는 원문 단정은 특정 치료와 증상·합병증 관리의 구분을 포함한 검토가 필요함. 번역에서는 치료가 없다는 원문 표현을 임의로 완화하거나 수정하지 않음.",
+      "sourceExpression": "Sometimes measles can lead to serious problems. There is no treatment for measles, but the measles-mumps-rubella (MMR) vaccine can prevent it.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-321",
+      "titleKo": "흑색종",
+      "titleEn": "Melanoma",
+      "issueType": "SOURCE_MEDICAL_REVIEW_REQUIRED",
+      "reason": "모든 병기의 첫 치료가 수술이라는 서술 및 표적치료가 정상 세포를 해치지 않는다는 절대적 서술은 의학적 검토가 필요함. 다른 제공 원문들은 정상 세포 손상이 더 적다고 표현하나 여기서는 원문대로 번역하고 보류함.",
+      "sourceExpression": "Surgery is the first treatment of all stages of melanoma. Other treatments include chemotherapy and radiation, biologic, and targeted therapies. Biologic therapy boosts your body's own ability to fight cancer. Targeted therapy uses substances that attack cancer cells without harming normal cells.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-62",
+      "titleKo": "폐경",
+      "titleEn": "Menopause",
+      "issueType": "SOURCE_CLASSIFICATION_REVIEW_REQUIRED",
+      "reason": "원문이 저용량 경구피임약을 Non-hormone treatments 아래에 열거합니다. 원문의 배치와 내용을 유지했으며, 호르몬 치료와의 분류 일관성을 검토해야 합니다.",
+      "sourceExpression": "Low-dose birth control pills for very heavy bleeding or periods that are close together.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-5676",
+      "titleKo": "정신질환",
+      "titleEn": "Mental Disorders",
+      "issueType": "SOURCE_CLASSIFICATION_REVIEW_REQUIRED",
+      "reason": "원문이 강박장애를 불안장애에 포함합니다. 원문의 분류를 유지했으며, 사용 시 적용할 진단분류 체계와의 일치 여부를 검토해야 합니다.",
+      "sourceExpression": "Anxiety disorders, including panic disorder, obsessive-compulsive disorder, and phobias",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-4014",
+      "titleKo": "중피종",
+      "titleEn": "Mesothelioma",
+      "issueType": "SOURCE_ANATOMY_REVIEW_REQUIRED",
+      "reason": "원문이 중피종의 시작 부위를 in the lungs로 표현합니다. 폐 조직과 이를 둘러싼 중피의 구별을 단순화한 표현인지 확인이 필요하여, 원문을 그대로 번역하고 메모합니다.",
+      "sourceExpression": "The tissue that lines your lungs, stomach, heart, and other organs is called mesothelium. Mesothelioma, also known as malignant mesothelioma, is cancer of that tissue. It usually starts in the lungs, but can also start in the abdomen or other organs.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-5741",
+      "titleKo": "경도인지장애",
+      "titleEn": "Mild Cognitive Impairment",
+      "issueType": "SOURCE_CURRENCY_REVIEW_REQUIRED",
+      "reason": "원문의 현재 입증된 약물치료가 없다는 표현을 유지했습니다. 원인 질환별 MCI 치료와 최근 치료 승인 범위를 구분하여 최신성을 확인할 필요가 있습니다.",
+      "sourceExpression": "At this time, there is no proven drug treatment for MCI. Your health care provider can check to see if you have any changes in your memory or thinking skills over time.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-1605",
+      "titleKo": "승모판 탈출증",
+      "titleEn": "Mitral Valve Prolapse",
+      "issueType": "SOURCE_PHYSIOLOGY_REVIEW_REQUIRED",
+      "reason": "원문이 심장판막 전체를 박동 때 열리고 박동 사이에 닫히는 것으로 설명합니다. 뒤 문단의 승모판 수축기 폐쇄 설명과의 관계 및 판막별 개폐 시점의 단순화 여부를 검토해야 합니다. 원문 설명은 유지했습니다.",
+      "sourceExpression": "The mitral valve is one of the four valves in your heart. Heart valves have flaps that open and close. The flaps make sure that blood flows in the right direction through your heart and to the rest of your body. When your heart beats, the flaps open to let blood through. Between heartbeats, they close to stop the blood from flowing backwards.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-594",
+      "titleKo": "구강 질환",
+      "titleEn": "Mouth Disorders",
+      "issueType": "SOURCE_MEDICAL_REVIEW_REQUIRED",
+      "reason": "원문이 canker sores의 원인을 세균이나 바이러스로 단정합니다. 아프타성 궤양과 감염성 궤양의 원인 구별을 검토할 필요가 있어 원문 표현을 유지하고 메모했습니다.",
+      "sourceExpression": "Canker sores - painful sores in the mouth, caused by bacteria or viruses",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-3229",
+      "titleKo": "엠폭스(Mpox)",
+      "titleEn": "Mpox",
+      "issueType": "SOURCE_INCOMPLETE_WORDING",
+      "reason": "원문은 Have immune system, for example from HIV or other conditions로 면역체계의 어떤 상태를 뜻하는지 수식어가 빠진 것으로 보입니다. weakened 등 누락어를 임의로 보충하지 않고 원문 구조를 옮겼습니다. 원문 복원 후 이 문장 재번역이 필요합니다.",
+      "sourceExpression": "Have immune system, for example from HIV or other conditions",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-334",
+      "titleKo": "유행성이하선염(볼거리)",
+      "titleEn": "Mumps",
+      "issueType": "SOURCE_MEDICAL_REVIEW_REQUIRED",
+      "reason": "원문은 유행성이하선염의 치료법이 없다고 포괄적으로 표현합니다. 질병 특이 치료와 증상·합병증 치료의 구별이 필요한지 검토해야 하며, 원문은 유지했습니다.",
+      "sourceExpression": "You can catch mumps by being with another person who has it. There is no treatment for mumps, but the measles-mumps-rubella (MMR) vaccine can prevent it.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-336",
+      "titleKo": "중증근무력증",
+      "titleEn": "Myasthenia Gravis",
+      "issueType": "SOURCE_MECHANISM_REVIEW_REQUIRED",
+      "reason": "원문이 혈장교환과 정맥 내 면역글로불린 모두를 혈액에서 비정상 항체를 제거하는 시술로 묶어 설명합니다. 두 치료의 작용기전 구별이 필요하여 원문 설명을 유지하고 검토 메모를 남겼습니다.",
+      "sourceExpression": "Plasmapheresis (plasma exchange) and intravenous immunoglobulin, which are procedures to remove abnormal antibodies from your blood. They are usually used in severe cases. They can help with symptoms for a few weeks or months.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-1240",
+      "titleKo": "신경모세포종",
+      "titleEn": "Neuroblastoma",
+      "issueType": "SOURCE_ANATOMY_REVIEW_REQUIRED",
+      "reason": "원문이 발생 부위를 spinal cord로 열거합니다. 척수 자체와 척추 주변 신경조직의 구별을 확인할 필요가 있어 원문을 그대로 번역했습니다.",
+      "sourceExpression": "Neuroblastoma usually begins in the adrenal glands. You have two adrenal glands, one on top of each kidney. The adrenal glands make important hormones that help control heart rate, blood pressure, blood glucose (blood sugar), and the way the body reacts to stress. Neuroblastoma may also begin in the neck, chest or spinal cord.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-1387",
+      "titleKo": "신경섬유종증",
+      "titleEn": "Neurofibromatosis",
+      "issueType": "SOURCE_CLASSIFICATION_REVIEW_REQUIRED",
+      "reason": "원문의 NF1·NF2·신경초종증 3유형 분류를 유지했습니다. NF2와 신경초종증의 명칭 및 분류 최신성은 별도 확인이 필요합니다.",
+      "sourceExpression": "There are three types of neurofibromatosis:",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-1616",
+      "titleKo": "노년기 영양",
+      "titleEn": "Nutrition for Older Adults",
+      "issueType": "SOURCE_SAFETY_REVIEW_REQUIRED",
+      "reason": "원문은 삼키기 어려울 때 식사와 함께 수분을 충분히 마시도록 일반적으로 권합니다. 연하곤란의 유형 및 흡인 위험에 따라 적용이 달라질 수 있으므로 원문을 유지하고 의료 검토가 필요한 항목으로 표시했습니다.",
+      "sourceExpression": "If you are having trouble swallowing, try drinking plenty of liquids with your meal. If that does not help, check with your health care provider. A health condition or medicine could be causing the problem.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-7109",
+      "titleKo": "오피오이드 과다복용",
+      "titleEn": "Opioid Overdose",
+      "issueType": "SOURCE_ROUTE_WORDING_REVIEW_REQUIRED",
+      "reason": "원문의 injected into the muscle under the skin, or into the veins에서 근육 내와 피하 투여를 나열하려던 것인지 쉼표가 누락된 것인지 불명확합니다. 피부 아래의 근육이라는 원문 문법을 유지했으며 투여 경로 표현은 원문 확인이 필요합니다.",
+      "sourceExpression": "Give the person naloxone, if it is available. Naloxone is a safe medication that can quickly stop an opioid overdose. There are two forms. One is a nasal spray that you spray info the nose. The other type is injected into the muscle under the skin, or into the veins. Naloxone works by blocking the effects of the opioids on the body. It's important to read the product instructions and check the expiration date before you give it to someone.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-7129",
+      "titleKo": "오피오이드 사용장애(OUD) 치료",
+      "titleEn": "Opioid Use Disorder (OUD) Treatment",
+      "issueType": "SOURCE_MECHANISM_REVIEW_REQUIRED",
+      "reason": "원문이 메타돈·부프레노르핀·로펙시딘을 같은 뇌 표적 및 갈망 감소 설명으로 묶고, 다음 문단에서 이 약들의 평생 복용 가능성을 함께 설명합니다. 약물별 작용기전과 사용 기간을 구별해 검토해야 합니다. 원문 내용은 유지했습니다.",
+      "sourceExpression": "Methadone, buprenorphine, and lofexidine, which can decrease withdrawal symptoms and cravings. They work by acting on one or another of the targets in the brain that opioids act on. But these medicines are different because they do not make you feel high. Some people worry that if they take methadone or buprenorphine, it means that they are substituting one addiction for another. But it is not; these medicines are a treatment. They restore balance to the parts of the brain affected by addiction. This allows your brain to heal while you work toward recovery.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-7129",
+      "titleKo": "오피오이드 사용장애(OUD) 치료",
+      "titleEn": "Opioid Use Disorder (OUD) Treatment",
+      "issueType": "SOURCE_MEDICAL_REVIEW_REQUIRED",
+      "reason": "원문이 날트렉손은 갈망에 도움이 되지 않는다고 단정합니다. 재발 예방 및 갈망 효과에 대한 약물 설명의 정확성을 확인해야 합니다. 원문 표현과 7~10일 조건을 유지했습니다.",
+      "sourceExpression": "Naltrexone works differently than methadone and buprenorphine. It does not help you with withdrawal symptoms or cravings. Instead, it takes away the high that you would normally get when you take opioids. Because of this, you would take naltrexone to prevent a relapse, not to try to get off opioids. You have to be off opioids for at least 7-10 days before you can take naltrexone. Otherwise you could have bad withdrawal symptoms.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-5804",
+      "titleKo": "난소 질환",
+      "titleEn": "Ovarian Disorders",
+      "issueType": "SOURCE_MEDICAL_REVIEW_REQUIRED",
+      "reason": "원문은 원발성 난소기능부전에서 난소가 기능을 멈춘다고 단정합니다. 같은 자료의 폐경 문서(62-S0007)는 난소 기능부전에서도 월경·임신 가능성이 남을 수 있다고 설명하므로, 기능 저하와 완전 중단의 구별을 검토할 필요가 있습니다. 원문은 유지했습니다.",
+      "sourceExpression": "Primary ovarian insufficiency is when your ovaries stop working before age 40.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-3799",
+      "titleKo": "일반의약품",
+      "titleEn": "Over-the-Counter Medicines",
+      "issueType": "SOURCE_DOSING_UNIT_REVIEW_REQUIRED",
+      "reason": "원문은 소아 액체약 계량기구에 teaspoons 표시를 권합니다. 원문 단위를 유지했으며 소아 투약 오류 예방을 위한 표준 용량 단위·기구 권고와의 일치 여부는 확인이 필요합니다.",
+      "sourceExpression": "Be careful when giving medicines to children. Make sure that you give your child the correct dose. If you are giving your child a liquid medicine, don't use a kitchen spoon. Instead use a measuring spoon or a dosing cup marked in teaspoons.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-352",
+      "titleKo": "췌장 이식",
+      "titleEn": "Pancreas Transplantation",
+      "issueType": "SOURCE_CURRENCY_REVIEW_REQUIRED",
+      "reason": "원문은 췌도세포이식을 실험적 시술로 표현합니다. 적용 제품·절차 및 국가별 승인 상태의 최신성은 별도 확인이 필요하여 원문 표현을 유지하고 표시했습니다.",
+      "sourceExpression": "The pancreas is a gland behind your stomach and in front of your spine. It produces the juices that help break down food and the hormones that help control blood sugar levels. A pancreas transplant is surgery to place a healthy pancreas from a donor into a person with a diseased pancreas. It is mostly done for people with severe type 1 diabetes. It can allow them to give up insulin shots. An experimental procedure called islet cell transplantation transplants only the parts of the pancreas that make insulin.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-5876",
+      "titleKo": "췌장염",
+      "titleEn": "Pancreatitis",
+      "issueType": "SOURCE_TREATMENT_REVIEW_REQUIRED",
+      "reason": "원문이 급성 췌장염의 보통 치료에 항생제를 일반적으로 포함합니다. 감염 동반 여부 등 항생제 적응증의 구별이 필요한지 의료 검토해야 하며, 원문 목록은 유지했습니다.",
+      "sourceExpression": "Acute pancreatitis occurs suddenly and usually goes away in a few days with treatment. It is often caused by gallstones. Common symptoms are severe pain in the upper abdomen, nausea, and vomiting. Treatment is usually a few days in the hospital for intravenous (IV) fluids, antibiotics, and medicines to relieve pain.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-611",
+      "titleKo": "마비",
+      "titleEn": "Paralysis",
+      "issueType": "SOURCE_CURRENCY_REVIEW_REQUIRED",
+      "reason": "원문의 미국에서는 폴리오가 더 이상 발생하지 않는다는 절대적인 표현을 유지했습니다. 최근 발생 사례 및 토착 전파 근절과 개별 감염 발생의 구별을 확인해야 합니다.",
+      "sourceExpression": "Polio used to be a cause of paralysis, but polio no longer occurs in the U.S.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-482",
+      "titleKo": "기생충 질환",
+      "titleEn": "Parasitic Diseases",
+      "issueType": "SOURCE_CURRENCY_REVIEW_REQUIRED",
+      "reason": "원문은 기생충질환에는 백신이 없다고 단정합니다. 말라리아 백신 등을 포함한 현재의 승인·권고 상태를 확인해야 하므로 원문을 그대로 번역하고 HOLD로 표시했습니다.",
+      "sourceExpression": "If you are traveling, it's important to drink only water you know is safe. Prevention is especially important. There are no vaccines for parasitic diseases. Some medicines are available to treat parasitic infections.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-1360",
+      "titleKo": "음경 질환",
+      "titleEn": "Penis Disorders",
+      "issueType": "SOURCE_ANATOMY_REVIEW_REQUIRED",
+      "reason": "원문은 balanitis를 귀두를 덮는 피부의 염증으로 설명합니다. 귀두염과 포피염의 해부학적 범위를 구별해야 하는지 검토가 필요하며, 원문 정의는 유지했습니다.",
+      "sourceExpression": "Balanitis - inflammation of the skin covering the head of the penis, most often in men and boys who have not been circumcised",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-360",
+      "titleKo": "공포증",
+      "titleEn": "Phobias",
+      "issueType": "SOURCE_DEFINITION_REVIEW_REQUIRED",
+      "reason": "원문은 광장공포증을 공공장소에 대한 공포로 짧게 정의하고 특정 공포증 설명에 이어 열거합니다. 진단적 정의와 분류를 충분히 반영하는지 검토가 필요하며, 원문의 범위는 유지했습니다.",
+      "sourceExpression": "There are many specific phobias. Acrophobia is a fear of heights. Agoraphobia is a fear of public places, and claustrophobia is a fear of closed-in places. If you become anxious and extremely self-conscious in everyday social situations, you could have a social phobia. Other common phobias involve tunnels, highway driving, water, flying, animals and blood.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-1656",
+      "titleKo": "페스트",
+      "titleEn": "Plague",
+      "issueType": "SOURCE_ANATOMY_REVIEW_REQUIRED",
+      "reason": "원문은 림프절 페스트의 주요 염증 부위로 편도·아데노이드·비장·흉선을 열거합니다. 특징적인 림프절 침범 설명과의 관계를 의료 검토해야 하며 원문 목록을 유지했습니다.",
+      "sourceExpression": "Bubonic plague causes the tonsils, adenoids, spleen, and thymus to become inflamed. Symptoms include fever, aches, chills, and tender lymph glands.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-1656",
+      "titleKo": "페스트",
+      "titleEn": "Plague",
+      "issueType": "SOURCE_CURRENCY_REVIEW_REQUIRED",
+      "reason": "원문의 백신이 없다는 표현은 국가별 허가·공급 상황 및 시점을 확인할 필요가 있어 그대로 번역하고 메모했습니다.",
+      "sourceExpression": "Lab tests can diagnose plague. Treatment is a strong antibiotic. There is no vaccine.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-5714",
+      "titleKo": "폐렴구균 감염",
+      "titleEn": "Pneumococcal Infections",
+      "issueType": "SOURCE_VACCINATION_CURRENCY_REVIEW_REQUIRED",
+      "reason": "원문이 폐렴구균 백신을 두 가지로 나누고 영유아용과 고위험군용으로 구분하며 65세 초과를 열거합니다. 현재 백신 제품·유형과 접종 연령 권고의 최신성은 확인이 필요하여 원문 수와 연령을 유지했습니다.",
+      "sourceExpression": "How the diagnosis is made depends upon where the infection is. Your doctor will do a physical exam and ask about your medical history. Possible tests may include blood, imaging, or lab tests. Treatment is with antibiotics. Vaccines can prevent pneumococcal infections. There are two vaccines. One is for infants and young children. The other is for people at high risk, including those who are over 65 years old, have chronic illnesses or weak immune systems, smoke, have asthma, or live in long-term care facilities.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-365",
+      "titleKo": "소아마비와 소아마비 후 증후군",
+      "titleEn": "Polio and Post-Polio Syndrome",
+      "issueType": "SOURCE_ABBREVIATION_REVIEW",
+      "reason": "앞선 원문은 미국 사용 백신을 IPV라고 명시하지만 이 문장은 PV라고 표기한다. 누락된 약어 문자가 있는지 원문 확인이 필요하며 번역에는 원문 PV를 그대로 보존했다.",
+      "sourceExpression": "Children in the United States get four doses of PV as part of their routine childhood immunizations. Most adults in the United States were vaccinated against polio as children.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-5912",
+      "titleKo": "다낭성 난소증후군",
+      "titleEn": "Polycystic Ovary Syndrome",
+      "issueType": "TERMINOLOGY_REVIEW",
+      "reason": "polyendocrine metabolic ovary syndrome(PMOS)의 한국어 표준 용어는 이 번역 작업에서 확인하지 않았다. 의미에 맞게 직역하고 영문 전체와 약어를 병기했으며 한국어 용어 검토가 필요하다. 원문의 명칭을 임의로 삭제하거나 변경하지 않았다.",
+      "sourceExpression": "Polycystic ovary syndrome (PCOS), also known as polyendocrine metabolic ovary syndrome (PMOS), is the name of a hormonal disorder. PCOS affects the ovaries, as well as many other parts of the body.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-1382",
+      "titleKo": "류마티스성 다발근통",
+      "titleEn": "Polymyalgia Rheumatica",
+      "issueType": "SOURCE_MEDICAL_CLAIM_REVIEW",
+      "reason": "원문은 치료 시 질환 자체가 하루나 이틀 안에 사라진다고 기술한다. 증상의 빠른 호전과 질환의 소실 또는 치료 기간을 구분하지 않아 의학적 확인이 필요하다. 원문 주장과 기간은 그대로 번역했다.",
+      "sourceExpression": "Polymyalgia rheumatica sometimes occurs along with giant cell arteritis, a condition that causes swelling of the arteries in your head. Symptoms include headaches and blurred vision. Doctors often prescribe prednisone, a steroid medicine, for both conditions. With treatment, polymyalgia rheumatica usually disappears in a day or two. Without treatment, it usually goes away after a year or more.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-1238",
+      "titleKo": "산후우울증",
+      "titleEn": "Postpartum Depression",
+      "issueType": "SOURCE_TEXT_CORRUPTION",
+      "reason": "원문의 Attending early Physical changes는 문법과 의미가 연결되지 않아 참석 대상이 무엇인지 알 수 없다. 누락되거나 잘못 치환된 원문을 확인해야 한다. 이를 추정하여 산후 진료 등의 의미로 바꾸지 않고 직역과 영문을 보존했다. 원문 복구 후 재번역이 필요하다.",
+      "sourceExpression": "Attending early Physical changes so symptoms can be found and treated as soon as possible",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-5784",
+      "titleKo": "당뇨병 전단계",
+      "titleEn": "Prediabetes",
+      "issueType": "SOURCE_THRESHOLD_REVIEW",
+      "reason": "원문은 당뇨병 A1C 경계를 above 6.5%로 서술한다. 경계값 6.5% 자체를 포함하는지 의학적 기준 확인이 필요하다. 번역은 임의로 이상으로 바꾸지 않고 초과로 보존했다.",
+      "sourceExpression": "Type 2 diabetes is above 6.5%",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-5984",
+      "titleKo": "임신과 영양",
+      "titleEn": "Pregnancy and Nutrition",
+      "issueType": "SOURCE_NUTRIENT_RECOMMENDATION_REVIEW",
+      "reason": "원문은 임신 중과 수유 중 엽산 필요량을 모두 하루 600 mcg로 제시한다. 임신·수유의 구분, 식이엽산과 보충제 엽산의 단위 기준에 대한 영양 권고 확인이 필요하다. 번역에서는 대상과 수치를 그대로 보존했다.",
+      "sourceExpression": "During pregnancy and when breastfeeding, you need 600 mcg per day from foods and/or vitamins. It is hard to get this amount from foods alone, so you will most likely need to take a supplement that contains folic acid.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-7131",
+      "titleKo": "임신과 오피오이드",
+      "titleEn": "Pregnancy and Opioids",
+      "issueType": "SOURCE_GUIDELINE_CURRENCY_REVIEW",
+      "reason": "원문은 HIV 감염 시 모유 수유를 일률적으로 금지한다. 국가별 권고와 치료·바이러스 억제 상태에 따른 최신 지침 확인이 필요하다. 번역은 원문의 금지 표현을 임의로 완화하지 않고 보존했다.",
+      "sourceExpression": "If you regularly take opioid medicines, you may be able to breastfeed. It depends on which medicine you are taking. But you should not breastfeed if you have HIV or take illegal drugs. Check with your provider before breastfeeding.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-3793",
+      "titleKo": "월경전증후군",
+      "titleEn": "Premenstrual Syndrome",
+      "issueType": "SOURCE_CLASSIFICATION_REVIEW",
+      "reason": "원문은 특정 비타민의 예로 칼슘과 비타민 B6를 나열한다. 칼슘을 비타민으로 묶은 분류 표현에 확인이 필요하며 번역에는 원문 표현을 그대로 보존했다.",
+      "sourceExpression": "Some studies have shown that certain vitamins may help with some symptoms of PMS. They include calcium and vitamin B6.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-112",
+      "titleKo": "전립선암",
+      "titleEn": "Prostate Cancer",
+      "issueType": "원문 의학적 의미 또는 최신성 확인 필요",
+      "reason": "전립선암 본문에 항암화학요법의 크림 투여가 나열되어 있음. 전립선암에 대한 실제 적용 범위는 별도 공식 근거로 확인하지 못했으므로 원문을 보존하고 의학적 판단 보류.",
+      "sourceExpression": "Chemotherapy uses medicines to kill cancer cells, slow their growth, or stop them from spreading. You might take the drugs by mouth, as an injection (shot), as a cream, or intravenously (by IV).",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-1359",
+      "titleKo": "금연",
+      "titleEn": "Quitting Smoking",
+      "issueType": "원문 의학적 의미 또는 최신성 확인 필요",
+      "reason": "전자담배의 금연 효과가 입증되지 않았다는 원문 서술의 최신성 확인 필요. 이번 번역에서 현재 연구 근거를 대조하지 않았음.",
+      "sourceExpression": "Some people think that switching to e-cigarettes can help to quit smoking, but that has not been proven. These battery-operated smoking devices look like cigarettes but work differently. Using an e-cigarette is called vaping. Researchers still have a lot to learn about the health effects of using e-cigarettes.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-379",
+      "titleKo": "방사선 노출",
+      "titleEn": "Radiation Exposure",
+      "issueType": "원문 의학적 의미 또는 최신성 확인 필요",
+      "reason": "전리 방사선의 예에 자외선 전체를 구분 없이 나열함. 자외선의 파장별 분류 범위와 문장의 정확성 확인 필요. 원문 분류를 번역자가 임의 변경하지 않음.",
+      "sourceExpression": "Ionizing radiation, which includes ultraviolet radiation, radon, x-rays, and gamma rays",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-6467",
+      "titleKo": "영아의 위식도역류",
+      "titleEn": "Reflux in Infants",
+      "issueType": "원문 의학적 의미 또는 최신성 확인 필요",
+      "reason": "쌀 시리얼을 모유·분유에 첨가하고 젖꼭지를 x자로 자르는 지시가 있음. 영아 수유에 대한 현재 권고 및 적용 조건을 별도로 확인하지 못했으므로 보류. 원문 지시를 보존.",
+      "sourceExpression": "Add rice cereal to your baby's bottle of formula or breastmilk. Check with your provider about how much to add. If the mixture is too thick, you can change the nipple size or cut a little \"x\" in the nipple to make the opening larger.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-3101",
+      "titleKo": "호흡기세포융합바이러스(RSV) 감염",
+      "titleEn": "Respiratory Syncytial Virus Infections",
+      "issueType": "원문 의학적 의미 또는 최신성 확인 필요",
+      "reason": "RSV 백신 수·접종 연령과 영아 예방약 수·적용 연령을 단정한 정보가 있어 작업 시점의 공급·권고 현황 대조 필요. 실제 대조 전이며 원문 날짜는 불명.",
+      "sourceExpression": "There are some vaccines to protect against RSV illness. Two of them are for people ages 60 and older. If you are in this age group, talk to your provider about whether an RSV vaccine would be right for you.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-402",
+      "titleKo": "겸상적혈구병",
+      "titleEn": "Sickle Cell Disease",
+      "issueType": "원문 의학적 의미 또는 최신성 확인 필요",
+      "reason": "원문은 voxelotor를 사용 가능한 치료제로 설명한다. 제조사 Pfizer의 2024-09-25 공식 발표에서는 전체 시장의 모든 OXBRYTA 물량 자진 철수와 유통·임상시험 중단을 공지했다. 원문 번역을 임의 수정하지 않고 사용 후보에서 보류하며, 현행 치료 선택지의 의료전문가 확인이 필요하다.",
+      "sourceExpression": "Voxelotor, another medicine to prevent the sickling of red blood cells. It can be used in adults and children ages 4 years and older.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-1567",
+      "titleKo": "천연두",
+      "titleEn": "Smallpox",
+      "issueType": "원문 의학적 의미 또는 최신성 확인 필요",
+      "reason": "원문에 천연두 치료법이 없다는 서술과 30년 전이라는 상대시점이 있다. 치료제 승인·공급 및 역사적 시점의 최신성 확인이 필요하며 번역에서는 원문을 보존했다.",
+      "sourceExpression": "There is no treatment. Fluids and medicines for pain or fever can help control symptoms. Most people recover, but some can die. Those who do recover may have severe scars.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-1694",
+      "titleKo": "척수성 근위축증",
+      "titleEn": "Spinal Muscular Atrophy",
+      "issueType": "원문 의학적 의미 또는 최신성 확인 필요",
+      "reason": "동일 본문 앞뒤는 SMN1, 이 문장은 SM1로 표기되어 유전자 식별자가 불일치한다. 원문에 있는 SM1을 조용히 SMN1로 변경하지 않았으며 확인 필요.",
+      "sourceExpression": "Most people have two copies of the SM1 gene - one from each parent. SMA normally only happens when both copies have the gene change. If only one copy has the change, there usually aren't any symptoms. But that gene could be passed down from parent to child.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-6465",
+      "titleKo": "지방간질환",
+      "titleEn": "Steatotic Liver Disease",
+      "issueType": "원문 의학적 의미 또는 최신성 확인 필요",
+      "reason": "원문은 MASLD 치료 승인 약물이 현재 없다고 기술함. 승인 현황의 최신성을 별도 공식 근거로 확인하지 않았으므로 해당 시점 의존 문장은 원문 그대로 보존하고 최신성 확인 필요로 보류함.",
+      "sourceExpression": "More studies are needed to see whether certain medicines are safe and effective to treat MASLD. Currently, no medicines are approved for treatment.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-6465",
+      "titleKo": "지방간질환",
+      "titleEn": "Steatotic Liver Disease",
+      "issueType": "원문 의학적 의미 또는 최신성 확인 필요",
+      "reason": "원문에서 ALD를 alcohol-associated liver disease로 정의하면서 같은 약어를 alcohol-related liver disease의 가장 초기 단계라고 기술함. 질환 범위와 단계의 관계를 확정할 수 없어 원문을 보존하고 의학적 판단 보류함.",
+      "sourceExpression": "Your liver breaks down most of the alcohol you drink, so it can be removed from your body. But the process of breaking it down can create harmful substances. These substances can damage liver cells, cause inflammation, and weaken your body's natural defenses. The more alcohol that you drink, the more you damage your liver. ALD is the earliest stage of alcohol-related liver disease. The next stages are alcoholic hepatitis and cirrhosis.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-8",
+      "titleKo": "뇌졸중",
+      "titleEn": "Stroke",
+      "issueType": "원문 의학적 의미 또는 최신성 확인 필요",
+      "reason": "원문의 tPA 투여 가능 시간을 증상 시작 후 4시간 이내로 한정하는 문장과 적용 조건은 최신 공식 지침으로 확인하지 않았음. 치료 시간 기준의 원문 최신성 확인 필요. 4시간은 임의로 수정하지 않았음.",
+      "sourceExpression": "You may get tPA, (tissue plasminogen activator), a medicine to dissolve the blood clot. You can only get this medicine within 4 hours of when your symptoms started. The sooner you can get it, the better your chance of recovery.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-5951",
+      "titleKo": "충치(치아우식증)",
+      "titleEn": "Tooth Decay",
+      "issueType": "원문 철자 불일치와 번역 처리",
+      "reason": "원문 salvia를 침으로 해석한 것은 같은 문서의 saliva와 문맥에 근거한 AI 추론임. 원문 철자를 번역문 괄호에도 보존하여 조용한 교정을 피함. 원문 저자의 의도 확인은 미실시.",
+      "sourceExpression": "You get fluoride from toothpaste, water, and other sources. This fluoride, along with your salvia, helps the enamel repair itself by replacing the minerals. Your teeth go through this natural process of losing minerals and regaining minerals all day long. But if you don't take care of your teeth and/or you eat and drink lots of sugary or starchy things, your enamel will keep losing minerals. This leads to tooth decay.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-5951",
+      "titleKo": "충치(치아우식증)",
+      "titleEn": "Tooth Decay",
+      "issueType": "원문 확인 필요",
+      "reason": "salvia 철자를 침으로 해석하되 원문 표기를 병기했음. 저자 의도 확인은 미실시.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-1520",
+      "titleKo": "쌍둥이·세쌍둥이·다태아 출산",
+      "titleEn": "Twins, Triplets, Multiple Births",
+      "issueType": "원문 의학적 의미 또는 최신성 확인 필요",
+      "reason": "다태임신에서 분만을 지연하기 위한 침상안정을 일반적으로 기술함. 현재 적용 조건과 권고를 별도 근거로 확인하지 않았으므로 원문을 유지하고 최신성 확인 필요.",
+      "sourceExpression": "Years ago, most twins came as a surprise. Now, most women know about a multiple pregnancy early. Women with multiple pregnancies should see their health care providers more often than women who are expecting one baby. Multiple pregnancy babies have a much higher risk of being born prematurely and having a low birth weight. There is also more of a risk of disabilities. Some women have to go on bed rest to delay labor. Finally, they may deliver by C-section, especially if there are three babies or more.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-5350",
+      "titleKo": "요관 질환",
+      "titleEn": "Ureteral Disorders",
+      "issueType": "원문 의학적 의미 또는 최신성 확인 필요",
+      "reason": "요관을 cystoscope(방광경)로 검사한다고 한 원문의 기기명과 해부학적 대상의 대응 관계를 별도 근거로 확인하지 못했으므로 그대로 번역하고 의학적 판단 보류.",
+      "sourceExpression": "Doctors diagnose problems with the ureters using different tests. These include urine tests, x-rays, and examination of the ureter with a scope called a cystoscope. Treatment depends on the cause of the problem. It may include medicines and, in severe cases, surgery.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-477",
+      "titleKo": "자궁 질환",
+      "titleEn": "Uterine Diseases",
+      "issueType": "원문 의학적 의미 또는 최신성 확인 필요",
+      "reason": "원문의 자궁선근증 정의가 자궁 내막 조직이 바깥쪽 벽에 자란다고 서술함. 자궁선근증과 자궁내막증의 병변 위치 구분을 별도 근거로 확인하지 못했으므로 원문을 보존하고 의학적 판단 보류.",
+      "sourceExpression": "Adenomyosis. Tissue that usually lines the uterus grows on the outside walls.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-6417",
+      "titleKo": "질염",
+      "titleEn": "Vaginitis",
+      "issueType": "원문 의학적 의미 또는 최신성 확인 필요",
+      "reason": "트리코모나스증 치료를 보통 단회 항생제라고 기술함. 대상과 약물별 요법의 현재 권고를 별도로 확인하지 않았으므로 원문을 보존하고 최신성 확인 필요.",
+      "sourceExpression": "The treatment for trichomoniasis is usually a single-dose antibiotic. Both you and your partner(s) should be treated, to prevent spreading the infection to others and to keep from getting it again.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-165",
+      "titleKo": "시각장애와 실명",
+      "titleEn": "Vision Impairment and Blindness",
+      "issueType": "원문 의학적 의미 또는 최신성 확인 필요",
+      "reason": "같은 원문에서 백내장을 시력 손실의 원인으로 제시하면서 원인이 무엇이든 잃은 시력은 회복 불가하다고 일반화함. 저시력 정의와 가역적 시력 손실의 적용 범위를 별도 근거로 확인하지 못했으므로 원문 문장을 유지하고 보류.",
+      "sourceExpression": "The sooner vision loss or eye disease is found and treated, the greater your chances of keeping your remaining vision. Whatever the cause, lost vision cannot be restored. But it can be managed. A loss of vision means you may have to reorganize your life and learn new ways of doing things. Your provider may make suggestions to help make life easier. These may include:",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-6288",
+      "titleKo": "활력징후",
+      "titleEn": "Vital Signs",
+      "issueType": "원문 의학적 의미 확인 필요",
+      "reason": "원문은 98.6 °F 또는 37 °C를 초과하면 발열이라고 일반화하며 측정부위·대상·조건을 제시하지 않음. 숫자는 충실히 번역했으나 발열 판단 기준의 적용 가능성을 확인하지 못했으므로 의학적 판단 보류.",
+      "sourceExpression": "Temperature, which measures how hot your body is. A body temperature that is higher than normal (over 98.6 °F, or 37 °C) is called a fever.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-5321",
+      "titleKo": "여성 건강검진",
+      "titleEn": "Women's Health Checkup",
+      "issueType": "원문 의학적 의미 확인 필요",
+      "reason": "원문은 Pap 검사와 HPV 검사를 모두 현미경으로 검사한다고 기술함. 두 검사의 방법 구분에 대한 원문 설명 확인이 필요하여 원문을 보존하고 의학적 판단 보류.",
+      "sourceExpression": "A cervical cancer screening, which uses a Pap test, an HPV test, or both. The tests can help prevent cervical cancer. A Pap test checks for cervical cancer and for abnormal cells that could turn into cancer. An HPV test looks for the types of HPV which can cause cervical cancer. For both tests, your provider will take a sample of cells from the surface of your cervix and send them to a lab to be examined under a microscope.",
+      "aiQaStatus": "HOLD"
+    },
+    {
+      "docId": "medlineplus-health-topics-en-1255",
+      "titleKo": "효모균 감염",
+      "titleEn": "Yeast Infections",
+      "issueType": "원문 의학적 의미 확인 필요",
+      "reason": "원문의 Candida is the scientific name for yeast는 Candida와 효모 전체를 동등하게 읽힐 수 있는 분류 설명임. 원문을 그대로 보존했으며 용어의 범위에 대한 원문 확인이 필요하여 의학적 판단 보류.",
+      "sourceExpression": "Candida is the scientific name for yeast. It is a fungus that lives almost everywhere, including in your body. Usually, your immune system keeps yeast under control. If you are sick or taking antibiotics, it can multiply and cause an infection.",
+      "aiQaStatus": "HOLD"
+    }
+  ],
+  "awkwardExpressions": [
+    {
+      "type": "이중/과도한 조사 직역",
+      "title": "생활 지원 거주시설(Assisted Living)",
+      "ko": "생활지원 주거(assisted living)는 일상적인 돌봄에 어느 정도 도움이 필요한 사람에게 제공하는 주거와 서비스입니다. 옷 입기, 목욕, 약 복용, 청소 같은 일에 도움이 필요할 수 있습니다. 하지만 요양시설(nursing home)이 제공하는 수준의 의료서비스는 필요하지 않습니다. 생활지원 주거는 거주자가 더 독립적으로 생활할 수 있게 합니다.",
+      "en": "Assisted living is housing and services for people who need some help with daily care. They may need help with things like dressing, bathing, taking their medicines, and cleaning. But they do not need the medical care that a nursing home provides. Assisted living allows the residents to live more independently."
+    },
+    {
+      "type": "이중/과도한 조사 직역",
+      "title": "소아 천식",
+      "ko": "아이의 의료진은 천식을 진단하기 위해 여러 방법을 사용할 수 있습니다.",
+      "en": "Your child's health care provider may use many tools to diagnose asthma:"
+    },
+    {
+      "type": "이중/과도한 조사 직역",
+      "title": "소아 천식",
+      "ko": "아이에게 천식이 있으면 아이의 의료진과 함께 치료 계획을 세우게 됩니다. 계획에는 다음과 같이 아이의 천식 증상을 관리하고 천식 발작을 예방하는 방법이 포함됩니다.",
+      "en": "If your child has asthma, you will work with their health care provider to create a treatment plan. The plan will include ways to manage your child's asthma symptoms and prevent asthma attacks, such as:"
+    },
+    {
+      "type": "이중/과도한 조사 직역",
+      "title": "소아 천식",
+      "ko": "아이의 의료진은 천식 증상이 조절될 때까지 치료를 조정할 수 있습니다.",
+      "en": "Your child's provider may adjust the treatment until the asthma symptoms are controlled."
+    },
+    {
+      "type": "이중/과도한 조사 직역",
+      "title": "자가면역질환",
+      "ko": "의사는 자가면역질환을 진단하는 데 어려움을 겪는 경우가 많습니다. 보통 특정 자가면역질환이 있는지 보여 주는 특이적인 검사가 없습니다. 증상이 혼란스러울 수도 있습니다. 많은 자가면역질환이 비슷한 증상을 보이기 때문입니다. 또한 근육통 같은 일부 증상은 다른 많은 질병에서도 흔합니다. 따라서 진단을 받기까지 오랜 시간이 걸리고 여러 분야의 의사를 방문해야 할 수 있습니다.",
+      "en": "Doctors often have a hard time diagnosing autoimmune diseases. There's usually not a specific test to show whether you have a certain autoimmune disease. And the symptoms can be confusing. That's because many autoimmune diseases have similar symptoms. And some symptoms, such as muscle aches, are common in many other illnesses. So it can take a long time and some visits to different types of doctors to get a diagnosis."
+    },
+    {
+      "type": "이중/과도한 조사 직역",
+      "title": "영아 건강검진",
+      "ko": "아기가 생기면 새로운 책임이 많이 생깁니다. 그중 하나는 아기가 정기 검진을 받도록 하는 것으로, 이를 영아 건강검진이라고도 합니다. 이러한 검진은 아기가 적절하게 성장하고 발달하는지 확인하는 데 중요합니다. 문제가 있다면 치료가 더 쉬울 수 있는 초기에 발견할 수 있습니다. 아기의 의료진이 얼마나 자주 검진을 받아야 하는지 알려줄 것입니다.",
+      "en": "There are many new responsibilities when you have a baby. One of them is to make sure that your baby gets regular checkups, which are also called well-baby exams. These exams are important in making sure that your baby is growing and developing properly. If there are any problems, they can be caught early, when they may be easier to treat. Your baby's health care provider will let you know how often your baby should get a checkup."
+    },
+    {
+      "type": "이중/과도한 조사 직역",
+      "title": "선천성 이상(Birth Defects)",
+      "ko": "선천성 이상이 있는 어린이는 여러 서비스가 필요한 경우가 많고, 여러 전문의의 진료를 받아야 할 수 있습니다. 일차 의료진은 아이에게 필요한 특별한 돌봄을 조정할 수 있습니다.",
+      "en": "Often, children with birth defects need a variety of services and may need to see several specialists. The primary health care provider can coordinate the special care that the child needs."
+    },
+    {
+      "type": "이중/과도한 조사 직역",
+      "title": "모반(Birthmarks)",
+      "ko": "많은 유형의 선천성 모반이 생기는 원인은 알려져 있지 않지만, 일부는 가족 내에서 나타납니다. 아기의 의사는 모반을 살펴보고 치료가 필요한지, 관찰해야 하는지 판단합니다. 색소성 모반은 점을 제외하면 보통 치료하지 않습니다. 혈관성 모반의 치료에는 레이저 수술이 포함됩니다.",
+      "en": "No one knows what causes many types of birthmarks, but some run in families. Your baby's doctor will look at the birthmark to see if it needs any treatment or if it should be watched. Pigmented birthmarks aren't usually treated, except for moles. Treatment for vascular birthmarks includes laser surgery."
+    },
+    {
+      "type": "이중/과도한 조사 직역",
+      "title": "유방 질환",
+      "ko": "일부 유방 변화는 만져지거나 눈에 보일 수 있습니다. 본인이 유방 변화를 알아차리거나 의료진이 임상 유방검사 중에 발견할 수 있습니다. 다른 유방 변화는 선별 유방촬영술이나 MRI, 초음파 같은 다른 영상검사에서만 발견될 수 있습니다. 의료진은 유방의 의심스러운 변화를 확인하기 위해 유방 생검을 권할 수도 있습니다.",
+      "en": "Some breast changes may be felt or seen. You may notice a change in your breast, or your provider may notice it during a clinical breast exam. Other breast changes may only be found during a screening mammogram or other imaging tests such as an MRI or ultrasound. Your provider may also recommend a breast biopsy to check a suspicious change in your breast."
+    },
+    {
+      "type": "이중/과도한 조사 직역",
+      "title": "뇌성마비",
+      "ko": "뇌성마비가 없는 어린이에게도 이러한 징후가 나타날 수 있다는 것을 아는 것이 중요합니다. 아이에게 이러한 징후가 하나라도 있으면 정확한 진단을 받을 수 있도록 아이의 의료진에게 연락하세요.",
+      "en": "It's important to know that children without CP can also have these signs. Contact your child's health care provider if your child has any of these signs, so you can get a correct diagnosis."
+    },
+    {
+      "type": "이중/과도한 조사 직역",
+      "title": "흉부 손상 및 질환",
+      "ko": "가슴은 목과 복부(배) 사이의 신체 부위입니다. 가슴의 의학 용어는 흉부입니다.",
+      "en": "The chest is the part of your body between your neck and your abdomen (belly). The medical term for your chest is thorax."
+    },
+    {
+      "type": "화씨 체온 단위 미표기",
+      "title": "어린이 건강",
+      "ko": "102를 넘는 열",
+      "en": "Fever higher than 102"
+    },
+    {
+      "type": "이중/과도한 조사 직역",
+      "title": "포경수술",
+      "ko": "아기에게 포경수술을 할지는 부모가 결정할 일입니다. 결정할 때는 의학적 이점과 위험뿐 아니라 부모 자신의 종교적·문화적·개인적 선호를 고려해야 합니다. 결정하기 전에 아기의 의료진과 이러한 점을 논의할 수 있습니다.",
+      "en": "As parents, it is your decision whether to have your baby circumcised. When making your decision, you should consider your own religious, cultural, and personal preferences, as well as the medical benefits and risks. You can discuss these with your baby's health care provider before you make a decision."
+    },
+    {
+      "type": "이중/과도한 조사 직역",
+      "title": "포경수술",
+      "ko": "포경수술의 의학적 이점은 무엇인가요?",
+      "en": "What are the medical benefits of circumcision?"
+    },
+    {
+      "type": "이중/과도한 조사 직역",
+      "title": "응급의료서비스",
+      "ko": "병원 응급실(ER)에서 진료받아야 할 수 있습니다. 응급실의 의사와 간호사는 심근경색과 손상 같은 응급상황을 치료합니다. 어떤 응급상황에서는 현재 있는 장소에서 도움이 필요합니다. 응급의료기사(EMT)는 특정 구조 업무를 수행합니다. 응급 신고에 대응하고 기본적인 의료 처치를 제공합니다. 일부 EMT는 현장에서 의료 시술을 하도록 훈련받은 전문 응급구조인력(paramedic)입니다. 대개 추가 진료를 위해 환자를 응급실로 이송합니다.",
+      "en": "You may need care in the hospital emergency room (ER). Doctors and nurses there treat emergencies, such as heart attacks and injuries. For some emergencies, you need help where you are. Emergency medical technicians, or EMTs, do specific rescue jobs. They answer emergency calls and give basic medical care. Some EMTs are paramedics - they have training to do medical procedures on site. They usually take you to the ER for more care."
+    },
+    {
+      "type": "이중/과도한 조사 직역",
+      "title": "건강정보 평가",
+      "ko": "개인이나 단체의 의견을 홍보하기?",
+      "en": "Promote the opinions of a person or group?"
+    },
+    {
+      "type": "이중/과도한 조사 직역",
+      "title": "가족 문제",
+      "ko": "가족은 같은 유전자나 주소를 공유하는 사람들의 집단 이상의 의미를 지닙니다. 가족은 사랑과 지지의 원천이어야 합니다. 그렇다고 모두가 언제나 사이좋게 지낸다는 뜻은 아닙니다. 갈등은 가족생활의 일부입니다. 질병, 장애, 중독, 실직, 학교 문제, 부부 문제 등 여러 일이 갈등으로 이어질 수 있습니다. 서로의 말을 듣고 갈등을 해결하려고 노력하는 것은 가족의 유대를 강화하는 데 중요합니다.",
+      "en": "Families are much more than groups of people who share the same genes or the same address. They should be a source of love and support. This does not mean that everyone gets along all the time. Conflicts are a part of family life. Many things can lead to conflict, such as illness, disability, addiction, job loss, school problems, and marital issues. Listening to each other and working to resolve conflicts are important in strengthening the family."
+    },
+    {
+      "type": "이중/과도한 조사 직역",
+      "title": "바른 자세 안내",
+      "ko": "좋은 자세는 보기 좋게 똑바로 서는 것 이상의 의미가 있습니다. 장기적인 건강의 중요한 부분입니다. 움직일 때나 가만히 있을 때 몸을 올바르게 유지하면 통증, 부상, 다른 건강 문제를 예방할 수 있습니다.",
+      "en": "Good posture is about more than standing up straight so you can look your best. It is an important part of your long-term health. Making sure that you hold your body the right way, whether you are moving or still, can prevent pain, injuries, and other health problems."
+    },
+    {
+      "type": "이중/과도한 조사 직역",
+      "title": "C형 간염",
+      "ko": "C형 간염으로 간경변이 생겼다면 간질환 전문의의 진료를 받아야 합니다. 간경변 관련 건강 문제의 치료에는 약물, 수술, 다른 의료 시술이 포함됩니다. C형 간염이 간부전이나 간암으로 이어지면 간이식이 필요할 수 있습니다.",
+      "en": "If your hepatitis C causes cirrhosis, you should see a doctor who specializes in liver diseases. Treatments for health problems related to cirrhosis include medicines, surgery, and other medical procedures. If your hepatitis C leads to liver failure or liver cancer, you may need a liver transplant."
+    },
+    {
+      "type": "이중/과도한 조사 직역",
+      "title": "가정 돌봄서비스",
+      "ko": "방문 건강보조원이 집에 오거나 원격의료로 담당 의료진에게 진료받는 등의 의료서비스",
+      "en": "Health care, such as having a home health aide come to your home or getting care from your provider through telehealth"
+    },
+    {
+      "type": "이중/과도한 조사 직역",
+      "title": "정신건강 증진 방법",
+      "ko": "삶의 의미와 목적의식 기르기. 일, 자원봉사, 새로운 기술 배우기, 자신의 영성 탐색 등을 통해 할 수 있습니다. 목적의식은 장기적인 정서 건강을 뒷받침합니다.",
+      "en": "Developing a sense of meaning and purpose in life, which could be through your job, volunteering, learning new skills, or exploring your spirituality. Having a sense of purpose supports long-term emotional health."
+    },
+    {
+      "type": "이중/과도한 조사 직역",
+      "title": "정신건강 증진 방법",
+      "ko": "특별히 선택한 단어나 문구, 물체, 자신의 호흡 같은 주의의 초점.",
+      "en": "A focus of attention, such as a specially chosen word or set of words, an object, or your breath."
+    },
+    {
+      "type": "이중/과도한 조사 직역",
+      "title": "사람유두종바이러스(HPV)",
+      "ko": "자녀에게 언제 HPV 백신을 접종해야 하는지 자녀의 의료진에게 물어보세요. 26세를 넘었고 아직 접종받지 않았다면 백신 접종으로 얻을 수 있는 이점에 대해 의료진과 상의하세요.",
+      "en": "Ask your child's provider about when to vaccinate your child against HPV. If you're over age 26 and haven't been vaccinated, talk with your provider about the possible benefits of vaccination."
+    },
+    {
+      "type": "이중/과도한 조사 직역",
+      "title": "루푸스",
+      "ko": "루푸스 환자는 흔히 여러 의료진의 진료를 받아야 합니다. 대개 일차진료 의료진과 류마티스 전문의(자가면역질환 및 뼈, 관절, 근육의 다른 질환을 전문으로 하는 의사)가 진료합니다. 어떤 다른 전문의가 필요한지는 루푸스가 몸에 미치는 영향에 따라 달라집니다. 예를 들어 루푸스가 심장이나 혈관을 손상시키면 심장질환 전문의의 진료를 받게 됩니다.",
+      "en": "People with lupus often need to see different providers. You will most likely have a primary care provider and a rheumatologist (a doctor who specializes in autoimmune and other diseases of the bones, joints, and muscles). Which other specialists you may need depend on how lupus affects your body. For example, if lupus is damaging your heart or blood vessels, you would see a cardiologist (a doctor who specializes in heart diseases)."
+    },
+    {
+      "type": "이중/과도한 조사 직역",
+      "title": "수막구균 감염증",
+      "ko": "본인 또는 자녀의 의료진이 수막구균 감염증일 가능성이 있다고 판단하면 혈액 및/또는 뇌척수액(척수 근처의 액체) 검체를 채취하는 검사를 지시합니다. 검체는 검사실로 보내 검사합니다. 검사에는 감염을 일으키는 세균의 구체적인 종류를 확인할 수 있는 세균 배양검사가 포함됩니다. 이를 알면 의료진이 최선의 치료를 결정하는 데 도움이 됩니다.",
+      "en": "If your (or your child's) health care provider thinks that you or your child could have meningococcal disease, they will order tests that take samples of blood and/or cerebrospinal fluid (fluid near the spinal cord). They will send the samples to a lab for testing. The testing will include bacteria culture testing, which can identify the specific type of bacteria that is causing the infection. Knowing this can help the provider decide on the best treatment."
+    },
+    {
+      "type": "이중/과도한 조사 직역",
+      "title": "신경모세포종",
+      "ko": "신경모세포종을 진단하기 위해 자녀의 의료진은 다양한 검사와 시술을 하며 다음이 포함될 수 있습니다.",
+      "en": "To diagnose neuroblastoma, your child's health care provider will do various tests and procedures, which may include:"
+    },
+    {
+      "type": "이중/과도한 조사 직역",
+      "title": "환자의 권리",
+      "ko": "충분한 설명에 근거한 동의는 중요한 환자 권리입니다. 의료진이 진료에 대한 결정을 내리는 데 필요한 정보를 제공하는 과정입니다. 진료의 종류에는 치료, 시술, 유전자검사, 임상시험이 있을 수 있습니다. 정보에는 본인의 의학적 상태에 대한 세부사항뿐 아니라 진료의 위험과 이점이 포함되어야 합니다.",
+      "en": "Informed consent is an important patient right. It is a process in which your health care provider gives you the information you need to make decisions about your care. The types of care could be treatments, procedures, genetic testing, or clinical trials. The information should include the risks and benefits of the care, as well as details about your medical condition."
+    },
+    {
+      "type": "이중/과도한 조사 직역",
+      "title": "환자의 권리",
+      "ko": "동의하기 전에 모든 것을 이해하는 것이 중요합니다. 때로는 의료진이 동의 의사를 표시하도록 양식에 서명을 요청합니다. 이를 서면 동의라고 합니다.",
+      "en": "It's important that you understand everything before you give consent. Sometimes your provider will ask you to sign a form to give your consent. This is called written consent."
+    },
+    {
+      "type": "이중/과도한 조사 직역",
+      "title": "환자 안전",
+      "ko": "치료 선택지에 대해 다른 의사의 의견을 구하세요.",
+      "en": "Get a second opinion about treatment options"
+    },
+    {
+      "type": "이중/과도한 조사 직역",
+      "title": "결막염",
+      "ko": "핑크아이(pink eye)의 의학적 이름은 결막염입니다. 눈의 바깥층과 눈꺼풀 안쪽의 염증을 말합니다. 부기, 가려움, 화끈거림, 분비물, 충혈을 일으킬 수 있습니다. 원인에는 다음이 포함됩니다.",
+      "en": "Conjunctivitis is the medical name for pink eye. It involves inflammation of the outer layer of the eye and inside of the eyelid. It can cause swelling, itching, burning, discharge, and redness. Causes include:"
+    },
+    {
+      "type": "이중/과도한 조사 직역",
+      "title": "산전 검사",
+      "ko": "선별검사는 임신부 또는 태아에게 특정 건강 문제가 있을 가능성이 있는지 확인합니다. 위험을 살펴보는 검사이며, 문제를 진단하지는 않습니다. 선별검사 결과가 비정상이라고 해서 문제가 있다는 뜻은 아닙니다. 더 많은 정보가 필요하다는 의미입니다. 의료진은 검사 결과의 의미와 이후에 취할 수 있는 조치를 설명할 수 있습니다. 진단검사가 필요할 수도 있습니다.",
+      "en": "Screening tests check if you or your fetus may have certain health issues. They look at risk but do not diagnose problems. If your screening test result is abnormal, it does not mean that there is a problem. It means that more information is needed. Your provider can explain what the test results mean and possible next steps. You may need diagnostic testing."
+    },
+    {
+      "type": "이중/과도한 조사 직역",
+      "title": "소아의 위식도역류",
+      "ko": "위식도역류질환(GERD)은 더 심하고 오래 지속되는 형태의 역류입니다. GERD는 증상을 반복해서 일으키거나 식도 안쪽 벽을 손상시킬 수 있습니다. 일주일에 두 번 이상 역류하면 GERD의 징후일 수 있습니다. 역류로 통증, 먹는 데 어려움 또는 식도 자극이 생기면 아이의 의료진이 GERD로 진단할 수 있습니다.",
+      "en": "Gastroesophageal reflux disease (GERD) is a more serious and long-lasting type of reflux. GERD can cause repeated symptoms or damage to the lining of the esophagus. Having reflux two or more times a week may be a sign of GERD. Your child's health care provider may diagnose GERD if the reflux causes pain, feeding problems, or irritation of the esophagus."
+    },
+    {
+      "type": "이중/과도한 조사 직역",
+      "title": "소아의 위식도역류",
+      "ko": "다른 질환도 비슷한 증상을 일으킬 수 있습니다. 증상이 자주 나타나거나 식사, 수면, 일상 활동을 어렵게 하면 아이의 의료진과 상담하세요.",
+      "en": "Other conditions can cause similar symptoms. Talk to your child's provider if symptoms happen often or make eating, sleeping, or daily activities difficult."
+    },
+    {
+      "type": "이중/과도한 조사 직역",
+      "title": "재활",
+      "ko": "재활을 받으면 흔히 여러 분야의 의료진으로 이루어진 팀이 돕습니다. 함께 필요 사항과 목표, 치료 계획을 정합니다. 치료 계획에 포함될 수 있는 치료 유형은 다음과 같습니다.",
+      "en": "When you get rehabilitation, you often have a team of different health care providers helping you. They will work with you to figure out your needs, goals, and treatment plan. The types of treatments that may be in a treatment plan include:"
+    },
+    {
+      "type": "이중/과도한 조사 직역",
+      "title": "구루병",
+      "ko": "식이성 구루병 외에도 유전되는 유형이 소아에게 생길 수 있습니다. 증상에는 뼈 통증이나 압통, 성장 장애, 뼈와 치아의 변형이 있습니다. 아이의 의사는 검사실 검사와 영상검사로 진단합니다. 치료는 식사에서 부족한 칼슘, 인 또는 비타민 D를 보충하는 것입니다. 미국에서는 구루병이 드뭅니다.",
+      "en": "In addition to dietary rickets, children can get an inherited form of the disease. Symptoms include bone pain or tenderness, impaired growth, and deformities of the bones and teeth. Your child's doctor uses lab and imaging tests to make the diagnosis. Treatment is replacing the calcium, phosphorus, or vitamin D that are lacking in the diet. Rickets is rare in the United States."
+    },
+    {
+      "type": "이중/과도한 조사 직역",
+      "title": "안전한 오피오이드 사용",
+      "ko": "지역의 의약품 회수 프로그램 찾기",
+      "en": "Finding a local drug take-back program"
+    },
+    {
+      "type": "이중/과도한 조사 직역",
+      "title": "소아의 말·언어 문제",
+      "ko": "아이의 말하기나 언어 발달이 걱정되면 아이의 의료진과 상담하세요.",
+      "en": "If you have concerns about your child's speech or language development, talk to your child's health care provider."
+    },
+    {
+      "type": "이중/과도한 조사 직역",
+      "title": "뇌졸중 재활",
+      "ko": "일부는 뇌졸중 후 빨리 회복하지만, 대부분은 어떤 형태로든 장기적인 재활이 필요합니다. 재활은 회복이 진행되고 필요가 달라지면서 바뀔 수 있습니다. 나아지려는 본인의 의지와 가족 및 의료팀의 지원은 최상의 결과를 얻는 데 도움이 됩니다.",
+      "en": "Some people recover quickly after a stroke, but most people need some type of long-term rehabilitation. This can change as you progress and your needs change. Your willingness to work toward improvement and the support of your family and health care team will help you get the best results."
+    },
+    {
+      "type": "이중/과도한 조사 직역",
+      "title": "턱관절 장애",
+      "ko": "수술이나 다른 시술은 효과가 없거나 오히려 증상을 악화시킬 수 있으므로 주의하는 것이 중요합니다. 수술이나 다른 시술 전에 두 명 이상의 의료진에게 의견을 구하고 위험을 충분히 이해하는 것이 매우 중요합니다. 가능하면 턱관절장애 치료를 전문으로 하는 외과 의사의 의견을 구하세요.",
+      "en": "It's important to be careful, because sometimes surgery or another procedure may not work or may even make your symptoms worse. Before any surgery or other procedure, it is very important to get opinions from more than one provider and to completely understand the risks. If possible, get an opinion from a surgeon who specializes in treating TMDs."
+    },
+    {
+      "type": "이중/과도한 조사 직역",
+      "title": "인후 질환",
+      "ko": "목 안의 인후는 음식을 식도로, 공기를 기관과 후두로 보내는 관입니다. 인후의 의학적 이름은 인두(pharynx)입니다.",
+      "en": "Your throat is a tube that carries food to your esophagus and air to your windpipe and larynx. The technical name for your throat is the pharynx."
+    },
+    {
+      "type": "이중/과도한 조사 직역",
+      "title": "걸음마기 유아의 발달",
+      "ko": "유아의 발달 속도는 서로 다릅니다. ‘정상’으로 보는 범위는 넓습니다. 자녀가 어떤 영역에서는 앞서고 다른 영역에서는 조금 늦을 수 있습니다. 발달 지연 가능성이 걱정되면 자녀의 의료진과 상담하세요.",
+      "en": "Toddlers do not develop at the same rate. There is a wide range of what is considered \"normal.\" Your child may be ahead in some areas and slightly behind in others. If you are worried about possible delays, talk to your child's health care provider."
+    },
+    {
+      "type": "이중/과도한 조사 직역",
+      "title": "편도염",
+      "ko": "진단을 위해 자녀의 의료진은 먼저 증상과 병력을 묻습니다. 자녀의 인후와 목을 살펴 편도의 발적이나 흰 반점, 림프절 부기 등을 확인합니다.",
+      "en": "To diagnose tonsillitis, your child's health care provider will first ask you about your child's symptoms and medical history. The provider will look at your child's throat and neck, checking for things such as redness or white spots on the tonsils and swollen lymph nodes."
+    }
+  ]
+}

@@ -4,10 +4,10 @@ export function createHealthRecordClient({headers,available,onChange,request=fet
   const notify=()=>onChange?.(records,status);
   return {
     records:()=>available()?records:[],status:()=>status,
-    async load(){
+    async load({force=false}={}){
       if(!available())return;
       if(pending)return pending;
-      if(status==='READY')return;
+      if(status==='READY'&&!force)return;
       const generation=++revision;const activeController=controller=new AbortController();status='LOADING';notify();
       const deadline=setTimeout(()=>activeController.abort(),10000);
       pending=(async()=>{

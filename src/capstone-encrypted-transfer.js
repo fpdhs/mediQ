@@ -10,6 +10,7 @@ export const capstoneKeyOperationTimeoutMs = 25000;
 const limit = 8 * 1024 * 1024;
 const opaque = prefix => prefix + randomUUID().replaceAll("-", "");
 const hash = value => createHash("sha256").update(value).digest("hex");
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
 const types = /^(?:application\/(?:dicom|octet-stream)|multipart\/related|image\/(?:png|jpeg))(?:\s*;[^\r\n]*)?$/iu;
 const encode = chunk => ({ ...chunk, ciphertext: chunk.ciphertext.toString("base64url"), nonce: chunk.nonce.toString("base64url"), tag: chunk.tag.toString("base64url") });
 function decode(value, max) {
@@ -67,7 +68,7 @@ export function createCapstoneImageEncryptor({ keyId, tokenProvider, control, ke
 }
 
 export function createCapstoneImageDecryptor({ keyId, tokenProvider, control, publicBaseUrl, recipientHospitalId, keyTransport, now = () => new Date() }) {
-  return { async open(result, requestPath, { method = "GET" } = {}) {
+  return { async open(result, requestPath, { method = "GET", transferJob = null } = {}) {
     if (result.contentType !== encryptedDicomType || !Buffer.isBuffer(result.body) || result.body.length > 12 * 1024 * 1024) throw new Error("ENCRYPTED_TRANSFER_REQUIRED");
     const payload = JSON.parse(result.body.toString("utf8"));
     if (Object.keys(payload).sort().join() !== ["version", "receipt", "contentType", "wrapped", "envelope", "chunks", "releaseId"].sort().join()
@@ -77,6 +78,10 @@ export function createCapstoneImageDecryptor({ keyId, tokenProvider, control, pu
     const binding = packageBinding(payload);
     const context = receiptContext(payload.receipt);
     const route = parseDataPlaneRequest({ method, path: requestPath }, publicBaseUrl);
+    if (transferJob !== null && (!route.importing || !transferJob || Object.keys(transferJob).sort().join() !== ["itemId", "jobId", "leaseId"].join()
+        || ![transferJob.jobId, transferJob.itemId, transferJob.leaseId].every(value => typeof value === "string" && UUID.test(value)))) {
+      throw new Error("ENCRYPTED_TRANSFER_SCOPE_MISMATCH");
+    }
     if ((context.method ?? "GET") !== method) throw new Error("ENCRYPTED_TRANSFER_SCOPE_MISMATCH");
     if (context.path !== requestPath || context.targetHospitalId !== recipientHospitalId || !route.sopInstanceUid) throw new Error("ENCRYPTED_TRANSFER_SCOPE_MISMATCH");
     const chunks = payload.chunks.map(chunk => ({ ...chunk, ciphertext: decode(chunk.ciphertext, limit), nonce: decode(chunk.nonce, 12), tag: decode(chunk.tag, 16) }));
@@ -106,7 +111,8 @@ export function createCapstoneImageDecryptor({ keyId, tokenProvider, control, pu
         } finally { for (const chunk of verified.plaintextChunks) chunk.fill(0); }
       } });
       return { contentType: payload.contentType, body: plaintext,
-        ...(route.importing ? { importContext: { receipt: payload.receipt, releaseId: payload.releaseId, packageBinding: binding } } : {}) };
+        ...(route.importing ? { importContext: { receipt: payload.receipt, releaseId: payload.releaseId, packageBinding: binding,
+          ...(transferJob ? { transferJob } : {}) } } : {}) };
     } catch (error) { plaintext?.fill(0); throw error; }
   } };
 }

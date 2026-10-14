@@ -70,6 +70,7 @@ def dependencies(local=None):
             resolved='public'+ref if ref.startswith('/') else posixpath.normpath(posixpath.join(posixpath.dirname(name),ref))
             queue.append(resolved.split('?')[0])
     files.update('public/assets/security-journey/'+s+'-v1.webp' for s in ['identity','consent','ticket','policy','token','encryption','view-storage','expiry'])
+    files.add('public/assets/security-journey/consent-v2.png')
     return sorted(files)
 
 def source_identity(local=None):

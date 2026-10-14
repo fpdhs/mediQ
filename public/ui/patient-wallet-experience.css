@@ -1,0 +1,80 @@
+/* One wallet, four paper colors. Task surfaces share geometry and controls. */
+#patient-portal-app{--wallet-ink:#192e4b;--wallet-muted:#596b81;--wallet-line:#d8e3ef;--wallet-accent:#2866bc;--wallet-paper:#f1f6fd}
+#patient-portal-app [data-wallet-theme=records]{--wallet-accent:#2866bc;--wallet-paper:#eef5ff}
+#patient-portal-app [data-wallet-theme=sharing]{--wallet-accent:#6851a3;--wallet-paper:#f3f0fc}
+#patient-portal-app [data-wallet-theme=helper]{--wallet-accent:#287967;--wallet-paper:#edf7f2}
+#patient-portal-app [data-wallet-theme=requests]{--wallet-accent:#816525;--wallet-paper:#fbf8ef}
+#patient-portal-app .page{color:var(--wallet-ink)}
+#patient-portal-app :is(.health-expanded-card,.helper-expanded-card){background:var(--wallet-paper);border:0;border-top:4px solid var(--wallet-accent);border-radius:8px;box-shadow:none;padding:28px}
+#patient-portal-app :is(.health-expanded-card,.helper-expanded-card) :is(h1,h2,h3,p,button,label,input,select,textarea){letter-spacing:0}
+#patient-portal-app :is(.page-head,.health-heading,.helper-heading,.history-heading) h1{font-size:var(--hp-patient-page-title);line-height:1.35;letter-spacing:0;font-weight:700;overflow-wrap:anywhere}
+#patient-portal-app :is(.page-head,.health-heading,.helper-heading,.history-heading)>p{font-size:16px;line-height:1.65;color:var(--wallet-muted)}
+#patient-portal-app :is(.health-wallet-back,.share-back){min-height:44px;padding:8px 0;color:var(--wallet-accent);font-size:14px;letter-spacing:0}
+#patient-portal-app :is(.health-expanded-card,.helper-expanded-card,.sharing-page) :is(input:not([type=checkbox]),select,textarea){font-family:var(--hp-font);font-size:16px;letter-spacing:0;border-radius:8px;border-color:var(--wallet-line);box-sizing:border-box;max-width:100%}
+#patient-portal-app :is(.btn,.hp-button,.helper-button,.health-filter){letter-spacing:0;border-radius:8px;min-height:44px}
+#patient-portal-app :is(button,a,input,select,textarea,summary):focus-visible{outline:3px solid var(--wallet-accent);outline-offset:4px}
+#patient-portal-app .sharing-page{padding:28px 0 48px}
+#patient-portal-app .sharing-page .page-head{margin:0 0 24px}
+#patient-portal-app .sharing-open-wallet{padding:28px;border:0;border-top:4px solid var(--wallet-accent);border-radius:8px;background:var(--wallet-paper);box-shadow:none}
+#patient-portal-app .sharing-open-wallet:before,#patient-portal-app .sharing-new:before,#patient-portal-app .sharing-new:after,#patient-portal-app .sharing-summary:before,#patient-portal-app .sharing-summary:after{display:none}
+#patient-portal-app .sharing-paper{background:transparent;border:0;padding:0;box-shadow:none}
+#patient-portal-app .sharing-compose{gap:32px;align-items:start}
+#patient-portal-app .sharing-compose .sharing-new{background:none;transform:none;padding:0;margin:0;box-shadow:none;border:0;border-radius:0}
+#patient-portal-app .sharing-summary{background:none;transform:none;padding:0 0 0 28px;border:0;border-left:1px solid #d7cfe8;border-radius:0;box-shadow:none}
+#patient-portal-app .sharing-summary h2{color:var(--wallet-accent)}
+#patient-portal-app .sharing-summary .btn{background:var(--wallet-accent);border-radius:8px;min-height:48px}
+#patient-portal-app .sharing-existing{background:none;border:0;border-top:1px solid var(--wallet-line);padding:24px 0 0;border-radius:0;box-shadow:none}
+#patient-portal-app .sharing-page :is(h2,h3,.sharing-route){letter-spacing:0}
+#patient-portal-app .sharing-note{font-size:13px;color:var(--wallet-muted)}
+#patient-portal-app .sharing-pass{border-radius:8px;box-shadow:none}
+#patient-portal-app .sharing-pass-stub{background:var(--wallet-paper)}
+#patient-portal-app [data-wallet-theme=requests] .history-heading{border:0;padding:0;background:none;margin:12px 0 24px}
+#patient-portal-app .helper-extracted-sheet .helper-conversation{border:0;border-radius:8px;box-shadow:none}
+#patient-portal-app .helper-extracted-sheet .helper-pocket{background:transparent;border:0;border-left:1px solid #c9ded5;border-radius:0;box-shadow:none;padding:0 0 0 24px}
+#patient-portal-app .helper-card{border-radius:8px}
+#patient-portal-app .mq-wallet-panel{background:none;border:0;border-left:1px solid var(--wallet-line);border-radius:0;padding:12px 20px}
+#patient-portal-app .mq-wallet-next{margin-top:22px;min-height:90px}
+#patient-portal-app .mq-wallet-next-label{font-size:15px;line-height:1.6;color:var(--wallet-muted);margin:0 0 10px}
+#patient-portal-app .mq-wallet-next-action{min-height:44px;padding:10px 16px;background:#2866bc;color:#fff;border:0;border-radius:8px;font:600 14px var(--hp-font);cursor:pointer}
+#patient-portal-app .mq-wallet-next-action:disabled{opacity:.55;cursor:default}
+#patient-portal-app .mq-wallet-card strong{font-size:21px;letter-spacing:0;white-space:normal;overflow-wrap:anywhere}
+#patient-portal-app .mq-wallet-dock{margin-top:40px}
+@media(max-width:850px){
+ #patient-portal-app .sharing-compose{grid-template-columns:1fr}
+ #patient-portal-app .sharing-summary,#patient-portal-app .helper-extracted-sheet .helper-pocket{border-left:0;border-top:1px solid var(--wallet-line);padding:24px 0 0}
+}
+@media(max-width:520px){
+ #patient-portal-app :is(.health-expanded-card,.helper-expanded-card,.sharing-open-wallet){padding:20px 14px}
+ #patient-portal-app :is(.page-head,.health-heading,.helper-heading,.history-heading) h1{font-size:var(--hp-patient-page-title)}
+ #patient-portal-app .mq-wallet-panel{padding:8px 0;border-left:0;border-top:1px solid var(--wallet-line)}
+ #patient-portal-app .mq-wallet-next{margin-top:16px;min-height:84px}
+ #patient-portal-app .mq-wallet-card strong{font-size:16px}
+ #patient-portal-app .mq-wallet-dock{margin-top:28px}
+}
+/* Shared extracted card: the wallet dock is a sibling, never a form background. */
+#patient-portal-app :is([data-page=activity],.share-review,.sharing-page){max-width:1120px;margin:0 auto;padding:28px 0 48px;background:none}
+#patient-portal-app .patient-task-card{background:var(--wallet-paper);border-top:4px solid var(--wallet-accent);border-radius:8px;padding:28px;min-width:0;color:var(--wallet-ink);font:400 var(--hp-patient-body)/1.6 var(--hp-font)}
+#patient-portal-app .patient-task-card :is(.page-head,.history-heading){display:block;margin:12px 0 24px;padding:0;min-width:0}
+#patient-portal-app .patient-task-card :is(.page-head,.history-heading) h1{font:700 var(--hp-patient-page-title)/1.35 var(--hp-font);letter-spacing:0;margin:0 0 8px}
+#patient-portal-app .patient-task-card :is(.page-head,.history-heading) p{font-size:16px;line-height:1.6;color:var(--wallet-muted);margin:0}
+#patient-portal-app .patient-task-card h2{font-size:var(--hp-patient-section-title);line-height:1.35;letter-spacing:0}
+#patient-portal-app .patient-task-card :is(button,input,select){font-family:var(--hp-font);font-size:16px;min-height:44px}
+#patient-portal-app .patient-task-card input[type=checkbox]{min-height:auto}
+#patient-portal-app .patient-task-card :is(.share-back,.health-wallet-back){font-size:14px;border:0;background:none;cursor:pointer}
+#patient-portal-app .patient-task-card .sharing-open-wallet{padding:0;border:0;background:none}
+#patient-portal-app .patient-task-card .history-layout{gap:24px;align-items:start}
+#patient-portal-app .patient-task-card :is(.history-pass,.history-row,.history-detail){padding:24px;border-radius:12px;background:#fff;border:1px solid var(--wallet-line);box-shadow:none;min-width:0}
+#patient-portal-app .patient-task-card :is(.history-route,.history-exam h3){color:var(--wallet-ink)}
+#patient-portal-app .patient-task-card .history-conditions{background:var(--wallet-paper);border-color:var(--wallet-line)}
+#patient-portal-app .patient-task-card .history-tools{flex-wrap:wrap;gap:12px}
+#patient-portal-app .patient-task-card .history-filters{display:flex;flex-wrap:wrap;gap:8px}
+#patient-portal-app .patient-task-card :is(.history-tools input,.history-filters button){max-width:100%;box-sizing:border-box}
+#patient-portal-app .patient-task-card .share-destination{background:var(--wallet-paper)}
+#patient-portal-app .patient-task-card .share-ticket{border-radius:12px;box-shadow:none}
+#patient-portal-app .patient-task-card .sharing-leather-tab{display:none}
+@media(max-width:650px){
+ #patient-portal-app :is([data-page=activity],.share-review,.sharing-page){padding:12px 0 28px}
+ #patient-portal-app .patient-task-card{padding:20px 14px}
+ #patient-portal-app .patient-task-card :is(.history-pass,.history-row,.history-detail){padding:18px 14px}
+ #patient-portal-app .patient-task-card .history-layout{grid-template-columns:minmax(0,1fr)}
+}

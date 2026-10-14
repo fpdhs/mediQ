@@ -1,5 +1,11 @@
 # Medi Q 환자 본인 열람 Grant 계약
 
+## 2026-10-13 승인된 공개 TLS 네트워크 경계
+
+사용자가 B 영상 전용 공인 IP·제한 방화벽·B TLS 진입점의 비용과 개설을 승인했다. 이 계약의 Cloud clinical byte 금지는 Control/API/웹 응용 계층의 영상 본문 전달·복호화·저장 금지로 유지한다. 기존 아키텍처의 네트워크 Data Plane과 같이, 별도 L4 relay가 B까지 TLS 암호문을 중계하는 것은 허용한다. Cloud에 영상 인증서 개인키나 평문 영상이 들어가지 않는다. 원본 PACS 공개 또는 Azure HTTP 영상 프록시는 허용하지 않는다.
+
+공개 진입점은 `https://highpass-images-b.japaneast.cloudapp.azure.com`이며, 신규 TLS 진입점만 구성했다. 모든 HTTP 경로는 `403 PATIENT_IMAGE_ENTRY_NOT_ENABLED`로 차단한다. 이는 Entra 환자 authority 연결, 본인 CT 열람, 병원 공유/다운로드 승인 또는 전체 MVP 완료가 아니다. [적용·검증 기록](../operations/patient-public-entry-rollout-2026-10-13.md)을 참조한다. 신규 증적은 DRAFT / UNASSIGNED이다.
+
 2026-10-09 · S1 USER-ADOPTED CONTRACT / IMPLEMENTATION IN PROGRESS
 
 ## 환자 Control 배포 준비 계약

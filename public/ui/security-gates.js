@@ -12,7 +12,7 @@ export const SECURITY_GATES = [
 const illustrationNames=['identity','consent','ticket','policy','token','encryption','view-storage','expiry'];
 const illustrationAlts=[
   '신분 카드와 소속 병원을 확인하는 관문',
-  '환자가 검사와 공유 범위를 직접 고르는 장면',
+  '파란 의료지갑에서 선택한 영상 카드와 공유할 병원·기간을 나타내는 입체 일러스트',
   '시간이 제한된 일회용 연결표와 재사용 차단 장면',
   '기관·사용자·목적·범위·기간·동의 조건을 함께 확인하는 관문',
   '요청자에게 연결된 임시 출입권과 유효기간',
@@ -21,6 +21,6 @@ const illustrationAlts=[
   '접근 차단과 별도로 진행하는 삭제 상태 확인',
 ];
 SECURITY_GATES.forEach((gate,index)=>Object.assign(gate,{
-  image:`/assets/security-journey/${illustrationNames[index]}-v1.webp`,
+  image:index===1 ? '/assets/security-journey/consent-v2.png' : `/assets/security-journey/${illustrationNames[index]}-v1.webp`,
   imageAlt:illustrationAlts[index],
 }));

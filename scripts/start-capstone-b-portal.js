@@ -45,6 +45,9 @@ if (process.env.CAPSTONE_B_PACS_IMPORT_ENABLED === '1') {
     } });
 }
 const patientSelfViewEnabled=process.env.CAPSTONE_PATIENT_SELF_VIEW_GATEWAY==='1';
+const patientOrigin=process.env.HIPASS_PATIENT_IMAGE_ORIGIN||'https://192.168.111.149:9443';
+const importBrowserOrigins=process.env.CAPSTONE_B_IMPORT_BROWSER_ORIGIN
+  ? ['https://192.168.111.149:9443',process.env.CAPSTONE_B_IMPORT_BROWSER_ORIGIN] : undefined;
 let patientImageDecryption;
 if(patientSelfViewEnabled && process.env.CAPSTONE_PATIENT_IMAGE_ENCRYPTION_REQUIRED==='1'){
   if(!encryptionRequired)throw new Error('PATIENT_ENCRYPTION_PROFILE_REQUIRED');
@@ -56,10 +59,10 @@ if(patientSelfViewEnabled && process.env.CAPSTONE_PATIENT_IMAGE_ENCRYPTION_REQUI
     const result=await boundedHttps('https://10.90.88.1',path,{tls:{ca},method:'POST',headers:{'content-type':'application/json','x-hipass-service-token':patientToken},
       body:JSON.stringify(body),maxBytes:32768,timeoutMs:8000});return {status:result.status,body:JSON.parse(result.body.toString('utf8'))};
   };
-  patientImageDecryption=createPatientImageDecryptor({...hospitalKeyConfig('B'),control,publicBaseUrl:'https://192.168.111.149:9443'});
+  patientImageDecryption=createPatientImageDecryptor({...hospitalKeyConfig('B'),control,publicBaseUrl:patientOrigin});
 }
-const server = https.createServer({ cert: readFileSync(process.env.CAPSTONE_B_TLS_CERT_FILE), key: readFileSync(process.env.CAPSTONE_B_TLS_KEY_FILE), minVersion: "TLSv1.2" }, createCapstoneBPortal({ root: "/app/public", ca, encryptionRequired, imageDecryption,patientSelfViewEnabled,patientImageDecryption, pacsReceiver, entraLoginEnabled: process.env.CAPSTONE_ENTRA_LOGIN_ENABLED === '1', diagnosticFactory: createRuntimeDiagnosticFactory(process.env) }));
+const server = https.createServer({ cert: readFileSync(process.env.CAPSTONE_B_TLS_CERT_FILE), key: readFileSync(process.env.CAPSTONE_B_TLS_KEY_FILE), minVersion: "TLSv1.2" }, createCapstoneBPortal({ root: "/app/public", ca, patientOrigin, importBrowserOrigins, encryptionRequired, imageDecryption,patientSelfViewEnabled,patientImageDecryption, pacsReceiver, entraLoginEnabled: process.env.CAPSTONE_ENTRA_LOGIN_ENABLED === '1', diagnosticFactory: createRuntimeDiagnosticFactory(process.env) }));
 server.headersTimeout = 10000;
 server.requestTimeout = 15000;
-server.setTimeout(encryptionRequired ? 35000 : 20000, socket => socket.destroy());
+server.setTimeout(encryptionRequired ? 60000 : 20000, socket => socket.destroy());
 server.listen(8443, "0.0.0.0");

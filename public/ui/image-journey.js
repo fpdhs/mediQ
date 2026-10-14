@@ -1,5 +1,6 @@
 // Presentation-only state. Never issues a request, grants access or records evidence.
 import {SECURITY_GATES} from './security-gates.js';
+import {mountJourneyLens} from './journey-lens.js';
 export function journeyState(mode='view', index=0, scenario='normal') {
   mode = mode === 'store' ? 'store' : 'view';
   const steps=SECURITY_GATES.map(g=>[g.name,g.title,g.check]);
@@ -15,6 +16,7 @@ export function mountImageJourney(root) {
   if(!root || root.dataset.bound) return;
   root.dataset.bound='true';
   let mode='view',index=0,scenario='normal',overview=true;
+  const lens=mountJourneyLens(root);
   const makeImage=gate=>{
     const img=document.createElement('img');
     img.src=gate.image;img.alt=gate.imageAlt;img.width=1536;img.height=1024;
@@ -40,6 +42,7 @@ export function mountImageJourney(root) {
     const model=journeyState(mode,index,scenario);
     root.dataset.mode=mode;root.dataset.step=String(index);root.dataset.scenario=scenario;
     root.dataset.overview=String(overview);
+    lens.update(model,overview);
     root.querySelector('[data-journey-overview]').hidden=!overview;
     root.querySelector('[data-journey-detail]').hidden=overview;
     root.querySelector('[data-journey-controls]').hidden=overview;

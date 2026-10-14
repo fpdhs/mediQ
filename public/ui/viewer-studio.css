@@ -131,3 +131,29 @@ body:has(#hospital-saas-app.mq-focus-viewer:not([hidden])) > .mq-demo-tools { di
   #hospital-saas-app #viewer-screen .studio-footnote span:last-child { display:none; }
 }
 @media(prefers-reduced-motion:reduce) { #hospital-saas-app #viewer-screen * { transition:none; } }
+
+/* Same protected pixels, sharper hierarchy and a restrained teal tool palette. */
+#hospital-saas-app.mq-focus-viewer{--studio-base:#171d20;--studio-panel:#222b2f;--studio-raised:#2b383d;--studio-line:#3c494e;--studio-text:#edf3f3;--studio-muted:#bac7cb;--studio-blue:#58d4c5}
+#hospital-saas-app.mq-focus-viewer #reception-context{display:none}
+#hospital-saas-app #viewer-screen *{letter-spacing:0;box-sizing:border-box}
+#hospital-saas-app #viewer-screen .studio-topbar{background:#202a2ee8;backdrop-filter:blur(14px);border-color:var(--studio-line)}
+#hospital-saas-app #viewer-screen :is(.studio-back,.studio-info-toggle,.mq-thumb,#studio-open-image){border-radius:6px}
+#hospital-saas-app #viewer-screen .studio-wordmark{letter-spacing:0}
+#hospital-saas-app #viewer-screen .studio-wordmark span{letter-spacing:0;color:#86d8cd}
+#hospital-saas-app #viewer-screen #viewer-study-label{font-size:14px;overflow-wrap:anywhere;line-height:1.5}
+#hospital-saas-app #viewer-screen .studio-panel-heading h3{font-size:15px;font-weight:700}
+#hospital-saas-app #viewer-screen .mq-thumb{border-left:3px solid transparent;background:#1a2327;min-height:72px}
+#hospital-saas-app #viewer-screen .mq-thumb.selected{border-color:#558b82;border-left-color:var(--studio-blue);background:#263b3b;box-shadow:none}
+#hospital-saas-app #viewer-screen .mq-thumb strong{font-size:13px;font-weight:650}
+#hospital-saas-app #viewer-screen .studio-series-meta{font-size:12px}
+#hospital-saas-app #viewer-screen .mq-viewer-tools{justify-content:flex-start;gap:8px;padding:10px 14px;background:var(--studio-panel)}
+#hospital-saas-app #viewer-screen .mq-tool{min-width:44px;min-height:44px;border-radius:6px;font-size:13px}
+#hospital-saas-app #viewer-screen .mq-tool.active{color:#9cf2e4;background:#24443e;border-color:#57b8a6}
+#hospital-saas-app #viewer-screen .mq-viewport{background:#000;border-radius:0}
+#hospital-saas-app #viewer-screen #viewer-placeholder h2{font-size:22px;letter-spacing:0}
+#hospital-saas-app #viewer-screen .studio-lock{border-radius:8px;background:#223332;color:#84d8cd;box-shadow:none}
+#hospital-saas-app #viewer-screen #studio-open-image{background:#087d72;border-color:#38b8a5;min-height:44px}
+#hospital-saas-app #viewer-screen .mq-statline{font-size:13px;line-height:1.7}
+#hospital-saas-app #viewer-screen #download-instance{min-height:44px;border-radius:6px;white-space:normal}
+#hospital-saas-app #viewer-screen :is(button,input):focus-visible{outline:3px solid #76dacc;outline-offset:3px}
+@media(max-width:700px){#hospital-saas-app #viewer-screen .mq-viewer-tools{gap:3px;padding:6px}#hospital-saas-app #viewer-screen .mq-viewer-tools .mq-tool{padding:8px;min-width:40px}#hospital-saas-app #viewer-screen #viewer-study-label{font-size:12px}#hospital-saas-app #viewer-screen .studio-topbar{flex-wrap:wrap}#hospital-saas-app #viewer-screen .studio-top-actions{gap:6px}#hospital-saas-app #viewer-screen .mq-viewer-side.right{width:min(280px,100%);top:125px}}

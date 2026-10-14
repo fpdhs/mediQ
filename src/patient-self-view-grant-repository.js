@@ -10,11 +10,12 @@ const failure = () => Object.assign(new Error('AUTHORITY_PERSISTENCE_UNAVAILABLE
 // No default in-memory audit fallback; not wired to runtime until that adapter
 // and its interaction with legacy saveQueue have been independently verified.
 export class PatientSelfViewGrantRepository {
-  constructor({ pool, appendAudit, enabled = false, clock = Date.now, deadlineMs = 10000 }) {
+  constructor({ pool, appendAudit, enabled = false, clock = Date.now, deadlineMs = 10000, resolveEntraOwnership = null }) {
     if (typeof pool?.connect !== 'function' || typeof appendAudit !== 'function'
       || !Number.isInteger(deadlineMs) || deadlineMs < 50 || deadlineMs > 10000) throw failure();
     this.pool = pool; this.appendAudit = appendAudit; this.enabled = enabled === true;
     this.clock = clock; this.deadlineMs = deadlineMs;
+    this.resolveEntraOwnership = resolveEntraOwnership;
   }
 
   async create(input, grant) {
@@ -53,18 +54,21 @@ export class PatientSelfViewGrantRepository {
       await query("SET LOCAL statement_timeout='5000ms'");
       await query("SET LOCAL lock_timeout='2000ms'");
       await query("SET LOCAL idle_in_transaction_session_timeout='10000ms'");
-      const authority = new PatientSelfViewAuthorityReader({ pool: { query }, enabled: true, clock: this.clock, lockRows: true });
+      const authority = new PatientSelfViewAuthorityReader({ pool: { query }, enabled: true, clock: this.clock, lockRows: true,
+        resolveEntraOwnership: this.resolveEntraOwnership });
       const allowed = await authority.authorize(input);
       if (allowed.decision !== 'ALLOWED' || allowed.scope.ownershipRevision !== grant.ownershipRevision
         || !uuid(allowed.scope.refId)) throw failure();
       const scope = allowed.scope;
+      const boundActor = scope.ownershipSubject !== scope.subject;
       await query({ text: `INSERT INTO capstone_patient_self_view_grants
         (grant_id,token_hash,subject,patient_id,ref_id,ownership_revision,source_hospital_id,viewing_gateway_id,
-         study_instance_uid,series_instance_uid,proof_key_thumbprint,audit_session_id,permission,authority_type,status,issued_at,expires_at)
-        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,'VIEW_ONLY','PATIENT_SELF_VIEW','ACTIVE',$13,$14)`,
-        values: [grant.grantId,grant.tokenHash,scope.subject,scope.patientId,scope.refId,scope.ownershipRevision,
+         study_instance_uid,series_instance_uid,proof_key_thumbprint,audit_session_id,permission,authority_type,status,issued_at,expires_at${boundActor ? ',authenticated_subject' : ''})
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,'VIEW_ONLY','PATIENT_SELF_VIEW','ACTIVE',$13,$14${boundActor ? ',$15' : ''})`,
+        values: [grant.grantId,grant.tokenHash,scope.ownershipSubject,scope.patientId,scope.refId,scope.ownershipRevision,
           scope.sourceHospitalId,grant.viewingGatewayId,scope.studyInstanceUid,scope.allowedSeriesUids[0],
-          grant.proofKeyThumbprint,grant.auditSessionId,new Date(grant.issuedAtMs).toISOString(),new Date(grant.expiresAtMs).toISOString()] });
+          grant.proofKeyThumbprint,grant.auditSessionId,new Date(grant.issuedAtMs).toISOString(),new Date(grant.expiresAtMs).toISOString(),
+          ...(boundActor ? [scope.subject] : [])] });
       const receipt = await this.appendAudit(Object.freeze({ query }), Object.freeze({
         action: AuditAction.PATIENT_SELF_VIEW_GRANT_ISSUED, result: 'SUCCESS', actorType: 'PATIENT',
         actorId: scope.subject, patientId: scope.patientId, sourceHospitalId: scope.sourceHospitalId,

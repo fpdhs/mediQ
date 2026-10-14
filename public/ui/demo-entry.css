@@ -15,6 +15,9 @@
 #capstone-login .mediq-entry-actions button+button{background:#ffffffd9;color:#3566b8;border-color:#b7c9e6;box-shadow:none}
 .mediq-entry-actions button:hover{filter:brightness(.96)}
 .mediq-entry-copy .mediq-entry-caption{font-size:13px;margin-top:22px;color:#63748a}
+#capstone-login .mediq-entry-security{display:inline-flex;align-items:center;gap:9px;margin-top:9px;padding:7px 0;border:0;background:transparent;color:#526887;font:inherit;font-size:13px;cursor:pointer;text-decoration:none;text-underline-offset:4px}
+#capstone-login .mediq-entry-security span{display:grid;place-items:center;width:22px;height:22px;border:1px solid #b8c9e1;border-radius:50%;color:#3566b8;font-size:12px}
+#capstone-login .mediq-entry-security:hover{text-decoration:underline;color:#244f91}
 .mediq-entry-journey{position:absolute;top:55%;right:4.5%;width:42%;max-width:650px;padding:24px 26px 18px;border-radius:30px;border:1px solid #fff;background:#ffffffec;box-shadow:0 20px 70px #31538214;z-index:1}
 .mediq-entry-person{font-size:14px;font-weight:650;margin:0 0 22px}.mediq-entry-person span{font-size:11px;color:#738397;font-weight:400;margin-left:10px}
 .mediq-entry-stops{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;position:relative}
@@ -32,7 +35,16 @@
 @keyframes mediq-breeze{0%{opacity:0;transform:translate(0,35px) rotate(-20deg)}15%{opacity:.6}70%{opacity:.5}100%{opacity:0;transform:translate(-180px,-90px) rotate(70deg)}}
 .mediq-entry-paused .mediq-entry-leaves i{animation-play-state:paused}
 #capstone-login .mediq-entry button:focus-visible,#capstone-login .mediq-login-back:focus-visible{outline:3px solid #3566b8;outline-offset:5px}
+#capstone-login .mediq-entry-security:focus-visible{outline:3px solid #3566b8;outline-offset:4px;border-radius:4px}
 .mediq-login-back{margin-bottom:24px}
 @media(max-width:1000px){.mediq-entry-copy{width:53%;margin-top:5vh}.mediq-entry-journey{width:40%;padding:18px 14px;top:28%}.mediq-entry-stops img,.mediq-entry-stops .mediq-entry-lock,.mediq-entry-stops .mediq-entry-hospital{width:70px;height:70px}.mediq-entry-stops::before{top:35px}.mediq-entry-stops strong{font-size:14px}.mediq-entry-stops span{font-size:10px}.mediq-entry-actions{flex-direction:column;align-items:flex-start}}
 @media(max-width:740px){.mediq-entry{min-height:100svh;padding-bottom:70px}.mediq-entry-header{padding:12px 20px;gap:10px;flex-wrap:wrap}.mediq-entry-brand .mediq-login-logo{width:140px}.mediq-entry-test{font-size:10px}.mediq-entry-motion{margin-left:auto}.mediq-entry-copy{width:auto;margin:36px 24px 0}.mediq-entry-copy>p{font-size:18px}#capstone-login .mediq-entry h1{font-size:clamp(39px,8.8vw,60px);margin-bottom:20px}.mediq-entry-actions{flex-direction:row}#capstone-login .mediq-entry-actions button{min-height:54px;font-size:14px;padding:14px 20px;gap:12px}.mediq-entry-scene{background-position:68% bottom;background-size:auto 100%;opacity:.5}.mediq-entry::before{background:linear-gradient(#ffffffed 0%,#ffffffd9 52%,#ffffff22)}.mediq-entry-journey{position:relative;top:auto;right:auto;width:auto;margin:34px 20px 0;padding:20px;border-radius:24px}.mediq-entry-stops img,.mediq-entry-stops .mediq-entry-lock,.mediq-entry-stops .mediq-entry-hospital{width:78px;height:78px}.mediq-entry-person{font-size:13px}.mediq-entry-footer{position:relative;left:auto;bottom:auto;margin:26px 24px 0;font-size:12px}.mediq-entry-leaves i{top:87%}}
 @media(prefers-reduced-motion:reduce){.mediq-entry-leaves i{animation:none;opacity:.35}}
+
+#capstone-login.mediq-mobile-login .mediq-entry-motion {min-height:48px;}
+#capstone-login.mediq-mobile-login .mediq-entry-header {
+ padding-top:calc(12px + env(safe-area-inset-top,0px));
+ padding-left:max(20px,env(safe-area-inset-left,0px));
+ padding-right:max(20px,env(safe-area-inset-right,0px));
+}
+#capstone-login.mediq-mobile-login .mediq-entry {padding-bottom:calc(70px + env(safe-area-inset-bottom,0px));}

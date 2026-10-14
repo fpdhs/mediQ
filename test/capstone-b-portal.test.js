@@ -6,12 +6,146 @@ import { readFileSync } from "node:fs";
 import { createCapstoneBPortal } from "../src/capstone-b-portal.js";
 
 async function start(t, transport, configuration = {}) {
-  const server = http.createServer(createCapstoneBPortal({ root: path.resolve("public"), ca: Buffer.from("test-ca"), transport, ...configuration }));
+  const server = http.createServer(createCapstoneBPortal({ root: path.resolve("public"), ca: Buffer.from("test-ca"), transport, importTransport: transport, ...configuration }));
   await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
   t.after(() => new Promise(resolve => { server.closeAllConnections(); server.close(resolve); }));
   const origin = `http://127.0.0.1:${server.address().port}`;
   return (pathname, options) => fetch(origin + pathname, { ...options, signal: AbortSignal.timeout(3000) });
 }
+
+test('B PACS import denies wrong origin or missing DPoP before contacting A', async t => {
+  let upstreamCalls = 0;
+  const get = await start(t, async () => { upstreamCalls++; throw new Error('Unexpected A request'); }, {
+    encryptionRequired: true,
+    imageDecryption: { open: async () => { throw new Error('Unexpected decryption'); } },
+    pacsReceiver: { receive: async () => { throw new Error('Unexpected PACS import'); } },
+  });
+  const route = '/dicomweb/studies/1.2/series/1.2.3/instances/1.2.3.4/import';
+  const origin = 'https://192.168.111.149:9443';
+  const cases = [
+    [{ method: 'POST', headers: { origin: 'https://evil.invalid', authorization: 'DPoP token', dpop: 'proof' } }, 403],
+    [{ method: 'POST', headers: { origin, authorization: 'DPoP token' } }, 401],
+    [{ method: 'POST', headers: { origin, authorization: 'Bearer token', dpop: 'proof' } }, 401],
+    [{ method: 'GET', headers: { origin, authorization: 'DPoP token', dpop: 'proof' } }, 403],
+  ];
+  for (const [options, expected] of cases) assert.equal((await get(route, options)).status, expected);
+  assert.equal(upstreamCalls, 0);
+});
+
+test('B PACS import rejects request bytes and missing receiver before contacting A', async t => {
+  let upstreamCalls = 0;
+  const transport = async () => { upstreamCalls++; throw new Error('Unexpected A request'); };
+  const origin = 'https://192.168.111.149:9443';
+  const route = '/dicomweb/studies/1.2/series/1.2.3/instances/1.2.3.4/import';
+  const notReady = await start(t, transport, { encryptionRequired: true, imageDecryption: { open: async () => ({}) } });
+  assert.equal((await notReady(route, { method: 'POST', headers: { origin, authorization: 'DPoP token', dpop: 'proof' } })).status, 503);
+
+  const ready = await start(t, transport, { encryptionRequired: true, imageDecryption: { open: async () => ({}) },
+    pacsReceiver: { receive: async () => ({}) } });
+  const response = await ready(route, { method: 'POST', headers: { origin, authorization: 'DPoP token', dpop: 'proof' }, body: 'not-empty' });
+  assert.equal(response.status, 400);
+  assert.equal((await response.json()).error, 'PACS_IMPORT_BODY_NOT_ALLOWED');
+  assert.equal(upstreamCalls, 0);
+});
+
+test('B PACS import uses its bounded long-running transport without widening other routes', async t => {
+  const seen = [];
+  const get = await start(t, async (...args) => {
+    seen.push(args);
+    return { status: 403, contentType: 'application/json', body: Buffer.from('{"error":"ACCESS_DENIED"}') };
+  }, { encryptionRequired: true, imageDecryption: { open: async () => { throw new Error('Unexpected decrypt'); } },
+    pacsReceiver: { receive: async () => { throw new Error('Unexpected PACS import'); } } });
+  const route = '/dicomweb/studies/1.2/series/1.2.3/instances/1.2.3.4/import';
+  const response = await get(route, { method: 'POST', headers: {
+    origin: 'https://192.168.111.149:9443', authorization: 'DPoP synthetic.token', dpop: 'synthetic-proof',
+  } });
+  assert.equal(response.status, 403);
+  assert.equal(seen.length, 1);
+  assert.equal(seen[0][0], 'https://10.90.88.2:9443');
+  assert.equal(seen[0][1], route);
+  assert.equal(seen[0][2].method, 'POST');
+  assert.equal(seen[0][2].timeoutMs, 55000);
+  assert.equal(seen[0][2].maxBytes, 12582912);
+  assert.equal(seen[0][2].body, undefined);
+  assert.deepEqual(Object.keys(seen[0][2].headers).sort(), ['authorization', 'dpop']);
+});
+
+test('B PACS import binds an optional job lease only to its authenticated Control report, never to A transport', async t => {
+  const job = { jobId: 'a11ce000-1111-4111-8111-111111111111', itemId: 'b22ce000-2222-4222-8222-222222222222',
+    leaseId: 'c33ce000-3333-4333-8333-333333333333' };
+  const received = [], upstream = [];
+  const get = await start(t, async (...args) => {
+    upstream.push(args);
+    return { status: 200, contentType: 'application/vnd.highpass.encrypted-dicom+json', body: Buffer.from('ciphertext') };
+  }, { encryptionRequired: true, imageDecryption: { open: async (_result, _path, options) => {
+    received.push(options); return { body: Buffer.from('synthetic DICOM'), importContext: { transferJob: options.transferJob } };
+  } }, pacsReceiver: { receive: async ({ decoded }) => ({ status: 'PACS_INSTANCE_VERIFIED', transferJob: decoded.importContext.transferJob }) } });
+  const route = '/dicomweb/studies/1.2/series/1.2.3/instances/1.2.3.4/import';
+  const headers = { origin: 'https://192.168.111.149:9443', authorization: 'DPoP token', dpop: 'proof',
+    'x-hipass-transfer-job-id': job.jobId, 'x-hipass-transfer-item-id': job.itemId,
+    'x-hipass-transfer-lease-id': job.leaseId };
+  const preflight = await get(route, { method: 'OPTIONS', headers: { origin: headers.origin,
+    'access-control-request-method': 'POST', 'access-control-request-headers': 'authorization,dpop,x-hipass-transfer-job-id,x-hipass-transfer-item-id,x-hipass-transfer-lease-id' } });
+  assert.equal(preflight.status, 204);
+  const response = await get(route, { method: 'POST', headers });
+  assert.equal(response.status, 200);
+  assert.deepEqual((await response.json()).transferJob, job);
+  assert.deepEqual(received[0].transferJob, job);
+  assert.deepEqual(Object.keys(upstream[0][2].headers).sort(), ['authorization', 'dpop']);
+});
+
+test('B PACS import rejects incomplete or malformed transfer lease headers before A is called', async t => {
+  let upstreamCalls = 0;
+  const get = await start(t, async () => { upstreamCalls++; throw new Error('Unexpected A request'); }, {
+    encryptionRequired: true, imageDecryption: { open: async () => ({}) }, pacsReceiver: { receive: async () => ({}) },
+  });
+  const route = '/dicomweb/studies/1.2/series/1.2.3/instances/1.2.3.4/import';
+  const base = { origin: 'https://192.168.111.149:9443', authorization: 'DPoP token', dpop: 'proof' };
+  const partial = await get(route, { method: 'POST', headers: { ...base, 'x-hipass-transfer-job-id': 'a11ce000-1111-4111-8111-111111111111' } });
+  assert.equal(partial.status, 400);
+  const invalid = await get(route, { method: 'POST', headers: { ...base,
+    'x-hipass-transfer-job-id': 'job', 'x-hipass-transfer-item-id': 'b22ce000-2222-4222-8222-222222222222',
+    'x-hipass-transfer-lease-id': 'c33ce000-3333-4333-8333-333333333333' } });
+  assert.equal(invalid.status, 400);
+  assert.equal(upstreamCalls, 0);
+});
+
+test('B PACS import does not report success when the A Gateway transport is interrupted', async t => {
+  let receiverCalls = 0;
+  const get = await start(t, async () => { throw Object.assign(new Error('timeout'), { code: 'ETIMEDOUT' }); }, {
+    encryptionRequired: true,
+    imageDecryption: { open: async () => { throw new Error('Must not decrypt'); } },
+    pacsReceiver: { receive: async () => { receiverCalls++; return { status: 'PACS_INSTANCE_VERIFIED' }; } },
+  });
+  const response = await get('/dicomweb/studies/1.2/series/1.2.3/instances/1.2.3.4/import', {
+    method: 'POST', headers: { origin: 'https://192.168.111.149:9443', authorization: 'DPoP token', dpop: 'proof' },
+  });
+  assert.equal(response.status, 503);
+  assert.equal((await response.json()).error, 'CAPSTONE_PORTAL_UNAVAILABLE');
+  assert.equal(receiverCalls, 0);
+});
+
+test('B PACS import masks destination failures and clears transient plaintext', async t => {
+  let plaintext, ciphertext;
+  const get = await start(t, async () => {
+    ciphertext = Buffer.from('synthetic ciphertext');
+    return { status: 200, contentType: 'application/vnd.highpass.encrypted-dicom+json', body: ciphertext };
+  }, {
+    encryptionRequired: true,
+    imageDecryption: { open: async () => {
+      plaintext = Buffer.from('synthetic DICOM plaintext');
+      return { contentType: 'application/dicom', body: plaintext };
+    } },
+    pacsReceiver: { receive: async () => { throw Object.assign(new Error('destination timeout'), { code: 'ETIMEDOUT' }); } },
+  });
+  const response = await get('/dicomweb/studies/1.2/series/1.2.3/instances/1.2.3.4/import', {
+    method: 'POST', headers: { origin: 'https://192.168.111.149:9443', authorization: 'DPoP token', dpop: 'proof' },
+  });
+  assert.equal(response.status, 503);
+  assert.equal((await response.json()).error, 'CAPSTONE_PORTAL_UNAVAILABLE');
+  assert.ok(plaintext.every(byte => byte === 0));
+  assert.ok(ciphertext.every(byte => byte === 0));
+});
 
 test('Entra-only CSP extension permits the fixed Microsoft authority, never arbitrary hosts',async t=>{
   const get=await start(t,async()=>({status:200,contentType:'application/json',body:Buffer.from('{}')}),{entraLoginEnabled:true});

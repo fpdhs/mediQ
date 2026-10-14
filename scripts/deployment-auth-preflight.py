@@ -15,16 +15,20 @@ spec = importlib.util.spec_from_file_location('deployment_auth_runtime', ROOT / 
 runtime = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(runtime)
 
-def ask_password_gui():
+def ask_password_gui(role='B'):
     import tkinter as tk
+    labels = {'A': 'A병원 송신 VM', 'B': 'B병원 수신 VM'}
+    if role not in labels:
+        raise ValueError('VM_ROLE_INVALID')
+    address = runtime.ops.ROLES[role][0]
     result = [None]
     window = tk.Tk()
-    window.title('Highpass — B병원 배포 인증 사전확인')
+    window.title(f'Highpass — {labels[role]} 인증 사전확인')
     window.geometry('490x240')
     window.resizable(False, False)
     window.attributes('-topmost', True)
-    tk.Label(window, text='B병원 테스트 VM · 192.168.111.149 · server', font=('맑은 고딕', 12, 'bold')).pack(pady=(18, 8))
-    tk.Label(window, text='VM 계정 비밀번호를 입력하세요. 웹 시연 비밀번호가 아닙니다.\n입력은 이 프로세스의 메모리에만 사용합니다. 저장·배포하지 않습니다.').pack(pady=6)
+    tk.Label(window, text=f'{labels[role]} · {address} · server', font=('맑은 고딕', 12, 'bold')).pack(pady=(18, 8))
+    tk.Label(window, text='해당 VM 계정 비밀번호를 입력하세요. 웹 시연 비밀번호가 아닙니다.\n입력은 이 프로세스의 메모리에만 사용합니다. 저장·배포하지 않습니다.').pack(pady=6)
     entry = tk.Entry(window, show='●', width=40)
     entry.pack(pady=10)
     entry.focus_set()

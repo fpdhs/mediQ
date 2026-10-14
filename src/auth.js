@@ -309,6 +309,7 @@ export class EntraOidcProvider extends AuthenticationProvider {
       issuer: claims.iss,
       audience: claims.aud,
       expiresAtMs: claims.exp * 1000,
+      entraObjectId: claims.oid.toLowerCase(),
       authMethod: "ENTRA_OIDC_ACCESS_TOKEN",
       authMode: AuthMode.ENTRA_OIDC,
     });
@@ -318,7 +319,7 @@ export class EntraOidcProvider extends AuthenticationProvider {
 export function validateSyntheticActorMap(input, tenantId) {
   if (!input || typeof input !== "object" || Array.isArray(input) || input.schemaVersion !== 1
       || typeof input.tenantId !== "string" || input.tenantId.toLowerCase() !== tenantId
-      || !Array.isArray(input.actors) || input.actors.length !== 2) {
+      || !Array.isArray(input.actors) || input.actors.length < 2 || input.actors.length > 3) {
     throw new AuthError(500, "ENTRA_ACTOR_MAP_INVALID_CONFIGURATION");
   }
   const actors = new Map();
@@ -329,7 +330,9 @@ export function validateSyntheticActorMap(input, tenantId) {
     const allowedKeys = entry.role === PrincipalRole.PATIENT
       ? ["objectId", "actorId", "role", "patientId"]
       : entry.role === PrincipalRole.DOCTOR
-        ? ["objectId", "actorId", "role", "doctorId", "hospitalId"] : [];
+        ? ["objectId", "actorId", "role", "doctorId", "hospitalId"]
+        : entry.role === PrincipalRole.SECURITY_ADMIN
+          ? ["objectId", "actorId", "role"] : [];
     if (!allowedKeys.length || Object.keys(entry).some(key => !allowedKeys.includes(key))
         || allowedKeys.some(key => typeof entry[key] !== "string" || !entry[key])) {
       throw new AuthError(500, "ENTRA_ACTOR_MAP_INVALID_CONFIGURATION");
@@ -344,6 +347,9 @@ export function validateSyntheticActorMap(input, tenantId) {
     }
     if (entry.role === PrincipalRole.DOCTOR && (!/^DOC-[A-Z0-9-]{1,64}$/u.test(entry.doctorId)
         || !/^HOSP-[A-Z0-9-]{1,64}$/u.test(entry.hospitalId))) {
+      throw new AuthError(500, "ENTRA_ACTOR_MAP_INVALID_CONFIGURATION");
+    }
+    if (entry.role === PrincipalRole.SECURITY_ADMIN && !/^synthetic-security-[a-z0-9-]{1,48}$/u.test(entry.actorId)) {
       throw new AuthError(500, "ENTRA_ACTOR_MAP_INVALID_CONFIGURATION");
     }
     roles.add(entry.role);

@@ -15,7 +15,7 @@ import {createSeedData} from '../src/seed.js';
 import {hccCatalog} from '../src/capstone-hcc-catalog.js';
 const records=syntheticHealthRecords();
 const doctor={role:'DOCTOR',doctorId:'DOC-B-01',hospitalId:'HOSP-B',subject:'doctor-b'};
-const doctors=[{doctorId:'DOC-B-01',hospitalId:'HOSP-B',roles:['DOCTOR'],approvedPurposes:['TRANSFER','TREATMENT']}];
+const doctors=[{doctorId:'DOC-B-01',hospitalId:'HOSP-B',roles:['Doctor'],approvedPurposes:['TRANSFER','TREATMENT']}];
 const hospitals=()=>[{hospitalId:'HOSP-A',status:'ACTIVE'},{hospitalId:'HOSP-B',status:'ACTIVE'}];
 const consent=()=>({consentId:'synthetic-consent',patientId:HCC_PATIENT_ID,sourceHospitalId:'HOSP-A',targetHospitalId:'HOSP-B',purpose:'TRANSFER',permission:'VIEW_ONLY',status:'ACTIVE',validFrom:new Date(Date.now()-10000).toISOString(),validUntil:new Date(Date.now()+100000).toISOString(),healthRecordScope:healthRecordScope([records[0].id,records.find(r=>r.kind==='AFP').id])});
 test('health selection is explicit, known, bounded and clinical-purpose only',()=>{

@@ -129,6 +129,70 @@ test('mobile initialization waits for presenter login and supports DOM already l
   assert.match(init, /else startMobileApp\(\)/);
   assert.doesNotMatch(client, /(?:localStorage|sessionStorage)\s*\./);
 });
+
+test('Entra mobile home waits for initialization, checks mapped patient and expiry, never uses simulator API', async () => {
+  const code = client.slice(client.indexOf('async function openEntraMobileHome('), client.indexOf('async function handleQuickAuth('));
+  for (const sample of ['valid', 'patient-mismatch', 'role-denied', 'expired-after-load', 'load-failure']) {
+    const state = { isAuthenticated: false, patientId: 'synthetic-patient' };
+    const calls = []; let checks = 0;
+    const auth = { provider: 'ENTRA_OIDC', context: { patientId: sample === 'patient-mismatch' ? 'other' : state.patientId },
+      headers(role) {
+        assert.equal(role, 'PATIENT'); checks++;
+        if (sample === 'role-denied' || (sample === 'expired-after-load' && checks === 2)) throw Error('SESSION_DENIED');
+        return { authorization: 'Bearer unit-fixture' };
+      },
+      reveal() { calls.push('reveal'); },
+    };
+    const context = vm.createContext({ state, capstoneAuth: auth,
+      fetch() { assert.fail('No simulation API call'); },
+      loadInitialData: async () => {
+        assert.equal(state.isAuthenticated, true); assert.deepEqual(calls, []);
+        calls.push('loaded'); if (sample === 'load-failure') throw Error('UNAVAILABLE');
+      },
+      document: { querySelector: selector => selector === '#auth-overlay' ? { remove() { calls.push('removed'); } } : null },
+    });
+    vm.runInContext(code, context);
+    const pending = vm.runInContext('openEntraMobileHome()', context);
+    if (sample === 'valid') { await pending; assert.deepEqual(calls, ['loaded', 'removed', 'reveal']); }
+    else { await assert.rejects(pending); assert.equal(state.isAuthenticated, false); assert.ok(!calls.includes('reveal')); }
+  }
+});
+
+test('Entra mobile lock discards session rather than reopening old auth simulations', async () => {
+  const code = client.slice(client.indexOf('async function handleLockApp('), client.indexOf('function handlePatientSelect('));
+  let reloaded = false;
+  const context = vm.createContext({ state: { isAuthenticated: true }, capstoneAuth: { provider: 'ENTRA_OIDC' },
+    faqAssistant: null, healthHelper: null, mobileRecords: null, walletHome: null, walletStudiesReady: true, walletConsentsReady: true,
+    location: { reload() { reloaded = true; } },
+    document: { documentElement: { removeAttribute(name) { assert.equal(name, 'data-auth-ready'); } }, querySelector() { assert.fail('No old auth UI'); } },
+    fetch() { assert.fail('No development lock endpoint'); },
+  });
+  vm.runInContext(code, context); await vm.runInContext('handleLockApp()', context);
+  assert.equal(reloaded, true);
+});
+
+test('shared Entra wallet keeps mobile background inert until explicit reveal and keeps failure locked', () => {
+  const source = readFileSync('public/capstone-auth.js', 'utf8');
+  const code = source.slice(source.indexOf('const finishEntra ='), source.indexOf('let redirectLogin;', source.indexOf('const finishEntra =')));
+  for (const mobile of [true, false]) {
+    let removed = false; const background = { isConnected: true, inert: true };
+    const element = { dataset: {}, style: { overflow: 'hidden' } };
+    const waiting = { querySelector: () => ({ textContent: '' }), append() {} };
+    const context = vm.createContext({ mobile, renderPatientAccount(){}, inactive: [[background, false]], previousOverflow: '',
+      form: { remove() { removed = true; }, querySelector() { return waiting; } },
+      document: { documentElement: element, createElement: () => ({ addEventListener() {} }) }, location: { reload() {} },
+    });
+    vm.runInContext(code, context);
+    const result = vm.runInContext('finishEntra({roles:["PATIENT"]})', context);
+    assert.equal(removed, !mobile); assert.equal(background.inert, mobile);
+    if (mobile) {
+      result.initializationFailed();
+      assert.equal(removed, false); assert.equal(element.dataset.authReady, undefined); assert.equal(background.inert, true);
+      result.reveal();
+      assert.equal(removed, true); assert.equal(element.dataset.authReady, '1'); assert.equal(background.inert, false);
+    }
+  }
+});
 test('mobile revocation requires exact server-confirmed consent and never treats HTTP failure or expiry as success', async () => {
   const start = client.indexOf('async function requestMobileRevocation(');
   const end = client.indexOf('function applyMobileRevocation(', start);

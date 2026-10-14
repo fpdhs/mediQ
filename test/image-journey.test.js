@@ -23,3 +23,17 @@ test('presentation module has no network calls or persistent evidence writes',()
   assert.doesNotMatch(source,/\bfetch\s*\(|XMLHttpRequest|localStorage|sessionStorage|setInterval|setTimeout/);
   assert.match(source,/textContent/);
 });
+
+test('consent illustration uses the person-free wallet asset in both modes',()=>{
+  for(const mode of ['view','store']){
+    const gate=journeyState(mode,1).gate;
+    assert.equal(gate.image,'/assets/security-journey/consent-v2.png');
+    assert.match(gate.imageAlt,/의료지갑/);
+    assert.match(gate.limit,/서버 승인/);
+    const bytes=readFileSync(new URL('../public'+gate.image,import.meta.url));
+    assert.equal(bytes.subarray(1,4).toString(),'PNG');
+    assert.equal(bytes.readUInt32BE(16),1536);
+    assert.equal(bytes.readUInt32BE(20),1024);
+  }
+  for(const i of [0,2,3,4,5,6,7])assert.match(journeyState('view',i).gate.image,/-v1\.webp$/);
+});

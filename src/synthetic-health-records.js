@@ -1,4 +1,5 @@
-// Fixed nonclinical presentation fixtures. Never a clinical/FHIR source or model input.
+// Fixed nonclinical presentation fixtures. May be projected into explicitly synthetic
+// FHIR resources; never a clinical source, diagnostic evidence or model knowledge.
 export const SYNTHETIC_HEALTH_VERSION = 'hong-gildong-health-20261011-v1';
 export function screeningFields(year = 2026) {
   const row=(group,label,value,unit='',note='')=>({group,label,value,unit,note,referenceRange:null,interpretation:null});

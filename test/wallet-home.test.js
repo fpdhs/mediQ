@@ -1,9 +1,22 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync,statSync} from 'node:fs';
-import {walletConsentState} from '../public/ui/wallet-home.js';
+import {walletConsentState,walletNextAction} from '../public/ui/wallet-home.js';
 const now=Date.parse('2026-10-11T12:00:00Z');
 const valid={status:'ACTIVE',validFrom:'2026-10-11T11:00:00Z',validUntil:'2026-10-11T13:00:00Z'};
+
+test('wallet next action follows loaded records and valid consent without implying delivery',()=>{
+ assert.equal(walletNextAction({},now).disabled,true);
+ assert.equal(walletNextAction({ready:true,error:true,consents:[valid]},now).disabled,true);
+ const active=walletNextAction({ready:true,consents:[valid]},now);
+ assert.equal(active.route,'requests');
+ assert.equal(active.disabled,false);
+ assert.match(active.label,/1건/);
+ for(const consent of [{...valid,status:'REVOKED'},{...valid,validUntil:new Date(now).toISOString()},{...valid,validFrom:'2026-10-12T00:00:00Z'}]) {
+  assert.equal(walletNextAction({ready:true,records:[{}],consents:[consent]},now).route,'records');
+ }
+ assert.match(walletNextAction({ready:true},now).label,/등록된 건강기록이 없어요/);
+});
 
 test('wallet keeps static card geometry under reduced motion and readable summary typography',()=>{
  const css=readFileSync(new URL('../public/ui/wallet-home.css',import.meta.url),'utf8');

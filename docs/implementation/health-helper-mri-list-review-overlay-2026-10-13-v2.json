@@ -1,0 +1,71 @@
+{
+  "schemaVersion": "health-helper-mri-review-overlay/1",
+  "artifactId": "health-helper-mri-list-review-overlay-2026-10-13-v2",
+  "status": "REVIEW_ONLY_NOT_SERVICE_APPROVED",
+  "createdAt": "2026-10-13",
+  "basePacket": {
+    "file": "health-helper-mri-list-review-packet-2026-10-13-v1.json",
+    "sha256": "sha256:d8acf01bf06d45eb3a8cef69ff7452a197e64876d4e074262b1b1204dae224ce"
+  },
+  "scope": {
+    "candidateOnly": true,
+    "clinicalUse": false,
+    "serviceEligible": false,
+    "patientEndpointEnabled": false,
+    "modelFineTuningPerformed": false
+  },
+  "instructions": [
+    "이 overlay는 base packet v1의 source segment, claim, corpus ID 및 hash를 바꾸지 않고 독립 검토 주석만 기록한다.",
+    "각 축을 독립 판단한다. 자동 QA·번역 충실도·다른 reviewer의 결정으로 미평가 축을 채우지 않는다.",
+    "리뷰어 ID는 조직이 부여한 식별자를 사용하고 이름·이메일·환자정보를 기록하지 않는다.",
+    "sourceSupport는 해당 claim의 sourceSegmentIds 안에 있는 실제 근거 segment만 기록한다.",
+    "이 기록은 reviewer 신원·자격을 인증하지 않으며 권리 승인, 임상 승인 또는 환자서비스 배포 권한을 부여하지 않는다.",
+    "base packet의 바이트나 해시가 바뀌면 이 overlay는 무효다. 새 base/overlay 버전을 만들고 이전 산출물을 보존한다."
+  ],
+  "rightsReviewContext": "기존 권리 범위 메모는 /lab-tests/ 후보 페이지를 대상으로 하므로 이 /mriscans.html Health Topic 요약에 대한 제품 내 저장·번역·표시 권한을 확정하지 않는다. 이 URL 및 hearing aids 연결 링크의 경계를 별도 검토할 것.",
+  "rightsReview": {
+    "decision": "UNASSESSED",
+    "reviewerId": null,
+    "reviewerRole": null,
+    "reviewedAt": null,
+    "rationale": null
+  },
+  "claimReviews": [
+    {
+      "claimId": "MRI-PREP-JEWELRY-001",
+      "review": {
+        "sourceSupport": {"decision":"UNASSESSED","reviewerId":null,"reviewerRole":null,"reviewedAt":null,"rationale":null,"assessedSegmentIds":[]},
+        "translation": {"decision":"UNASSESSED","reviewerId":null,"reviewerRole":null,"reviewedAt":null,"rationale":null},
+        "clinical": {"decision":"UNASSESSED","reviewerId":null,"reviewerRole":null,"reviewedAt":null,"rationale":null},
+        "disposition": {"decision":"UNASSESSED","reviewerId":null,"reviewerRole":null,"reviewedAt":null,"rationale":null}
+      }
+    },
+    {
+      "claimId": "MRI-PREP-HAIRPIN-001",
+      "review": {
+        "sourceSupport": {"decision":"UNASSESSED","reviewerId":null,"reviewerRole":null,"reviewedAt":null,"rationale":null,"assessedSegmentIds":[]},
+        "translation": {"decision":"UNASSESSED","reviewerId":null,"reviewerRole":null,"reviewedAt":null,"rationale":null},
+        "clinical": {"decision":"UNASSESSED","reviewerId":null,"reviewerRole":null,"reviewedAt":null,"rationale":null},
+        "disposition": {"decision":"UNASSESSED","reviewerId":null,"reviewerRole":null,"reviewedAt":null,"rationale":null}
+      }
+    },
+    {
+      "claimId": "MRI-PREP-HEARING-AID-001",
+      "review": {
+        "sourceSupport": {"decision":"UNASSESSED","reviewerId":null,"reviewerRole":null,"reviewedAt":null,"rationale":null,"assessedSegmentIds":[]},
+        "translation": {"decision":"UNASSESSED","reviewerId":null,"reviewerRole":null,"reviewedAt":null,"rationale":null},
+        "clinical": {"decision":"UNASSESSED","reviewerId":null,"reviewerRole":null,"reviewedAt":null,"rationale":null},
+        "disposition": {"decision":"UNASSESSED","reviewerId":null,"reviewerRole":null,"reviewedAt":null,"rationale":null}
+      }
+    },
+    {
+      "claimId": "MRI-PREP-DEVICE-DISCLOSURE-001",
+      "review": {
+        "sourceSupport": {"decision":"UNASSESSED","reviewerId":null,"reviewerRole":null,"reviewedAt":null,"rationale":null,"assessedSegmentIds":[]},
+        "translation": {"decision":"UNASSESSED","reviewerId":null,"reviewerRole":null,"reviewedAt":null,"rationale":null},
+        "clinical": {"decision":"UNASSESSED","reviewerId":null,"reviewerRole":null,"reviewedAt":null,"rationale":null},
+        "disposition": {"decision":"UNASSESSED","reviewerId":null,"reviewerRole":null,"reviewedAt":null,"rationale":null}
+      }
+    }
+  ]
+}

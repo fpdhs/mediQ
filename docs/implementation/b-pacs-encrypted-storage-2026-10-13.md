@@ -67,8 +67,8 @@ AES-XTS는 저장 기밀성이지 AEAD·파일 무결성 증명이 아니다. �
 | 두 임시 assignment 실제 부재 재확인 | PASS, exit0 | 같은 폴더 `cleanup-recheck.json`; read-only ARM 재확인. 제거를 재수행하거나 다른 권한을 삭제하지 않음 |
 | 안전한 수동 lock | PASS, exit0 | `artifacts/workstation/b-storage-lock-20261013T013616Z/result.json` |
 | 새 운영자 인증·read/unwrap-only 수동 recover·임시 권한 제거 | PASS, exit0 / 57,147ms | `artifacts/workstation/b-storage-provision-20261013T013712Z/result.json` |
-| 실제 B Docker 내 암호화 mount 경계 검사 | PASS | `artifacts/workstation/b-storage-runtime-20261013T013452Z/result.json`; 기존 Portal pinned image의 임시 network-none/read-only/unprivileged probe, 자동 제거 |
-| 수동 복구 후 실제 boundary·내용 해시 재검증 | PASS, exit0 | `artifacts/workstation/b-storage-runtime-20261013T014128Z/result.json`; 동일 probe SHA-256, 전용 mapper, 기존 Portal healthy |
+| 실제 B Docker 내 암호화 mount 경계 검사 | PASS, 당시 검사 범위 한정 | `artifacts/workstation/b-storage-runtime-20261013T013452Z/result.json`; 기존 Portal pinned image의 임시 network-none/read-only/unprivileged probe, 자동 제거. 당시 probe는 LUKS 매핑 이름 형식은 확인했지만 provision manifest UUID와의 정확한 일치는 검사하지 않음 |
+| 수동 복구 후 실제 boundary·내용 해시 재검증 | PASS, 당시 검사 범위 한정 | `artifacts/workstation/b-storage-runtime-20261013T014128Z/result.json`; 동일 probe SHA-256, mapper, Portal health. manifest UUID와의 exact match는 미검증 |
 | offline provisioning 안전 계약 | PASS 12/12, exit0 | `python -m unittest discover -s test -p b_pacs_storage_provision_test.py -v` |
 | 기존 mount 경계 focused 회귀 | PASS 6/6, exit0 | `node --test test/b-pacs-storage-boundary.test.js`; 전체 회귀 아님 |
 | 실제 B Portal 보존 | PASS | 동일 image `sha256:5af80fd19b6a7f49ea68f20bb64f3c1f6f9d6c5c62b5f72c680345eef1069fa3`, healthy; container 목록 동일 |
@@ -90,10 +90,16 @@ python scripts/b-pacs-storage-runtime-check.py
 
 VM 비밀번호는 concealed stdin, Azure token은 로그인된 운영자 CLI에서 받아 guest stdin으로만 전달한다. pinned SSH 및 private IP TLS/SNI/CA 검증, 유한 command/network timeout을 사용한다. 실패 시 새 file/key/header/manifest를 삭제하지 말고 정확한 UUID·loop·assignment·증적을 확인하여 조정한다. backup header restore는 실제 disk header를 덮어쓰므로 별도 승인/복제 환경 없이는 수행하지 않는다.
 
-현재 mount는 root0700이다. Orthanc의 실제 UID에 전용 data subdirectory 최소 권한을 부여하고 동일 encrypted filesystem bind를 확인하는 절차가 아직 필요하다. 넓은 chmod777 또는 Portal에게 raw filesystem 권한을 주는 해결책은 사용하지 않는다.
+현재 확인된 mount 정책은 root `0700`이다. 로컬 storage lifecycle 코드는 올바른 LUKS mount를 연 뒤 `/opt/highpass/b-pacs-encrypted/orthanc-db`만 UID/GID `10001:10001`, mode `0700`으로 만들고, 재개 때 같은 encrypted filesystem·owner·mode를 검증하도록 보강했다. 기존 B VM에 이 코드가 적용됐다는 증거는 아직 없으며, 기존 파일이나 디렉터리를 재귀 변경하지 않는다. 넓은 `chmod 777` 또는 Portal에 raw filesystem 권한을 주는 해결책은 사용하지 않는다.
+
+## 2026-10-14 로컬 검증 보강
+
+수신 경계가 root-only `storage.json`의 LUKS UUID를 컨테이너 환경으로 고정하고, 매 요청 때 실제 dm UUID와 정확히 비교하도록 후보 코드를 보강했다. Orthanc는 전용 encrypted subdirectory만 UID `10001`로 쓰며 root filesystem은 read-only, 모든 capability 제거, no-new-privileges로 실행하도록 구성했다. mTLS boundary는 UID `65532`, root filesystem read-only로 실행하고 encrypted mount 전체는 read-only로 확인한다. Compose launch gate는 internal network·미게시 포트·정확한 source bind·UUID·health dependency·digest와 Orthanc config를 검증하며, 실행 전에 host에서 mount 및 subdirectory owner/mode/device를 재검증한다. 기존 10월 13일 VM 증적은 이 새 검사를 수행하지 않았고, 후보 코드는 아직 B VM에 배포되지 않았다.
+
+오프라인 검증(2026-10-14 갱신): Python B storage/receiver safety suite 38/38 PASS, Node A/B Gateway·암호화·수신 회귀 81/81 PASS. 엄격한 Compose launch gate에는 정확한 mTLS secret mount와 root:65532 소유권·0750 디렉터리·0440 파일 조건도 포함한다. 실제 로컬 Compose 렌더에 pinned 후보 digest를 넣고 strict launch validator PASS. Orthanc 후보에서 UID `10001`로 합성 DICOM 1개 등록 후 UID·원시 SHA-256 재조회 및 중복 무변경 PASS; 컨테이너는 전용 tmpfs와 loopback test만 사용하고 제거했다. VM·Azure·서비스 배포/변경은 하지 않았다. 최신 B VM mount 및 전용 data subdirectory 상태는 NOT VERIFIED.
 
 ## 다음 작업 한 개
 
 2026-10-13 10:51 KST 후속: [공유 Vault 보호·복구 검토](b-pacs-key-recovery-review-2026-10-13.md)에서 실제 read-only 설정/권한/복구 자료를 재확인했다. purge protection 활성화/현재7일 유지 권고, 비가역 Vault 전체 변경의 실제 승인은 대기 중이다. AuditEvent 진단 설정 부재도 신규 FAIL로 기록했다. 재부팅·별도 Vault 복원은 실행하지 않았다.
 
-**저장 키의 공유 Vault purge-protection 적용 여부와 복구 검토를 확정하고 B 수신 PACS 배포 gate를 준비한다.** 이후 전용 mTLS, 고정·스캔된 이미지, DB directory 최소권한, audit/retention/rollback을 연결해야 한다. 저장소 생성 성공을 PACS 수신 완료·700장 종단 완료·MVP/v3 완료로 승격하지 않는다.
+**다음 원격 작업은 마스킹 인증 입력으로 B의 현재 mount/runtime를 읽기 전용 재점검하는 것이다.** 새 storage recovery 절차가 encrypted `orthanc-db` 디렉터리를 만들고 검증한 뒤, root-only B Orthanc config와 수신 인증서의 소유권·권한을 확인한다. 모든 원격 gate가 PASS하기 전에는 manual Compose start나 import flag를 활성화하지 않는다. 저장소 생성 성공을 PACS 수신 완료·700장 종단 완료·MVP/v3 완료로 승격하지 않는다.

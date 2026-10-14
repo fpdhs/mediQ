@@ -6,6 +6,14 @@ export function walletConsentState(consent, now = Date.now()) {
   if (consent.status === 'ACTIVE' && Number.isFinite(from) && Number.isFinite(until) && from <= now && now < until) return '공유 동의 유효';
   return '상태 확인 필요';
 }
+export function walletNextAction({ready=false,error=false,records=[],consents=[]},now=Date.now()) {
+  if(error)return {label:'최신 상태를 확인하지 못했어요.',action:'기록 확인하기',route:'records',disabled:true};
+  if(!ready)return {label:'내 기록과 공유 상태를 확인하고 있어요.',action:'확인 중',route:'records',disabled:true};
+  const active=consents.filter(c=>walletConsentState(c,now)==='공유 동의 유효');
+  if(active.length)return {label:`현재 유효한 공유 동의가 ${active.length}건 있어요.`,action:'공유 범위 확인하기',route:'requests',disabled:false};
+  if(records.length)return {label:'다음 진료에 필요한 기록을 골라보세요.',action:'내 건강기록 보기',route:'records',disabled:false};
+  return {label:'아직 등록된 건강기록이 없어요.',action:'내 건강기록 보기',route:'records',disabled:false};
+}
 const node = (tag, cls, text) => {
   const item = document.createElement(tag); item.className = cls;
   if (text !== undefined) item.textContent = text;
@@ -16,6 +24,7 @@ const icon = type => {
   const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
   svg.setAttribute('viewBox','0 0 24 24');svg.setAttribute('fill','none');svg.setAttribute('stroke','currentColor');svg.setAttribute('stroke-width','1.5');svg.setAttribute('aria-hidden','true');
   const path=document.createElementNS(svg.namespaceURI,'path');
+  if(type==='requests'){path.setAttribute('d','M3 3h6v6H3zM15 3h6v6h-6zM3 15h6v6H3zM15 15h3v3h3v3h-6z');svg.append(path);return svg;}
   path.setAttribute('d',({requests:'M7 3h10v3h3v15H4V6h3M8 12l3 3 5-6',records:'M5 3h10l4 4v14H5zM9 12h6M12 9v6',sharing:'M4 7h12m-4-4 4 4-4 4M20 17H8m4-4-4 4 4 4',helper:'M4 4h16v12H9l-5 4zM8 9h8M8 12h5'})[type]||'M4 4h16v16H4zM8 12h8M12 8v8');
   svg.append(path);return svg;
 };
@@ -40,7 +49,7 @@ export function createHelperSurface(root,navigate,mobile=false){
   }
   root.append(createWalletDock({selected:'helper',navigate}));
 }
-const cardDefinitions=[['requests','공유 내용 확인','내가 허용한 공유를 확인해요'],['records','내 건강기록','영상부터 건강검진까지'],['sharing','영상 공유','다음 병원에 안전하게'],['helper','건강도우미','내 기록을 알기 쉽게']];
+const cardDefinitions=[['requests','공유 QR','병원에 보여줄 나의 티켓'],['records','내 건강기록','영상부터 건강검진까지'],['sharing','영상 공유','다음 병원에 안전하게'],['helper','건강도우미','내 기록을 알기 쉽게']];
 
 // The same foreground artwork and menu vocabulary continue below an extracted card.
 export function createWalletDock({selected,navigate,home=false}) {
@@ -51,7 +60,7 @@ export function createWalletDock({selected,navigate,home=false}) {
     const card=node('button',`mq-wallet-card mq-wallet-card-${route}`);card.type='button';card.dataset.walletRoute=route;
     const badge=node('span','mq-card-icon');badge.append(icon(route));
     card.append(badge,node('strong','',label),node('span','mq-card-copy',copy));
-    if(route==='requests')card.append(node('span','mq-card-cta','확인하기'));
+    if(route==='requests')card.append(node('span','mq-card-cta','QR 보기'));
     card.setAttribute('aria-label',label);
     if(route===selected){card.setAttribute('aria-current','page');card.classList.add('is-selected');}
     card.onclick=()=>{if(route!==selected)navigate(route);};cards.append(card);
@@ -62,12 +71,13 @@ export function createWalletDock({selected,navigate,home=false}) {
 }
 export function mountPatientWalletDock(root,page,navigate){
   if(!root||page==='home')return null;
-  const selected=({phr:'records',images:'records',health:'records',documents:'records',consent:'sharing',visit:'sharing',activity:'requests'})[page]||page;
+  const selected=({phr:'records',images:'records',health:'records',documents:'records',consent:'sharing',visit:'requests',activity:'requests'})[page]||page;
+  root.dataset.walletTheme=selected;
   const existing=root.querySelector(':scope > .mq-wallet-dock');
   root.querySelectorAll('.mq-wallet-dock').forEach(dock=>{if(dock!==existing)dock.remove();});
   if(existing?.dataset.walletPage===page)return existing;
   root.querySelectorAll('.mq-wallet-dock').forEach(dock=>dock.remove());
-  const dock=createWalletDock({selected,navigate:route=>navigate(({records:'phr',requests:'activity'})[route]||route)});
+  const dock=createWalletDock({selected,navigate:route=>navigate(({records:'phr',requests:'visit'})[route]||route)});
   dock.dataset.walletPage=page;
   root.append(dock);
   return dock;
@@ -81,7 +91,11 @@ export function createWalletHome({root, navigate}) {
   const salutation=node('span','mq-wallet-title-line','내 의료 지갑,');
   title.append(salutation,node('span','mq-wallet-title-line','다음 진료를 준비해요.'));
   const hello = node('p', 'mq-wallet-hello', '내 지갑을 확인하고 있어요.');
-  greeting.append(title, hello);
+  const next=node('div','mq-wallet-next');
+  const nextLabel=node('p','mq-wallet-next-label');nextLabel.setAttribute('role','status');
+  const nextButton=node('button','mq-wallet-next-action');nextButton.type='button';nextButton.disabled=true;
+  next.append(nextLabel,nextButton);
+  greeting.append(title, hello,next);
   const overview = node('div','mq-wallet-overview');
   const records = node('section','mq-wallet-panel'), shares = node('section','mq-wallet-panel');
   const recordList = node('div','mq-wallet-list'), shareList = node('div','mq-wallet-list');
@@ -115,6 +129,9 @@ export function createWalletHome({root, navigate}) {
         if(deadlines.length)expiryTimer=setTimeout(()=>api.update({name,records:rows,consents,ready}),Math.min(60000,Math.max(1,Math.min(...deadlines)-Date.now()+10)));
       }
       hello.textContent=`${name}님의 소중한 건강기록을 안전하게 보관하고, 필요할 때 확인하세요.`;
+      const suggested=walletNextAction({ready,error,records:rows,consents});
+      nextLabel.textContent=suggested.label;nextButton.textContent=suggested.action;nextButton.disabled=suggested.disabled;
+      nextButton.onclick=()=>{if(!nextButton.disabled)navigate(suggested.route);};
       recordList.replaceChildren();shareList.replaceChildren();
       for(const row of (ready?rows:[]).slice(0,3)) {
         const item=button('', 'records','mq-wallet-row');
@@ -129,7 +146,7 @@ export function createWalletHome({root, navigate}) {
         item.append(node('span','mq-share-symbol','↗'),node('strong','',`${hospital(consent.sourceHospitalId)} → ${hospital(consent.targetHospitalId)}`),status);shareList.append(item);
       }
       if(!ready||!consents.length)shareList.append(node('p','mq-wallet-empty',error?'공유 상태를 확인하지 못했어요. 새로고침해 주세요.':ready?'아직 공유한 영상이 없어요.':'공유 상태를 확인하고 있어요.'));
-      buttons[0].querySelector('.mq-card-copy').textContent=ready?'내가 허용한 공유를 확인해요':'공유 정보를 확인하고 있어요';
+      buttons[0].querySelector('.mq-card-copy').textContent=ready?'병원에 보여줄 나의 티켓':'공유 정보를 확인하고 있어요';
     },
     reset(){clearTimeout(timer);busy=false;buttons.forEach(b=>b.classList.remove('is-extracting'));this.update({});},
   };

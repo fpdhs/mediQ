@@ -44,6 +44,23 @@ function clockAt(startMs) {
   return clock;
 }
 
+test('explicit replacement preserves consent, rejects old nonce and records replacement audit',async()=>{
+ const {dir,service,store}=await createService();
+ try{
+  const {approval,nonce}=await issueTicket(service);const id=approval.consentId;
+  const before=JSON.stringify(service.getConsent(id));
+  await assert.rejects(service.issueConsentHandoffTicket(id,'P-1002',{}, {replaceExisting:true}),e=>e.code==='PATIENT_IDENTITY_MISMATCH');
+  const issued=await service.issueConsentHandoffTicket(id,'P-1001',{}, {replaceExisting:true});
+  assert.equal(JSON.stringify(service.getConsent(id)),before);
+  assert.equal((await service.redeemTransferTicket(nonce,redeemInput())).decision,'DENIED');
+  assert.equal(store.get('transferTickets').filter(t=>t.consentId===id&&t.status==='ISSUED').length,1);
+  assert.ok(store.get('auditLogs').some(l=>l.action==='TICKET_REVOKED'&&l.ticketId===approval.ticketId));
+  assert.equal((await service.redeemTransferTicket(issued.qr.payload.split('/').at(-1),redeemInput())).decision,'ALLOWED');
+  await service.revokeConsent(id,'P-1001');
+  await assert.rejects(service.issueConsentHandoffTicket(id,'P-1001',{}, {replaceExisting:true}),e=>e.code==='CONSENT_REVOKED');
+ }finally{await rm(dir,{recursive:true,force:true});}
+});
+
 test('ticket redemption and status agree at the exact expiry boundary without issuing a token', async () => {
   for (const offset of [-1, 0, 1]) {
     let now = Date.parse('2026-06-25T10:00:00.000Z');

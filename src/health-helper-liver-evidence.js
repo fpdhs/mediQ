@@ -87,7 +87,7 @@ export async function verifyLiverFunctionEvidence(folder){
 const markerPatterns=[['AST',/(?<![a-z])AST(?![a-z])|아스파르트산아미노전달효소|아스파르테이트아미노전달효소/i],
  ['ALT',/(?<![a-z])ALT(?![a-z])|알라닌아미노전달효소/i],
  ['GGT',/(?<![a-z])GGT(?![a-z])|γ\s*[-‐]?\s*GTP|감마\s*[-‐]?\s*지티피|감마글루타밀전이효소/i]];
-const detailIntentPatterns=[['PURPOSE',/목적|왜|무엇.*검사|사용하|하는.*검사/],
+const detailIntentPatterns=[['PURPOSE',/목적|왜|무엇.*검사|사용하|하는.*검사|설명|알려/],
  ['LIMITS',/한계|원인|알.*수|의미|해석|높|낮|정상.*(?:뜻|의미)/],
  ['PREPARATION',/준비|금식|공복|약.*(?:중단|복용)|검사.*전/],
  ['COMPARISON',/비교|이전|직전|지난|추세|참고범위|단위/]];
@@ -100,7 +100,7 @@ export function retrieveLiverFunctionEvidence(question){
  const markers=markerPatterns.filter(([,p])=>p.test(question)).map(([name])=>name);
  // "간 효소 AST" names one enzyme; it is not a request for a whole liver panel.
  // Keep the explicit panel terminology separate so the marker's own evidence can win.
- const panel=/간\s*기능(?:\s*검사)?|간기능|간\s*패널|liver\s*function/i.test(question);
+ const panel=/간\s*기능(?:\s*검사)?|간기능|간\s*패널|liver\s*function|간\s*수치|피검사\s*간\s*수치/i.test(question);
  if(!markers.length&&!panel)return baseline;
  if(markers.length>1||(markers.length&&panel&&!/검사.*(?:패널|묶음|전체)|패널.*(?:구성|검사|목적)/.test(question)))
   return {status:'INSUFFICIENT_EVIDENCE',evidence:[],reason:'AMBIGUOUS_LIVER_MARKERS'};

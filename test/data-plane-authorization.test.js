@@ -100,6 +100,12 @@ test("DPoP is verified against the actual hospital URL and persists replay rejec
   const allowed = await authorizeDataPlane(service, input, config);
   assert.equal(allowed.status, 200, allowed.body.reason);
   assert.equal((await authorizeDataPlane(service, input, config)).body.reason, "DPOP_NONCE_REPLAYED");
+  const alias='https://highpass-images-b.japaneast.cloudapp.azure.com';
+  const externalUnsigned = `${encode({ typ: "dpop+jwt", alg: "ES256", jwk })}.${encode({ jti: randomUUID(), htm: "GET", htu: alias + input.path, iat: Date.parse(service.clock()) / 1000, ath: createHash("sha256").update(input.token).digest("base64url") })}`;
+  input.dpopProof = `${externalUnsigned}.${sign("sha256", Buffer.from(externalUnsigned), { key: keys.privateKey, dsaEncoding: "ieee-p1363" }).toString("base64url")}`;
+  assert.equal((await authorizeDataPlane(service,input,config)).body.reason,'DPOP_URI_MISMATCH');
+  assert.equal((await authorizeDataPlane(service,input,{...config,clinicianPublicBaseUrl:alias})).status,200);
+  assert.equal((await authorizeDataPlane(service,input,{...config,clinicianPublicBaseUrl:alias})).body.reason,'DPOP_NONCE_REPLAYED');
 });
 
 test("signed report binds audit scope and rechecks consent before releasing prepared bytes", async t => {

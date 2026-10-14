@@ -9,15 +9,22 @@ const syntheticPatients = Object.freeze({ 'synthetic-phantom-account': 'HP-TEST-
 // Called only with an authenticated server principal. HTTP body/status/owner
 // fields never supply evidence. One bounded, current DB snapshot on every read.
 export class PatientSelfViewAuthorityReader {
-  constructor({ pool, enabled = false, clock = Date.now, lockRows = false, allowIssuedGrant = false }) {
+  constructor({ pool, enabled = false, clock = Date.now, lockRows = false, allowIssuedGrant = false, resolveEntraOwnership = null }) {
     if (typeof pool?.query !== 'function') throw new Error('AUTHORITY_DATABASE_REQUIRED');
     this.pool = pool; this.enabled = enabled === true; this.clock = clock; this.lockRows = lockRows === true;
     this.allowIssuedGrant = allowIssuedGrant === true;
+    this.resolveEntraOwnership = resolveEntraOwnership;
   }
 
   async authorize(input) {
     if (!this.enabled) return unverified('PATIENT_ACCOUNT_UNVERIFIED');
     const principal = input?.principal;
+    let binding = null;
+    try { binding = this.resolveEntraOwnership?.(principal) ?? null; }
+    catch { return unverified('PATIENT_ACCOUNT_UNVERIFIED'); }
+    const entra = binding && principal?.authMethod === 'ENTRA_OIDC_ACCESS_TOKEN'
+      && principal.authMode === 'ENTRA_OIDC' && principal.issuer === binding.issuer
+      && principal.audience === binding.audience && principal.entraObjectId === binding.objectId;
     const session = principal?.authMethod === 'TEST_JWT' && principal.authMode === 'TEST'
       && principal.issuer === 'highpass-capstone-test-idp' && principal.audience === 'highpass-capstone-api';
     // Only the internal signature+ledger verifier constructs this principal.
@@ -25,9 +32,11 @@ export class PatientSelfViewAuthorityReader {
     const grant = this.allowIssuedGrant && principal?.authMethod === 'PATIENT_SELF_VIEW_GRANT'
       && principal.authorityType === 'PATIENT_SELF_VIEW' && principal.issuer === 'highpass-control-plane'
       && principal.audience === 'mediq-patient-self-view-gateway';
-    if (principal?.role !== 'PATIENT' || !(session || grant)
+    const ownershipSubject = binding?.ownershipSubject ?? principal?.subject;
+    if (principal?.role !== 'PATIENT' || !(session || grant || entra)
       || !Number.isFinite(principal.expiresAtMs) || principal.expiresAtMs <= this.clock()
-      || !Object.hasOwn(syntheticPatients, principal.subject) || syntheticPatients[principal.subject] !== principal.patientId
+      || (binding && !(entra || grant))
+      || !Object.hasOwn(syntheticPatients, ownershipSubject) || syntheticPatients[ownershipSubject] !== principal.patientId
       || principal.patientId !== input?.patientId) return { decision: 'DENIED', reasonCode: 'PATIENT_SUBJECT_MISMATCH', statusCode: 403 };
     if (!uid(input.studyInstanceUid) || !uid(input.seriesInstanceUid) || input.requestedAction !== 'VIEW')
       return { decision: 'DENIED', reasonCode: 'SCOPE_MISMATCH', statusCode: 403 };
@@ -42,20 +51,30 @@ export class PatientSelfViewAuthorityReader {
         JOIN hospitals h ON h.hospital_id=s.source_hospital_id
         JOIN imaging_series se ON se.study_instance_uid=s.study_instance_uid
         WHERE a.subject=$1 AND a.patient_id=$2 AND s.study_instance_uid=$3 AND se.series_instance_uid=$4${this.lockRows ? ' FOR SHARE OF a,p,r,s,h,se' : ''}`,
-        values: [principal.subject, input.patientId, input.studyInstanceUid, input.seriesInstanceUid], query_timeout: 5000 });
+        values: [ownershipSubject, input.patientId, input.studyInstanceUid, input.seriesInstanceUid], query_timeout: 5000 });
       if (principal.expiresAtMs <= this.clock()) return { decision: 'DENIED', reasonCode: 'PATIENT_SUBJECT_MISMATCH', statusCode: 403 };
+      if (binding && this.resolveEntraOwnership(principal)?.revision !== binding.revision)
+        return unverified('PATIENT_ACCOUNT_UNVERIFIED');
       if (result.rows.length !== 1) return unverified('PATIENT_OWNERSHIP_UNVERIFIED');
       const row = result.rows[0];
       if (!row.account_revision || !row.ref_id || !Number.isInteger(row.version) || row.version < 1)
         return unverified('PATIENT_OWNERSHIP_UNVERIFIED');
-      const revision = createHash('sha256').update(JSON.stringify([row.account_revision,row.ref_id,row.version,row.patient_id,row.study_instance_uid,row.source_hospital_id,row.series_instance_uid])).digest('hex');
-      const decision = evaluatePatientSelfViewPolicy(input, {
+      const revisionParts = [row.account_revision,row.ref_id,row.version,row.patient_id,row.study_instance_uid,row.source_hospital_id,row.series_instance_uid];
+      if (binding) revisionParts.push(binding.revision);
+      const revision = createHash('sha256').update(JSON.stringify(revisionParts)).digest('hex');
+      const policyInput = binding ? { ...input, principal: { ...principal, subject: ownershipSubject } } : input;
+      const decision = evaluatePatientSelfViewPolicy(policyInput, {
         account: { verified: true, evidenceKind: row.evidence_kind, subject: row.subject, patientId: row.patient_id, status: row.account_status },
         ownership: { verified: true, revision, patientId: row.patient_id, studyInstanceUid: row.study_instance_uid, sourceHospitalId: row.source_hospital_id, status: row.ref_status },
         sourceHospital: { hospitalId: row.source_hospital_id, status: row.hospital_status },
         series: [{ studyInstanceUid: row.study_instance_uid, seriesInstanceUid: row.series_instance_uid }],
       });
-      if (decision.decision === 'ALLOWED') decision.scope.refId = row.ref_id;
+      if (decision.decision === 'ALLOWED') {
+        decision.scope.refId = row.ref_id;
+        decision.scope.ownershipSubject = ownershipSubject;
+        // Preserve the real authenticated actor in the grant ledger and audit.
+        decision.scope.subject = principal.subject;
+      }
       return decision;
     } catch { return unverified('PATIENT_OWNERSHIP_UNVERIFIED'); }
   }

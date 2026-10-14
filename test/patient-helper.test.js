@@ -29,6 +29,41 @@ test('KDCA source guide renders attribution, context, license and non-AI questio
     assert.equal(find('helper-question-input').value,'어떤 정보를 확인하나요?');
   } finally {globalThis.document=prior;}
 });
+test('synthetic HCC provenance status renders without source links or AI suggestions',async()=>{
+ const prior=globalThis.document;globalThis.document={createElement:tag=>new Element(tag)};
+ try{
+  const root=new Element('main');createPatientHelper(root,{ask:async()=>({status:'SYNTHETIC_SCENARIO',
+   answer:'발표용 합성 사례입니다. 실제 진단 근거가 아닙니다.',sources:[],questions:[],generationUsed:false,clinicalUse:false,synthetic:true,
+   scenarioEvidence:{version:'hong-gildong-health-20261011-v1',presentationId:'HONG_GILDONG_SYNTHETIC_56',diagnosisOrigin:'PRESENTATION_SETUP',
+    recordIds:['demo-2026-10-08-CHECKUP','demo-2025-10-08-AFP','demo-2026-04-08-AFP','demo-2026-10-08-AFP','demo-2025-10-08-ULTRASOUND','demo-2026-04-08-ULTRASOUND','demo-2026-10-08-ULTRASOUND'],
+    records:[{id:'demo-2026-10-08-CHECKUP',kind:'CHECKUP',date:'2026-10-08'},
+     {id:'demo-2025-10-08-AFP',kind:'AFP',date:'2025-10-08'},{id:'demo-2026-04-08-AFP',kind:'AFP',date:'2026-04-08'},
+     {id:'demo-2026-10-08-AFP',kind:'AFP',date:'2026-10-08'},{id:'demo-2025-10-08-ULTRASOUND',kind:'ULTRASOUND',date:'2025-10-08'},
+     {id:'demo-2026-04-08-ULTRASOUND',kind:'ULTRASOUND',date:'2026-04-08'},{id:'demo-2026-10-08-ULTRASOUND',kind:'ULTRASOUND',date:'2026-10-08'}]}})});
+  const find=cls=>descendants(root).find(el=>el.className===cls);
+  find('helper-manual-input').value='AFP와 간 초음파 자료는 간암 사례와 어떻게 연결되나요?';await find('helper-add-form').dispatch('submit');
+  assert.equal(find('helper-answer').textContent,'발표용 합성 사례입니다. 실제 진단 근거가 아닙니다.');
+  assert.equal(descendants(root).find(el=>el.attributes?.role==='status')?.textContent,
+   '합성 발표 시나리오의 출처 설명 · AI 생성 및 임상 해석 아님.');
+  const panel=find('helper-evidence-drawer helper-scenario-evidence');assert.ok(panel);
+  assert.equal(descendants(panel).find(el=>el.tag==='summary').textContent,'합성 기록 근거 · 7건');
+  assert.ok(descendants(panel).some(el=>el.textContent==='자료 버전: hong-gildong-health-20261011-v1'));
+  assert.ok(descendants(panel).some(el=>el.textContent.includes('간 관련 건강검진 · 2026-10-08 · 기록 ID demo-2026-10-08-CHECKUP')));
+  assert.ok(descendants(panel).some(el=>el.textContent.includes('간암 전원 설정: HONG_GILDONG_SYNTHETIC_56 · PRESENTATION_SETUP')));
+  assert.equal(descendants(root).some(el=>el.className==='helper-source-card'),false);
+ }finally{globalThis.document=prior;}
+});
+test('scenario evidence drawer rejects malformed provenance and renders supplied values only as text',async()=>{
+ const prior=globalThis.document;globalThis.document={createElement:tag=>new Element(tag)};
+ try{
+  const root=new Element('main');createPatientHelper(root,{ask:async()=>({status:'SYNTHETIC_SCENARIO',answer:'합성 사례',synthetic:true,generationUsed:false,clinicalUse:false,
+   scenarioEvidence:{version:'v1',presentationId:'<img src=x>',diagnosisOrigin:'PRESENTATION_SETUP',recordIds:['<img src=x>'],records:[{id:'<img src=x>',kind:'AFP',date:'2026-10-08'}]}})});
+  const find=cls=>descendants(root).find(el=>el.className===cls);
+  find('helper-manual-input').value='합성 질문';await find('helper-add-form').dispatch('submit');
+  assert.equal(descendants(root).some(el=>el.className==='helper-evidence-drawer helper-scenario-evidence'),false);
+  assert.equal(descendants(root).some(el=>el.tag==='img'),false);
+ }finally{globalThis.document=prior;}
+});
 test('MRI list source guidance renders structured source fragments and provenance note as inert text',async()=>{
  const prior=globalThis.document;globalThis.document={createElement:tag=>new Element(tag)};
  try {
@@ -52,6 +87,22 @@ test('MRI list source guidance renders structured source fragments and provenanc
   assert.ok(descendants(root).some(el=>el.textContent==='원문 링크 안내 · AI 생성 답변 아님 · 질문은 프로젝트 예시입니다.'));
   assert.equal(descendants(root).some(el=>el.className==='helper-claim-evidence'),false);
  } finally {globalThis.document=prior;}
+});
+test('unreviewed MRI question shows the patient-safe insufficient-evidence state with no citation card',async()=>{
+ const prior=globalThis.document;globalThis.document={createElement:tag=>new Element(tag)};
+ try{
+  const root=new Element('main');createPatientHelper(root,{ask:async()=>({status:'INSUFFICIENT_EVIDENCE',
+   answer:'이 질문에 사용할 검토된 근거가 아직 준비되지 않았어요. 의료진에게 확인해 주세요.',sources:[],questions:[],
+   recordContext:'NOT_CONNECTED'})});
+  const find=cls=>descendants(root).find(el=>el.className===cls);
+  find('helper-manual-input').value='MRI 전에 장신구를 제거해야 하나요?';
+  await find('helper-add-form').dispatch('submit');
+  assert.equal(find('helper-answer').textContent,'이 질문에 사용할 검토된 근거가 아직 준비되지 않았어요. 의료진에게 확인해 주세요.');
+  assert.equal(descendants(root).find(el=>el.attributes?.role==='status')?.textContent,
+   '질문에 답할 근거가 부족해요. 현재 지원하는 주제를 확인해 주세요.');
+  assert.equal(descendants(root).some(el=>el.className==='helper-source-card'),false);
+  assert.equal(descendants(root).some(el=>el.className==='helper-claim-evidence'),false);
+ }finally{globalThis.document=prior;}
 });
 test('RAG claim quotes render as text, never as executable markup',async()=>{
  const prior=globalThis.document;globalThis.document={createElement:tag=>new Element(tag)};

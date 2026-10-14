@@ -127,3 +127,26 @@ body { background:#edf0f4; color:#192638; }
  .mediq-hero-card { padding:20px 16px; }
  .wallet-scan-stack { opacity:.5; right:14px; }
 }
+
+/* Preserve readable content above gesture bars and inside landscape cutouts. */
+.mobile-header {
+ padding-top:calc(16px + env(safe-area-inset-top,0px));
+ padding-left:max(18px,env(safe-area-inset-left,0px));
+ padding-right:max(18px,env(safe-area-inset-right,0px));
+}
+.mobile-content {
+ min-width:0;
+ padding-bottom:calc(100px + env(safe-area-inset-bottom,0px));
+ padding-left:max(24px,env(safe-area-inset-left,0px));
+ padding-right:max(24px,env(safe-area-inset-right,0px));
+ scroll-padding-bottom:calc(100px + env(safe-area-inset-bottom,0px));
+}
+.mobile-nav {
+ padding-left:max(10px,env(safe-area-inset-left,0px));
+ padding-right:max(10px,env(safe-area-inset-right,0px));
+}
+.wallet-profile {padding-bottom:calc(120px + env(safe-area-inset-bottom,0px));}
+.mobile-shell :is(input,select,textarea) {max-width:100%;min-width:0;}
+@media(max-width:360px) {
+ .mobile-content {padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px));}
+}

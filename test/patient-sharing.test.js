@@ -9,7 +9,7 @@ test('mobile sharing paper reuses its wallet shell and static cache without chan
  const js=readFileSync('public/ui/patient-sharing.js','utf8'),css=readFileSync('public/ui/wallet-record-sheet.css','utf8'),mobile=readFileSync('public/mobile/app.js','utf8'),sw=readFileSync('public/mobile/sw.js','utf8');
  assert.match(js,/selected:'sharing'/);assert.match(js,/paper.append\(\.\.\.root.children\)/);assert.match(js,/createTextNode\('영상 공유'\)/);
  assert.match(css,/sharing-extracted-sheet/);assert.match(css,/prefers-reduced-motion:reduce/);
- assert.match(mobile,/createSharingSurface\(document.querySelector\('#tab-share'\)/);assert.match(sw,/shell-v39/);assert.match(sw,/\/ui\/patient-sharing.js/);
+ assert.match(mobile,/createSharingSurface\(document.querySelector\('#tab-share'\)/);assert.match(sw,/const CACHE_NAME = "hipass-mediq-shell-(?:v\d+|[a-f0-9]{64})";/);assert.match(sw,/\/ui\/patient-sharing.js/);
  assert.doesNotMatch(js,/innerHTML|localStorage|sessionStorage/);
 });
 test('patient web keeps the selected ingress layout and does not rebuild its live form',()=>{
@@ -17,7 +17,7 @@ test('patient web keeps the selected ingress layout and does not rebuild its liv
  createSharingSurface(root,()=>assert.fail('Selecting a surface must not navigate'));
  assert.equal(root.attributes['data-sharing-surface'],'patient-web');assert.deepEqual(root.children,[form]);
  const html=readFileSync('public/index.html','utf8');
- assert.match(html,/내 영상을, 필요한 병원에\./);assert.match(html,/이렇게 공유해요/);assert.doesNotMatch(html,/sharing-wallet-v2.css|id="sharing-study-picker"/);
+ assert.match(html,/<h1>영상 공유<\/h1>/);assert.match(html,/이렇게 공유해요/);assert.doesNotMatch(html,/sharing-wallet-v2.css|id="sharing-study-picker"/);
 });
 test('unfolded sharing summary and mobile referral preserve explicit review and server purpose',()=>{const html=readFileSync('public/index.html','utf8'),mobile=readFileSync('public/mobile/index.html','utf8'),js=readFileSync('public/mobile/app.js','utf8'),css=readFileSync('public/ui/wallet-home.css','utf8');assert.match(html,/sharing-open-wallet/);assert.match(html,/sharing-summary-values/);assert.match(mobile,/value="TRANSFER" selected>전원/);assert.match(js,/purpose: state.sharePurpose/);assert.match(js,/INVALID_SHARE_PURPOSE/);assert.match(css,/health-wallet-sheet:before/);assert.doesNotMatch(html+mobile,/의견 상담/);});
 test('selected web summary exposes the chosen exam, operations and both dates before review',()=>{

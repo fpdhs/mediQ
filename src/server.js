@@ -19,6 +19,9 @@ import {
 import { HipassService, ServiceValidationError } from "./services.js";
 import { authorizeDataPlane, recordDataPlaneReady, isLegacyImageOperation } from "./data-plane-authorization.js";
 import { ingressMeta, validateIngressConfig } from "./ingress.js";
+import { patientRequestOrigin } from './patient-public-origins.js';
+import {publicHandoffReceipt,qrInputMeta,isPublicQrPrincipal} from './public-qr-handoff.js';
+import {clinicianReceptions} from './clinician-receptions.js';
 import { createStoreFromEnv } from "./store-factory.js";
 import { getBearerToken, readJson, RequestBodyError, sendError, sendJson, sendProblem, serveStatic } from "./http-utils.js";
 import { PhrProviderError, PhrProviderErrorCode, SyntheticFhirProvider } from "./health-data-provider.js";
@@ -41,8 +44,16 @@ import { createAzureHelperModel } from './health-helper-azure.js';
 import { createOllamaHelperModel } from './health-helper-ollama.js';
 import { createHealthHelperHandler } from './health-helper-http.js';
 import {createSyntheticHealthHandler} from './synthetic-health-http.js';
+import {isScenarioHealthPatient} from './scenario-health-standard.js';
 import {createSharedHealthHandler} from './shared-health-records.js';
 import {HCC_PATIENT_SUBJECT} from './capstone-hcc-catalog.js';
+import {createSyntheticHccProvenanceAnswer} from './health-helper-synthetic-hcc-provenance.js';
+import { createPacsTransferJobRuntime } from "./pacs-transfer-job-runtime.js";
+import { findAzureKeyVaultAuditEvent, listAzureKeyVaultAudit } from './azure-keyvault-audit.js';
+import { toSecurityAuditView } from './security-observatory-view.js';
+import { buildEventIndex, parseEventQuery, createSecurityReport } from './security-console.js';
+import { listWafAudit } from './waf-audit.js';
+import { listEntraAudit } from './entra-audit.js';
 
 const port = Number(process.env.PORT ?? 3000);
 async function authenticateRequest(request) {
@@ -58,6 +69,7 @@ validateIngressConfig(process.env);
 const store = createStoreFromEnv();
 await store.load();
 const service = new HipassService(store);
+const pacsTransferJobRuntime = await createPacsTransferJobRuntime({ service, readJson });
 if (process.env.HIPASS_ARCHIVE_RETENTION_ROOT && process.env.HIPASS_CONTROL_PLANE_ONLY === '1') throw new Error('ARCHIVE_STORAGE_FORBIDDEN_ON_CONTROL');
 const retentionSweep = () => service.reconcileHospitalArchiveRetention().catch(() => console.warn('ARCHIVE_RETENTION_RECONCILIATION_FAILED'));
 const retentionTimer = process.env.HIPASS_ARCHIVE_RETENTION_ROOT ? setInterval(retentionSweep, 30000) : null;
@@ -67,13 +79,17 @@ const helperAudit = async input => {
   await service.writeAudit(input); await store.save();
 };
 const localHelperModel = createOllamaHelperModel();
+const translationRag = await (await import('./health-helper-patient-translation.js')).createPatientTranslationRag();
 const healthHelper = new HealthHelperRag({ model: localHelperModel ?? createAzureHelperModel(), audit: helperAudit,
-  mode: localHelperModel ? 'VISIT_PREPARATION' : 'SOURCE_GUIDANCE', timeoutMs: localHelperModel ? 60000 : 15000 });
+  translationRag, mode: localHelperModel ? 'VISIT_PREPARATION' : 'SOURCE_GUIDANCE', timeoutMs: translationRag ? 40000 : localHelperModel ? 60000 : 15000,
+  syntheticScenario: ({principal,question}) => createSyntheticHccProvenanceAnswer({principal,question,
+    enabled:process.env.HIPASS_CAPSTONE_MAIN_SCENARIO==='HCC',catalogCommitted:isHccCatalogCommitted(store)}) });
 const routeHealthHelper = createHealthHelperHandler({helper:healthHelper, authenticate:authenticateRequest,
   requestMeta, audit:helperAudit, requireTrustedIngress:Boolean(process.env.HIPASS_INGRESS_SECRET)});
 const routeSyntheticHealth=createSyntheticHealthHandler({authenticate:authenticateRequest,requestMeta,audit:helperAudit,
+  studies:principal=>service.listStudies(principal.patientId,{includeSeries:true}),
   requireTrustedIngress:Boolean(process.env.HIPASS_INGRESS_SECRET),eligible:principal=>process.env.HIPASS_CAPSTONE_MAIN_SCENARIO==='HCC'
-    && principal.patientId===HCC_PATIENT_ID && principal.subject===HCC_PATIENT_SUBJECT && isHccCatalogCommitted(store)});
+    && isScenarioHealthPatient(principal) && isHccCatalogCommitted(store)});
 const patientGrantRuntime = await createPatientSelfViewGrantRuntime({store,service});
 const routeSharedHealth=createSharedHealthHandler({authenticate:authenticateRequest,requestMeta,audit:helperAudit,
   requireTrustedIngress:Boolean(process.env.HIPASS_INGRESS_SECRET),consents:()=>store.get('consents'),doctors:()=>store.get('doctors'),hospitals:()=>store.get('hospitals'),
@@ -91,7 +107,8 @@ if (process.env.HIPASS_CAPSTONE_KEY_RELEASE === "1") {
   const schema = await pool.query("SELECT to_regclass('capstone_key_releases') IS NOT NULL AS ready");
   if (schema.rows[0]?.ready !== true) { await pool.end(); throw new Error("KEY_RELEASE_MIGRATION_REQUIRED"); }
   await pool.query("SELECT release_id, metadata, expires_at, consumed_at FROM capstone_key_releases LIMIT 0");
-  routeKeyRelease = createKeyReleaseHttpHandler({ service, repository: new PostgresKeyReleaseRepository(pool), configuration: {
+  routeKeyRelease = createKeyReleaseHttpHandler({ service, repository: new PostgresKeyReleaseRepository(pool),
+    transferJobRepository: pacsTransferJobRuntime?.repository, configuration: {
     sourceHospitalId: process.env.HIPASS_DATA_PLANE_SOURCE_HOSPITAL_ID,
     publicBaseUrl: process.env.HIPASS_DATA_PLANE_PUBLIC_BASE_URL,
     recipientHospitalId: process.env.HIPASS_KEY_RELEASE_RECIPIENT_HOSPITAL_ID,
@@ -198,6 +215,7 @@ server.listen(port, process.env.HIPASS_LISTEN_HOST ?? '0.0.0.0', () => {
   console.log(`HiPass MVP is running at http://localhost:${port}`);
 });
 server.on('close',()=>{patientGrantRuntime?.close().catch(()=>console.warn('PATIENT_AUTHORITY_CLOSE_FAILED'));});
+server.on('close',()=>{pacsTransferJobRuntime?.close().catch(()=>console.warn('PACS_TRANSFER_JOB_DATABASE_CLOSE_FAILED'));});
 server.on('close',()=>{if(retentionTimer)clearInterval(retentionTimer);});
 
 async function persistAuthenticationAudit() {
@@ -229,16 +247,15 @@ async function routeApi(request, response, url) {
   if (method === "GET" && url.pathname === "/api/capstone-demo/identity") {
     if (process.env.AUTH_MODE !== "ENTRA_OIDC") return sendJson(response, 404, { error: "ENTRA_LOGIN_NOT_ENABLED" });
     const principal = await authenticateRequest(request);
-    if (![PrincipalRole.PATIENT, PrincipalRole.DOCTOR].includes(principal.role)) throw new AuthError(403, "ENTRA_SYNTHETIC_ROLE_REQUIRED");
-    const hccScenario = process.env.HIPASS_CAPSTONE_MAIN_SCENARIO === "HCC" && isHccCatalogCommitted(store);
+    if (![PrincipalRole.PATIENT, PrincipalRole.DOCTOR, PrincipalRole.SECURITY_ADMIN].includes(principal.role)) throw new AuthError(403, "ENTRA_SYNTHETIC_ROLE_REQUIRED");
+    const hccScenario = principal.role !== PrincipalRole.SECURITY_ADMIN
+      && process.env.HIPASS_CAPSTONE_MAIN_SCENARIO === "HCC" && isHccCatalogCommitted(store);
     const patientId = principal.patientId ?? (hccScenario ? HCC_PATIENT_ID : "P-1001");
-    const demoContext = {
-      patientId,
-      patientName: hccScenario ? "홍길동" : "가상환자 1001",
-      defaultStudyUid: hccScenario ? HCC_STUDY_UID : "1.2.410.100.1.20260620.001",
-      entryRole: principal.role,
-      ...(hccScenario ? { scenario: HCC_PRESENTATION } : {}),
-    };
+    const demoContext = principal.role === PrincipalRole.SECURITY_ADMIN
+      ? { entryRole: principal.role }
+      : { patientId, patientName: hccScenario ? "홍길동" : "가상환자 1001",
+        defaultStudyUid: hccScenario ? HCC_STUDY_UID : "1.2.410.100.1.20260620.001",
+        entryRole: principal.role, ...(hccScenario ? { scenario: HCC_PRESENTATION } : {}) };
     const meta = requestMeta(request, principal);
     await service.writeAudit({ actorType: principal.role, actorId: principal.subject, hospitalId: principal.hospitalId,
       action: "LOGIN_SUCCESS", result: "SUCCESS", reasonCode: "ENTRA_SYNTHETIC_ACTOR_MAPPED", ipAddress: meta.ipAddress });
@@ -309,6 +326,7 @@ async function routeApi(request, response, url) {
 
   if (await routePatientGrant(request,response,url)) return;
   const principal = await authenticateRequest(request);
+  if (pacsTransferJobRuntime && await pacsTransferJobRuntime.route(request, response, url, principal, requestMeta(request, principal))) return;
 
   if (method === "POST" && url.pathname === "/api/capstone-demo/phantom-catalog") {
     response.setHeader("cache-control", "no-store");
@@ -502,13 +520,17 @@ async function routeApi(request, response, url) {
     const consentForAuth = service.getConsent(segments[2]);
     if (!consentForAuth) return sendError(response, 404, "Consent not found");
     assertPatientPrincipal(principal, consentForAuth.patientId);
+    const ticketInput=await readJson(request,{maxBytes:1024,strictUtf8:true});
+    if(ticketInput.replaceExisting!==undefined&&typeof ticketInput.replaceExisting!=='boolean')return sendError(response,400,'Invalid replacement option');
+    response.setHeader('Cache-Control','no-store');
     try {
       const result = await service.issueConsentHandoffTicket(
         segments[2],
         principal.patientId,
         requestMeta(request, principal),
+        {replaceExisting:ticketInput.replaceExisting===true},
       );
-      sendJson(response, 201, result);
+      sendJson(response, 201, publicHandoffReceipt(result,process.env,service.publicBaseUrl));
     } catch (error) {
       if (error instanceof ServiceValidationError) {
         const conflictCodes = ["HANDOFF_TICKET_ALREADY_ISSUED", "CONSENT_REVOKED", "CONSENT_EXPIRED"];
@@ -573,7 +595,20 @@ async function routeApi(request, response, url) {
     return;
   }
 
-  if (method === "POST" && url.pathname === "/api/transfers/tickets/redeem-viewer") {
+  if (method === 'GET' && url.pathname === '/api/clinician/receptions') {
+    response.setHeader('Cache-Control','no-store');
+    let receptions;
+    try { receptions=clinicianReceptions(store,principal); }
+    catch(error) {
+      if(error instanceof AuthError){await service.writeAudit({actorType:principal.role,actorId:principal.doctorId||principal.patientId||principal.subject,action:'RECEPTION_LIST_DENIED',result:'FAIL',reasonCode:error.code,...requestMeta(request,principal)});await store.save();}
+      throw error;
+    }
+    await service.writeAudit({actorType:'DOCTOR',actorId:principal.doctorId,targetHospitalId:principal.hospitalId,action:'RECEPTION_LIST_VIEWED',result:'SUCCESS',...requestMeta(request,principal)});
+    await store.save();
+    return sendJson(response,200,{receptions});
+  }
+
+  if (method === "POST" && ["/api/transfers/tickets/redeem-viewer","/api/demo/qr/redeem"].includes(url.pathname)) {
     const body = await readJson(request);
     const validation = requireFields(body, ["nonce"]);
     if (validation) return sendError(response, 400, validation);
@@ -581,7 +616,11 @@ async function routeApi(request, response, url) {
       doctorId: principal.doctorId,
       hospitalId: principal.hospitalId,
     });
-    const result = await service.redeemViewerHandoff(body.nonce, principal, requestMeta(request, principal));
+    let qrMeta;
+    if(url.pathname==='/api/demo/qr/redeem'&&!isPublicQrPrincipal(principal,process.env))return sendJson(response,403,{error:'QR_DEMO_NOT_ALLOWED'});
+    try { qrMeta=qrInputMeta(body,principal,requestMeta(request, principal),process.env); }
+    catch { return sendJson(response,403,{error:'QR_INPUT_NOT_ALLOWED'}); }
+    const result = await service.redeemViewerHandoff(body.nonce, principal, qrMeta);
     sendJson(response, result.statusCode ?? (result.decision === "ALLOWED" ? 200 : 403), result);
     return;
   }
@@ -757,6 +796,94 @@ async function routeApi(request, response, url) {
     });
     await store.save();
     sendJson(response, 201, { ok: true });
+    return;
+  }
+
+  if (method === "GET" && url.pathname === "/api/security/overview") {
+    await requireSecurityObservatoryPrincipal(request, principal);
+    response.setHeader('cache-control', 'no-store');
+    const applicationLogs = service.listAuditLogs({
+      action: url.searchParams.get('action'), result: url.searchParams.get('result'), limit: 64,
+    }).map(toSecurityAuditView);
+    const alertLogs = service.listAnomalyAlerts();
+    const denialLogs = service.listAuditLogs({ limit: 200 }).filter(log => ['DENIED', 'FAIL', 'FAILED', 'ERROR'].includes(String(log.result).toUpperCase()));
+    const alerts = [...new Map([...alertLogs, ...denialLogs].map(log => [log.auditId, log])).values()]
+      .sort((a, b) => String(b.createdAt ?? '').localeCompare(String(a.createdAt ?? '')))
+      .slice(0, 64).map(toSecurityAuditView);
+    const reviews = service.listAuditLogs({ action: 'SECURITY_REVIEW_RECORDED', limit: 200 })
+      .map(toSecurityReviewView).filter(Boolean);
+    const azureKeyVaultAudit = await listAzureKeyVaultAudit();
+    const meta = requestMeta(request, principal);
+    await service.writeAudit({ actorType: principal.role, actorId: principalActorId(principal),
+      action: 'SECURITY_OVERVIEW_READ', result: 'SUCCESS', reasonCode: 'SECURITY_ADMIN_AUTHORIZED',
+      ipAddress: meta.ipAddress, auditSessionId: principal.sessionId ?? undefined });
+    await store.save();
+    sendJson(response, 200, {
+      observedAt: new Date().toISOString(),
+      applicationAudit: {
+        status: 'available', events: applicationLogs,
+        alerts,
+        integrity: service.verifyAuditIntegrity(),
+      },
+      azureKeyVaultAudit,
+      reviews,
+    });
+    return;
+  }
+
+  if ((method === 'GET' && url.pathname === '/api/security/events') || (method === 'POST' && url.pathname === '/api/security/reports')) {
+    await requireSecurityObservatoryPrincipal(request, principal);
+    response.setHeader('cache-control', 'no-store');
+    let query;
+    try { query = parseEventQuery(url.searchParams); } catch { return sendError(response, 400, 'SECURITY_QUERY_INVALID'); }
+    const reviews = [...store.get('auditLogs')].reverse().filter(log => log.action === 'SECURITY_REVIEW_RECORDED').map(toSecurityReviewView).filter(Boolean);
+    const [azure, waf, entra] = await Promise.all([listAzureKeyVaultAudit(), listWafAudit(), listEntraAudit()]);
+    const index = buildEventIndex(store.get('auditLogs'), azure, reviews, query, waf, entra);
+    let report;
+    if (method === 'POST') {
+      try { report = createSecurityReport(index, await readJson(request, { maxBytes: 16384, strictUtf8: true }), principalActorId(principal)); }
+      catch (error) { return sendError(response, error.message === 'SECURITY_REPORT_EVENT_UNAVAILABLE' ? 409 : 400, 'SECURITY_REPORT_INVALID_OR_EVENT_UNAVAILABLE'); }
+    }
+    const meta = requestMeta(request, principal);
+    await service.writeAudit({ actorType: principal.role, actorId: principalActorId(principal),
+      action: report ? 'SECURITY_REPORT_GENERATED' : 'SECURITY_EVENTS_SEARCHED', result: 'SUCCESS',
+      reasonCode: report ? `REPORT_${report.requestedFormat}_GENERATED` : 'SECURITY_ADMIN_AUTHORIZED',
+      auditSessionId: report?.reportId ?? principal.sessionId ?? undefined, ipAddress: meta.ipAddress });
+    await store.save();
+    if (report) return sendJson(response, 201, report);
+    const { allEvents, ...view } = index;
+    return sendJson(response, 200, view);
+  }
+
+  if (method === "POST" && url.pathname === "/api/security/reviews") {
+    await requireSecurityObservatoryPrincipal(request, principal);
+    response.setHeader('cache-control', 'no-store');
+    const body = await readJson(request);
+    const review = validateSecurityReviewInput(body);
+    if (!review) return sendError(response, 400, 'SECURITY_REVIEW_INPUT_INVALID');
+    if (review.source === 'APP') {
+      const target = [...service.listAuditLogs({ limit: 200 }), ...service.listAnomalyAlerts()]
+        .find(log => log.auditId === review.eventRef);
+      const isAlert = target && (['DENIED', 'FAIL', 'FAILED', 'ERROR'].includes(String(target.result).toUpperCase())
+        || service.listAnomalyAlerts().some(log => log.auditId === target.auditId));
+      if (!isAlert) return sendError(response, 404, 'SECURITY_REVIEW_EVENT_NOT_FOUND');
+    } else if (['WAF','ENTRA'].includes(review.source)) {
+      const source = await (review.source === 'WAF' ? listWafAudit() : listEntraAudit());
+      if (source.status !== 'available') return sendError(response, 503, 'WAF_AUDIT_SOURCE_UNAVAILABLE');
+      if (!source.events.some(event => event.eventRef === review.eventRef)) return sendError(response, 404, 'SECURITY_REVIEW_EVENT_NOT_FOUND');
+    } else {
+      const target = await findAzureKeyVaultAuditEvent(review.eventRef);
+      if (target?.sourceStatus) return sendError(response, 503, 'AZURE_AUDIT_SOURCE_UNAVAILABLE');
+      if (!target) return sendError(response, 404, 'SECURITY_REVIEW_EVENT_NOT_FOUND');
+    }
+    const meta = requestMeta(request, principal);
+    const reason = `SECURITY_REVIEW:${JSON.stringify(review)}`;
+    await service.writeAudit({ actorType: principal.role, actorId: principalActorId(principal),
+      hospitalId: principal.hospitalId, action: 'SECURITY_REVIEW_RECORDED', result: 'SUCCESS',
+      reason, ipAddress: meta.ipAddress, userAgent: meta.userAgent,
+      auditSessionId: principal.sessionId ?? undefined });
+    await store.save();
+    sendJson(response, 201, { ok: true, recordedAt: new Date().toISOString() });
     return;
   }
 
@@ -1077,6 +1204,7 @@ async function routeGateway(request, response, url) {
     const result = await operation(service, await readJson(request, { maxBytes: 32768, strictUtf8: true }), {
       sourceHospitalId: process.env.HIPASS_DATA_PLANE_SOURCE_HOSPITAL_ID,
       publicBaseUrl: process.env.HIPASS_DATA_PLANE_PUBLIC_BASE_URL,
+      clinicianPublicBaseUrl: process.env.AUTH_MODE==='ENTRA_OIDC'?process.env.HIPASS_PATIENT_IMAGE_ORIGIN:undefined,
       pacsImportEnabled: process.env.HIPASS_B_PACS_IMPORT_ENABLED === '1',
     });
     response.setHeader("cache-control", "no-store");
@@ -1143,7 +1271,7 @@ function requestMeta(request, principal) {
   return {
     ingressTrusted: ingress.ingressTrusted,
     method: request.method,
-    externalUrl: new URL(request.url, service.publicBaseUrl).href,
+    externalUrl: new URL(request.url, patientRequestOrigin(request.url, process.env, service.publicBaseUrl)).href,
     authorizationScheme: String(request.headers.authorization ?? "").split(" ")[0],
     actorId: principalActorId(principal),
     actorType: principal?.actorType,
@@ -1154,6 +1282,51 @@ function requestMeta(request, principal) {
     clientAttestationToken,
     dpopProof,
   };
+}
+
+async function requireSecurityObservatoryPrincipal(request, principal) {
+  try {
+    requireRoles(principal, [PrincipalRole.SECURITY_ADMIN, PrincipalRole.PLATFORM_ADMIN]);
+  } catch (error) {
+    const meta = requestMeta(request, principal);
+    await service.writeAudit({ actorType: principal.role, actorId: principalActorId(principal),
+      action: 'SECURITY_CONSOLE_DENIED', result: 'DENIED', reasonCode: error.code,
+      ipAddress: meta.ipAddress, auditSessionId: principal.sessionId ?? undefined });
+    await store.save();
+    throw error;
+  }
+}
+
+function toSecurityReviewView(log) {
+  try {
+    const prefix = 'SECURITY_REVIEW:';
+    if (!String(log.reasonCode ?? '').startsWith(prefix)) return null;
+    const details = JSON.parse(String(log.reasonCode).slice(prefix.length));
+    if (!validateSecurityReviewInput(details)) return null;
+    return {
+      source: details.source,
+      eventRef: details.eventRef,
+      status: details.status,
+      ticketRef: details.ticketRef ?? '',
+      note: details.note ?? '',
+      actorId: String(log.actorId ?? 'UNKNOWN'),
+      recordedAt: String(log.createdAt ?? ''),
+    };
+  } catch { return null; }
+}
+
+function validateSecurityReviewInput(body) {
+  const allowed = ['source', 'eventRef', 'status', 'ticketRef', 'note'];
+  if (!body || typeof body !== 'object' || Array.isArray(body) || Object.keys(body).some(key => !allowed.includes(key))) return null;
+  if (!['APP', 'AZURE_KEYVAULT', 'WAF', 'ENTRA'].includes(body.source)
+      || typeof body.eventRef !== 'string' || !/^[A-Za-z0-9_-]{1,128}$/u.test(body.eventRef)
+      || !['REVIEWED', 'INVESTIGATING', 'ACTION_REQUIRED', 'FALSE_POSITIVE'].includes(body.status)) return null;
+  const ticketRef = body.ticketRef ?? '';
+  const note = body.note ?? '';
+  if (typeof ticketRef !== 'string' || ticketRef.length > 40 || (ticketRef && !/^[A-Za-z0-9][A-Za-z0-9._:-]{0,39}$/u.test(ticketRef))) return null;
+  if (typeof note !== 'string' || note.length > 160 || /[\u0000-\u001f\u007f]/u.test(note)
+      || /@|https?:\/\/|(?:\d+\.){3,}\d+|MEDIQ-SYN|(?:1\.){2,}\d{1,3}/iu.test(note)) return null;
+  return { source: body.source, eventRef: body.eventRef, status: body.status, ticketRef, note: note.trim() };
 }
 
 function principalActorId(principal) {

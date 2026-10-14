@@ -47,6 +47,10 @@
 #patient-health-helper .helper-source-list-item{margin:3px 0}
 #patient-health-helper .helper-source-terms{font-size:13px;color:#3566b8;text-decoration:underline}
 #patient-health-helper .helper-source-card a:focus-visible{outline:3px solid #3566b8;outline-offset:3px}
+#patient-health-helper .helper-scenario-evidence{margin:12px 0;padding:0 12px;border:1px solid #d4dfe9;border-radius:14px;background:#fafcf8;overflow-wrap:anywhere}
+#patient-health-helper .helper-scenario-evidence .helper-note{margin:8px 0;font-size:13px;line-height:1.6}
+#patient-health-helper .helper-scenario-evidence-list{margin:4px 0;padding-left:22px;line-height:1.6}
+#patient-health-helper .helper-scenario-evidence-item{margin:4px 0}
 /* The topic spans the workspace; paper notes own the sage space. */
 #patient-health-helper .helper-heading{margin-bottom:22px}
 #patient-health-helper .helper-heading h1{font-size:clamp(28px,2.6vw,38px);margin:8px 0 12px;letter-spacing:-.045em}

@@ -58,6 +58,9 @@ const MEDICAL_TEST_PATHS=new Set(['obesity-screening','measuring-blood-pressure'
  'hepatitis-testing','lung-function-tests','dental-exam','alpha-fetoprotein-afp-tumor-marker-test','sonogram',
  'how-to-understand-your-lab-results','liver-function-tests'].map(p=>`/lab-tests/${p}/`));
 const EXPLICIT_MEDICAL_TOPIC = /\b(?:AFP|AST|SGOT|ALT|SGPT|GGT|GTP|CT|MRI|BMI|eGFR|A1C)\b|간\s*초음파|초음파|컴퓨터\s*단층|엑스레이|X[- ]?선|혈압|혈당|체중|허리둘레|크레아티닌|헤모글로빈|혈색소|콜레스테롤|중성지방|요단백|간염|폐기능|시력|청력|구강검진|건강검진/iu;
+const SCENARIO_RECORD_LABELS = Object.freeze({
+  CHECKUP: '간 관련 건강검진', AFP: '혈청 AFP', ULTRASOUND: '간 초음파',
+});
 export function createPatientHelper(root, {navigate, ask, getRecords, getComparisons, recordStatus, retryRecords, surface = 'web'} = {}) {
   if (!root) return;
   const node = (tag, cls, text) => {
@@ -69,8 +72,8 @@ export function createPatientHelper(root, {navigate, ask, getRecords, getCompari
     const el = node('button', cls, label); el.type = 'button'; el.addEventListener('click', action); return el;
   };
   const header = node('header', 'helper-heading');
-  header.append(node('p', 'helper-eyebrow', 'Medi Q 건강도우미'), node('h1', '', '내 기록을 알기 쉽게'),
-    node('p', '', '검사 변화를 확인하고, 다음 진료 질문을 준비해요.'));
+  header.append(node('h1', '', '건강도우미'),
+    node('p', '', '내 기록을 알기 쉽게, 다음 진료를 준비해요.'));
   header.append(button('↻ 새 대화', () => newConversation(), 'helper-button helper-new-chat'));
   const grid = node('div', 'helper-grid');
   const chat = node('section', 'helper-conversation');
@@ -281,6 +284,30 @@ export function createPatientHelper(root, {navigate, ask, getRecords, getCompari
       if (sequence !== generation) return;
       answers.append(node('p', 'helper-answer', surface === 'mobile' && result.status === 'VISIT_PREPARATION'
         ? result.answer.replace('오른쪽에서', '아래 메모에서') : result.answer));
+      const evidence = result.status === 'SYNTHETIC_SCENARIO' && result.synthetic === true
+        && result.generationUsed === false && result.clinicalUse === false ? result.scenarioEvidence : null;
+      if (evidence && typeof evidence.version === 'string' && evidence.version.length <= 80
+        && evidence.diagnosisOrigin === 'PRESENTATION_SETUP'
+        && typeof evidence.presentationId === 'string' && /^[A-Z0-9_-]{1,80}$/u.test(evidence.presentationId)
+        && Array.isArray(evidence.records)
+        && evidence.records.length > 0 && evidence.records.length <= 20
+        && Array.isArray(evidence.recordIds) && evidence.recordIds.length === evidence.records.length) {
+        const validRecords = evidence.records.every((record, index) => record
+          && Object.hasOwn(SCENARIO_RECORD_LABELS, record.kind)
+          && typeof record.id === 'string' && /^[A-Za-z0-9-]{1,80}$/u.test(record.id)
+          && evidence.recordIds[index] === record.id
+          && typeof record.date === 'string' && /^\d{4}-\d{2}-\d{2}$/u.test(record.date));
+        if (validRecords) {
+          const panel = node('details', 'helper-evidence-drawer helper-scenario-evidence');
+          const summary = node('summary', '', `합성 기록 근거 · ${evidence.records.length}건`);
+          panel.append(summary, node('p', 'helper-note', `자료 버전: ${evidence.version}`));
+          const list = node('ul', 'helper-scenario-evidence-list');
+          for (const record of evidence.records)
+            list.append(node('li', 'helper-scenario-evidence-item', `${SCENARIO_RECORD_LABELS[record.kind]} · ${record.date} · 기록 ID ${record.id}`));
+          panel.append(list, node('p', 'helper-note', `간암 전원 설정: ${evidence.presentationId} · PRESENTATION_SETUP. 검사·영상 기록에서 도출된 진단이 아닙니다.`));
+          answers.append(panel);
+        }
+      }
       const claimEvidence = Array.isArray(result.claimEvidence)
         ? result.claimEvidence.filter(item => typeof item?.text === 'string' && typeof item?.quote === 'string') : [];
       if (claimEvidence.length) {
@@ -322,11 +349,15 @@ export function createPatientHelper(root, {navigate, ask, getRecords, getCompari
       }
       if (result.status === 'GENERATED' || result.status === 'VISIT_PREPARATION') setSuggestions(result.questions, true);
       if (result.status === 'SOURCE_GUIDANCE') setSuggestions(result.questions ?? QUESTION_TEMPLATES, false);
+      if (result.status === 'RETRIEVED') setSuggestions(result.questions ?? QUESTION_TEMPLATES, false);
       askStatus.textContent = result.status === 'VISIT_PREPARATION' ? '로컬 Qwen 질문 추천 · 공식 원문은 AI 입력으로 사용하지 않습니다 · 개인 기록 해석 아님.'
-        : result.status === 'GENERATED' ? '공개 근거 기반 설명 · 개인 기록 해석이 아닙니다.'
-        : result.status === 'SOURCE_GUIDANCE' ? '원문 링크 안내 · AI 생성 답변 아님 · 질문은 프로젝트 예시입니다.'
-        : result.status === 'REFUSED' ? '개인 진단이나 암 확정 요청에는 답하지 않습니다.'
-        : result.status === 'PERSONAL_INPUT_NOT_SUPPORTED' ? '이 후보에는 개인 정보나 수치를 입력할 수 없습니다.'
+        : result.status === 'GENERATED' ? result.profile === 'SCHOOL_DEMO_TRANSLATION_RAG'
+          ? '한국어 번역 근거 기반 AI 답변 · 학교 발표용 비임상 안내.' : '공개 근거 기반 설명 · 개인 기록 해석이 아닙니다.'
+        : result.status === 'RETRIEVED' ? '한국어 번역 근거 검색 답변 · 학교 발표용 비임상 안내.'
+        : result.status === 'SYNTHETIC_SCENARIO' ? '합성 발표 시나리오의 출처 설명 · AI 생성 및 임상 해석 아님.'
+        : result.status === 'SOURCE_GUIDANCE' ? (result.profile === 'SCHOOL_DEMO_TRANSLATION_RAG' ? '관련 원문 자료 안내 · 학교 발표용 건강 정보' : '원문 링크 안내 · AI 생성 답변 아님 · 질문은 프로젝트 예시입니다.')
+        : result.status === 'REFUSED' ? '진단·치료·약물이나 개별 운동 권고는 제공하지 않아요. 담당 의료진과 상담해 주세요.'
+        : result.status === 'PERSONAL_INPUT_NOT_SUPPORTED' ? '개인 식별정보나 검사 수치는 입력할 수 없습니다. 일반 검사명으로 질문해 주세요.'
         : result.status === 'INSUFFICIENT_EVIDENCE' ? '질문에 답할 근거가 부족해요. 현재 지원하는 주제를 확인해 주세요.'
         : '현재 답변 가능한 범위를 확인해 주세요.';
     } catch (error) {
@@ -345,7 +376,7 @@ export function createPatientHelper(root, {navigate, ask, getRecords, getCompari
   pocket.append(status, undo, form,
     button('질문 모아보기 ↗', () => { notesList.replaceChildren(); for (const question of questions) notesList.append(node('li', '', question.text)); if (!questions.length) notesList.append(node('li', '', '아직 담은 질문이 없어요.')); notesDialog.showModal(); }),
     node('p', 'helper-note', '이 페이지에서만 유지됩니다. 새로고침하면 삭제돼요.'));
-  chat.append(jump, node('p', 'helper-disclaimer', '진료 질문을 준비하는 도우미입니다. 진단·처방은 제공하지 않습니다. 개인정보는 입력하지 마세요. 정리된 검사 주제·질문 의도만 AI에 전달하며 기록 수치·식별정보와 공식 원문 본문은 전달하지 않습니다.'));
+  chat.append(jump, node('p', 'helper-disclaimer', '학교 발표용 건강 정보 안내와 진료 질문 준비를 돕습니다. 진단·처방은 제공하지 않습니다. 개인정보는 입력하지 마세요. 검사 주제와 한국어 설명 근거를 사용하며 개인 기록 수치·식별정보는 AI에 전달하지 않습니다.'));
   const workspace=node('div','helper-workspace');workspace.append(comparison,chat);
   grid.append(workspace, pocket); root.replaceChildren(header, context, grid, notesDialog); render(); refresh(); setStage(0);
   return {refresh,selectMetric(label){const metric=metrics.find(m=>m.title===label);if(!metric)return;recordSelect.value=metric.id;newConversation();drawComparison(true);}, reset() { generation++; controller?.abort(); askButton.disabled=false; askInput.value=''; introduction.hidden=false; notesDialog.close();

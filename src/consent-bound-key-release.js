@@ -5,6 +5,15 @@ import { HCC_SOURCE_CONTRACT } from './hcc-source-contract.js';
 const fields = ["packageId", "keyId", "wrappedKeyHash", "ciphertextHash", "manifestHash", "recipientHospitalId"];
 const digest = value => createHash("sha256").update(value).digest("hex");
 const keyPattern = /^https:\/\/[a-z0-9][a-z0-9-]{1,22}[a-z0-9]\.vault\.azure\.net\/keys\/[A-Za-z0-9-]{1,127}\/[a-f0-9]{32}$/u;
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
+
+function transferJobBinding(input) {
+  if (!input || Object.keys(input).sort().join() !== ["jobId", "itemId", "leaseId"].sort().join()
+      || ![input.jobId, input.itemId, input.leaseId].every(value => typeof value === "string" && UUID.test(value))) {
+    throw new Error("KEY_RELEASE_BINDING_INVALID");
+  }
+  return Object.freeze({ jobId: input.jobId, itemId: input.itemId, leaseId: input.leaseId });
+}
 
 function binding(input, configuration) {
   if (!input || Object.keys(input).sort().join() !== [...fields].sort().join()
@@ -19,7 +28,7 @@ function binding(input, configuration) {
  * Repository must durably persist metadata and atomically consume releases.
  */
 export class ConsentBoundKeyRelease {
-  constructor({ service, repository, configuration }) {
+  constructor({ service, repository, transferJobRepository = null, configuration }) {
     if (!service || repository?.persistent !== true || !["create", "read", "consume"].every(name => typeof repository[name] === "function")
       || !keyPattern.test(configuration?.keyId)
       || ![configuration?.sourceHospitalId, configuration?.recipientHospitalId].every(value => typeof value === "string" && /^[A-Za-z0-9_-]{1,128}$/u.test(value))
@@ -27,6 +36,7 @@ export class ConsentBoundKeyRelease {
     parseDataPlaneRequest({ method: "GET", path: "/dicomweb/studies" }, configuration.publicBaseUrl);
     this.service = service;
     this.repository = repository;
+    this.transferJobRepository = transferJobRepository;
     this.configuration = Object.freeze({ ...configuration });
   }
 
@@ -75,6 +85,7 @@ export class ConsentBoundKeyRelease {
       const { releaseId, receipt, packageBinding, phase, authenticatedHospitalId, evidence } = input;
       if (this.configuration.pacsImportEnabled !== true || authenticatedHospitalId !== 'HOSP-B'
         || !/^[a-f0-9-]{36}$/u.test(releaseId) || !['BEFORE_IMPORT', 'PACS_VERIFIED'].includes(phase)) throw new Error('KEY_RELEASE_PRINCIPAL_INVALID');
+      const transfer = input.transferJob === undefined ? null : transferJobBinding(input.transferJob);
       const snapshot = binding(packageBinding, this.configuration);
       const record = await this.repository.read(releaseId);
       if (!record?.consumed || record.receiptHash !== digest(receipt ?? '')
@@ -89,6 +100,24 @@ export class ConsentBoundKeyRelease {
         || authority.route.seriesInstanceUid !== HCC_SOURCE_CONTRACT.seriesUid
         || !/^[a-f0-9]{64}$/u.test(evidence.sha256) || !Number.isSafeInteger(evidence.bytes) || evidence.bytes < 132 || evidence.bytes > 8388608
         || (phase === 'BEFORE_IMPORT' ? evidence.orthancId !== null : !/^[a-f0-9]{8}(?:-[a-f0-9]{8}){4}$/u.test(evidence.orthancId))) throw new Error('KEY_RELEASE_BINDING_INVALID');
+      if (transfer) {
+        if (!this.transferJobRepository || typeof this.transferJobRepository.assertActiveLease !== 'function'
+            || typeof this.transferJobRepository.recordVerifiedReceipt !== 'function') throw new Error('KEY_RELEASE_BINDING_INACTIVE');
+        const consent = this.service.store.get('consents').find(item => item.consentId === authority.grant.consentId);
+        if (!consent || this.service.effectiveConsentStatus(consent) !== 'ACTIVE'
+            || consent.permission !== 'DOWNLOAD_ALLOWED' || consent.targetHospitalId !== authenticatedHospitalId
+            || consent.sourceHospitalId !== authority.grant.sourceHospitalId
+            || consent.purpose !== authority.grant.purpose) throw new Error('KEY_RELEASE_POLICY_DENIED');
+        const claim = { ...transfer, actorId: authority.grant.doctorId,
+          sourceHospitalId: authority.grant.sourceHospitalId, targetHospitalId: authenticatedHospitalId,
+          consentId: authority.grant.consentId, purpose: authority.grant.purpose,
+          permission: consent.permission, validUntil: consent.validUntil,
+          studyInstanceUid: authority.route.studyInstanceUid,
+          seriesInstanceUid: authority.route.seriesInstanceUid, sopInstanceUid: authority.route.sopInstanceUid };
+        if (phase === 'BEFORE_IMPORT') await this.transferJobRepository.assertActiveLease(claim);
+        else await this.transferJobRepository.recordVerifiedReceipt({ ...claim,
+          sha256: evidence.sha256, destinationSopInstanceUid: authority.route.sopInstanceUid });
+      }
       await this.service.writeAudit({ actorType: 'GATEWAY', actorId: `b-pacs:${releaseId}`, hospitalId: 'HOSP-B',
         action: phase === 'BEFORE_IMPORT' ? 'PACS_IMPORT_AUTHORIZED' : 'PACS_INSTANCE_VERIFIED', result: 'SUCCESS',
         reason: JSON.stringify({ verification: 'AUTHENTICATED_B_REPORT', ...evidence }),

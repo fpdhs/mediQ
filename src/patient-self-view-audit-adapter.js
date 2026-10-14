@@ -5,7 +5,7 @@ import { PatientSelfViewGrantRepository } from './patient-self-view-grant-reposi
 
 // Explicit single-writer capstone adapter, not API HA. Shares the legacy save
 // queue and audit construction; publishes memory only after confirmed COMMIT.
-export function createPatientSelfViewPersistence({ store, pool, enabled = false, singleWriter = false, clock = Date.now }) {
+export function createPatientSelfViewPersistence({ store, pool, enabled = false, singleWriter = false, clock = Date.now, resolveEntraOwnership = null }) {
   if (typeof store?.runExclusive !== 'function' || typeof store?.insertAuditLogs !== 'function')
     throw new Error('AUTHORITY_PERSISTENCE_UNAVAILABLE');
   return Object.freeze({
@@ -14,7 +14,7 @@ export function createPatientSelfViewPersistence({ store, pool, enabled = false,
       return store.runExclusive(async () => {
         await store.saveNow(); // Flush earlier mutations before reading the head.
         let committedAudit;
-        const repository = new PatientSelfViewGrantRepository({ pool, enabled: true, clock,
+        const repository = new PatientSelfViewGrantRepository({ pool, enabled: true, clock, resolveEntraOwnership,
           appendAudit: async (tx, event) => {
             await tx.query({text:'SELECT public.capstone_patient_lock_audit()'});
             const result = await tx.query({text:'SELECT audit_id,previous_hash,record_hash FROM audit_logs'});

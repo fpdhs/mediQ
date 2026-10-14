@@ -10,7 +10,7 @@ import { authorizeDataPlane } from '../src/data-plane-authorization.js';
 import { ConsentBoundKeyRelease } from '../src/consent-bound-key-release.js';
 import { HCC_SOURCE_CONTRACT as fixed } from '../src/hcc-source-contract.js';
 
-async function fixture(t) {
+async function fixture(t, { transferJobRepository = null } = {}) {
   const dir = await mkdtemp(path.join(tmpdir(), 'hp-b-pacs-authority-'));
   t.after(() => rm(dir, { recursive: true, force: true }));
   const store = new JsonStore(path.join(dir, 'db.json')); await store.load();
@@ -46,7 +46,7 @@ async function fixture(t) {
   const records = new Map();
   const repository = { persistent: true, async create(row) { records.set(row.releaseId, row); }, async read(id) { return records.get(id); },
     async consume(id) { const row = records.get(id); if (row.consumed) return false; row.consumed = true; return true; } };
-  const policy = new ConsentBoundKeyRelease({ service, repository, configuration: config });
+  const policy = new ConsentBoundKeyRelease({ service, repository, transferJobRepository, configuration: config });
   const packageBinding = { packageId: 'fixture-pacs-package', keyId: config.keyId, wrappedKeyHash: 'a'.repeat(64),
     ciphertextHash: 'b'.repeat(64), manifestHash: 'c'.repeat(64), recipientHospitalId: 'HOSP-B' };
   const receipt = granted.body.receipt, prepared = await policy.prepare({ receipt, packageBinding });
@@ -63,6 +63,36 @@ test('POST DPoP authorizes fixed B import and produces correlated B report audit
   assert.equal(await f.policy.authorizeImport({ ...f.context, phase: 'PACS_VERIFIED', evidence }), true);
   const audit = f.store.get('auditLogs').find(x => x.action === 'PACS_INSTANCE_VERIFIED');
   assert.equal(audit.studyInstanceUid, fixed.studyUid); assert.ok(audit.auditSessionId); assert.match(audit.reason, /AUTHENTICATED_B_REPORT/);
+});
+
+test('authenticated B PACS verification completes only the exact claimed job item', async t => {
+  const calls = { claims: [], receipts: [] };
+  const transferJobRepository = {
+    async assertActiveLease(input) { calls.claims.push(input); return true; },
+    async recordVerifiedReceipt(input) { calls.receipts.push(input); return { accepted: true }; },
+  };
+  const f = await fixture(t, { transferJobRepository });
+  const transferJob = { jobId: randomUUID(), itemId: randomUUID(), leaseId: randomUUID() };
+  const evidence = { ...f.evidence, orthancId: null };
+  assert.equal(await f.policy.authorizeImport({ ...f.context, transferJob, phase: 'BEFORE_IMPORT', evidence }), true);
+  assert.equal(calls.claims.length, 1);
+  assert.equal(calls.claims[0].actorId, 'DOC-B-01');
+  assert.equal(calls.claims[0].consentId, f.consent.consentId);
+  assert.equal(calls.claims[0].permission, 'DOWNLOAD_ALLOWED');
+  const verified = { ...evidence, orthancId: '12345678-12345678-12345678-12345678-12345678' };
+  assert.equal(await f.policy.authorizeImport({ ...f.context, transferJob, phase: 'PACS_VERIFIED', evidence: verified }), true);
+  assert.equal(calls.receipts.length, 1);
+  assert.equal(calls.receipts[0].jobId, transferJob.jobId);
+  assert.equal(calls.receipts[0].destinationSopInstanceUid, fixed.sopUid ?? f.input.path.split('/').at(-2));
+  assert.equal(calls.receipts[0].sha256, verified.sha256);
+  assert.equal(f.store.get('auditLogs').some(row => row.action === 'PACS_INSTANCE_VERIFIED'), true);
+});
+
+test('transfer completion report fails closed when the durable job lease is unavailable', async t => {
+  const f = await fixture(t);
+  const transferJob = { jobId: randomUUID(), itemId: randomUUID(), leaseId: randomUUID() };
+  await assert.rejects(f.policy.authorizeImport({ ...f.context, transferJob, phase: 'BEFORE_IMPORT', evidence: f.evidence }), /KEY_RELEASE_/);
+  assert.equal(f.store.get('auditLogs').some(row => row.action === 'PACS_IMPORT_AUTHORIZED'), false);
 });
 
 test('import feature-off, Bearer, missing proof, tampered token and DPoP replay deny', async t => {

@@ -18,7 +18,10 @@ export function createKeyReleaseHttpHandler(options) {
     }
     const body = await readJson(request, { maxBytes: 32768, strictUtf8: true });
     const expected = preparing ? ["receipt", "packageBinding"] : wrapping ? ["receipt", "packageId", "keyId"] : importing ? ['receipt', 'packageBinding', 'releaseId', 'phase', 'evidence'] : ["receipt", "packageBinding", "releaseId", "phase"];
-    if (!body || Object.keys(body).sort().join() !== expected.sort().join()) {
+    const keys = body && Object.keys(body).sort().join();
+    const expectedKeys = expected.slice().sort().join();
+    const expectedTransferKeys = importing ? [...expected, "transferJob"].sort().join() : null;
+    if (!body || (keys !== expectedKeys && keys !== expectedTransferKeys)) {
       sendJson(response, 400, { error: "KEY_RELEASE_REQUEST_INVALID" }); return true;
     }
     try {

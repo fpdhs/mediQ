@@ -3,6 +3,7 @@ import {HCC_PATIENT_ID} from './capstone-hcc-catalog.js';
 import {AuthError} from './auth.js';
 import {HelperError} from './health-helper-rag.js';
 import {sendJson} from './http-utils.js';
+import {Role} from './domain.js';
 export const SHARED_HEALTH_PATH='/api/v1/clinician/health-records';
 export function validateHealthRecordSelection(input){
   if(input.healthRecordIds===undefined)return null;
@@ -16,7 +17,7 @@ export function validateHealthRecordSelection(input){
 export function healthRecordScope(ids){return ids?.length?{version:SYNTHETIC_HEALTH_VERSION,ids:[...ids]}:null;}
 export function authorizeSharedHealth(principal,consent,doctors,now=Date.now()){
   if(principal.role!=='DOCTOR'||!principal.doctorId||!principal.hospitalId)throw new HelperError(403,'HEALTH_RECORD_DOCTOR_REQUIRED');
-  const doctor=doctors.find(d=>d.doctorId===principal.doctorId&&d.hospitalId===principal.hospitalId&&d.roles?.includes('DOCTOR'));
+  const doctor=doctors.find(d=>d.doctorId===principal.doctorId&&d.hospitalId===principal.hospitalId&&d.roles?.includes(Role.DOCTOR));
   if(!doctor)throw new HelperError(403,'DOCTOR_HOSPITAL_MISMATCH');
   if(!consent)throw new HelperError(403,'ACCESS_DENIED_NO_CONSENT');
   if(consent.targetHospitalId!==principal.hospitalId)throw new HelperError(403,'HOSPITAL_MISMATCH');
@@ -38,7 +39,7 @@ export function createSharedHealthHandler({authenticate,requestMeta,audit,consen
       if(requireTrustedIngress&&!requestMeta(request,principal).ingressTrusted)throw new HelperError(403,'TRUSTED_INGRESS_REQUIRED');
       if(request.method!=='GET')throw new HelperError(405,'METHOD_NOT_ALLOWED');
       if(!eligible())throw new HelperError(403,'HEALTH_RECORD_SCENARIO_REQUIRED');
-      if(principal.role!=='DOCTOR'||!doctors().some(d=>d.doctorId===principal.doctorId&&d.hospitalId===principal.hospitalId&&d.roles?.includes('DOCTOR')))throw new HelperError(403,'HEALTH_RECORD_DOCTOR_REQUIRED');
+      if(principal.role!=='DOCTOR'||!doctors().some(d=>d.doctorId===principal.doctorId&&d.hospitalId===principal.hospitalId&&d.roles?.includes(Role.DOCTOR)))throw new HelperError(403,'HEALTH_RECORD_DOCTOR_REQUIRED');
       const activeHospital=id=>hospitals().some(h=>h.hospitalId===id&&h.status==='ACTIVE');
       if(!activeHospital(principal.hospitalId))throw new HelperError(403,'HOSPITAL_NOT_ACTIVE');
       if([...url.searchParams.keys()].some(k=>!['consentId','purpose'].includes(k))||[...url.searchParams.keys()].some(k=>url.searchParams.getAll(k).length!==1)||request.headers['transfer-encoding']||Number(request.headers['content-length']||0)>0)throw new HelperError(422,'HEALTH_RECORD_INPUT_INVALID');

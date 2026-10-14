@@ -27,9 +27,9 @@ test("dashboard preserves explicit revoked/expired flow instead of silently usin
 test("patient dashboard never requests privileged audit, detection or quarantine feeds", async () => {
   const source = readFileSync(new URL("../public/app.js", import.meta.url), "utf8");
   const start = source.indexOf("async function fetchDashboardSnapshot(options = {})");
-  const prefix = source.slice(start, source.indexOf("  lastStudies =", start));
+  const prefix = source.slice(start, source.indexOf("  lastConsents =", start));
   let requested;
-  const context = vm.createContext({ URLSearchParams, currentPersona: "PATIENT", auditResultFilter:null, auditActionFilter:null,
+  const context = vm.createContext({ URLSearchParams, capstoneAuth:null, currentPersona: "PATIENT", auditResultFilter:null, auditActionFilter:null,
     demo:{patientId:"synthetic"}, latestConsentId:null, consentViewRevision:0, dashboardRequestSequence:0, dashboardAppliedSequence:0,
     fetchDashboardReads:async paths=>{requested=paths;return [{status:"UP"},[],[]];} });
   await vm.runInContext(prefix + "\nreturn; }\nfetchDashboardSnapshot()", context);
@@ -39,8 +39,8 @@ test("patient dashboard never requests privileged audit, detection or quarantine
 test("a failed patient list response is never rendered as a successful zero count", async () => {
   const source = readFileSync(new URL("../public/app.js", import.meta.url), "utf8");
   const start = source.indexOf("async function fetchDashboardSnapshot(options = {})");
-  const prefix = source.slice(start, source.indexOf("  lastStudies =", start));
-  const context = vm.createContext({ URLSearchParams, currentPersona: "PATIENT", auditResultFilter:null, auditActionFilter:null,
+  const prefix = source.slice(start, source.indexOf("  lastConsents =", start));
+  const context = vm.createContext({ URLSearchParams, capstoneAuth:null, currentPersona: "PATIENT", auditResultFilter:null, auditActionFilter:null,
     demo:{patientId:"synthetic"}, latestConsentId:null, consentViewRevision:0, dashboardRequestSequence:0, dashboardAppliedSequence:0,
     fetchDashboardReads:async()=>[{status:"UP"},{error:"FORBIDDEN"},[]] });
   await assert.rejects(vm.runInContext(prefix + "\nreturn; }\nfetchDashboardSnapshot()", context), /PATIENT_SNAPSHOT_UNAVAILABLE/);
@@ -92,10 +92,10 @@ test("revocation UI acknowledges only the exact server-confirmed consent, never 
 test("dashboard discards a delayed snapshot captured before the selected consent changed", async () => {
   const source = readFileSync(new URL("../public/app.js", import.meta.url), "utf8");
   const start = source.indexOf("async function fetchDashboardSnapshot(options = {})");
-  const prefix = source.slice(start, source.indexOf("  lastStudies =", start));
+  const prefix = source.slice(start, source.indexOf("  lastConsents =", start));
   let release;
   const pending = new Promise(resolve => { release = resolve; });
-  const context = vm.createContext({ URLSearchParams, currentPersona: "PATIENT", auditResultFilter: null, auditActionFilter: null,
+  const context = vm.createContext({ URLSearchParams, capstoneAuth:null, currentPersona: "PATIENT", auditResultFilter: null, auditActionFilter: null,
     demo: { patientId: "synthetic" }, latestConsentId: "old", consentViewRevision: 0, dashboardRequestSequence: 0, dashboardAppliedSequence: 0,
     fetchDashboardReads: async paths => { await pending; return paths.map(() => []); } });
   const result = vm.runInContext(prefix + "\nreturn 'SNAPSHOT_APPLIED'; }\nfetchDashboardSnapshot()", context);
@@ -107,11 +107,11 @@ test("dashboard discards a delayed snapshot captured before the selected consent
 test("dashboard ignores older responses and pre-revocation snapshots even when consent ID is unchanged", async () => {
   const source = readFileSync(new URL("../public/app.js", import.meta.url), "utf8");
   const start = source.indexOf("async function fetchDashboardSnapshot(options = {})");
-  const prefix = source.slice(start, source.indexOf("  lastStudies =", start));
+  const prefix = source.slice(start, source.indexOf("  lastConsents =", start));
   for (const staleCause of ["revision", "sequence"]) {
     let release;
     const pending = new Promise(resolve => { release = resolve; });
-    const context = vm.createContext({ URLSearchParams, currentPersona: "PATIENT", auditResultFilter: null, auditActionFilter: null,
+    const context = vm.createContext({ URLSearchParams, capstoneAuth:null, currentPersona: "PATIENT", auditResultFilter: null, auditActionFilter: null,
       demo: { patientId: "synthetic" }, latestConsentId: "same", consentViewRevision: 0,
       dashboardRequestSequence: 0, dashboardAppliedSequence: 0, fetchDashboardReads: async paths => { await pending; return paths.map(() => []); } });
     const result = vm.runInContext(prefix + "\nreturn 'SNAPSHOT_APPLIED'; }\nfetchDashboardSnapshot()", context);

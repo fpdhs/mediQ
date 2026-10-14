@@ -84,6 +84,30 @@ test('school-demo generation maps every answer sentence to an exact retrieved qu
  for(const bad of [missingQuote,appended,wrongReference,outOfRange,negativeIndex,fractionalIndex,repeatedIndex,skippedSentence,reversedSentences,multipleEvidenceClaims])
   assert.throws(()=>validateEducationOutput(bad,r),/EDUCATION_OUTPUT_REJECTED/u);
 });
+test('school-demo rejection diagnostics distinguish citation, scope and focus failures without model text',()=>{
+ const base={...retrieveMedlineplus('빈혈',candidate()),claimEvidenceRequired:true};
+ base.evidence[0]={...base.evidence[0],text_ko:'빈혈의 개념에 관한 테스트 문장입니다. 두 번째 테스트 문장입니다.'};
+ base.evidence.push({...base.evidence[0],chunk_id:'diagnostic-second-source'});
+ const good={evidenceIds:['E1'],claimEvidence:[{evidenceId:'E1',sentenceIndexes:[0]}]};
+ const cases=[
+  [{...good,answer:'MODEL_TEXT_MUST_NOT_LEAK'},base,'OUTPUT_SCHEMA'],
+  [{...good,evidenceIds:['E1','E2']},base,'CITATION_SET_MISMATCH'],
+  [{...good,claimEvidence:[{evidenceId:'E1',sentenceIndexes:[2]}]},base,'SENTENCE_INDEX_OUT_OF_RANGE'],
+  [{...good,claimEvidence:[{evidenceId:'E1',sentenceIndexes:[1,0]}]},base,'SENTENCE_INDEX_NOT_CONSECUTIVE'],
+  [good,{...base,evidence:[{...base.evidence[0],allowedSentenceIndexes:[2]}]},'SENTENCE_INDEX_NOT_ALLOWED_FOR_RETRIEVAL'],
+  [good,{...base,focus:['TEST_FOCUS'],evidence:[{...base.evidence[0],focusSentenceIndexes:{TEST_FOCUS:[1]}}]},'FOCUS_NOT_COVERED'],
+ ];
+ for(const [value,retrieval,reasonCode] of cases){
+  assert.throws(()=>validateEducationOutput(value,retrieval),error=>{
+   assert.equal(error.message,'EDUCATION_OUTPUT_REJECTED');
+   assert.equal(error.reasonCode,reasonCode);
+   assert.equal(Object.keys(error).join(','),'reasonCode');
+   return true;
+  });
+ }
+ assert.equal(validateEducationOutput(good,base).status,'GENERATED');
+});
+
 test('source UI accepts only fixed MedlinePlus topics and rejects spoofed or held links',()=>{
  assert.equal(helperSourceUrl('https://medlineplus.gov/anemia.html'),'https://medlineplus.gov/anemia.html');
  for(const url of ['https://medlineplus.gov/highbloodpressure.html','https://medlineplus.gov/anemia.html?x=1','https://medlineplus.gov.evil/anemia.html','https://evil@medlineplus.gov/anemia.html','https://medlineplus.gov/anemia.html#x'])assert.equal(helperSourceUrl(url),null);

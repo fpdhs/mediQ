@@ -33,6 +33,8 @@
     "e2e:https": "node scripts/e2e-integration-test.js",
     "phr:verify-mapping": "node scripts/verify-phr-imaging-mapping-compose.js",
     "phr:verify-mapping:local": "node scripts/verify-phr-imaging-mapping.js",
+    "rag:mri-review-progress": "node scripts/report-health-helper-mri-review-progress.js",
+    "rag:school-demo-medical-tests:eval": "node scripts/evaluate-health-helper-school-demo-medical-tests.js",
     "compliance:evidence": "node scripts/collect-compliance-evidence.js",
     "compliance:evidence:verify": "node scripts/verify-evidence-manifest.js",
     "test:cert-fixtures": "node scripts/cert-fixture-check.js",

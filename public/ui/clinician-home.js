@@ -45,7 +45,8 @@ export function createClinicianHome(root, {onSelect, onOpen, onRefresh}) {
       const copy=node('span',undefined,'cq-copy');
       copy.append(node('strong',model.patient),node('small',`${row.study.description || '의료영상'} · ${hospital(row.study.sourceHospitalId)}`));
       const state=node('span',row.attention?row.state:'권한 확인 필요','cq-badge');state.dataset.tone=row.attention?'attention':'pending';
-      button.append(node('span',row.study.modality || 'DCM','cq-modality'),copy,state);
+      const modality=node('span',row.study.modality || 'DCM','cq-modality');modality.dataset.modality=row.study.modality || 'DCM';
+      button.append(modality,copy,state);
       button.addEventListener('click',async()=>{await onSelect(row.study.studyInstanceUid);find('cq-dossier').focus();});list.append(button);
     }
     if (!rows.length) list.append(node('p','조건에 맞는 검사가 없습니다.','cq-empty'));

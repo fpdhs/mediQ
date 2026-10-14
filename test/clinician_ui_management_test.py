@@ -30,7 +30,9 @@ class UnifiedUiTests(unittest.TestCase):
     def test_identity_changes_when_clinician_markup_changes(self):
         html=(ROOT/'public/index.html').read_text(encoding='utf8')
         a=manager.bundle.source_identity(html)
-        b=manager.bundle.source_identity(html.replace('다음 진료, 바로 이어가세요.','다음 검사를 확인하세요.'))
+        marker='aria-label="의료진 컨텍스트"'
+        self.assertEqual(html.count(marker),1)
+        b=manager.bundle.source_identity(html.replace(marker,'aria-label="의료진 검증 컨텍스트"'))
         self.assertNotEqual(a['revision'],b['revision'])
     def test_identity_does_not_depend_on_patient_markup(self):
         html=(ROOT/'public/index.html').read_text(encoding='utf8')

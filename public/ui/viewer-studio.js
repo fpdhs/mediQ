@@ -1,9 +1,35 @@
 // Presentation controls only. Access requests use the existing authorized callback.
+export function prepareImagingWorkspace(root=document){
+  const desk=root.querySelector('#clinical-desk');
+  if(!desk||desk.classList.contains('imaging-focus'))return;
+  const canvas=desk.querySelector('.mq-clinical-canvas'),copy=desk.querySelector('.desk-hero-copy'),guide=desk.querySelector('.prep-guide');
+  if(!canvas||!copy||!guide)return;
+  const doc=root.ownerDocument||root;
+  // Move existing, already-bound elements; never clone the protected viewport or its controls.
+  guide.prepend(copy);
+  for(const section of [...guide.querySelectorAll(':scope > section')]){
+    const heading=section.querySelector('h3');if(!heading)continue;
+    const details=doc.createElement('details'),summary=doc.createElement('summary');
+    summary.textContent=heading.textContent;heading.remove();details.append(summary,...section.childNodes);section.replaceChildren(details);
+  }
+  const activity=desk.querySelector('.desk-activity');
+  if(activity){const details=doc.createElement('details'),summary=doc.createElement('summary');summary.textContent='최근 접근 이력';activity.before(details);details.append(summary,activity);guide.append(details);}
+  const title=desk.querySelector('.mq-title h2');if(title)title.textContent='환자 영상';
+  desk.classList.add('imaging-focus');
+}
 export function initializeViewerStudio({ root = document, openViewer }) {
+  prepareImagingWorkspace(root);
   const find = selector => root.querySelector(selector);
   const screen = find('#viewer-screen');
   const toggle = find('#studio-info-toggle');
   const inspector = find('#studio-inspector');
+  const infoLayout=globalThis.matchMedia?.('(min-width: 1100px)');
+  if(screen&&toggle&&inspector&&infoLayout?.matches){
+    inspector.hidden=false;toggle.setAttribute('aria-expanded','true');screen.classList.add('studio-inspector-open');
+  }
+  infoLayout?.addEventListener('change',event=>{
+    if(!event.matches&&screen&&toggle&&inspector){inspector.hidden=true;toggle.setAttribute('aria-expanded','false');screen.classList.remove('studio-inspector-open');}
+  });
   for (const [id,label] of [['studio-info-toggle','검사 정보'],['tool-pan','영상 이동'],['tool-zoom','영상 확대'],['tool-ww-wl','화면 대비'],['tool-invert','명암 반전'],['tool-reset','영상 조작 초기화']]) {
     find(`#${id}`)?.setAttribute('aria-label',label);
   }

@@ -4,6 +4,8 @@ import {HealthHelperRag, AFP_SOURCE, retrieveHelperEvidence, validateHelperOutpu
 import {createAzureHelperModel} from '../src/health-helper-azure.js';
 import {retrieveHealthEducationEvidence} from '../src/health-helper-education-retrieval.js';
 import {testOnlyClearedCorpus} from './helpers/health-helper-corpus.js';
+import {createSyntheticHccProvenanceAnswer} from '../src/health-helper-synthetic-hcc-provenance.js';
+import {HCC_PATIENT_ID,HCC_PATIENT_SUBJECT} from '../src/capstone-hcc-catalog.js';
 const patient={role:'PATIENT',subject:'synthetic-account',patientId:'synthetic-patient'};
 const answer={answer:'AFP는 간질환의 경과를 살피는 혈액검사입니다. 검사기관의 참고범위를 확인하세요.',sourceIds:[AFP_SOURCE.id],questions:['다른 검사와 함께 어떻게 이해하면 되나요?']};
 test('KDCA default source guidance never calls a model or enables derivative chunks',async()=>{
@@ -83,6 +85,41 @@ test('draft educational retrieval candidates are not connected to patient-servic
 });
 test('clinical request is a policy response, not AI-generated success',async()=>{
   const f=fixture();assert.equal((await f.service.ask(patient,{question:'AFP로 암인지 진단해줘'})).status,'REFUSED');assert.equal(f.calls.length,0);
+});
+test('synthetic HCC composite question returns fixture provenance only for committed scenario patient',async()=>{
+  const hccPatient={role:'PATIENT',subject:HCC_PATIENT_SUBJECT,patientId:HCC_PATIENT_ID};
+  const question='홍길동 56세 건강검진 결과와 AFP, 간 초음파, 간암 시나리오는 어떤 관계가 있나요?';
+  assert.equal(createSyntheticHccProvenanceAnswer({principal:hccPatient,question,enabled:false,catalogCommitted:true}),null);
+  assert.equal(createSyntheticHccProvenanceAnswer({principal:hccPatient,question,enabled:true,catalogCommitted:false}),null);
+  const logs=[];let calls=0;
+  const scenario=({principal,question:input})=>createSyntheticHccProvenanceAnswer({principal,question:input,enabled:true,catalogCommitted:true});
+  const service=new HealthHelperRag({mode:'GENERATION',corpus:{version:'empty-test',sources:[],chunks:[]},audit:async row=>logs.push(row),syntheticScenario:scenario,
+    model:{generate:async()=>{calls++;return structuredClone(answer);}}});
+  const result=await service.ask(hccPatient,{question});
+  assert.equal(result.status,'SYNTHETIC_SCENARIO');assert.equal(result.recordContext,'SYNTHETIC_SCENARIO_ONLY');
+  assert.equal(result.generationUsed,false);assert.equal(result.clinicalUse,false);assert.deepEqual(result.sources,[]);
+  assert.equal(result.scenarioEvidence.recordIds.length,7);
+  assert.equal(result.scenarioEvidence.records.length,7);
+  assert.deepEqual(result.scenarioEvidence.records[0],{id:'demo-2026-10-08-CHECKUP',kind:'CHECKUP',date:'2026-10-08'});
+  assert.equal(result.scenarioEvidence.records.filter(record=>record.kind==='AFP').length,3);
+  assert.equal(result.scenarioEvidence.records.filter(record=>record.kind==='ULTRASOUND').length,3);
+  assert.equal(result.scenarioEvidence.presentationId,'HONG_GILDONG_SYNTHETIC_56');
+  assert.equal(result.scenarioEvidence.diagnosisOrigin,'PRESENTATION_SETUP');
+  assert.match(result.answer,/간 관련 건강검진 항목\(2026-10-08\): 간 효소 AST 32 U\/L, 간 효소 ALT 35 U\/L, 간 효소 γ-GTP 48 U\/L, C형간염 항체 음성/u);
+  assert.match(result.answer,/2025-10-08 6\.2 ng\/mL → 2026-04-08 8\.4 ng\/mL → 2026-10-08 24\.6 ng\/mL/u);
+  assert.match(result.answer,/2025-10-08, 2026-04-08, 2026-10-08의 세 기록이 같은 합성 예시 이미지를/u);
+  assert.match(result.answer,/이 설정은 건강검진 수치, AFP 값 또는 초음파 이미지에서 도출한 것이 아닙니다/u);
+  assert.match(result.answer,/6\.2 ng\/mL.*8\.4 ng\/mL.*24\.6 ng\/mL/u);
+  assert.match(result.answer,/실제 촬영 영상이나 판독문은 아닙니다/u);
+  assert.equal(calls,0);assert.equal(logs.at(-1).reasonCode,'HELPER_SYNTHETIC_SCENARIO_PROVENANCE');
+  assert.doesNotMatch(JSON.stringify(logs),/홍길동|24\.6|question|answer/);
+
+  const ordinaryPatient={...patient};
+  const ordinary=await service.ask(ordinaryPatient,{question});
+  assert.notEqual(ordinary.status,'SYNTHETIC_SCENARIO');assert.equal(ordinary.recordContext,'NOT_CONNECTED');
+  assert.doesNotMatch(JSON.stringify(ordinary),/24\.6|홍길동/u);
+  const clinical=await service.ask(hccPatient,{question:'AFP와 간 초음파가 간암 진단 근거인가요?'});
+  assert.equal(clinical.status,'REFUSED');assert.equal(calls,0);
 });
 test('missing deployment is explicit 503, no fake answer',async()=>{
   const f=fixture({model:null});await assert.rejects(f.service.ask(patient,{question:'AFP 설명'}),{statusCode:503,code:'HELPER_MODEL_NOT_CONFIGURED'});

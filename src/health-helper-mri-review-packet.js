@@ -16,14 +16,87 @@ const EXPECTED_CLAIMS = Object.freeze({
   'MRI-PREP-DEVICE-DISCLOSURE-001': {question:'MRI 전에 심박조율기가 있으면 의료진에게 알려야 하나요?',focus:'MRI_DEVICE_DISCLOSURE',segments:['3953-S0016','3953-S0022']},
 });
 
+const REVIEW_AXES = Object.freeze({
+  sourceSupport: {role:'SOURCE_EVIDENCE_REVIEWER', decisions:['UNASSESSED','DIRECT_SUPPORT','PARTIAL_SUPPORT','NO_SUPPORT','AMBIGUOUS']},
+  translation: {role:'TRANSLATION_REVIEWER', decisions:['UNASSESSED','FAITHFUL','CORRECTION_REQUIRED','NOT_APPLICABLE']},
+  clinical: {role:'CLINICAL_REVIEWER', decisions:['UNASSESSED','ACCEPTABLE_WITHIN_SCOPE','REVISION_REQUIRED','REJECTED']},
+  disposition: {role:'CURATION_EDITOR', decisions:['UNASSESSED','RETAIN_DRAFT','REVISE','EXCLUDE']},
+});
+const RIGHTS_REVIEW = {role:'RIGHTS_REVIEWER',decisions:['UNASSESSED','PUBLIC_DOMAIN_SCOPE_MATCH','PERMISSION_REQUIRED','LINK_ONLY','HOLD']};
+const RIGHTS_REVIEW_CONTEXT='기존 권리 범위 메모는 /lab-tests/ 후보 페이지를 대상으로 하므로 이 /mriscans.html Health Topic 요약에 대한 제품 내 저장·번역·표시 권한을 확정하지 않는다. 이 URL 및 hearing aids 연결 링크의 경계를 별도 검토할 것.';
+
 function reject(){throw new Error('HEALTH_HELPER_MRI_REVIEW_PACKET_INVALID');}
-function allUnassessed(review){
-  for(const axis of ['sourceSupport','translation','clinical','disposition']){
-    const value=review?.[axis];
-    if(value?.decision!=='UNASSESSED'||value.reviewerId!==null||value.reviewerRole!==null
-      ||value.reviewedAt!==null||value.rationale!==null)reject();
-    if(axis==='sourceSupport'&&(!Array.isArray(value.assessedSegmentIds)||value.assessedSegmentIds.length))reject();
+function validIsoDate(value){
+  if(typeof value!=='string'||!/^\d{4}-\d{2}-\d{2}$/u.test(value))return false;
+  const date=new Date(`${value}T00:00:00Z`);
+  return !Number.isNaN(date.valueOf())&&date.toISOString().slice(0,10)===value;
+}
+function validateReviewEntry(entry,rule){
+  if(!entry||!rule.decisions.includes(entry.decision))reject();
+  if(entry.decision==='UNASSESSED'){
+    if(entry.reviewerId!==null||entry.reviewerRole!==null||entry.reviewedAt!==null||entry.rationale!==null)reject();
+    return;
   }
+  if(typeof entry.reviewerId!=='string'||!/^[A-Za-z0-9._:-]{1,64}$/u.test(entry.reviewerId)
+    ||entry.reviewerRole!==rule.role||!validIsoDate(entry.reviewedAt)
+    ||typeof entry.rationale!=='string'||!entry.rationale.trim()||entry.rationale.length>1000)reject();
+}
+function validateClaimReview(review,allowedSegmentIds){
+  if(!review||Object.keys(review).length!==Object.keys(REVIEW_AXES).length)reject();
+  for(const [axis,rule] of Object.entries(REVIEW_AXES))validateReviewEntry(review[axis],rule);
+  const support=review.sourceSupport;
+  if(!Array.isArray(support.assessedSegmentIds)
+    ||new Set(support.assessedSegmentIds).size!==support.assessedSegmentIds.length
+    ||support.assessedSegmentIds.some(id=>!allowedSegmentIds.includes(id))
+    ||(support.decision==='UNASSESSED'&&support.assessedSegmentIds.length!==0)
+    ||(support.decision!=='UNASSESSED'&&support.assessedSegmentIds.length===0))reject();
+}
+function validateSourceRights(review){
+  if(!review||Object.keys(review).length!==5)reject();
+  validateReviewEntry(review,RIGHTS_REVIEW);
+}
+function reviewProgress(packet){
+  const claimAxes=Object.keys(REVIEW_AXES);
+  const cells=[...packet.claims.flatMap(claim=>claimAxes.map(axis=>claim.review[axis])),packet.source.rightsReview];
+  const axisCounts=Object.fromEntries(claimAxes.map(axis=>[axis,
+    Object.fromEntries(REVIEW_AXES[axis].decisions.map(decision=>[decision,packet.claims.filter(claim=>claim.review[axis].decision===decision).length]))]));
+  const fullyAnnotated=packet.claims.filter(claim=>claimAxes.every(axis=>claim.review[axis].decision!=='UNASSESSED')).length;
+  const unassessed=packet.claims.filter(claim=>claimAxes.every(axis=>claim.review[axis].decision==='UNASSESSED')).length;
+  const reviewed=cells.filter(cell=>cell.decision!=='UNASSESSED').length;
+  return {
+    schemaVersion:'health-helper-mri-review-progress/1',status:'REVIEW_PROGRESS_ONLY_NOT_SERVICE_APPROVED',
+    packetStatus:packet.status,claims:{total:packet.claims.length,fullyAnnotated,partiallyAnnotated:packet.claims.length-fullyAnnotated-unassessed,unassessed,decisionsByAxis:axisCounts},
+    rights:{decision:packet.source.rightsReview.decision,reviewed:packet.source.rightsReview.decision!=='UNASSESSED'},
+    reviewCells:{reviewed,total:cells.length,pending:cells.length-reviewed},serviceEligible:false,clinicalUse:false,
+    note:'Counts structurally valid review annotations only. Reviewer identity and qualifications are not authenticated; this report does not assess evidence, grant content rights, approve clinical use, or authorize patient-service deployment.',
+  };
+}
+
+export function composeHealthHelperMriReviewPacket(basePacket,overlay,basePacketSha256){
+  if(basePacket?.schemaVersion!=='health-helper-mri-list-review-packet/1'
+    ||overlay?.schemaVersion!=='health-helper-mri-review-overlay/1'
+    ||overlay.artifactId!=='health-helper-mri-list-review-overlay-2026-10-13-v2'
+    ||overlay.status!=='REVIEW_ONLY_NOT_SERVICE_APPROVED'
+    ||overlay.basePacket?.file!=='health-helper-mri-list-review-packet-2026-10-13-v1.json'
+    ||overlay.basePacket?.sha256!==basePacketSha256
+    ||!/^sha256:[a-f0-9]{64}$/u.test(basePacketSha256??'')
+    ||overlay.scope?.candidateOnly!==true||overlay.scope?.clinicalUse!==false
+    ||overlay.scope?.serviceEligible!==false||overlay.scope?.patientEndpointEnabled!==false
+    ||overlay.scope?.modelFineTuningPerformed!==false
+    ||overlay.rightsReviewContext!==RIGHTS_REVIEW_CONTEXT
+    ||!Array.isArray(overlay.claimReviews)||overlay.claimReviews.length!==Object.keys(EXPECTED_CLAIMS).length)reject();
+  const reviewByClaimId=new Map();
+  for(const record of overlay.claimReviews){
+    if(!EXPECTED_CLAIMS[record?.claimId]||reviewByClaimId.has(record.claimId))reject();
+    reviewByClaimId.set(record.claimId,record.review);
+  }
+  if(reviewByClaimId.size!==basePacket.claims?.length
+    ||basePacket.claims.some(claim=>!reviewByClaimId.has(claim.claimId)))reject();
+  return {
+    ...structuredClone(basePacket),
+    source:{...structuredClone(basePacket.source),rightsReviewContext:overlay.rightsReviewContext,rightsReview:structuredClone(overlay.rightsReview)},
+    claims:basePacket.claims.map(claim=>({...structuredClone(claim),review:structuredClone(reviewByClaimId.get(claim.claimId))})),
+  };
 }
 
 export function validateHealthHelperMriReviewPacket(packet,corpus,manifest){
@@ -40,7 +113,7 @@ export function validateHealthHelperMriReviewPacket(packet,corpus,manifest){
     ||packet.candidateInput?.fileSha256!==manifest.inputSha256)reject();
   if(packet.source?.url!=='https://medlineplus.gov/mriscans.html'
     ||packet.source?.localHtmlSnapshot!=='NOT_STORED'
-    ||packet.source?.rightsReview?.decision!=='UNASSESSED'
+    ||packet.source?.rightsReviewContext!==RIGHTS_REVIEW_CONTEXT
     ||packet.candidateInput?.recordId!=='medlineplus-health-topics-en-3953'
     ||packet.candidateInput?.recordSourceContentSha256!=='sha256:8b363d26a9359ecd7e68e9a89749192ba1215de2625f449480bb6e3128f5a454')reject();
 
@@ -72,8 +145,14 @@ export function validateHealthHelperMriReviewPacket(packet,corpus,manifest){
     if(claim.candidateDisplay?.kind!=='LIST_GUIDANCE'||claim.candidateDisplay.heading!==heading
       ||JSON.stringify(claim.candidateDisplay.items)!==JSON.stringify(items))reject();
     seen.add(claim.claimId);
-    allUnassessed(claim.review);
+    validateClaimReview(claim.review,refs);
   }
+  validateSourceRights(packet.source.rightsReview);
   return {valid:true,claimCount:packet.claims.length,segmentCount:packet.sourceSegments.length,
     status:packet.status,rightsDecision:packet.source.rightsReview.decision};
+}
+
+export function buildHealthHelperMriReviewProgress(packet,corpus,manifest){
+  validateHealthHelperMriReviewPacket(packet,corpus,manifest);
+  return reviewProgress(packet);
 }

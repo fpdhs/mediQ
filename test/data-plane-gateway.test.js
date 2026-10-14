@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { randomBytes } from "node:crypto";
-import { createDataPlaneHandler, requireHttpsOrigin, boundedHttps } from "../src/data-plane-gateway.js";
+import { createDataPlaneHandler, requireHttpsOrigin, boundedHttps, validatePacsImportTransportRequest, pacsImportTransportTimeoutMs } from "../src/data-plane-gateway.js";
 import { execFileSync } from "node:child_process";
 import { createServer } from "node:https";
 import { existsSync } from "node:fs";
@@ -13,6 +13,23 @@ const study = "1.2.410.100.1.20260620.001";
 const series = study + ".1";
 const token = randomBytes(32).toString("base64url");
 const grant = () => ({ active: true, studyInstanceUid: study, allowedSeriesUids: [series], receipt: "test-receipt", expiresAt: new Date(Date.now() + 60000).toISOString() });
+
+test('PACS import HTTPS transport is narrowly scoped to empty DPoP POSTs and bounded response/deadline', () => {
+  const path = `/dicomweb/studies/${study}/series/${series}/instances/${series}.1/import`;
+  const valid = { method: 'POST', tls: { ca: Buffer.from('test CA') }, headers: { authorization: 'DPoP synthetic.token', dpop: 'proof' },
+    timeoutMs: pacsImportTransportTimeoutMs, maxBytes: 12582912 };
+  assert.equal(validatePacsImportTransportRequest('https://10.90.88.2:9443', path, valid), true);
+  for (const [origin, pathname, options] of [
+    ['https://10.90.88.1', path, valid],
+    ['https://10.90.88.2:9443', `/dicomweb/studies/${study}`, valid],
+    ['https://10.90.88.2:9443', path, { ...valid, body: Buffer.from('not empty') }],
+    ['https://10.90.88.2:9443', path, { ...valid, timeoutMs: pacsImportTransportTimeoutMs + 1 }],
+    ['https://10.90.88.2:9443', path, { ...valid, maxBytes: 12582913 }],
+    ['https://10.90.88.2:9443', path, { ...valid, headers: { ...valid.headers, 'x-hipass-service-token': 'forbidden' } }],
+    ['https://10.90.88.2:9443', path, { ...valid, tls: {} }],
+    ['https://10.90.88.2:9443', path, { ...valid, tls: { ...valid.tls, rejectUnauthorized: false } }],
+  ]) assert.throws(() => validatePacsImportTransportRequest(origin, pathname, options), /PACS_IMPORT_TRANSPORT_SCOPE_INVALID/u);
+});
 
 async function call(transport, url = "/dicomweb/studies", extra = {}) {
   const handler = createDataPlaneHandler({ publicBaseUrl: "https://hospital-a.test", controlOrigin: "https://control.test", orthancOrigin: "https://orthanc.test", serviceToken: token, transport });
@@ -33,6 +50,55 @@ test("Gateway never fetches PACS if authorization fails or control service is un
   assert.equal(response.status, 403); assert.equal(calls, 1);
   assert.equal((await call(async () => { throw new Error("TLS failure"); })).status, 503);
   assert.throws(() => requireHttpsOrigin("http://unsafe.test"));
+});
+
+test("A Gateway rejects Import request bodies before authorization or PACS access", async () => {
+  const url = `/dicomweb/studies/${study}/series/${series}/instances/${series}.1/import`;
+  for (const headers of [
+    { "content-length": "1" },
+    { "transfer-encoding": "chunked" },
+  ]) {
+    let calls = 0, resumed = false;
+    const handler = createDataPlaneHandler({ publicBaseUrl: "https://hospital-a.test", controlOrigin: "https://control.test",
+      orthancOrigin: "https://orthanc.test", serviceToken: token,
+      transport: async () => { calls++; throw new Error("UNEXPECTED_UPSTREAM_CALL"); } });
+    const response = { destroyed: false, writeHead(status) { this.status = status; }, end(body) { this.body = body; } };
+    await handler({ method: "POST", url, headers: { authorization: "DPoP test.access.token", dpop: "test-proof", ...headers },
+      socket: { remoteAddress: "192.0.2.2" }, resume() { resumed = true; } }, response);
+    assert.equal(response.status, 400);
+    assert.equal(JSON.parse(response.body).error, "DATA_PLANE_REQUEST_BODY_NOT_ALLOWED");
+    assert.equal(resumed, true);
+    assert.equal(calls, 0);
+  }
+});
+
+test("A Gateway accepts only an empty Import POST, reads the selected WADO instance and encrypts it", async () => {
+  const url = `/dicomweb/studies/${study}/series/${series}/instances/${series}.1/import`;
+  const raw = Buffer.from("synthetic DICOM instance");
+  const calls = [];
+  const handler = createDataPlaneHandler({ publicBaseUrl: "https://hospital-a.test", controlOrigin: "https://control.test",
+    orthancOrigin: "https://orthanc.test", serviceToken: token, encryptionRequired: true,
+    imageEncryptionFactory: () => ({ async seal(input) {
+      assert.deepEqual(input.body, raw);
+      assert.equal(input.contentType, "application/dicom");
+      assert.equal(input.route.requestedAction, "DOWNLOAD");
+      return { contentType: "application/vnd.highpass.encrypted-dicom+json", body: Buffer.from("ciphertext") };
+    } }),
+    transport: async (origin, path, options) => {
+      calls.push({ origin, path, options });
+      if (origin === "https://control.test" && path.endsWith("/authorize")) return { status: 200, body: Buffer.from(JSON.stringify(grant())) };
+      if (origin === "https://control.test" && path.endsWith("/ready")) return { status: 200, body: Buffer.from('{"accepted":true}') };
+      assert.equal(origin, "https://orthanc.test");
+      assert.equal(options.method, undefined);
+      return { status: 200, contentType: "application/dicom", body: raw };
+    } });
+  const response = { destroyed: false, writeHead(status, headers) { this.status = status; this.headers = headers; }, end(body) { this.body = body; } };
+  await handler({ method: "POST", url, headers: { "content-length": "0", authorization: "DPoP test.access.token", dpop: "test-proof" },
+    socket: { remoteAddress: "192.0.2.2" }, resume() {} }, response);
+  assert.equal(response.status, 200);
+  assert.equal(response.headers["content-type"], "application/vnd.highpass.encrypted-dicom+json");
+  assert.equal(response.body.toString(), "ciphertext");
+  assert.ok(calls.some(x => x.origin === "https://orthanc.test" && x.path === `/dicom-web/studies/${study}/series/${series}/instances/${series}.1`));
 });
 
 test("required image encryption returns ciphertext only and clears A response bytes even on encryption failure", async () => {

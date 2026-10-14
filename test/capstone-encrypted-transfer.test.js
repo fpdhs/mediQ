@@ -80,6 +80,17 @@ test('POST import retains DOWNLOAD + method/path-bound crypto and one-use releas
   await assert.rejects(b.open(result, requestPath, { method: 'POST' }), /KV_POLICY_DENIED/);
 });
 
+test('encrypted import carries a validated transfer lease only in the B-side import context', async t => {
+  const { seal, b, requestPath } = await setup(t, { importing: true });
+  const transferJob = { jobId: 'a11ce000-1111-4111-8111-111111111111', itemId: 'b22ce000-2222-4222-8222-222222222222',
+    leaseId: 'c33ce000-3333-4333-8333-333333333333' };
+  const encrypted = await seal();
+  const decoded = await b.open(encrypted, requestPath, { method: 'POST', transferJob });
+  assert.deepEqual(decoded.importContext.transferJob, transferJob);
+  decoded.body.fill(0);
+  await assert.rejects(b.open(encrypted, requestPath, { method: 'POST', transferJob: { ...transferJob, leaseId: 'not-a-uuid' } }), /SCOPE_MISMATCH/);
+});
+
 test("encrypted hospital transport uses live consent wrap/pre/post authority and one-time RSA/AES roundtrip", async t => {
   const { seal, b, body, requestPath } = await setup(t);
   const ciphertext = await seal();

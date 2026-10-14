@@ -2,10 +2,27 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {webcrypto} from 'node:crypto';
 import {readFile} from 'node:fs/promises';
-import {createPatientPixelSession,capturePatientViewerFocus} from '../public/patient-pixel-viewer.js';
+import {createPatientPixelSession,capturePatientViewerFocus,patientViewerErrorMessage} from '../public/patient-pixel-viewer.js';
 const now=Date.now(),iat=Math.floor(now/1000);
 const token='header.'+Buffer.from(JSON.stringify({iat,exp:iat+300})).toString('base64url')+'.signature';
 const study={studyInstanceUid:'1.2.3',series:[{seriesInstanceUid:'1.2.3.1',description:'Series 1'}]};
+
+test('unconnected public route is distinguished from login, expiry and authorization errors',async()=>{
+ for(const [status,code,expected] of [[403,'PUBLIC_ROUTE_NOT_ENABLED','ROUTE_UNAVAILABLE'],[401,'AUTHENTICATION_REQUIRED','LOGIN_REQUIRED'],[403,'PATIENT_ACCESS_DENIED','DENIED']]){
+  const f=fixture();f.args.fetcher=async()=>Response.json({error:code},{status});
+  await assert.rejects(createPatientPixelSession(f.args),new RegExp(expected));
+ }
+ assert.match(patientViewerErrorMessage(new Error('PATIENT_VIEWER_ROUTE_UNAVAILABLE')),/로그인 문제가 아니며/);
+ assert.doesNotMatch(patientViewerErrorMessage(new Error('PATIENT_VIEWER_DENIED')),/다시 로그인/);
+});
+
+test('patient viewing room is shared, responsive and clears stale decoded pixels on expiry',async()=>{
+ const js=await readFile(new URL('../public/patient-pixel-viewer.js',import.meta.url),'utf8');
+ const css=await readFile(new URL('../public/ui/patient-pixel-viewer.css',import.meta.url),'utf8');
+ assert.match(js,/version!==generation/);assert.match(js,/sessionAbort\?\.abort\(\);clearTimeout\(timer\);clear\(\)/);
+ assert.match(js,/slider\.onchange/);assert.match(js,/aria-valuetext/);assert.match(js,/URL.revokeObjectURL/);
+ assert.match(css,/background:#000/);assert.match(css,/@media\(max-width:600px\)/);assert.match(css,/:focus-visible/);
+});
 test('viewer restores a replaced launcher only in its original container and exact Study',()=>{
   const container={id:'studies',querySelectorAll:()=>candidates};let candidates=[],focused;
   const button=(value,options={})=>({isConnected:true,disabled:false,
@@ -50,6 +67,20 @@ test('patient viewer issues a single-Series Grant then fetches actual instance p
   for(const c of f.calls){assert.equal(new URL(c.url).search,'');assert.ok(!c.url.includes(token));assert.equal(c.options.cache,'no-store');assert.ok(c.options.signal);}
   assert.equal(f.calls[1].options.headers.get('authorization'),'DPoP '+token);
   s.close();await assert.rejects(s.frame(0),/EXPIRED/);assert.equal(f.calls.length,3);
+});
+
+test('public viewer sends Entra token only to app and DPoP only to pinned B origin without cookies or redirects',async()=>{
+  const f=fixture();f.args.origin='https://highpass-demo.japaneast.cloudapp.azure.com';
+  const session=await createPatientPixelSession(f.args);await session.frame(0);
+  assert.equal(new URL(f.calls[0].url).origin,f.args.origin);
+  for(const c of f.calls.slice(1)){
+    assert.equal(new URL(c.url).origin,'https://highpass-images-b.japaneast.cloudapp.azure.com');
+    assert.equal(c.options.headers.get('authorization'),'DPoP '+token);
+    const proof=JSON.parse(Buffer.from(c.options.headers.get('dpop').split('.')[1],'base64url'));
+    assert.equal(proof.htu,c.url);
+  }
+  for(const c of f.calls){assert.equal(c.options.credentials,'omit');assert.equal(c.options.redirect,'error');}
+  session.close();
 });
 test('multi-series CT selects only a Series present in the Study and issues a separately scoped Grant',async()=>{
   const seriesUid='1.2.3.2',f=fixture({selectedSeries:seriesUid});

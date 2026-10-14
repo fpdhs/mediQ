@@ -10,7 +10,7 @@ if (conflictingModes.some(name => process.env[name] === '1')) {
 }
 
 process.env.HIPASS_HEALTH_HELPER_SCHOOL_DEMO = '1';
-process.env.HIPASS_MEDLINEPLUS_PREVIEW_PORT = '11445';
+process.env.HIPASS_MEDLINEPLUS_PREVIEW_PORT ??= '11445';
 process.env.HIPASS_MEDLINEPLUS_UPLOADED = '1';
 process.env.HIPASS_HEALTH_HELPER_SCHOOL_BIND_ADDRESS ??= '127.0.0.1';
 process.env.HIPASS_HEALTH_HELPER_SCHOOL_PUBLIC_HOST ??= '127.0.0.1';

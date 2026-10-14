@@ -108,3 +108,36 @@
  #capstone-login.mediq-wallet-login .mediq-login-entry>p:first-of-type{text-align:left;font-size:14px}
  #capstone-login.mediq-wallet-login .mediq-login-entry>.mediq-login-brand{display:none}
 }
+
+/* Mobile wallet login: retain artwork while respecting notch/gesture insets. */
+#capstone-login.mediq-mobile-login .mediq-login-back {min-height:48px;}
+#capstone-login.mediq-mobile-login {scroll-padding-top:env(safe-area-inset-top,0px);scroll-padding-bottom:env(safe-area-inset-bottom,0px);}
+#capstone-login.mediq-mobile-login .mediq-wallet-story {
+ padding-top:calc(28px + env(safe-area-inset-top,0px));
+ padding-left:max(24px,env(safe-area-inset-left,0px));
+}
+#capstone-login.mediq-mobile-login .mediq-login-entry {
+ padding-right:max(28px,env(safe-area-inset-right,0px));
+ padding-bottom:calc(32px + env(safe-area-inset-bottom,0px));
+ min-width:0;
+}
+@media(max-width:740px) {
+ #capstone-login.mediq-mobile-login .mediq-wallet-story {padding-top:calc(20px + env(safe-area-inset-top,0px));}
+ #capstone-login.mediq-mobile-login .mediq-login-entry {padding-left:max(26px,env(safe-area-inset-left,0px));padding-right:max(26px,env(safe-area-inset-right,0px));}
+}
+
+/* Security sign-in is a quiet, Entra-only doorway that keeps the patient wallet identity. */
+#capstone-login.mediq-security-login .mediq-wallet-copy h1{max-width:none;font-size:clamp(36px,4.4vw,64px);word-break:keep-all}
+#capstone-login.mediq-security-login .mediq-wallet-copy p{max-width:28ch}
+#capstone-login.mediq-security-login .mediq-security-auth-flow{margin:26px 0 8px;padding:18px 20px;border:1px solid #dce5f2;border-radius:16px;background:#f5f8fd}
+#capstone-login.mediq-security-login .mediq-security-auth-flow ol{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;list-style:none;margin:0;padding:0}
+#capstone-login.mediq-security-login .mediq-security-auth-flow li{display:grid;gap:6px;min-width:0;color:#263d5d}
+#capstone-login.mediq-security-login .mediq-security-step-number{color:#3566b8;font-size:11px;font-weight:700;letter-spacing:.08em}
+#capstone-login.mediq-security-login .mediq-security-auth-flow li strong{font-size:13px;font-weight:650;word-break:keep-all}
+#capstone-login.mediq-security-login .mediq-security-auth-flow p{margin:14px 0 0;padding-top:12px;border-top:1px solid #dce5f2;color:#53657d;font-size:12px;line-height:1.6}
+#capstone-login.mediq-security-login .mediq-login-back{font-size:12px;color:#3566b8;text-decoration:underline;text-underline-offset:3px}
+@media(max-width:740px){
+ #capstone-login.mediq-security-login .mediq-security-auth-flow{margin-top:20px;padding:16px}
+ #capstone-login.mediq-security-login .mediq-security-auth-flow ol{gap:5px}
+ #capstone-login.mediq-security-login .mediq-security-auth-flow li strong{font-size:12px}
+}

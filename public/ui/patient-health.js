@@ -192,7 +192,7 @@ export function createPatientHealth({root,onView,onShare,openPreview,onCompare,o
     const heading=el('header','health-heading');
     if(onHome)heading.append(action('‹ 내 지갑으로',onHome,'health-wallet-back'));
     const symbol=el('span','health-sheet-symbol');symbol.append(createWalletIcon('records'));symbol.setAttribute('aria-hidden','true');
-    heading.append(symbol,el('h1','',patientName()?`${patientName()}님의 건강기록`:'내 건강기록'),el('p','health-intro','검사부터 건강검진까지, 한곳에서 확인하세요.'));
+    heading.append(symbol,el('h1','','내 건강기록'),el('p','health-intro','영상부터 건강검진까지 한곳에서 확인하세요.'));
     const compare=action('검사 변화 비교',()=>onCompare?.('혈청 AFP'),'health-compare-button');compare.disabled=!onCompare||!rows.some(r=>r.kind==='AFP');heading.append(compare);main.append(heading);
     const tools=el('div','health-tools');
     for(const [key,label]of [['ALL','전체'],['DICOM','의료영상'],['CHECKUP','건강검진'],['BLOOD','혈액검사'],['ULTRASOUND','초음파']]){const b=action(label,()=>{filter=key;detailOpened=false;draw();},'health-filter');b.setAttribute('aria-pressed',String(filter===key));tools.append(b);}

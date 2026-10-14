@@ -2,7 +2,7 @@
 // Security Principle: Only static client assets (HTML, CSS, JS, Icons) are cached.
 // Sensitive clinical data and API endpoints (/api/*) are NEVER stored in cache.
 
-const CACHE_NAME = "hipass-mediq-shell-v39";
+const CACHE_NAME = "hipass-mediq-shell-v49";
 
 const APP_SHELL_ASSETS = [
   "/mobile/",
@@ -17,6 +17,8 @@ const APP_SHELL_ASSETS = [
   "/ui/brand.css",
   "/brand/mediq-source.png",
   "/mobile/app.js",
+  "/login-navigation.js",
+  "/auth-boot.css",
   "/mobile/health-helper.js",
   "/mobile/health-helper.css",
   "/ui/patient-helper.js",
@@ -51,6 +53,7 @@ const APP_SHELL_ASSETS = [
   "/images/mediq-wallet-leather-v1.webp",
   "/images/mediq-synthetic-abdominal-ct.png",
   "/patient-pixel-viewer.js",
+  "/ui/patient-pixel-viewer.css",
   "/mobile/manifest.json",
   "/mobile/icon-192.png",
   "/mobile/icon-512.png",

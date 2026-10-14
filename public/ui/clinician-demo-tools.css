@@ -1,3 +1,79 @@
+.mq-demo-tools[hidden] { display:none!important; }
+/* Keep the shared drawer independent from role-specific glass workspace styles. */
+body:has(#hospital-saas-app) #clinician-tools.shared-demo-tools.demo-menu-redesign[aria-labelledby] { inset:0 0 0 auto;width:min(460px,100vw);max-width:100vw;height:100dvh;max-height:100dvh;border:0;border-left:1px solid #d3dfed;border-radius:0;padding:24px;background:#fafbfc;backdrop-filter:none; }
+body:has(#hospital-saas-app) #clinician-tools.shared-demo-tools.demo-menu-redesign .demo-tools-heading { border:0;padding:0; }
+body:has(#hospital-saas-app) #clinician-tools.shared-demo-tools.demo-menu-redesign .demo-tools-current { border:0;border-block:1px solid #c6d4e4;background:transparent;padding:18px 0 12px;margin:0 0 22px; }
+body:has(#hospital-saas-app) #clinician-tools.shared-demo-tools.demo-menu-redesign .demo-tools-current>strong { font-size:19px; }
+body:has(#hospital-saas-app) #clinician-tools.shared-demo-tools.demo-menu-redesign .demo-tools-list { display:grid;grid-template-columns:minmax(0,1fr);gap:22px; }
+body:has(#hospital-saas-app) #clinician-tools.shared-demo-tools.demo-menu-redesign .demo-menu-button { border:0;border-bottom:1px solid #e5e9ee;border-radius:0;min-height:54px;padding:13px 8px;background:transparent;color:#263c56; }
+body:has(#hospital-saas-app) #clinician-tools.shared-demo-tools.demo-menu-redesign .demo-menu-button[aria-current=page] { background:#eaf1fb;border-left:3px solid #3566b8;padding-left:5px; }
+body:has(#hospital-saas-app) #clinician-tools.shared-demo-tools.demo-menu-redesign .demo-menu-button:disabled { background:transparent;color:#626e7e; }
+body:has(#hospital-saas-app) #clinician-tools.shared-demo-tools.demo-menu-redesign .demo-menu-button:hover:enabled { background:#eef2f6;border-color:#e5e9ee; }
+@media(max-width:480px) { body:has(#hospital-saas-app) #clinician-tools.shared-demo-tools.demo-menu-redesign[aria-labelledby] { padding:20px 16px;padding-bottom:max(20px,env(safe-area-inset-bottom)); } }
+@media(max-width:380px) {
+  body:has(#hospital-saas-app) #clinician-tools.shared-demo-tools.demo-menu-redesign [data-demo-action=simulate] { display:grid;grid-template-columns:21px minmax(0,1fr);gap:6px 12px; }
+  #clinician-tools.shared-demo-tools.demo-menu-redesign [data-demo-action=simulate] .demo-menu-marker { grid-column:2; }
+}
+/* Shared drawer: grouping expresses navigation, explanation and mutation boundaries. */
+#clinician-tools.shared-demo-tools { background:#fafbfc;padding:24px; }
+#clinician-tools.shared-demo-tools * { box-sizing:border-box;letter-spacing:0; }
+#clinician-tools.shared-demo-tools .demo-tools-heading { gap:12px; }
+#clinician-tools.shared-demo-tools .demo-tools-heading h2 { font-size:23px;font-weight:750; }
+#clinician-tools.shared-demo-tools .demo-tools-intro { font-size:12px;margin:4px 0 18px; }
+#clinician-tools.shared-demo-tools .demo-tools-current { padding:18px 0 12px;gap:7px;margin:0 0 22px; }
+#clinician-tools.shared-demo-tools .demo-tools-context-label { font-size:12px;font-weight:650;color:#5c697a; }
+#clinician-tools.shared-demo-tools .demo-tools-current>strong { font-size:19px;line-height:1.45; }
+#clinician-tools.shared-demo-tools .demo-tools-current .demo-tools-patient { font-size:12px;color:#657183; }
+#clinician-tools.shared-demo-tools .demo-tools-current .demo-tools-route { font-size:14px;color:#263c56; }
+#clinician-tools.shared-demo-tools .demo-tools-state { display:flex;gap:7px;align-items:center;flex-wrap:wrap;color:#715425;font-size:12px;margin-top:4px; }
+#clinician-tools.shared-demo-tools .demo-tools-state[data-state=valid] { color:#216551; }
+#clinician-tools.shared-demo-tools svg { width:21px;height:21px;flex:none;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round; }
+#clinician-tools.shared-demo-tools .demo-tools-state svg { width:17px;height:17px; }
+#clinician-tools.shared-demo-tools .demo-tools-permission:not(:empty) { color:#4f6073;border-left:1px solid #ccd5df;padding-left:8px; }
+#clinician-tools.shared-demo-tools .demo-tools-current .demo-tools-boundary { font-size:12px;color:#657183; }
+#clinician-tools.shared-demo-tools .demo-tools-list { display:grid;gap:22px; }
+#clinician-tools.shared-demo-tools .demo-menu-group { min-width:0;margin:0; }
+#clinician-tools.shared-demo-tools .demo-menu-group h3 { font-size:12px;color:#657183;font-weight:650;margin:0 0 7px; }
+#clinician-tools.shared-demo-tools .demo-menu-rows { border-top:1px solid #dce3ea; }
+#clinician-tools.shared-demo-tools .demo-menu-rows .demo-menu-button { display:flex;gap:12px;align-items:center;padding:13px 8px;min-height:54px;border:0;border-bottom:1px solid #e5e9ee;border-radius:0;background:transparent; }
+#clinician-tools.shared-demo-tools .demo-menu-button>svg { color:#3f628d; }
+#clinician-tools.shared-demo-tools [data-group=explanation] .demo-menu-button>svg { color:#71638c; }
+#clinician-tools.shared-demo-tools .demo-menu-copy { min-width:0;flex:1;overflow-wrap:anywhere; }
+#clinician-tools.shared-demo-tools .demo-menu-label { font-size:14px;font-weight:600;line-height:1.5; }
+#clinician-tools.shared-demo-tools .demo-menu-marker { flex:none;font-size:12px;color:#61758d; }
+#clinician-tools.shared-demo-tools .demo-menu-button[aria-current=page] { background:#eaf1fb;border-left:3px solid #3566b8;padding-left:5px;color:#214d87; }
+#clinician-tools.shared-demo-tools .demo-menu-button:hover:not(:disabled) { background:#eef2f6;filter:none; }
+#clinician-tools.shared-demo-tools .demo-menu-button:disabled { background:transparent;color:#626e7e; }
+#clinician-tools.shared-demo-tools .demo-menu-button:disabled>svg { color:#7c8897; }
+#clinician-tools.shared-demo-tools .demo-tools-option small { font-size:12px;margin:3px 0 0;color:#677383;line-height:1.5; }
+#clinician-tools.shared-demo-tools [data-group=execution] { border-top:1px solid #dce3ea;padding-top:18px; }
+#clinician-tools.shared-demo-tools [data-group=execution] .demo-menu-marker { color:#805925; }
+#clinician-tools.shared-demo-tools [data-group=restricted]>summary { display:flex;align-items:center;gap:8px;min-height:48px;font-size:13px;color:#657183;cursor:pointer;list-style:none; }
+#clinician-tools.shared-demo-tools [data-group=restricted]>summary::before { content:'›';font-size:20px; }
+#clinician-tools.shared-demo-tools [data-group=restricted][open]>summary::before { transform:rotate(90deg); }
+#clinician-tools.shared-demo-tools .demo-tools-count { margin-left:auto;font-size:12px; }
+#clinician-tools.shared-demo-tools .demo-tools-mobile { display:flex;align-items:center;gap:12px;border-block:1px solid #dce3ea;text-decoration:none;margin:16px 0 0;font-size:13px; }
+#clinician-tools.shared-demo-tools .demo-tools-mobile span { flex:1; }
+#clinician-tools.shared-demo-tools .demo-tools-mobile small { font-size:11px; }
+#clinician-tools.shared-demo-tools .demo-tools-footer { display:flex;align-items:center;gap:12px;padding:12px 0 0; }
+#clinician-tools.shared-demo-tools .demo-tools-read-status { flex:1;font-size:12px;margin:0; }
+#clinician-tools.shared-demo-tools .demo-tools-footer .demo-tools-refresh { width:44px;height:44px;min-height:44px;flex:none;margin:0;padding:0;font-size:24px;border:1px solid #cbd6e3;border-radius:8px; }
+#clinician-tools.shared-demo-tools summary:focus-visible { outline:3px solid #3566b8;outline-offset:2px; }
+@media(max-width:480px) { #clinician-tools.shared-demo-tools { padding:20px 16px;padding-bottom:max(20px,env(safe-area-inset-bottom)); } }
+#clinician-tools.shared-demo-tools .demo-tools-identifiers summary { cursor:pointer;min-height:44px;display:flex;align-items:center;font-size:13px;color:#244e85; }
+#clinician-tools.shared-demo-tools .demo-tools-identifiers p { white-space:pre-line;font-size:12px; }
+[data-demo-tools-open] { min-height:44px;border:1px solid #b9cbe3;border-radius:8px;background:#f7faff;color:#244e85;padding:8px 14px;font:600 14px var(--hp-font, sans-serif);white-space:nowrap;cursor:pointer; }
+#clinician-tools.shared-demo-tools { font-family:var(--hp-font,sans-serif); }
+#clinician-tools.shared-demo-tools h2 { font-size:26px;letter-spacing:0; }
+#clinician-tools.shared-demo-tools .demo-tools-current { border:0;border-block:1px solid #c6d4e4;border-radius:0;background:transparent;padding:18px 0;margin-bottom:22px;overflow-wrap:anywhere; }
+#clinician-tools.shared-demo-tools .demo-tools-current p { font-size:14px;line-height:1.65;margin:0; }
+#clinician-tools.shared-demo-tools .demo-tools-list button { border-radius:8px;min-height:44px;padding:12px 16px;font-size:15px; }
+#clinician-tools.shared-demo-tools button:disabled { color:#596b80;background:#edf1f5;cursor:not-allowed; }
+#clinician-tools.shared-demo-tools .demo-tools-option small { margin:5px 2px 0; }
+#clinician-tools.shared-demo-tools .demo-tools-mobile { display:inline-block;padding:14px 0;color:#244e85;min-height:44px;box-sizing:border-box; }
+#clinician-tools.shared-demo-tools .demo-tools-read-status { font-size:13px;line-height:1.6;color:#506680; }
+#clinician-tools.shared-demo-tools .demo-tools-refresh { border-radius:8px;font:600 14px var(--hp-font,sans-serif);cursor:pointer; }
+[data-demo-tools-open]:focus-visible,#clinician-tools.shared-demo-tools a:focus-visible { outline:3px solid #3566b8;outline-offset:3px; }
 #hospital-saas-app .mq-nav-group[hidden] { display:none!important; }
 .security-timeline { color:#192e48; }
 .audit-scope { padding:20px 24px; background:#e8eff7; border-radius:14px; margin:20px 0; }
@@ -202,6 +278,17 @@ body:has(#clinician-tools[open]) { overflow:hidden; }
 .import-check-list li { padding:17px 0; border-bottom:1px solid #e1e8ef; display:grid; grid-template-columns:105px 1fr; gap:12px; }
 .import-check-list li span { font-size:14px; line-height:1.6; color:#805325; }
 .import-check-list li[data-ready=true] span { color:#2c655d; }
+.transfer-selection-tools { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:18px 0 8px; }
+#transfer-selection-count { color:#52667f; font-size:13px; font-weight:700; }
+.transfer-selection-list { list-style:none; padding:0; margin:0 0 16px; max-height:220px; overflow:auto; border-top:1px solid #e1e8ef; }
+.transfer-selection-list:empty { display:none; }
+.transfer-selection-list li { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 4px; border-bottom:1px solid #e1e8ef; color:#344b63; font-size:13px; }
+.transfer-selection-list li span { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.transfer-selection-list li button { border:0; background:transparent; color:#8b3f35; font-weight:700; padding:8px; cursor:pointer; }
+.transfer-job-resume { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:14px; border:1px solid #c7d8e5; background:#f2f7fa; margin:16px 0; }
+.transfer-job-resume p { margin:0; }
+.transfer-job-resume label { display:flex; align-items:center; gap:10px; flex:1; min-width:0; color:#344b63; font-size:13px; font-weight:700; }
+.transfer-job-resume select { min-width:0; min-height:38px; flex:1; border:1px solid #c7d8e5; background:#fff; color:#18324a; padding:0 10px; }
 .import-boundary { background:#f2f5f9; padding:18px; border-radius:12px; margin-bottom:20px; }
 .import-boundary p { margin:6px 0 0; }
 .import-receipt .mq-statline { display:grid; grid-template-columns:105px 1fr; gap:14px; padding:18px 0; border-bottom:1px dashed #b9c9da; }
@@ -215,4 +302,57 @@ body:has(#clinician-tools[open]) { overflow:hidden; }
   .import-workbench-grid { grid-template-columns:1fr; }
   .import-checksheet,.import-receipt { padding:24px 20px; }
   .import-workbench-grid h3 { font-size:23px; }
+  .transfer-selection-tools,.transfer-job-resume { align-items:stretch; flex-direction:column; }
 }
+
+/* Cross-source security observatory: readable status before event detail. */
+.security-observatory { margin:20px 0 30px; padding:clamp(18px,3vw,30px); border:1px solid #ccd9e8; border-radius:20px; background:linear-gradient(145deg,#f2f6fb 0%,#e7eef7 100%); color:#1b3552; box-shadow:0 18px 40px #263f5d12; }
+.security-observatory-heading { display:flex; justify-content:space-between; align-items:flex-start; gap:24px; margin-bottom:20px; }
+.security-observatory-kicker { color:#527099; font-size:11px; font-weight:750; letter-spacing:.08em; }
+.security-observatory-heading h3 { margin:8px 0; font-size:clamp(20px,2.2vw,27px); line-height:1.35; letter-spacing:-.025em; }
+.security-observatory-heading p { max-width:780px; margin:0; color:#59708b; font-size:14px; line-height:1.65; }
+.security-observatory-readat { flex:none; padding:9px 12px; border:1px solid #cad8e8; border-radius:10px; background:#ffffffb8; color:#425c7c!important; font-size:12px!important; }
+.security-source-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+.security-source-card { min-width:0; padding:16px; border:1px solid #d5e0eb; border-radius:14px; background:#fff; box-shadow:0 6px 16px #253d5710; }
+.security-source-card>span { display:block; min-height:24px; color:#516a87; font-size:12px; font-weight:650; }
+.security-source-card strong { display:block; margin:6px 0; color:#425b77; font-size:17px; }
+.security-source-card strong[data-state=available],.security-source-card strong[data-state=ok] { color:#176653; }
+.security-source-card strong[data-state=unavailable],.security-source-card strong[data-state=permission_required],.security-source-card strong[data-state=misconfigured],.security-source-card strong[data-state=failed] { color:#9a4c37; }
+.security-source-card p,.security-source-card small { display:block; margin:0; color:#657a91; font-size:12px; line-height:1.6; }
+.security-source-card small { margin-top:8px; }
+.security-feed-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; margin-top:16px; align-items:start; }
+.security-feed-panel { min-width:0; padding:17px; border:1px solid #cfdae7; border-radius:16px; background:#fff; }
+.security-feed-heading { display:flex; justify-content:space-between; align-items:center; gap:12px; padding-bottom:12px; border-bottom:1px solid #e5ebf2; }
+.security-feed-heading span { color:#647b96; font-size:11px; }
+.security-feed-heading h3 { margin:4px 0 0; color:#1f3b59; font-size:17px; }
+.security-feed-heading>span:last-child { flex:none; display:grid; place-items:center; min-width:34px; min-height:30px; padding:0 8px; border-radius:20px; background:#edf3fa; color:#375c87; font-weight:700; }
+.security-event-list { display:grid; gap:10px; padding-top:12px; }
+.security-feed-empty { margin:0; padding:13px; color:#65798e; background:#f5f8fb; border-radius:10px; font-size:13px; line-height:1.6; }
+.security-event-card { min-width:0; padding:13px; border:1px solid #dce5ef; border-left:4px solid #8499b3; border-radius:11px; background:#fbfcfe; }
+.security-event-card[data-kind=warning] { border-left-color:#bf8640; }
+.security-event-card[data-kind=error] { border-left-color:#ad4e4e; }
+.security-event-card[data-kind=success] { border-left-color:#39856f; }
+.security-event-card header { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+.security-event-card time { color:#657a91; font-size:11px; }
+.security-event-card strong { display:block; margin:5px 0; color:#203d5c; font-size:14px; line-height:1.45; overflow-wrap:anywhere; }
+.security-event-card p { margin:4px 0; color:#61768c; font-size:12px; line-height:1.55; overflow-wrap:anywhere; }
+.security-event-card .security-event-review-state { display:inline-block; margin-top:6px; padding:4px 8px; border-radius:20px; background:#eef2f6; color:#596d82; font-size:11px; }
+.security-event-card details { margin-top:10px; border-top:1px solid #e5ebf2; padding-top:8px; }
+.security-event-card summary { min-height:40px; display:flex; align-items:center; color:#315986; font-size:12px; font-weight:650; cursor:pointer; }
+.security-review-form { display:grid; gap:8px; padding:8px 0 2px; }
+.security-review-form label { display:grid; gap:5px; color:#4c647f; font-size:12px; }
+.security-review-form select,.security-review-form input { width:100%; min-height:42px; border:1px solid #c8d5e4; border-radius:8px; padding:8px 10px; color:#203c5a; background:white; font:inherit; font-size:13px; }
+.security-review-form button { min-height:44px; border:0; border-radius:8px; background:#315f99; color:#fff; font-family:inherit; font-size:13px; font-weight:650; cursor:pointer; }
+.security-review-form button:disabled { opacity:.55; cursor:wait; }
+.security-observatory-boundary { margin:16px 0 0; padding:12px 14px; border-left:3px solid #859ab5; background:#ffffffa8; color:#5a7089; font-size:12px; line-height:1.65; }
+@media(max-width:900px) { .security-source-grid { grid-template-columns:1fr; } .security-source-card { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:4px 12px; align-items:center; } .security-source-card>span { grid-column:1/-1; } .security-source-card p { grid-column:1/-1; } .security-source-card small { margin-top:0; text-align:right; } }
+@media(max-width:760px) { .security-feed-grid { grid-template-columns:1fr; } .security-observatory-heading { display:grid; } .security-observatory-readat { justify-self:start; margin:0!important; } }
+#hospital-saas-app.security-admin-only .mq-testbar,
+#hospital-saas-app.security-admin-only .mq-sidebar,
+#hospital-saas-app.security-admin-only .mq-context-chip,
+#hospital-saas-app.security-admin-only .clinical-flow,
+#hospital-saas-app.security-admin-only #demo-tool-return { display:none!important; }
+#hospital-saas-app.security-admin-only .demo-tools-trigger { display:none!important; }
+.security-session-badge { padding:8px 12px; border-radius:20px; background:#e8eef7; color:#315781; font-size:12px; font-weight:700; }
+#hospital-saas-app.security-admin-only .mq-shell-grid { grid-template-columns:minmax(0,1fr); }
+#hospital-saas-app.security-admin-only .mq-main { width:100%; max-width:none; }

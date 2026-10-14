@@ -4,6 +4,8 @@
 import { initializeCapstoneAuth } from "/capstone-auth.js";
 import {openPatientPixelViewer,createPatientPixelSession} from '/patient-pixel-viewer.js';
 import {createWalletHome,createHelperSurface} from '/ui/wallet-home.js';
+import {createQrTicketSurface} from '/ui/patient-qr-ticket.js';
+let mobileQrTicket=null;
 import {createSharingSurface} from '/ui/patient-sharing.js';
 import {createPatientHealth,healthRecords} from '/ui/patient-health.js';
 import {createHealthRecordClient} from '/ui/health-record-client.js';
@@ -81,15 +83,22 @@ async function initializeMobileApp() {
   if (document.documentElement.dataset.capstone === "1" && !capstoneAuth) {
     throw new Error("CAPSTONE_AUTH_REQUIRED");
   }
+  if (capstoneAuth?.provider === 'ENTRA_OIDC') capstoneAuth.headers('PATIENT');
   if (capstoneAuth?.context) handlePatientSelect(capstoneAuth.context.patientId);
   setupNavigation();
   setupSyncChannel();
   registerServiceWorker();
   setupAuth();
-  createSharingSurface(document.querySelector('#tab-share'),route=>{switchTab(({requests:'share'})[route]||route);if(route==='requests')document.querySelector('#btn-share-sub-manage')?.click();window.scrollTo({top:0,behavior:'instant'});},true);
+  const qrPane=document.createElement('section');qrPane.id='tab-ticket';qrPane.className='tab-pane';document.querySelector('#tab-home').parentElement.append(qrPane);
+  mobileQrTicket=createQrTicketSurface({root:qrPane,read:()=>({consents:state.consents,studies:state.studies,ready:state.isAuthenticated&&walletConsentsReady}),
+    readStatus:async(id,ticket)=>{const r=await fetch(`/api/consents/${encodeURIComponent(id)}/handoff-tickets/${encodeURIComponent(ticket)}`,{headers:patientHeaders(),cache:'no-store',signal:AbortSignal.timeout(10000)});if(!r.ok)throw Error('STATUS_UNAVAILABLE');return r.json();},
+    issue:async id=>{const r=await fetch(`/api/consents/${encodeURIComponent(id)}/handoff-ticket`,{method:'POST',headers:patientHeaders(),body:JSON.stringify({replaceExisting:true}),signal:AbortSignal.timeout(10000)});if(!r.ok)throw Error('ISSUE_FAILED');return r.json();},
+    navigate:route=>{switchTab(route==='history'||route==='sharing'?'share':route);if(route==='history')document.querySelector('#btn-share-sub-manage')?.click();}});
+  window.addEventListener('pagehide',()=>mobileQrTicket?.clear());
+  createSharingSurface(document.querySelector('#tab-share'),route=>{switchTab(({requests:'ticket'})[route]||route);window.scrollTo({top:0,behavior:'instant'});},true);
   walletHome=createWalletHome({root:document.querySelector('#tab-home'),navigate:route=>{
-    switchTab(({requests:'share',history:'share',sharing:'share'})[route]||route);
-    if(['requests','history'].includes(route))document.querySelector('#btn-share-sub-manage')?.click();
+    switchTab(({requests:'ticket',history:'share',sharing:'share'})[route]||route);
+    if(route==='history')document.querySelector('#btn-share-sub-manage')?.click();
     window.scrollTo({top:0,behavior:'instant'});
     const destination=document.querySelector('.tab-pane.active');destination?.classList.add('mq-wallet-screen-enter');
     const heading=destination?.querySelector('h1,h2');heading?.setAttribute('tabindex','-1');heading?.focus({preventScroll:true});
@@ -104,7 +113,7 @@ async function initializeMobileApp() {
   healthHelper=createMobileHealthHelper(document.querySelector('#patient-health-helper'), {
     headers:patientHeaders, isUnlocked:()=>state.isAuthenticated,
   });
-  createHelperSurface(document.querySelector('#patient-health-helper'),route=>{switchTab(({sharing:'share',requests:'share'})[route]||route);if(route==='requests')document.querySelector('#btn-share-sub-manage')?.click();window.scrollTo({top:0,behavior:'instant'});},true);
+  createHelperSurface(document.querySelector('#patient-health-helper'),route=>{switchTab(({sharing:'share',requests:'ticket'})[route]||route);window.scrollTo({top:0,behavior:'instant'});},true);
   faqAssistant=createFaqAssistant({root:document.querySelector('.mobile-shell'),surface:'mobile',navigate:route=>{
     if(route==='share-manage'){switchTab('share');document.querySelector('#btn-share-sub-manage')?.click();}
     else switchTab(route);
@@ -122,14 +131,20 @@ async function initializeMobileApp() {
     headerBadge.textContent = "🔒 잠금 상태";
     headerBadge.className = "badge";
   }
-  if (capstoneAuth?.context.scenario) {
+  if (capstoneAuth?.provider === 'ENTRA_OIDC') {
+    await openEntraMobileHome();
+  } else if (capstoneAuth?.context.scenario) {
     document.querySelector('.auth-grid-options')?.setAttribute('hidden', '');
     const authTitle = document.querySelector('.auth-title'); if (authTitle) authTitle.textContent = '홍길동님의 시연 세션 확인';
     await handleQuickAuth('CAPSTONE_SESSION');
   }
 }
 const startMobileApp = () => {
-  void initializeMobileApp().catch(() => showToast("시연 인증을 확인하지 못했습니다. 새로고침하여 다시 로그인하세요."));
+  void initializeMobileApp().catch(() => {
+    state.isAuthenticated = false;
+    if (capstoneAuth?.provider === 'ENTRA_OIDC') capstoneAuth.initializationFailed();
+    else showToast("시연 인증을 확인하지 못했습니다. 새로고침하여 다시 로그인하세요.");
+  });
 };
 if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", startMobileApp, { once: true });
 else startMobileApp();
@@ -210,6 +225,8 @@ function setupNavigation() {
 }
 
 function switchTab(tabName) {
+  if(!state.isAuthenticated)mobileQrTicket?.clear();
+  if(tabName==='ticket'){if(!state.isAuthenticated)return;mobileQrTicket?.refresh();}
   if (tabName === 'helper' && !state.isAuthenticated) return;
   state.currentTab = tabName;
   mobileHealth?.setActive(tabName==='records');
@@ -294,6 +311,32 @@ function setupAuth() {
     patientSelect.addEventListener("change", (e) => {
       handlePatientSelect(e.target.value);
     });
+  }
+}
+
+async function openEntraMobileHome() {
+  if (capstoneAuth?.provider !== 'ENTRA_OIDC' ||
+      capstoneAuth.context?.patientId !== state.patientId) throw new Error('ENTRA_PATIENT_NOT_MAPPED');
+  // Identity and role were mapped by the authenticated server endpoint.
+  // This checks token expiry/role, not a client-created authentication grant.
+  capstoneAuth.headers('PATIENT');
+  state.isAuthenticated = true;
+  state.authMethod = 'ENTRA_OIDC';
+  state.authenticatedAt = new Date().toISOString();
+  try {
+    await loadInitialData();
+    capstoneAuth.headers('PATIENT');
+    const badge = document.querySelector('#header-auth-badge');
+    if (badge) { badge.textContent = 'Microsoft 인증 연결'; badge.className = 'badge badge-good'; }
+    // Remove rather than fade: an opacity transition could expose the old
+    // simulation card for one frame after the wallet waiting screen is removed.
+    document.querySelector('#auth-overlay')?.remove();
+    capstoneAuth.reveal();
+  } catch (error) {
+    state.isAuthenticated = false;
+    state.authMethod = null;
+    state.authenticatedAt = null;
+    throw error;
   }
 }
 
@@ -402,6 +445,7 @@ async function handleQuickAuth(method = "BIO") {
 
 async function handleLockApp() {
   if (!state.isAuthenticated) return;
+  mobileQrTicket?.clear();
 
   state.isAuthenticated = false;
   faqAssistant?.reset();
@@ -411,6 +455,14 @@ async function handleLockApp() {
   walletStudiesReady=false;walletConsentsReady=false;
   state.authMethod = null;
   state.authenticatedAt = null;
+
+  if (capstoneAuth?.provider === 'ENTRA_OIDC') {
+    // Reload discards the in-memory token and returns to shared wallet login.
+    // Never resurrect PASS/Kakao/PIN simulations for an Entra session.
+    document.documentElement.removeAttribute('data-auth-ready');
+    location.reload();
+    return;
+  }
 
   // Record audit log
   try {
@@ -474,6 +526,7 @@ async function handleLockApp() {
 }
 
 function handlePatientSelect(patientId) {
+  mobileQrTicket?.clear();
   faqAssistant?.reset();
   healthHelper?.reset();
   mobileRecords?.reset();
@@ -510,7 +563,10 @@ function handlePatientSelect(patientId) {
 async function loadInitialData() {
   if (!state.isAuthenticated) return;
   initMockMedicalRecords();
-  await Promise.all([loadStudies(), loadConsents(), loadVaultInfo(), loadDeviceInfo()]);
+  const loads = [loadStudies(), loadConsents()];
+  // Native-device/vault simulators are not public Entra APIs.
+  if (capstoneAuth?.provider !== 'ENTRA_OIDC') loads.push(loadVaultInfo(), loadDeviceInfo());
+  await Promise.all(loads);
   void mobileRecords?.load();
   renderHomeScreen();
   renderStudiesList();
@@ -1378,6 +1434,7 @@ async function handleExecuteShareTicket() {
 
     const ticketData = await ticketRes.json();
     state.activeTicket = ticketData;
+    mobileQrTicket?.set(ticketData,consent.consentId);
 
     renderActiveQrView();
     startTicketStatusPolling();

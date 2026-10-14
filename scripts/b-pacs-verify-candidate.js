@@ -7,7 +7,7 @@ import { loadPinnedBImportManifest } from '../src/b-pacs-receiver.js';
 const tests = ['b-pacs-receiver', 'b-pacs-authority', 'b-pacs-portal', 'b-pacs-storage-boundary',
   'data-plane-authorization', 'data-plane-gateway', 'consent-bound-key-release', 'key-release-http-handler',
   'capstone-encrypted-transfer', 'capstone-b-portal', 'patient-self-view-authorization', 'patient-data-plane-gateway', 'patient-bound-key-release'];
-const files = ['src/b-pacs-receiver.js', 'src/b-pacs-storage-boundary.js', 'src/data-plane-authorization.js',
+const files = ['Dockerfile.b-pacs-receiver', 'Dockerfile.b-pacs-receiver.dockerignore', 'src/b-pacs-receiver.js', 'src/b-pacs-storage-boundary.js', 'src/data-plane-authorization.js',
   'src/data-plane-gateway.js', 'src/capstone-encrypted-transfer.js', 'src/consent-bound-key-release.js',
   'src/key-release-http-handler.js', 'src/capstone-b-portal.js', 'src/server.js', 'scripts/start-capstone-b-portal.js',
   'scripts/start-b-pacs-mtls.js', 'orthanc/hospital-b-receiver.json', 'infra/workstation/hospital-b-pacs-receiver.compose.yml',

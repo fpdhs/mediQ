@@ -5,6 +5,8 @@
    - FHIR R4 PHR, 5-Step Pipeline, Cloud Viewer, PACS Import & Live Receipts
    ========================================================================== */
 import { initializeCapstoneAuth } from "/capstone-auth.js";
+import {initializeDemoTools,demoEnvironment} from '/ui/demo-tools.js';
+let demoTools=null;
 import {openPatientPixelViewer, createPatientPixelSession} from '/patient-pixel-viewer.js';
 import {createPatientLibrary} from '/ui/patient-library.js';
 import {createPatientSharing,createSharingSurface, recipientChoices, sharingDraftModel} from '/ui/patient-sharing.js';
@@ -12,16 +14,25 @@ import {createPatientHistory} from '/ui/patient-history.js';
 import {createPatientHealth, healthRecords} from '/ui/patient-health.js';
 import {createPatientHelper} from '/ui/patient-helper.js';
 import {createHealthRecordClient} from '/ui/health-record-client.js';
+import {createScenarioHealthStandard} from '/ui/scenario-health-standard.js';
+let scenarioHealthStandard=null;
 import {createHealthSharePicker} from '/ui/health-share-picker.js';
 import {createClinicianHealth} from '/ui/clinician-health.js';
 import {renderTransferTracking} from '/ui/transfer-tracking.js';
 import {importPreflight} from '/ui/import-preflight.js';
 import {renderHospitalVault} from '/ui/hospital-vault.js';
 import {renderSecurityTimeline} from '/ui/security-timeline.js';
+import {renderSecurityConsole} from '/ui/security-console.js';
+import { loginHomePath } from '/login-navigation.js';
 let auditTimelineVersion=0;
 let pacsImportBusy = false;
+let transferQueue = [];
+let transferQueueConsentId = "";
+let activeTransferJobId = "";
+let activeTransferJobs = [];
 let healthSharePicker=null, clinicianHealth=null;
 import {createWalletHome,createHelperSurface,mountPatientWalletDock} from '/ui/wallet-home.js';
+import {createQrTicketSurface} from '/ui/patient-qr-ticket.js';
 let walletHome=null;
 let walletSnapshotReady=false;
 function refreshWalletHome(){walletHome?.update({name:demo.patientName,records:healthRecords(lastStudies,Boolean(capstoneAuth?.context.scenario),syntheticHealthClient?.records()||[]),consents:lastConsents,ready:walletSnapshotReady});}
@@ -37,18 +48,29 @@ import { initializePatientComponents, renderPatientOverview, renderPresentationS
 import { selectConsentForStudy, isRevocationAcknowledged } from "/consent-selection.js";
 import { createShareReview } from '/ui/patient-share-review.js';
 let shareReview = null;
+let patientStudySnapshotAvailable = false;
 import { clinicalNextAction, renderClinicalActivity, renderClinicalDossier, renderClinicianDetail, clinicianDetailModel, filterClinicalStudies, renderClinicalMetrics, renderClinicalStudyList } from "/ui/clinician.js";
 import { initializeViewerStudio } from '/ui/viewer-studio.js';
+import { initializeTransferActions } from '/ui/transfer-actions.js';
 import { createClinicianHome } from '/ui/clinician-home.js';
+import { initializeReceptionHome } from '/ui/clinician-reception.js';
+import {createReceptionDesk} from '/ui/clinician-reception-desk.js';
+let receptionDesk=null;
+let receptionHome=null;
 let clinicianHome = null;
 const capstoneAuth = await initializeCapstoneAuth();
-const patientQrController = createPatientQrController({
+const patientQrController = createQrTicketSurface({
+  root:document.querySelector('#patient-portal-app [data-page="visit"]'),
+  read:()=>({consents:lastConsents,studies:lastStudies,ready:walletSnapshotReady}),
+  issue:id=>postJson(`/api/consents/${encodeURIComponent(id)}/handoff-ticket`,{replaceExisting:true}),
+  navigate:route=>navigatePatientPage(route==='history'?'activity':route),
   readStatus: (consentId, ticketId) => fetchJson(`/api/consents/${encodeURIComponent(consentId)}/handoff-tickets/${encodeURIComponent(ticketId)}`, { cache: "no-store", signal: AbortSignal.timeout(10000) }),
   render: renderPatientQr,
 });
 window.addEventListener("pagehide", () => patientQrController.clear());
 window.addEventListener('pagehide', () => patientLibrary?.setActive(false));
 window.addEventListener('pagehide', () => patientHealth?.setActive(false));
+window.addEventListener('pagehide', () => scenarioHealthStandard?.reset());
 
 const demo = {
   patientId: capstoneAuth?.context.patientId ?? "P-1001",
@@ -118,6 +140,7 @@ let dashboardLoadsInFlight = 0;
 let clinicalRecentLogs = [];
 let isEasyMode = false;
 let isPreflightPassed = false;
+let preflightFingerprint = "";
 let wwWlPresetIndex = 0;
 let zoomScaleIndex = 0;
 let isInverted = false;
@@ -284,7 +307,7 @@ function initNavigation() {
 
   // Hospital SaaS Sub-routing
   document.querySelectorAll("#hospital-saas-app [data-view]").forEach((button) => {
-    button.addEventListener("click", () => navigateHospitalScreen(button.dataset.view));
+    button.addEventListener("click", () => navigateHospitalScreen(button.dataset.view==='viewer'?'studies':button.dataset.view));
   });
   document.querySelectorAll("#hospital-saas-app [data-view-jump]").forEach((button) => {
     button.addEventListener("click", () => navigateHospitalScreen(button.dataset.viewJump));
@@ -294,6 +317,9 @@ function initNavigation() {
   const initialHash = (location.hash || "").replace("#", "");
   if (capstoneAuth?.roles?.length === 1 && capstoneAuth.roles[0] === 'PATIENT') {
     switchPersona('PATIENT');
+  } else if (capstoneAuth?.roles?.length === 1 && capstoneAuth.roles[0] === 'SECURITY_ADMIN') {
+    switchPersona('DOCTOR', false);
+    navigateHospitalScreen('audit');
   } else if (capstoneAuth?.context.entryRole === 'DOCTOR' || ["DOCTOR", "doctor", "HOSPITAL_ADMIN", "admin"].includes(initialHash)) {
     switchPersona("DOCTOR", false);
     navigateHospitalScreen("dashboard");
@@ -306,18 +332,25 @@ function initNavigation() {
 }
 
 function switchPersona(persona, updateHash = true) {
-  if (capstoneAuth?.roles && !capstoneAuth.roles.includes(persona)) {
-    showToast('현재 계정은 환자 화면만 이용할 수 있습니다. 의료진은 별도 인증이 필요합니다.');
+  const securityAdminShell = persona === 'DOCTOR' && capstoneAuth?.roles?.includes('SECURITY_ADMIN');
+  if (capstoneAuth?.roles && !capstoneAuth.roles.includes(persona) && !securityAdminShell) {
+    showToast(`현재 계정에는 ${persona==='PATIENT'?'환자':'의료진'} 권한이 없습니다. 해당 역할의 계정으로 인증해 주세요.`);
     return;
   }
   faqAssistant?.reset();
+  demoTools?.close();
   ++auditTimelineVersion;
   renderSecurityTimeline(document.querySelector('#security-timeline'),null,'error');
   patientHelper?.reset();
   syntheticHealthClient?.reset();
+  scenarioHealthStandard?.reset();
   healthSharePicker?.reset();
   clinicianHealth?.reset();
   clinicianHome?.reset();
+  receptionDesk?.clear();
+  receptionHome?.reset();
+  const receptionContext=document.querySelector('#reception-context');
+  if(receptionContext){receptionContext.hidden=true;receptionContext.textContent='';}
   walletHome?.reset();
   walletSnapshotReady=false;
   patientLibrary?.setActive(false);
@@ -332,6 +365,26 @@ function switchPersona(persona, updateHash = true) {
 
   const patientApp = document.querySelector("#patient-portal-app");
   const hospitalApp = document.querySelector("#hospital-saas-app");
+  hospitalApp?.classList.toggle('security-admin-only', Boolean(securityAdminShell));
+  if (securityAdminShell) {
+    hospitalApp.setAttribute('aria-label', 'Medi Q 보안 관제실');
+    const brandSub = hospitalApp.querySelector('.mq-brand-sub');
+    if (brandSub) brandSub.textContent = 'Security Operations';
+    const context = hospitalApp.querySelector('.mq-context');
+    if (context) {
+      context.setAttribute('aria-label', '보안 운영자 컨텍스트');
+      if (!context.querySelector('[data-security-session]')) {
+        const badge = document.createElement('span');
+        badge.dataset.securitySession = 'true';
+        badge.className = 'security-session-badge';
+        badge.textContent = '보안 운영자 · 인증됨';
+        const logout = document.createElement('button');
+        logout.type = 'button'; logout.className = 'mq-btn'; logout.textContent = '로그아웃';
+        logout.addEventListener('click', () => location.replace(loginHomePath(location.pathname)));
+        context.append(badge, logout);
+      }
+    }
+  }
 
   if (persona === "PATIENT") {
     if (patientApp) patientApp.hidden = false;
@@ -342,6 +395,7 @@ function switchPersona(persona, updateHash = true) {
     if (hospitalApp) hospitalApp.hidden = false;
     if (updateHash) history.replaceState(null, "", "#DOCTOR");
   }
+  demoTools?.update();
 }
 
 // Backwards-compatible Role activation helper
@@ -354,6 +408,7 @@ function activateRole(role, updateHash = true) {
 }
 
 function navigatePatientPage(page) {
+  if(page==='visit')patientQrController.refresh();
   if (page === 'helper') {patientHelper?.refresh();void syntheticHealthClient?.load();}
   if (page === 'phr') void syntheticHealthClient?.load();
   if (page === 'consent') void syntheticHealthClient?.load();
@@ -370,7 +425,7 @@ function navigatePatientPage(page) {
     consent: "공유 동의 관리",
     sharing: "동의·공유",
     health: "건강검진·검사결과 데모",
-    visit: "병원 방문 모드",
+    visit: "공유 QR",
     activity: "접근이력·동의 영수증",
     notifications: "알림",
     storage: "저장공간·만료",
@@ -408,23 +463,24 @@ function navigateFromPatientWallet(page) {
 }
 
 function navigateHospitalScreen(screen) {
+  if (capstoneAuth?.roles?.length === 1 && capstoneAuth.roles[0] === 'SECURITY_ADMIN' && screen !== 'audit') return;
   const hospitalApp = document.querySelector("#hospital-saas-app");
   if (!hospitalApp) return;
   if (screen !== "viewer") {
     stopCinePlayback();
   }
-  if (screen !== 'qr') stopCameraQrScan();
+  if (screen !== 'dashboard') stopCameraQrScan();
 
   const screenMeta = {
-    dashboard: ["Clinical Desk / Home", "진료 홈"],
+    dashboard: ["의료진 / 홈", "홈"],
     exchange: ["시연도구 / 영상 보안 여정", "영상 보안 여정"],
-    studies: ["Hospital Portal / 의료영상", "승인된 의료영상"],
-    records: ["Hospital Portal / 환자 기록", "환자가 공유한 건강기록"],
-    viewer: ["Hospital Portal / Cloud Viewer", "Cloud DICOM Viewer"],
-    transfer: ["Hospital Portal / 병원 보관함", "병원 보관함"],
-    audit: ["시연도구 / 보안 타임라인", "보안 타임라인"],
-    qr: ["Hospital Portal / 공유 접수", "공유 접수"],
-    admin: ["Operations / Connector", "Connector Operations"],
+    studies: ["의료진 / 검사 선택", "승인된 의료영상"],
+    records: ["의료진 / 환자 기록", "환자 기록"],
+    viewer: ["의료진 / 환자 영상", "환자 영상"],
+    transfer: ["의료진 / 병원 보관함", "병원 보관함"],
+    audit: ["보안 관리자 / 관제", "보안 관제실"],
+    qr: ["의료진 / 접수 데스크", "접수 데스크"],
+    admin: ["운영 / 플랫폼·보안 관리", "플랫폼·보안 관리"],
     "pacs-archive": ["시연도구 / 전송 확인", "병원 간 영상 전달 상태"],
   };
 
@@ -440,7 +496,7 @@ function navigateHospitalScreen(screen) {
     (screen === 'viewer' ? viewerScreen : previewHost).append(shell);
   }
   hospitalApp.querySelectorAll(".mq-nav").forEach((b) => {
-    const selected = b.dataset.view === (screen === 'studies' ? 'dashboard' : screen);
+    const selected = b.dataset.view === (screen === 'studies' ? 'viewer' : screen);
     b.classList.toggle("active", selected);
     b.setAttribute("aria-selected", String(selected));
     if (selected) b.setAttribute('aria-current', 'page');
@@ -454,10 +510,12 @@ function navigateHospitalScreen(screen) {
 
   if (screen === "pacs-archive") {
     loadHospitalBPacsArchive();
+    void restorePacsTransferJob();
   }
-  if (screen === 'transfer') { runPreflightCheck(); loadHospitalBPacsArchive(); }
+  if (screen === 'transfer') { runPreflightCheck(); loadHospitalBPacsArchive(); void restorePacsTransferJob(); }
   if (screen === 'audit') loadAuditTimeline();
   clinicianHealth?.setActive(screen==='records'&&currentPersona==='DOCTOR');
+  if(screen==='qr'&&currentPersona==='DOCTOR')receptionDesk?.load();
 }
 
 // Backwards-compatible View activation helper
@@ -487,7 +545,29 @@ function activateView(targetId) {
 // Event Bindings
 // --------------------------------------------------------------------------
 function bindEvents() {
-  initializeViewerStudio({ openViewer });
+  initializeViewerStudio({ openViewer:openClinicianHomeViewer });
+  const transferActions=initializeTransferActions({
+    readHistory:()=>fetchJson('/api/pacs-transfer-jobs/history',{cache:'no-store'}),
+    readJob:id=>fetchJson(`/api/pacs-transfer-jobs/${encodeURIComponent(id)}`,{cache:'no-store'}),
+    stageSelected:stageSelectedInstanceForPacs,
+    active:()=>currentPersona==='DOCTOR',
+    context:()=>({selected:!!selectedSopUid,busy:pacsImportBusy,
+      consent:getConsentForStudy(selectedStudyUid,lastConsents)})
+  });
+  if(transferActions){
+    const hospitalApp=document.querySelector('#hospital-saas-app');
+    const resetObserver=new MutationObserver(()=>transferActions.update());
+    resetObserver.observe(hospitalApp,{attributes:true,attributeFilter:['hidden']});
+    const viewportObserver=new MutationObserver(()=>transferActions.update());
+    viewportObserver.observe(viewerImage,{attributes:true,attributeFilter:['src','hidden']});
+    hospitalApp.querySelectorAll('.mq-nav,[data-view-jump]').forEach(button=>button.addEventListener('click',()=>{
+      transferActions.update();if(button.dataset.view==='transfer'||button.dataset.viewJump==='transfer')void transferActions.load();
+    }));
+    document.querySelector('#load-instances')?.addEventListener('click',()=>transferActions.update());
+    document.querySelector('#btn-pacs-import-run')?.addEventListener('click',()=>transferActions.watch());
+    document.querySelector('#btn-resume-pacs-job')?.addEventListener('click',()=>transferActions.watch());
+    window.addEventListener('pagehide',()=>transferActions.clear());
+  }
   // Global & Refresh
   document.querySelector("#refresh")?.addEventListener("click", loadDashboard);
   document.querySelector("#home-refresh-btn")?.addEventListener("click", loadDashboard);
@@ -510,6 +590,11 @@ function bindEvents() {
   accessPurposeSelect?.addEventListener("change", syncPatientChoices);
   accessModeSelect?.addEventListener("change", syncPatientChoices);
   patientStudySelect?.addEventListener("change", () => selectStudy(patientStudySelect.value, lastStudies));
+  document.querySelector('#share-reload-studies')?.addEventListener('click', async event => {
+    event.currentTarget.disabled=true;
+    try { await loadDashboard({skipPhr:true}); } catch { /* loadDashboard renders the failure state. */ }
+    finally { document.querySelector('#share-reload-studies').disabled=false; }
+  });
   patientSeriesSelect?.addEventListener("change", () => {
     selectedSeriesUid = patientSeriesSelect.value;
     resetViewerData();
@@ -657,9 +742,9 @@ function bindEvents() {
     const button=document.querySelector('#clinical-open-viewer');
     const next=clinicalNextAction(selectedStudy,getConsentForStudy(selectedStudyUid,lastConsents),latestTokenInfo,!viewerImage.hidden);
     if (next.action==='details') { openDetails(); return; }
-    if (next.action==='qr') { navigateHospitalScreen('qr'); return; }
+    if (next.action==='qr') { navigateHospitalScreen('dashboard'); return; }
     button.disabled=true;
-    try { if (next.action==='refresh') await loadDashboard(); else await openViewer(); }
+    try { if (next.action==='refresh') await loadDashboard(); else await openClinicianHomeViewer(); }
     catch { showToast('연결 상태를 확인하고 다시 시도해 주세요.'); }
     finally { button.disabled=false; refreshClinicalNextAction(); }
   });
@@ -696,7 +781,32 @@ function bindEvents() {
   document.querySelector('#vault-refresh')?.addEventListener('click',loadHospitalBPacsArchive);
   document.querySelector('#pacs-import-confirm')?.addEventListener('change', event => {
     const run = document.querySelector('#btn-pacs-import-run');
-    if (run) run.disabled = pacsImportBusy || !isPreflightPassed || !event.target.checked;
+    if (run) run.disabled = pacsImportBusy || activeTransferJobs.length > 0 || !isPreflightPassed || !event.target.checked;
+  });
+  document.querySelector('#btn-add-series-transfer-items')?.addEventListener('click', addCurrentSeriesToTransfer);
+  document.querySelector('#transfer-selection-list')?.addEventListener('click', event => {
+    if(pacsImportBusy || activeTransferJobs.length > 0)return;
+    const button = event.target.closest('[data-remove-transfer-item]');
+    if (!button) return;
+    transferQueue.splice(Number(button.dataset.removeTransferItem), 1);
+    if (!transferQueue.length) transferQueueConsentId = "";
+    renderTransferSelection();
+    runPreflightCheck();
+  });
+  document.querySelector('#transfer-job-select')?.addEventListener('change', event => {
+    activeTransferJobId = event.target.value;
+    const selected = activeTransferJobs.find(job => job.jobId === activeTransferJobId);
+    const status = document.querySelector('#transfer-job-resume-status');
+    if (status && selected) status.textContent = `작업 상태 ${selected.state} · ${selected.succeededItems}/${selected.totalItems} 완료 · ${selected.failedItems}건 실패`;
+    renderTransferSelection();
+  });
+  document.querySelector('#btn-resume-pacs-job')?.addEventListener('click', async () => {
+    if (!activeTransferJobId || pacsImportBusy) return;
+    pacsImportBusy = true;
+    renderTransferSelection();
+    try { await processPacsTransferJob(activeTransferJobId); }
+    catch (error) { showTransferFailure(error); }
+    finally { pacsImportBusy = false; await restorePacsTransferJob(); renderTransferSelection(); }
   });
   document.querySelector("#btn-pacs-import-run")?.addEventListener("click", runPacsImport);
   document.querySelector("#btn-refresh-pacs-archive")?.addEventListener("click", () => {
@@ -721,7 +831,8 @@ function bindEvents() {
       input.focus();
       return;
     }
-    await redeemScannedNonce(nonce);
+    await redeemScannedNonce(nonce, input.dataset.demoImport==='1'?'DEMO_IMPORT':'MANUAL');
+    delete input.dataset.demoImport;
     input.value = '';
   });
   document.querySelector("#btn-toggle-camera-scan")?.addEventListener("click", toggleCameraQrScan);
@@ -798,6 +909,13 @@ async function loadDashboard(options = {}) {
   } catch (error) {
     if (typeof document !== "undefined") {
       walletSnapshotReady=false;
+      patientStudySnapshotAvailable=false;
+      if(patientStudySelect)patientStudySelect.disabled=true;
+      const studyState=document.querySelector('#share-study-state');
+      if(studyState){studyState.textContent='검사 목록을 불러오지 못했습니다. 다시 불러오기를 눌러 주세요.';studyState.dataset.state='error';}
+      shareReview?.refresh(consentMutationPending);
+      patientSharing?.update([],lastConsents,consentMutationPending);
+      demoTools?.update();
       clinicianHome?.fail();
       walletHome?.update({name:demo.patientName,error:true});
       const state = document.querySelector("#patient-read-state");
@@ -814,12 +932,35 @@ async function fetchDashboardSnapshot(options = {}) {
   const personaAtRequest = currentPersona;
   const selectionAtRequest = latestConsentId;
   const revisionAtRequest = consentViewRevision;
+  if (currentPersona === 'DOCTOR' && capstoneAuth?.roles?.includes('SECURITY_ADMIN') && !capstoneAuth.roles.includes('DOCTOR')) {
+    walletSnapshotReady = true;
+    demoTools?.update();
+    return;
+  }
+  if(currentPersona==='DOCTOR'&&typeof location!=='undefined'&&location.hostname==='highpass-demo.japaneast.cloudapp.azure.com'){
+    const result=await fetchJson('/api/clinician/receptions',{cache:'no-store'});
+    if(!Array.isArray(result.receptions))throw Error('RECEPTIONS_UNAVAILABLE');
+    if(personaAtRequest!==currentPersona||requestSequence<dashboardAppliedSequence||revisionAtRequest!==consentViewRevision||selectionAtRequest!==latestConsentId)return;
+    dashboardAppliedSequence=requestSequence;
+    const rows=result.receptions.filter(r=>r.status==='CONSENT_ACTIVE'&&r.consent);
+    lastConsents=[...new Map(rows.map(r=>[r.consentId,r.consent])).values()];
+    lastStudies=[...new Map(rows.flatMap(r=>r.studies).map(s=>[s.studyInstanceUid,s])).values()];
+    if(selectedStudyUid&&!lastStudies.some(s=>s.studyInstanceUid===selectedStudyUid)){selectedStudy=null;selectedStudyUid='';latestToken=null;latestTokenInfo=null;resetViewerData();}
+    selectedStudy=lastStudies.find(s=>s.studyInstanceUid===selectedStudyUid)||null;
+    updateConsentState(lastConsents);renderDoctorStudies(lastStudies);walletSnapshotReady=true;demoTools?.update();return;
+  }
   const auditParams = new URLSearchParams();
   if (auditResultFilter?.value) auditParams.set("result", auditResultFilter.value);
   if (auditActionFilter?.value) auditParams.set("action", auditActionFilter.value);
   const auditQuery = auditParams.toString();
 
-  const [health, studies, consents, logs, usage, anomalies, quarantines] = await fetchDashboardReads([
+  // Public patient pages do not need operational health/admin endpoints.
+  // Keep both patient reads atomic; neither is a substitute for authorization.
+  const patientOnly = Boolean(capstoneAuth) && currentPersona === "PATIENT";
+  const results = await fetchDashboardReads(patientOnly ? [
+    `/api/imaging-studies?patientId=${encodeURIComponent(demo.patientId)}&includeSeries=true`,
+    `/api/patients/${encodeURIComponent(demo.patientId)}/consents`,
+  ] : [
     "/api/health",
     `/api/imaging-studies?patientId=${demo.patientId}&includeSeries=true`,
     `/api/patients/${demo.patientId}/consents`,
@@ -828,20 +969,18 @@ async function fetchDashboardSnapshot(options = {}) {
       "/api/transfer-usage", "/api/anomaly-alerts", "/api/security/quarantines?all=true",
     ]),
   ], options.background === true);
+  const [health, studies, consents, logs, usage, anomalies, quarantines] = patientOnly ? [null, ...results] : results;
 
   // A delayed heartbeat must never replace a newer selection or a mutation's
   // confirmed outcome. Server authorization remains the only access authority.
   if (requestSequence < dashboardAppliedSequence || selectionAtRequest !== latestConsentId || revisionAtRequest !== consentViewRevision || personaAtRequest !== currentPersona) return;
   if (!Array.isArray(studies) || !Array.isArray(consents) || health?.error) throw new Error("PATIENT_SNAPSHOT_UNAVAILABLE");
   dashboardAppliedSequence = requestSequence;
-  lastStudies = Array.isArray(studies) ? studies : [];
   lastConsents = Array.isArray(consents) ? consents : [];
+  applyPatientStudySnapshot(studies);
   walletSnapshotReady=true;
   refreshWalletHome();
   updateConsentState(lastConsents);
-  renderPatientStudyOptions(lastStudies);
-  shareReview?.refresh(consentMutationPending);
-  renderStudies(lastStudies);
   renderPatientOverview(lastStudies, { onView: study => openPatientStudyViewer(study.studyInstanceUid), onShare: study => {
     selectStudy(study.studyInstanceUid, lastStudies);
     if (sourceHospitalSelect) sourceHospitalSelect.value = study.sourceHospitalId;
@@ -864,7 +1003,7 @@ async function fetchDashboardSnapshot(options = {}) {
   renderQuarantines(Array.isArray(quarantines) ? quarantines : []);
   renderConsentHistory(Array.isArray(consents) ? consents : []);
   renderMetrics(lastStudies, Array.isArray(logs) ? logs : [], Array.isArray(usage) ? usage : []);
-  renderHealth(health);
+  if (health) renderHealth(health);
   renderPatientReceipts(Array.isArray(consents) ? consents : [], Array.isArray(logs) ? logs : []);
   updatePipelineSteps();
   if (currentPersona !== "PATIENT") await loadHospitalBPacsArchive();
@@ -903,6 +1042,16 @@ async function fetchDashboardReads(paths, background = false) {
 // FHIR R4 Personal Health Record (PHR) Module
 // --------------------------------------------------------------------------
 async function loadPhrDashboard() {
+  if (capstoneAuth) {
+    if(currentPersona!=='PATIENT')return;
+    if(!scenarioHealthStandard)scenarioHealthStandard=createScenarioHealthStandard({
+      root:document.querySelector('#patient-phr .health-standard'),request:path=>fetchJson(path,{cache:'no-store',headers:capstoneAuth.headers('PATIENT')}),
+      available:()=>currentPersona==='PATIENT',
+      onSnapshot:async snapshot=>{applyPatientStudySnapshot(snapshot.studies);await syntheticHealthClient?.load({force:true});if(syntheticHealthClient?.status()==='ERROR')throw new Error('HEALTH_RECORDS_UNAVAILABLE');},
+      onView:study=>openPatientStudyViewer(study.studyInstanceUid),
+    });
+    return scenarioHealthStandard.load();
+  }
   setPhrState("합성 PHR 데이터를 불러오는 중입니다.", "loading");
   try {
     const [summary, imaging] = await Promise.all([
@@ -1400,6 +1549,7 @@ async function createPatientConsent(options = {}) {
   patientConsentReady = false;
   updateVisitModePacket(null);
   clearCountdownTimer();
+  latestTicketNonce = null;
   syncPatientChoices({ preserveConsentState: true });
   setPatientStatus("동의 생성 중");
   const scope = { studyInstanceUid: selectedStudyUid };
@@ -1419,6 +1569,7 @@ async function createPatientConsent(options = {}) {
   if (result.consentId) {
     if (result.status === "ACTIVE") acknowledgedConsent = { consentId: result.consentId, status: result.status };
     latestConsentId = result.consentId;
+    lastConsents=[result,...lastConsents.filter(c=>c.consentId!==result.consentId)];
     patientConsentReady = true;
     setPatientStatus("동의 완료 (ACTIVE)");
     showViewerMessage("환자 동의가 성공적으로 생성되었습니다.", "success");
@@ -1431,10 +1582,11 @@ async function createPatientConsent(options = {}) {
         updateVisitModePacket(handoff);
       }
     } catch {
-      // Non-fatal if QR ticket issuance is deferred
+      patientQrController.clear('공유는 승인됐지만 QR 발급에 실패했습니다. QR 발급 버튼으로 다시 시도해 주세요.');
     }
     broadcastSync("CONSENT_CREATED");
-    navigatePatientPage(latestTicketNonce ? "visit" : "consent");
+    if(!latestTicketNonce)patientQrController.clear('공유는 승인됐지만 QR 발급을 확인하지 못했습니다. 기존 QR가 있다면 해당 화면을 이용해 주세요.');
+    navigatePatientPage("visit");
     showToast(latestTicketNonce ? "공유 동의가 생성되었습니다. 병원에 1회용 QR를 보여주세요." : "동의가 생성되었습니다. QR 발급 결과는 확인이 필요합니다.");
   } else {
     patientConsentReady = false;
@@ -1540,20 +1692,35 @@ function syncPatientChoices(options = {}) {
   if (viewerStatus) viewerStatus.textContent = "토큰 필요";
 }
 
+function applyPatientStudySnapshot(studies) {
+  if (!Array.isArray(studies)) throw new Error('PATIENT_SNAPSHOT_UNAVAILABLE');
+  lastStudies = studies;
+  patientStudySnapshotAvailable = true;
+  renderPatientStudyOptions(lastStudies);
+  renderStudies(lastStudies);
+  shareReview?.refresh(consentMutationPending);
+}
+
 function renderPatientStudyOptions(studies) {
   if (!patientStudySelect) return;
   patientStudySelect.innerHTML = studies.map((study) => `
     <option value="${escapeHtml(study.studyInstanceUid)}">${escapeHtml(study.description)} (${escapeHtml(study.modality)})</option>
-  `).join("");
+  `).join("") || '<option value="">등록된 영상검사가 없습니다</option>';
 
-  if (!studies.some((study) => study.studyInstanceUid === selectedStudyUid) && studies[0]) {
-    selectedStudyUid = studies[0].studyInstanceUid;
+  if (!studies.some((study) => study.studyInstanceUid === selectedStudyUid)) {
+    selectedStudyUid = studies[0]?.studyInstanceUid || '';
+    selectedSeriesUid = '';
   }
+  patientStudySelect.disabled = consentMutationPending || !studies.length;
   patientStudySelect.value = selectedStudyUid;
-  if (sourceHospitalSelect) sourceHospitalSelect.value = demo.sourceHospitalId;
-  if (targetHospitalSelect) targetHospitalSelect.value = demo.targetHospitalId;
-  if (accessPurposeSelect) accessPurposeSelect.value = demo.purpose;
-  if (accessModeSelect) accessModeSelect.value = demo.permission;
+  const selected = studies.find(study => study.studyInstanceUid === selectedStudyUid);
+  if (selected && sourceHospitalSelect) {
+    sourceHospitalSelect.value = selected.sourceHospitalId;
+    demo.sourceHospitalId = selected.sourceHospitalId;
+  }
+  // Never overwrite the recipient, purpose, permission or dates of a draft.
+  const state = document.querySelector('#share-study-state');
+  if (state) { state.textContent = studies.length ? `등록된 영상검사 ${studies.length}건에서 선택하세요.` : '등록된 영상검사가 없습니다. 기록을 다시 불러와 주세요.'; state.dataset.state = studies.length ? 'ready' : 'empty'; }
   renderPatientSeriesOptions();
 }
 
@@ -1677,7 +1844,7 @@ async function requestDoctorToken() {
 }
 
 async function openViewer() {
-  switchPersona("DOCTOR");
+  if(currentPersona!=="DOCTOR")switchPersona("DOCTOR");
   navigateHospitalScreen("viewer");
   if (!latestToken || latestTokenInfo?.studyInstanceUid !== selectedStudyUid) {
     await requestDoctorToken();
@@ -1740,6 +1907,7 @@ async function loadInstancesForSelectedSeries() {
     totalSlices = 1;
     currentSliceIndex = 0;
     updateSliceControlsUi();
+    renderTransferSelection();
     showViewerMessage(toFriendlyError(result?.error || "NO_INSTANCES"), "fail");
     return;
   }
@@ -1754,6 +1922,7 @@ async function loadInstancesForSelectedSeries() {
   totalSlices = lastInstances.length;
   currentSliceIndex = 0;
   updateSliceControlsUi();
+  renderTransferSelection();
   showViewerMessage(`Instance 메타데이터 ${totalSlices}건을 확인했습니다. 마우스 휠 또는 Cine 재생으로 단면을 탐색하세요.`, "success");
 
   await displaySlice(0);
@@ -1976,26 +2145,17 @@ async function loadInstancePixels(sopInstanceUid) {
 }
 
 async function downloadSelectedInstance() {
-  if (!requireToken() || !selectedSopUid) return;
-  const response = await proofFetch(`/dicomweb/studies/${selectedStudyUid}/series/${selectedSeriesUid}/instances/${selectedSopUid}/download`, {
-    headers: { authorization: `Bearer ${latestToken}` },
-  });
+  showViewerMessage('PC 다운로드는 차단되어 있습니다. B병원 PACS 보관을 이용해 주세요.','warning');
+}
 
-  if (!response.ok) {
-    const error = await safeJson(response);
-    showViewerMessage(toFriendlyError(error.error), "fail");
-    renderOutput(error);
-    return;
-  }
-
-  const blob = await response.blob();
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = `${selectedSopUid}.dcm`;
-  link.click();
-  URL.revokeObjectURL(url);
-  renderOutput({ status: "DOWNLOAD_STARTED", sopInstanceUid: selectedSopUid, bytes: blob.size });
+function stageSelectedInstanceForPacs(){
+  if(pacsImportBusy||activeTransferJobId){navigateHospitalScreen('transfer');return;}
+  const consent=getConsentForStudy(selectedStudyUid,lastConsents);
+  const item={studyInstanceUid:selectedStudyUid,seriesInstanceUid:selectedSeriesUid,sopInstanceUid:selectedSopUid};
+  if(!item.sopInstanceUid||!importPreflight(consent,{...item,hospitalId:demo.targetHospitalId}).ready){showToast('선택 영상과 다운로드 동의를 확인하세요.');return;}
+  if(transferQueue.length){showToast('기존 선택 작업을 먼저 확인하세요. 다른 영상을 자동으로 추가하지 않습니다.');navigateHospitalScreen('transfer');return;}
+  transferQueue.push(item);transferQueueConsentId=consent.consentId;
+  navigateHospitalScreen('transfer');renderTransferSelection();runPreflightCheck();
 }
 
 function renderSeries(seriesRows) {
@@ -2133,8 +2293,12 @@ function refreshClinicalNextAction() {
 }
 
 async function selectStudy(studyUid, studies = lastStudies) {
+  const nextStudy = studies.find(study => study.studyInstanceUid === studyUid);
+  if (!nextStudy) return;
   selectedStudyUid = studyUid;
-  selectedStudy = studies.find((study) => study.studyInstanceUid === studyUid) ?? selectedStudy;
+  selectedStudy = nextStudy;
+  if (sourceHospitalSelect) sourceHospitalSelect.value = nextStudy.sourceHospitalId;
+  demo.sourceHospitalId = nextStudy.sourceHospitalId;
   selectedSeriesUid = "";
   if (patientStudySelect) patientStudySelect.value = selectedStudyUid;
   renderPatientSeriesOptions();
@@ -2144,10 +2308,12 @@ async function selectStudy(studyUid, studies = lastStudies) {
   updateConsentState(lastConsents);
   if (viewerStatus) viewerStatus.textContent = "토큰 필요";
   syncSelectedStudyUi();
+  shareReview?.refresh(consentMutationPending);
   refreshClinicianHome();
 }
 
 function refreshClinicianHome() {
+  demoTools?.update();
   clinicianHome?.update({studies:lastStudies, selectedUid:selectedStudyUid,
     consentForStudy:uid=>getConsentForStudy(uid,lastConsents),
     context:{...capstoneAuth?.context,patientName:demo.patientName}, logs:clinicalRecentLogs});
@@ -2194,15 +2360,14 @@ function resetViewerData() {
   updateSliceControlsUi();
   hideSeriesImage();
   setDownloadState();
+  renderTransferSelection();
 }
 
 function setDownloadState() {
-  const allowed = latestTokenInfo?.permission === "DOWNLOAD_ALLOWED" && Boolean(selectedSopUid);
   if (downloadButton) {
-    downloadButton.disabled = !allowed;
-    downloadButton.title = allowed
-      ? "선택된 DICOM 인스턴스 다운로드"
-      : "조회 전용(VIEW_ONLY) 토큰입니다. 서버에서 다운로드가 원천 차단됩니다.";
+    downloadButton.disabled = true;
+    downloadButton.hidden = true;
+    downloadButton.title = 'PC 다운로드 차단 · 승인된 B병원 PACS 보관만 제공';
   }
 }
 
@@ -2499,18 +2664,135 @@ function resetViewerTools() {
 // --------------------------------------------------------------------------
 // PACS Import (STOW-RS)
 // --------------------------------------------------------------------------
+function transferItemsForPreflight() {
+  if (transferQueue.length) return transferQueue.map(({ studyInstanceUid, seriesInstanceUid, sopInstanceUid }) =>
+    ({ studyInstanceUid, seriesInstanceUid, sopInstanceUid }));
+  return selectedStudyUid && selectedSeriesUid && selectedSopUid
+    ? [{ studyInstanceUid: selectedStudyUid, seriesInstanceUid: selectedSeriesUid, sopInstanceUid: selectedSopUid }] : [];
+}
+
+function transferQueueFingerprint(items = transferItemsForPreflight()) {
+  const consentId = transferQueue.length ? transferQueueConsentId : getConsentForStudy(items[0]?.studyInstanceUid, lastConsents)?.consentId;
+  return JSON.stringify({ consentId: consentId ?? "", items });
+}
+
+function renderTransferJobChoices() {
+  const select = document.querySelector('#transfer-job-select');
+  const resume = document.querySelector('#transfer-job-resume');
+  const resumeButton = document.querySelector('#btn-resume-pacs-job');
+  if (!select) return;
+  activeTransferJobs = activeTransferJobs.filter(job => job && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu.test(job.jobId ?? ''));
+  const previous = activeTransferJobId;
+  const options = activeTransferJobs.map(job => {
+    const option = document.createElement('option');
+    option.value = job.jobId;
+    option.textContent = `${job.state} · ${job.succeededItems}/${job.totalItems} 완료 · ${job.failedItems}건 실패`;
+    return option;
+  });
+  if (!options.length) {
+    const option = document.createElement('option');
+    option.value = '';
+    option.textContent = '미완료 작업 없음';
+    options.push(option);
+  }
+  select.replaceChildren(...options);
+  activeTransferJobId = activeTransferJobs.find(job => job.jobId === previous)?.jobId ?? activeTransferJobs[0]?.jobId ?? '';
+  select.value = activeTransferJobId;
+  select.disabled = pacsImportBusy || activeTransferJobs.length === 0;
+  if (resume) resume.hidden = activeTransferJobs.length === 0;
+  if (resumeButton) resumeButton.disabled = pacsImportBusy || !activeTransferJobId;
+}
+
+function renderTransferSelection() {
+  const list = document.querySelector('#transfer-selection-list');
+  const count = document.querySelector('#transfer-selection-count');
+  const addButton = document.querySelector('#btn-add-series-transfer-items');
+  const runButton = document.querySelector('#btn-pacs-import-run');
+  const confirmation = document.querySelector('#pacs-import-confirm');
+  const confirmationLabel = document.querySelector('#pacs-import-confirm-label');
+  const items = transferQueue;
+  if (count) count.textContent = `작업에 담긴 영상 ${items.length}건`;
+  if (confirmationLabel) confirmationLabel.textContent = items.length
+    ? `${items.length}건을 환자 동의 범위에 따라 B병원 PACS로 가져옵니다.`
+    : selectedSopUid ? '현재 선택한 영상 1건을 환자 동의 범위에 따라 B병원 PACS로 가져옵니다.'
+      : '전송할 영상을 추가하거나 Viewer에서 Instance를 선택하세요.';
+  if (list) {
+    list.replaceChildren(...items.map((item, index) => {
+      const row = document.createElement('li');
+      const study = lastStudies.find(candidate => candidate.studyInstanceUid === item.studyInstanceUid);
+      const label = document.createElement('span');
+      label.textContent = `${study?.description || '선택 검사'} · 영상 ${index + 1}`;
+      const remove = document.createElement('button');
+      remove.type = 'button'; remove.dataset.removeTransferItem = String(index);
+      remove.setAttribute('aria-label', `전송 선택 영상 ${index + 1}건에서 제거`);
+      remove.textContent = '제거';
+      remove.disabled = pacsImportBusy || activeTransferJobs.length > 0;
+      row.append(label, remove);
+      return row;
+    }));
+  }
+  if (addButton) {
+    addButton.disabled = pacsImportBusy || !selectedStudyUid || !selectedSeriesUid || lastInstances.length === 0;
+    addButton.textContent = lastInstances.length ? `현재 Series 영상 추가 (${lastInstances.length})` : '현재 Series 영상 추가';
+  }
+  if (runButton) runButton.disabled = pacsImportBusy || activeTransferJobs.length > 0 || !isPreflightPassed || !confirmation?.checked;
+  renderTransferJobChoices();
+}
+
+function addCurrentSeriesToTransfer() {
+  if (pacsImportBusy || !lastInstances.length || !selectedStudyUid || !selectedSeriesUid) return;
+  const consent = getConsentForStudy(selectedStudyUid, lastConsents);
+  if (!consent || consent.status !== 'ACTIVE' || consent.permission !== 'DOWNLOAD_ALLOWED'
+      || consent.targetHospitalId !== demo.targetHospitalId) {
+    showToast('현재 Series에 유효한 다운로드 동의가 없습니다. 환자 동의 범위와 수신 병원을 확인하세요.');
+    return;
+  }
+  if (transferQueue.length && transferQueueConsentId !== consent.consentId) {
+    showToast('한 작업에는 하나의 환자 동의만 담을 수 있습니다. 기존 작업을 먼저 실행하세요.');
+    return;
+  }
+  const known = new Set(transferQueue.map(item => `${item.studyInstanceUid}\0${item.seriesInstanceUid}\0${item.sopInstanceUid}`));
+  let added = 0;
+  for (const instance of lastInstances) {
+    const sopInstanceUid = dicomValue(instance, '00080018');
+    const item = { studyInstanceUid: selectedStudyUid, seriesInstanceUid: selectedSeriesUid, sopInstanceUid };
+    if (!importPreflight(consent, { ...item, hospitalId: demo.targetHospitalId }).ready) continue;
+    const key = `${item.studyInstanceUid}\0${item.seriesInstanceUid}\0${item.sopInstanceUid}`;
+    if (known.has(key)) continue;
+    if (transferQueue.length >= 10000) break;
+    transferQueue.push(item); known.add(key); added++;
+  }
+  if (added) transferQueueConsentId = consent.consentId;
+  renderTransferSelection();
+  runPreflightCheck();
+  if (added) showToast(`환자 동의 범위에 포함된 영상 ${added}건을 전송 작업에 추가했습니다.`);
+  else showToast('추가할 수 있는 새 영상이 없습니다. 이미 선택했거나 동의 범위 밖일 수 있습니다.');
+}
+
 function runPreflightCheck() {
   if (pacsImportBusy) return;
+  isPreflightPassed = false;
+  preflightFingerprint = "";
   const pill = document.querySelector("#pacs-import-status-pill");
   const log = document.querySelector("#pacs-import-log");
   const runBtn = document.querySelector("#btn-pacs-import-run");
   const integrityStatus = document.querySelector("#pacs-integrity-status");
   const destStatus = document.querySelector("#pacs-destination-status");
-  const consent = getConsentForStudy(selectedStudyUid, lastConsents);
-  const readiness = importPreflight(consent, selectedStudyUid, demo.targetHospitalId);
-  const study = lastStudies.find(s => s.studyInstanceUid === selectedStudyUid);
+  const items = transferItemsForPreflight();
+  const consent = transferQueue.length
+    ? lastConsents.find(row => row.consentId === transferQueueConsentId)
+    : getConsentForStudy(items[0]?.studyInstanceUid ?? selectedStudyUid, lastConsents);
+  const perItem = items.map(item => importPreflight(consent, { ...item, hospitalId: demo.targetHospitalId }));
+  const baseChecks = perItem[0]?.checks ?? importPreflight(consent, { hospitalId: demo.targetHospitalId }).checks;
+  const checksForItems = baseChecks.map(([name, , reason], index) => {
+    const valid = items.length > 0 && perItem.every(result => result.checks[index]?.[1] === true);
+    const failed = perItem.find(result => result.checks[index]?.[1] !== true)?.checks[index]?.[2];
+    return [name, valid, valid ? `${items.length}개 항목 확인 · 서버 재검증 필요` : failed ?? reason];
+  });
+  const readiness = { ready: items.length > 0 && perItem.every(result => result.ready), checks: checksForItems };
+  const study = lastStudies.find(s => s.studyInstanceUid === items[0]?.studyInstanceUid);
   const context = document.querySelector('#pacs-import-context');
-  if (context) context.textContent = `${study?.description || '검사 미선택'} · ${consent?.sourceHospitalId || '출처 미확인'} → ${consent?.targetHospitalId || '수신 병원 미확인'}`;
+  if (context) context.textContent = `${study?.description || '검사 미선택'} · ${consent?.sourceHospitalId || '출처 미확인'} → ${consent?.targetHospitalId || '수신 병원 미확인'} · ${items.length}건`;
   const folderTitle = document.querySelector('#vault-folder-title'); if(folderTitle) folderTitle.textContent=study?.description || '검사를 선택하세요';
   const folderModality = document.querySelector('#vault-folder-modality'); if(folderModality) folderModality.textContent=study?.modality || '영상';
   const deadline = document.querySelector('#vault-consent-deadline'); if(deadline) deadline.textContent=consent?.validUntil ? formatDate(consent.validUntil) : '공유 종료 시각을 확인하세요';
@@ -2541,99 +2823,222 @@ function runPreflightCheck() {
       log.dataset.tone = "fail";
     }
     if (runBtn) runBtn.disabled = true;
+    renderTransferSelection();
     return;
   }
 
   isPreflightPassed = true;
+  preflightFingerprint = transferQueueFingerprint(items);
   if (pill) {
-    pill.textContent = "로컬 사전확인 · 운영 Preflight 미검증";
+    pill.textContent = "화면 정보 확인 · 서버 권한 검증 대기";
     pill.className = "mq-badge mq-badge-good";
   }
-  if (integrityStatus) integrityStatus.textContent = "보관 작업 후 해시 계산";
-  if (destStatus) destStatus.textContent = "실제 수신 PACS 등록: NOT VERIFIED";
+  if (integrityStatus) integrityStatus.textContent = "B PACS 재조회 전";
+  if (destStatus) destStatus.textContent = "B PACS 등록 전";
   if (log) {
-    log.textContent = "선택된 동의로 로컬 암호화 보관을 요청합니다. 서버가 권한·범위를 재검증합니다. 실제 수신 PACS/STOW-RS 연결은 미구현이며 별도 키 설정이 필요합니다.";
+    log.textContent = `${items.length}개 DICOM 인스턴스를 영속 작업으로 등록합니다. 영상별로 현재 동의를 재검증하고 B PACS 재조회 영수증이 일치해야 완료로 집계합니다.`;
     log.dataset.tone = "success";
   }
-  // Confirmation enables the button; this is not server authorization.
+  renderTransferSelection();
 }
 
 async function runPacsImport() {
   if (pacsImportBusy || !isPreflightPassed || !document.querySelector('#pacs-import-confirm')?.checked) return;
-  const consent = getConsentForStudy(selectedStudyUid, lastConsents);
-  if (!importPreflight(consent, selectedStudyUid, demo.targetHospitalId).ready) { runPreflightCheck(); return; }
+  const items = transferItemsForPreflight();
+  if (!preflightFingerprint || preflightFingerprint !== transferQueueFingerprint(items)) {
+    const confirmation = document.querySelector('#pacs-import-confirm');
+    if (confirmation) confirmation.checked = false;
+    runPreflightCheck();
+    return;
+  }
+  const consent = transferQueue.length
+    ? lastConsents.find(row => row.consentId === transferQueueConsentId)
+    : getConsentForStudy(items[0]?.studyInstanceUid, lastConsents);
+  if (!consent || items.some(item => !importPreflight(consent, { ...item, hospitalId: demo.targetHospitalId }).ready)) {
+    runPreflightCheck(); return;
+  }
   pacsImportBusy = true;
-  const controls = ['#btn-pacs-import-run', '#btn-preflight-check', '#pacs-import-confirm'].map(id => document.querySelector(id));
-  controls.forEach(el => { if (el) el.disabled = true; });
+  renderTransferSelection();
   const pill = document.querySelector("#pacs-import-status-pill");
   const log = document.querySelector("#pacs-import-log");
   const integrityStatus = document.querySelector("#pacs-integrity-status");
   const destStatus = document.querySelector("#pacs-destination-status");
   const transferStatus = document.querySelector("#pacs-transfer-status");
-
-  if (pill) {
-    pill.textContent = "전송 진행 중...";
-    pill.className = "mq-badge mq-badge-warn";
-  }
-  if (log) {
-    log.textContent = "로컬 암호화 보관 작업을 요청하고 있습니다. 실제 STOW-RS 전송이 아닙니다.";
-    log.dataset.tone = "loading";
-  }
-
+  const confirmationLabel = document.querySelector('#pacs-import-confirm-label');
   try {
-  const result = await postJson("/api/transfers/pacs-import", {
-    consentId: consent.consentId,
-    doctorId: demo.doctorId,
-    targetHospitalId: demo.targetHospitalId,
-    studyInstanceUid: selectedStudyUid,
-  });
-
-  if (result.status === "COMPLETED") {
-    const gotoBtn = document.querySelector("#btn-goto-pacs-archive");
-    if (gotoBtn) gotoBtn.style.display = "block";
-    if (integrityStatus) integrityStatus.textContent = result.sha256 ? `서버 보고 해시: ${result.sha256}` : '해시 미제공';
-    if (destStatus) destStatus.textContent = `로컬 보관 완료 · ${result.retention?.validUntil ? formatDate(result.retention.validUntil) + '까지' : '보관기한 미확인'} · PACS 등록 미검증`;
-    if (transferStatus) transferStatus.textContent = `로컬 보관 완료 (${Number.isInteger(result.instancesTransferred) ? result.instancesTransferred : '미확인'}건)`;
-    if (pill) {
-      pill.textContent = "로컬 보관 시뮬레이션 완료";
-      pill.className = "mq-badge mq-badge-good";
+    if (activeTransferJobId) throw Object.assign(new Error('ACTIVE_TRANSFER_JOB_EXISTS'), { code: 'ACTIVE_TRANSFER_JOB_EXISTS' });
+    if (pill) { pill.textContent = '작업 등록 중...'; pill.className = 'mq-badge mq-badge-warn'; }
+    if (log) { log.textContent = `동의된 영상 ${items.length}건으로 재시작 가능한 B PACS 전송 작업을 만들고 있습니다.`; log.dataset.tone = 'loading'; }
+    const created = await fetchJson('/api/pacs-transfer-jobs', { method: 'POST',
+      headers: { 'content-type': 'application/json', 'idempotency-key': crypto.randomUUID() },
+      body: JSON.stringify({ consentId: consent.consentId, items }) });
+    if (created.error || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu.test(created.jobId ?? '')) {
+      throw Object.assign(new Error(created.error || 'PACS_TRANSFER_JOB_CREATE_FAILED'), { code: created.error || 'PACS_TRANSFER_JOB_CREATE_FAILED' });
     }
-    if (log) {
-      const bytesFmt = result.transferredBytes ? `(${(result.transferredBytes / 1024).toFixed(1)} KB)` : "";
-      log.textContent = `로컬 보관 시뮬레이터: ${result.instancesTransferred}건 ${bytesFmt}. 실제 수신 PACS 등록·원본 동일성은 별도 검증 대상입니다. 감사세션: ${result.auditSessionId}`;
-      log.dataset.tone = "success";
-    }
-    updatePipelineSteps();
-    renderOutput(result);
-    broadcastSync("PACS_IMPORT");
-    try {
-      await loadHospitalBPacsArchive();
-      await loadDashboard();
-    } catch {
-      if (log) log.textContent += ' 보관 완료 응답은 받았으나 후속 화면 갱신에 실패했습니다. 전송 확인에서 재조회하세요.';
-    }
-  } else {
-    if (pill) {
-      pill.textContent = "요청 미완료";
-      pill.className = "mq-badge mq-badge-bad";
-    }
-    if (log) {
-      log.textContent = `로컬 보관 요청 미완료: ${toFriendlyError(result.error || result.message)}. 보관 목록을 확인한 후 재점검하세요.`;
-      log.dataset.tone = "fail";
-    }
-    renderOutput(result);
-  }
-  } catch {
-    if (pill) pill.textContent = '결과 확인 필요';
-    if (log) { log.textContent = '서버 응답을 확인하지 못했습니다. 이미 처리되었을 수 있으니 전송 확인에서 보관 목록을 먼저 확인하세요. 자동 재시도하지 않습니다.'; log.dataset.tone = 'fail'; }
-    if (transferStatus) transferStatus.textContent = '처리 결과 미확인';
+    activeTransferJobId = created.jobId;
+    activeTransferJobs.unshift({ jobId: created.jobId, state: 'CREATED', totalItems: items.length,
+      succeededItems: 0, failedItems: 0, validUntil: consent.validUntil });
+    renderTransferJobChoices();
+    if (confirmationLabel) confirmationLabel.textContent = `작업 ${items.length}건을 B병원 PACS로 가져오는 중입니다.`;
+    await processPacsTransferJob(activeTransferJobId);
+  } catch (error) {
+    showTransferFailure(error);
   } finally {
     pacsImportBusy = false;
     isPreflightPassed = false;
-    controls.forEach(el => { if (el) el.disabled = false; });
-    const run = document.querySelector('#btn-pacs-import-run'); if (run) run.disabled = true;
     const confirmation = document.querySelector('#pacs-import-confirm'); if (confirmation) confirmation.checked = false;
+    await restorePacsTransferJob();
+    renderTransferSelection();
   }
+}
+
+async function processPacsTransferJob(jobId) {
+  const pill = document.querySelector('#pacs-import-status-pill');
+  const log = document.querySelector('#pacs-import-log');
+  const integrity = document.querySelector('#pacs-integrity-status');
+  const destination = document.querySelector('#pacs-destination-status');
+  const transferStatus = document.querySelector('#pacs-transfer-status');
+  while (true) {
+    if (consentMutationPending) throw Object.assign(new Error('CONSENT_CHANGED'), { code: 'VIEW_CONTEXT_CHANGED' });
+    const claim = await fetchJson(`/api/pacs-transfer-jobs/${encodeURIComponent(jobId)}/claim`, { method: 'POST' });
+    if (claim.error) throw Object.assign(new Error(claim.error), { code: claim.error });
+    if (claim.claimed !== true) {
+      const job = claim.job ?? await fetchJson(`/api/pacs-transfer-jobs/${encodeURIComponent(jobId)}`, { cache: 'no-store' });
+      if (job.error) throw Object.assign(new Error(job.error), { code: job.error });
+      showPacsTransferJob(job);
+      if (log && job.items?.some(item => ['IN_PROGRESS', 'RETRYABLE', 'PENDING'].includes(item.state))) {
+        log.textContent = '작업이 저장되었습니다. 이미 실행 중인 항목이 있거나 다음 lease를 기다리는 중입니다. 잠시 뒤 상태를 새로 확인하거나 이어서 처리하세요.';
+        log.dataset.tone = 'loading';
+      }
+      return;
+    }
+    const { item } = claim;
+    if (!item || claim.permission !== 'DOWNLOAD_ALLOWED' || !claim.consentId || !claim.auditSessionId) {
+      throw Object.assign(new Error('TRANSFER_CLAIM_INVALID'), { code: 'TRANSFER_CLAIM_INVALID' });
+    }
+    if (pill) { pill.textContent = '영상 전송 중...'; pill.className = 'mq-badge mq-badge-warn'; }
+    if (log) { log.textContent = `영상 ${item.ordinal}을 A Gateway에서 받아 B PACS에 등록하고 재조회하는 중입니다.`; log.dataset.tone = 'loading'; }
+    let importStarted = false;
+    try {
+      const token = await postJson('/api/dicom-access/request', { consentId: claim.consentId,
+        doctorId: demo.doctorId, requestingHospitalId: claim.targetHospitalId,
+        studyInstanceUid: item.studyInstanceUid, seriesInstanceUid: item.seriesInstanceUid,
+        purpose: claim.purpose, requestedAction: 'DOWNLOAD' });
+      const expiresAt = Date.parse(token.expiresAt);
+      if (token.error || token.decision !== 'ALLOWED' || token.tokenType !== 'DPoP' || !token.accessToken
+          || token.permission !== 'DOWNLOAD_ALLOWED' || token.allowedStudyUid !== item.studyInstanceUid
+          || (token.allowedSeriesUids?.length && !token.allowedSeriesUids.includes(item.seriesInstanceUid))
+          || !Number.isFinite(expiresAt) || expiresAt <= Date.now()) {
+        throw Object.assign(new Error(token.reasonCode || token.error || 'DOWNLOAD_TOKEN_DENIED'),
+          { code: token.reasonCode || token.error || 'DOWNLOAD_TOKEN_DENIED' });
+      }
+      if (consentMutationPending) throw Object.assign(new Error('CONSENT_CHANGED'), { code: 'VIEW_CONTEXT_CHANGED' });
+      importStarted = true;
+      const receipt = await fetchJson(`/dicomweb/studies/${item.studyInstanceUid}/series/${item.seriesInstanceUid}/instances/${item.sopInstanceUid}/import`, {
+        method: 'POST', headers: { authorization: `Bearer ${token.accessToken}`,
+          'x-hipass-transfer-job-id': claim.jobId, 'x-hipass-transfer-item-id': item.itemId,
+          'x-hipass-transfer-lease-id': claim.leaseId },
+      });
+      if (receipt.error || receipt.status !== 'PACS_INSTANCE_VERIFIED' || receipt.simulation !== false
+          || receipt.destinationVerification !== true || receipt.studyInstanceUid !== item.studyInstanceUid
+          || receipt.seriesInstanceUid !== item.seriesInstanceUid || receipt.sopInstanceUid !== item.sopInstanceUid
+          || !/^[a-f0-9]{64}$/u.test(receipt.sha256 ?? '') || !Number.isSafeInteger(receipt.bytes) || receipt.bytes < 132) {
+        throw Object.assign(new Error(receipt.error || 'PACS_RECEIPT_INVALID'), { code: receipt.error || 'PACS_RECEIPT_INVALID', importStarted });
+      }
+      if (integrity) integrity.textContent = `B PACS 재조회 · SHA-256 일치 · ${item.ordinal}번`;
+      if (destination) destination.textContent = 'B병원 PACS UID·원본 해시 재검증';
+      renderOutput({ status: receipt.status, studyInstanceUid: receipt.studyInstanceUid,
+        seriesInstanceUid: receipt.seriesInstanceUid, sopInstanceUid: receipt.sopInstanceUid,
+        sha256: receipt.sha256, bytes: receipt.bytes, alreadyStored: receipt.alreadyStored === true });
+      const job = await fetchJson(`/api/pacs-transfer-jobs/${encodeURIComponent(jobId)}`, { cache: 'no-store' });
+      if (job.error) throw Object.assign(new Error(job.error), { code: job.error, importStarted: true });
+      showPacsTransferJob(job);
+      if (transferStatus) transferStatus.textContent = `${job.succeededItems}/${job.totalItems} 완료`;
+    } catch (error) {
+      if (error && typeof error === 'object' && error.importStarted === undefined) error.importStarted = importStarted;
+      throw error;
+    }
+  }
+}
+
+function showPacsTransferJob(job) {
+  const total = Number(job.totalItems ?? job.items?.length ?? 0);
+  const succeeded = Number(job.succeededItems ?? job.items?.filter(item => item.state === 'SUCCEEDED').length ?? 0);
+  const failed = Number(job.failedItems ?? job.items?.filter(item => ['FAILED', 'EXPIRED', 'REVOKED'].includes(item.state)).length ?? 0);
+  const remaining = job.items?.some(item => ['PENDING', 'IN_PROGRESS', 'RETRYABLE'].includes(item.state)) ?? false;
+  const pill = document.querySelector('#pacs-import-status-pill');
+  const log = document.querySelector('#pacs-import-log');
+  const transferStatus = document.querySelector('#pacs-transfer-status');
+  if (pill) { pill.textContent = remaining ? '작업 저장 · 이어서 가능' : failed ? '일부 영상 확인 필요' : 'B PACS 등록 확인';
+    pill.className = remaining ? 'mq-badge mq-badge-warn' : failed ? 'mq-badge mq-badge-bad' : 'mq-badge mq-badge-good'; }
+  if (transferStatus) transferStatus.textContent = `${succeeded}/${total} 완료 · ${failed}건 실패`;
+  if (log && !remaining) { log.textContent = failed
+      ? `작업 ${total}건 중 ${succeeded}건이 수신 검증됐고 ${failed}건은 실패 상태입니다. 실패 항목을 성공으로 간주하지 않았습니다.`
+      : `작업 ${total}건 모두 B PACS 저장 후 UID·원본 SHA-256 재조회가 확인됐습니다.`;
+    log.dataset.tone = failed ? 'fail' : 'success'; }
+  const resumeStatus = document.querySelector('#transfer-job-resume-status');
+  if (resumeStatus) resumeStatus.textContent = `작업 상태 ${job.state} · ${succeeded}/${total} 완료 · ${failed}건 실패${remaining ? ' · 미완료 항목 있음' : ''}`;
+  if (remaining) {
+    const summary = { jobId: job.jobId, state: job.state, totalItems: total, succeededItems: succeeded,
+      failedItems: failed, validUntil: job.validUntil };
+    const index = activeTransferJobs.findIndex(candidate => candidate.jobId === job.jobId);
+    if (index < 0) activeTransferJobs.unshift(summary);
+    else activeTransferJobs[index] = summary;
+  } else activeTransferJobs = activeTransferJobs.filter(candidate => candidate.jobId !== job.jobId);
+  if (!remaining && activeTransferJobId === job.jobId) {
+    activeTransferJobId = '';
+    transferQueue = []; transferQueueConsentId = '';
+  }
+  renderTransferJobChoices();
+  renderTransferSelection();
+}
+
+function showTransferFailure(error) {
+  const raw = error?.code ?? error?.message ?? 'PACS_TRANSFER_FAILED';
+  const reason = /^[A-Z][A-Z0-9_]{0,63}$/u.test(raw) ? raw : 'PACS_TRANSFER_FAILED';
+  const importStarted = error?.importStarted === true;
+  const pill = document.querySelector('#pacs-import-status-pill');
+  const log = document.querySelector('#pacs-import-log');
+  const transferStatus = document.querySelector('#pacs-transfer-status');
+  const destination = document.querySelector('#pacs-destination-status');
+  if (pill) { pill.textContent = importStarted ? '수신 결과 확인 필요' : '작업이 중단됨'; pill.className = 'mq-badge mq-badge-bad'; }
+  if (log) { log.textContent = importStarted
+      ? `전송 응답을 확인하지 못했습니다 (${toFriendlyError(reason)}). 확인 코드: ${reason}. 자동 재전송하지 않았습니다. 저장된 작업과 lease 상태를 확인한 뒤 재개하세요.`
+      : `전송 작업을 계속하지 못했습니다: ${toFriendlyError(reason)}. 확인 코드: ${reason}. 동의와 접근 정책을 다시 확인하세요.`;
+    log.dataset.tone = 'fail'; }
+  if (transferStatus) transferStatus.textContent = importStarted ? '수신 결과 미확인' : '작업 중단';
+  if (destination) destination.textContent = importStarted ? 'B PACS 결과 재확인 필요' : 'B PACS 등록 미확인';
+  if (activeTransferJobId) {
+    const panel = document.querySelector('#transfer-job-resume');
+    const status = document.querySelector('#transfer-job-resume-status');
+    if (panel) panel.hidden = false;
+    if (status) status.textContent = '작업이 저장되어 있습니다. 현재 동의를 다시 확인한 뒤 미완료 항목을 재개할 수 있습니다.';
+  }
+  renderTransferSelection();
+}
+
+async function restorePacsTransferJob() {
+  if (currentPersona !== 'DOCTOR') return;
+  const panel = document.querySelector('#transfer-job-resume');
+  const status = document.querySelector('#transfer-job-resume-status');
+  if (status) status.textContent = '서버에 저장된 미완료 전송 작업을 확인하고 있습니다.';
+  try {
+    const result = await fetchJson('/api/pacs-transfer-jobs/active', { cache: 'no-store' });
+    if (result.error || !Array.isArray(result.jobs)) throw new Error(result.error || 'PACS_TRANSFER_JOB_LIST_INVALID');
+    const previousJobId = activeTransferJobId;
+    activeTransferJobs = result.jobs;
+    activeTransferJobId = activeTransferJobs.some(job => job.jobId === previousJobId) ? previousJobId : '';
+    renderTransferJobChoices();
+    if (status) status.textContent = activeTransferJobs.length
+      ? `${activeTransferJobs.length}개의 미완료 작업이 서버에 저장되어 있습니다. 선택한 작업을 재개하면 동의와 접근 권한을 다시 확인합니다.`
+      : '미완료 전송 작업이 없습니다.';
+  } catch {
+    activeTransferJobs = [];
+    activeTransferJobId = '';
+    if (panel) panel.hidden = true;
+    renderTransferJobChoices();
+  }
+  renderTransferSelection();
 }
 
 // --------------------------------------------------------------------------
@@ -2651,6 +3056,11 @@ function updateTransferTracking(state, archives = []) {
 }
 
 async function loadHospitalBPacsArchive() {
+  if(location.hostname==='highpass-demo.japaneast.cloudapp.azure.com'){
+    const legacy=document.querySelector('#hospital-vault-list');if(legacy)legacy.hidden=true;
+    updateTransferTracking('unavailable');
+    return;
+  }
   const version = ++archiveRequestVersion;
   updateTransferTracking('loading');
   const tableBody = document.querySelector("#hospital-b-pacs-table-body");
@@ -2980,11 +3390,11 @@ function scanCameraFrame() {
 }
 
 let qrReceptionBusy = false;
-async function redeemScannedNonce(nonce) {
+async function redeemScannedNonce(nonce, inputMethod='CAMERA') {
   if (qrReceptionBusy) return;
   qrReceptionBusy = true;
   stopCameraQrScan();
-  const controls = ['qr-manual-submit', 'btn-toggle-camera-scan', 'btn-reset-qr-scan', 'btn-simulate-qr-scan'];
+  const controls = ['qr-manual-submit', 'qr-image-input', 'qr-manual-input', 'btn-toggle-camera-scan', 'btn-reset-qr-scan', 'btn-simulate-qr-scan'];
   controls.forEach(id => { const element = document.getElementById(id); if (element) element.disabled = true; });
   resetQrScan();
   try {
@@ -3000,7 +3410,8 @@ async function redeemScannedNonce(nonce) {
     statusPill.className = "mq-badge mq-badge-warn";
   }
 
-  const result = await postJson("/api/transfers/tickets/redeem-viewer", { nonce });
+  const redemptionPath=location.hostname==='highpass-demo.japaneast.cloudapp.azure.com'?'/api/demo/qr/redeem':'/api/transfers/tickets/redeem-viewer';
+  const result = await postJson(redemptionPath, { nonce, inputMethod });
   if (result?.decision === "ALLOWED" && result.accessToken) {
     latestToken = result.accessToken;
     latestTokenInfo = result;
@@ -3012,7 +3423,7 @@ async function redeemScannedNonce(nonce) {
     setDownloadState();
 
     if (statusPill) {
-      statusPill.textContent = "QR 인식 완료 (ALLOWED)";
+      statusPill.textContent = "공유 접수 완료 · 서버 검증 통과";
       statusPill.className = "mq-badge mq-badge-good";
     }
     if (scannedRef) scannedRef.textContent = `${result.ticketId || "TICKET-VERIFIED"} (소진됨)`;
@@ -3020,7 +3431,7 @@ async function redeemScannedNonce(nonce) {
     if (scannedConsent) scannedConsent.textContent = `ACTIVE (${result.viewerContext?.permission || "VIEW_ONLY"})`;
     if (scannedToken) scannedToken.textContent = "발급 완료 · 단기 접근 권한";
     if (message) {
-      message.innerHTML = "<strong>QR 바인딩 성공:</strong> 환자 일회용 암호학적 티켓이 검증되어 Viewer 세션과 단기 토큰이 생성되었습니다.";
+      message.textContent = "일회용 QR 접수가 완료되었습니다. 영상 열람은 별도의 영상 경로·권한 확인 후 진행됩니다.";
       message.dataset.tone = "success";
     }
 
@@ -3037,14 +3448,17 @@ async function redeemScannedNonce(nonce) {
       auditSessionId: result.auditSessionId,
     });
 
-    await loadDashboard();
-    navigateHospitalScreen("viewer");
-    await loadGatewayStudies();
-    await loadSeriesForActiveToken();
-    if (lastSeries.length > 0) {
-      await loadInstancesForSelectedSeries();
+    // Reception succeeded even if a separate dashboard refresh is unavailable.
+    await loadDashboard().catch(()=>{});
+    const receptions=await fetchJson('/api/clinician/receptions',{cache:'no-store'});
+    const receipt=receptions.receptions?.find(row=>row.ticketId===result.ticketId);
+    if(receipt){
+      if(receipt.studies[0])await selectReceptionContext(receipt,receipt.studies[0]);
+      else clinicianHealth?.selectReception(receipt.consentId);
+      receptionHome?.update(receipt,demo.patientName||receipt.patientId);
     }
-    showToast("QR 검증 완료: Cloud DICOM 뷰어로 자동 전환되었습니다.");
+    navigateHospitalScreen('dashboard');
+    showToast('QR 확인 완료 · 접수 내용 보기에서 이어서 진행하세요.');
   } else {
     if (statusPill) {
       statusPill.textContent = "QR 검증 거부";
@@ -3071,46 +3485,13 @@ async function redeemScannedNonce(nonce) {
 }
 
 async function simulateQrScan() {
-  const statusPill = document.querySelector("#qr-handoff-status");
-  const message = document.querySelector("#qr-handoff-message");
-
-  if (!patientConsentReady && !latestConsentId) {
-    if (statusPill) {
-      statusPill.textContent = "동의 없음";
-      statusPill.className = "mq-badge mq-badge-bad";
-    }
-    if (message) {
-      message.textContent = "환자의 유효한 동의가 없습니다. 먼저 환자 포털에서 동의를 생성하세요.";
-      message.dataset.tone = "fail";
-    }
-    return;
-  }
-
-  let nonceToRedeem = latestTicketNonce;
-  if (!nonceToRedeem && latestConsentId) {
-    const handoff = await postJson(`/api/consents/${encodeURIComponent(latestConsentId)}/handoff-ticket`, {});
-    if (handoff?.qr?.payload) {
-      const match = handoff.qr.payload.match(/\/t\/([A-Za-z0-9_-]{22,128})$/);
-      if (match) {
-        nonceToRedeem = match[1];
-        latestTicketNonce = nonceToRedeem;
-      }
-    }
-  }
-
-  if (!nonceToRedeem) {
-    if (statusPill) {
-      statusPill.textContent = "QR 발급 실패";
-      statusPill.className = "mq-badge mq-badge-bad";
-    }
-    if (message) {
-      message.textContent = "티켓 발급 실패: 기존 티켓이 소진되었거나 동의가 만료/철회되었습니다.";
-      message.dataset.tone = "fail";
-    }
-    return;
-  }
-
-  await redeemScannedNonce(nonceToRedeem);
+  // Only substitute camera input. Never issue a patient ticket as a doctor.
+  navigateHospitalScreen('dashboard');
+  document.querySelector('#reception-import').open=true;
+  const input=document.querySelector('#qr-manual-input');
+  if(input){input.value='';input.dataset.demoImport='1';input.focus();}
+  const hint=document.querySelector('#qr-handoff-message');
+  if(hint)hint.textContent='시연 입력 · 환자 화면의 연결 코드를 붙여넣고 접수하세요. 동의·병원·기간·접근 증명은 서버에서 검증합니다.';
 }
 
 function resetQrScan() {
@@ -3158,17 +3539,110 @@ async function loadAuditTimeline() {
   const version=++auditTimelineVersion;
   const root=document.querySelector('#security-timeline');
   renderSecurityTimeline(root,null,'loading');
+  renderSecurityObservatory(null,'loading');
   if(currentPersona==='PATIENT') {renderSecurityTimeline(root,null,'error');return;}
   const persona=currentPersona;
+  const securityAccess = capstoneAuth?.roles?.some(role => ['SECURITY_ADMIN', 'PLATFORM_ADMIN'].includes(role));
+  const observatory = document.querySelector('.security-observatory');
+  if (observatory) observatory.hidden = !securityAccess;
   const params=new URLSearchParams({limit:'64'});
   if(auditResultFilter?.value)params.set('result',auditResultFilter.value);
   if(auditActionFilter?.value)params.set('action',auditActionFilter.value);
   try {
-    const logs=await fetchJson(`/api/audit-logs?${params}`,{signal:AbortSignal.timeout(10000)});
+    const overview=securityAccess ? await fetchJson(`/api/security/overview?${params}`,{signal:AbortSignal.timeout(15000),cache:'no-store'}) : null;
+    const logs=overview?.applicationAudit?.events ?? await fetchJson(`/api/audit-logs?${params}`,{signal:AbortSignal.timeout(10000),cache:'no-store'});
     if(version!==auditTimelineVersion)return;
     if(persona!==currentPersona||!Array.isArray(logs))throw new Error('AUDIT_UNAVAILABLE');
     renderSecurityTimeline(root,logs);
-  }catch {if(version===auditTimelineVersion)renderSecurityTimeline(root,null,'error');}
+    if(overview)renderSecurityObservatory(overview);
+  }catch {if(version===auditTimelineVersion){renderSecurityTimeline(root,null,'error');renderSecurityObservatory(null,'error');}}
+}
+
+function renderSecurityObservatory(overview,state='ready') {
+  const observatory=document.querySelector('.security-observatory');
+  if(!observatory)return;
+  if (capstoneAuth?.roles?.some(role => ['SECURITY_ADMIN','PLATFORM_ADMIN'].includes(role))) {
+    renderSecurityConsole(observatory, { overview, state, fetchJson, postJson, refresh: loadAuditTimeline });
+    return;
+  }
+  const setSource=(name,label,count,stateName)=>{
+    const card=observatory.querySelector(`[data-source-card="${name}"]`);
+    if(!card)return;
+    const status=card.querySelector('[data-source-status]'),countNode=card.querySelector('[data-source-count]');
+    status.textContent=label;status.dataset.state=stateName;
+    countNode.textContent=count;
+  };
+  if(state!=='ready'||!overview) {
+    observatory.querySelector('[data-security-observed-at]').textContent=state==='loading'?'출처 확인 중…':'조회 실패 · 인증 또는 권한 확인 필요';
+    setSource('app',state==='loading'?'조회 중':'조회 실패',state==='loading'?'기록을 불러오는 중':'결과 없음 · 0건으로 간주하지 않음',state==='loading'?'loading':'failed');
+    setSource('azure',state==='loading'?'조회 중':'출처 상태 미확인','API 조회 실패 · 로그가 없다는 뜻이 아님',state==='loading'?'loading':'failed');
+    setSource('integrity',state==='loading'?'검증 중':'미확인','검증 근거를 받지 못함',state==='loading'?'loading':'failed');
+    drawSecurityFeed(observatory.querySelector('[data-security-app-alerts]'),[],new Map(),'APP','조회할 수 없습니다. 권한과 연결 상태를 확인해 주세요.');
+    drawSecurityFeed(observatory.querySelector('[data-security-vault-events]'),[],new Map(),'AZURE_KEYVAULT','조회할 수 없습니다. 로그 미수집과 API 실패를 구분하세요.');
+    observatory.querySelector('[data-security-app-count]').textContent='—';
+    observatory.querySelector('[data-security-vault-count]').textContent='—';
+    return;
+  }
+  const app=overview.applicationAudit,azure=overview.azureKeyVaultAudit||{},reviews=new Map();
+  for(const review of overview.reviews||[]) {
+    const key=`${review.source}|${review.eventRef}`;
+    if(!reviews.has(key))reviews.set(key,review);
+  }
+  const observed=Date.parse(overview.observedAt);
+  observatory.querySelector('[data-security-observed-at]').textContent=`마지막 조회 ${Number.isFinite(observed)?new Date(observed).toLocaleString('ko-KR'):'시각 미확인'} · 최신 응답 기준`;
+  const applicationEvents=Array.isArray(app.events)?app.events:[],appAlerts=Array.isArray(app.alerts)?app.alerts:[];
+  setSource('app','연결됨',`표시 ${applicationEvents.length}건 · 경보 ${appAlerts.length}건`,app.status==='available'?'available':'unavailable');
+  const azureLabels={available:'연결됨',not_configured:'미설정',permission_required:'권한 추가 필요',misconfigured:'설정 오류',unavailable:'연결 확인 필요'};
+  const azureLabel=azureLabels[azure.status]||'상태 미확인';
+  const azureCount=Array.isArray(azure.events)?azure.events.length:0;
+  const azureCountText=azure.status==='available'?`최근 24시간 · ${azureCount}건${azureCount===0?' · 조회된 기록 없음':''}`:(azure.reason||'출처 상태 미확인');
+  setSource('azure',azureLabel,azureCountText,azure.status||'unavailable');
+  const integrity=app.integrity||{};
+  setSource('integrity',integrity.ok?'연결 이상 없음':'검증 실패',integrity.ok?`앱 체인 ${integrity.checked??0}건 점검`:`사유 ${integrity.reason||'미제공'} · ID ${integrity.failedAuditId||'미제공'}`,integrity.ok?'ok':'failed');
+  observatory.querySelector('[data-security-app-count]').textContent=`${appAlerts.length}건`;
+  observatory.querySelector('[data-security-vault-count]').textContent=azure.status==='available'?`${azureCount}건`:'—';
+  drawSecurityFeed(observatory.querySelector('[data-security-app-alerts]'),appAlerts.slice(0,20),reviews,'APP',appAlerts.length?'최근 접근 거부·실패 이벤트가 없습니다.':'확인이 필요한 앱 이벤트가 없습니다.');
+  const vaultEvents=azure.status==='available'&&Array.isArray(azure.events)?azure.events.slice(0,20):[];
+  const vaultEmpty=azure.status==='available'?'최근 24시간 조회 결과가 없습니다. 이는 보안 위험이 없다는 판정은 아닙니다.':`Key Vault 감사 출처: ${azureLabel} · ${azure.reason||'설정 또는 권한 확인 필요'}`;
+  drawSecurityFeed(observatory.querySelector('[data-security-vault-events]'),vaultEvents,reviews,'AZURE_KEYVAULT',vaultEmpty);
+  const detail=document.querySelector('[data-audit-integrity-detail]');
+  if(detail)detail.textContent=integrity.ok
+    ? `앱 저장소의 ${integrity.checked??0}개 감사 레코드 해시 연결을 확인했습니다. 이 결과는 Azure 불변 보관, 외부 백업, 로그 수집 완전성 또는 시스템 전체 안전성을 증명하지 않습니다.`
+    : `앱 해시 연결 검증 실패 또는 미확인 · ${integrity.reason||'근거 없음'}. 원본 기록을 수정하지 말고 저장소와 보관 경로를 조사하세요.`;
+}
+
+function drawSecurityFeed(container,events,reviews,source,emptyMessage) {
+  if(!container)return;
+  container.replaceChildren();
+  if(!events.length){const empty=document.createElement('p');empty.className='security-feed-empty';empty.textContent=emptyMessage;container.append(empty);return;}
+  for(const event of events) {
+    const eventRef=source==='APP'?event.auditId:event.eventRef;
+    const review=reviews.get(`${source}|${eventRef}`);
+    const card=document.createElement('article');card.className='security-event-card';
+    const result=source==='APP'?String(event.result||'UNKNOWN').toUpperCase():String(event.resultType||'UNKNOWN').toUpperCase();
+    card.dataset.kind=['DENIED','FAIL','FAILED','ERROR','FAILURE'].includes(result)?'error':source==='APP'?'warning':'success';
+    const header=document.createElement('header'),time=document.createElement('time');
+    const timestamp=source==='APP'?event.createdAt:event.timeGenerated,date=Date.parse(timestamp);
+    time.textContent=Number.isFinite(date)?new Date(date).toLocaleString('ko-KR'):'기록 시각 미확인';
+    const badge=document.createElement('span');badge.textContent=source==='APP'?'앱':'Key Vault';header.append(time,badge);
+    const title=document.createElement('strong');
+    title.textContent=source==='APP'?`${event.action||'앱 이벤트'} · ${result}`:`${event.operationName||'Vault 작업'} · ${result}`;
+    const copy=document.createElement('p');copy.textContent=source==='APP'?`사유 ${event.reasonCode||'미제공'} · 기관 ${event.hospitalId||'미확인'}`:`${event.resource||'Key Vault'}${event.resultSignature?` · ${event.resultSignature}`:''} · 참조 ${event.eventRef}`;
+    card.append(header,title,copy);
+    if(review){const state=document.createElement('span');state.className='security-event-review-state';state.textContent=`검토 ${({REVIEWED:'완료',INVESTIGATING:'중',ACTION_REQUIRED:'조치 필요',FALSE_POSITIVE:'오탐 판정'})[review.status]||'기록 있음'}${review.ticketRef?` · ${review.ticketRef}`:''} · ${review.actorId||'관리자'} · ${Number.isFinite(Date.parse(review.recordedAt))?new Date(review.recordedAt).toLocaleString('ko-KR'):''}`;card.append(state);if(review.note){const note=document.createElement('p');note.textContent=`메모: ${review.note}`;card.append(note);}}
+    const disclosure=document.createElement('details'),summary=document.createElement('summary');summary.textContent='검토 상태와 운영 메모 추가';
+    const form=document.createElement('form');form.className='security-review-form';form.dataset.securityReview='true';form.dataset.source=source;form.dataset.eventRef=eventRef;
+    const statusLabel=document.createElement('label');statusLabel.textContent='검토 상태';const status=document.createElement('select');status.name='status';
+    for(const [value,label]of [['REVIEWED','검토 완료'],['INVESTIGATING','조사 중'],['ACTION_REQUIRED','조치 필요'],['FALSE_POSITIVE','오탐으로 판단']])status.add(new Option(label,value));statusLabel.append(status);
+    const ticketLabel=document.createElement('label');ticketLabel.textContent='사건·티켓 번호 (선택)';const ticket=document.createElement('input');ticket.name='ticketRef';ticket.maxLength=40;ticket.autocomplete='off';ticket.placeholder='예: SEC-1042';ticketLabel.append(ticket);
+    const noteLabel=document.createElement('label');noteLabel.textContent='운영 메모 (선택, 환자 식별정보 금지)';const note=document.createElement('input');note.name='note';note.maxLength=160;note.autocomplete='off';note.placeholder='조사 진행 상황이나 후속 조치만 기록';noteLabel.append(note);
+    const submit=document.createElement('button');submit.type='submit';submit.textContent='검토 이력 추가';form.append(statusLabel,ticketLabel,noteLabel,submit);disclosure.append(summary,form);card.append(disclosure);container.append(card);
+    form.addEventListener('submit',async eventSubmit=>{
+      eventSubmit.preventDefault();if(submit.disabled)return;submit.disabled=true;
+      try{await postJson('/api/security/reviews',{source,eventRef,status:status.value,ticketRef:ticket.value,note:note.value});await loadAuditTimeline();}
+      catch{showToast('검토 이력을 남기지 못했습니다. 권한·출처 상태를 확인해 주세요.');submit.disabled=false;}
+    });
+  }
 }
 function renderAuditTable(logs) {
   const tbody = document.querySelector("#audit-log-rows");
@@ -3450,8 +3924,9 @@ async function getJson(path, token) {
 async function fetchJson(path, options = {}) {
   const headers = new Headers(options.headers ?? {});
   const development = developmentPrincipalHeaders(path);
+  const mappedRole = capstoneAuth?.roles?.length === 1 ? capstoneAuth.roles[0] : development['x-hipass-role'];
   const principalHeaders = capstoneAuth
-    ? (development["x-hipass-role"] && !headers.has("authorization") ? capstoneAuth.headers(development["x-hipass-role"]) : {})
+    ? (mappedRole && !headers.has("authorization") ? capstoneAuth.headers(mappedRole) : {})
     : development;
   for (const [key, value] of Object.entries(principalHeaders)) {
     if (!headers.has(key)) headers.set(key, value);
@@ -3468,13 +3943,18 @@ function proofBase64(bytes) {
 
 async function proofFetch(path, options = {}) {
   const headers = new Headers(options.headers ?? {});
-  const url = new URL(path, location.origin);
+  const imageOrigin='https://highpass-images-b.japaneast.cloudapp.azure.com';
+  const pacsImport = options.method === 'POST' && /^\/dicomweb\/studies\/[0-9.]{1,64}\/series\/[0-9.]{1,64}\/instances\/[0-9.]{1,64}\/import$/.test(path);
+  const viewerImage = (options.method ?? 'GET') === 'GET' && /^\/dicomweb\/studies(?:\/[0-9.]+\/series(?:\/[0-9.]+\/instances(?:\/[0-9.]+\/rendered)?)?)?$/.test(path);
+  const externalImage=location.hostname==='highpass-demo.japaneast.cloudapp.azure.com' && (viewerImage || pacsImport);
+  const url = new URL(path,externalImage?imageOrigin:location.origin);
   const token = headers.get("authorization")?.split(" ")[1];
   let bound = false;
   if (token) {
     try { bound = Boolean(JSON.parse(atob(token.split(".")[1].replaceAll("-", "+").replaceAll("_", "/"))).cnf?.jkt); } catch {}
   }
-  const issuance = options.method === "POST" && ["/api/dicom-access/request", "/api/transfers/tickets/redeem-viewer", "/api/transfers/tickets/redeem"].includes(url.pathname);
+  if (pacsImport && !bound) throw new Error("PACS_IMPORT_DPOP_REQUIRED");
+  const issuance = options.method === "POST" && ["/api/dicom-access/request", "/api/transfers/tickets/redeem-viewer", "/api/transfers/tickets/redeem", "/api/demo/qr/redeem"].includes(url.pathname);
   let bindIssuance = false;
   if (issuance) {
     proofPolicyPromise ??= fetch("/api/security/proof-policy", { headers, cache: 'no-store', signal: AbortSignal.timeout(10000) }).then(async (response) => {
@@ -3484,7 +3964,7 @@ async function proofFetch(path, options = {}) {
     bindIssuance = (await proofPolicyPromise).supported;
   }
   if (bound || bindIssuance) {
-    if (url.origin !== location.origin || url.protocol !== "https:" || !crypto.subtle) throw new Error("보안 연결에서 접근 증명을 다시 발급해 주세요.");
+    if ((url.origin !== location.origin && !(externalImage&&url.origin===imageOrigin)) || url.protocol !== "https:" || !crypto.subtle) throw new Error("보안 연결에서 접근 증명을 다시 발급해 주세요.");
     proofKeyPromise ??= crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-256" }, false, ["sign", "verify"]);
     const key = await proofKeyPromise;
     const jwk = await crypto.subtle.exportKey("jwk", key.publicKey);
@@ -3498,7 +3978,7 @@ async function proofFetch(path, options = {}) {
     headers.set("dpop", `${input}.${proofBase64(signature)}`);
   }
   const imageDeadline = document.documentElement.dataset.capstone === "1" && url.pathname.startsWith("/dicomweb/") && url.pathname.includes("/instances/") && !url.pathname.endsWith("/metadata");
-  return fetch(path, { ...options, headers, signal: options.signal ?? AbortSignal.timeout(imageDeadline ? 35000 : 20000) });
+  return fetch(url.href, { ...options, headers,credentials:externalImage?'omit':options.credentials,redirect:externalImage?'error':options.redirect,cache:externalImage?'no-store':options.cache, signal: options.signal ?? AbortSignal.timeout(imageDeadline ? 45000 : 20000) });
 }
 
 function developmentPrincipalHeaders(path) {
@@ -3514,7 +3994,7 @@ function developmentPrincipalHeaders(path) {
     };
   }
 
-  if (path === "/api/transfers/tickets/redeem-viewer") {
+  if (path === "/api/transfers/tickets/redeem-viewer" || path === "/api/demo/qr/redeem" || path === '/api/clinician/receptions') {
     return {
       "x-hipass-role": "DOCTOR",
       "x-hipass-user-id": demo.doctorId,
@@ -3621,6 +4101,13 @@ function toFriendlyError(code) {
     DOWNLOAD_NOT_ALLOWED: "환자가 조회 전용(VIEW_ONLY)으로 동의하여 다운로드가 차단되었습니다.",
     TOKEN_PERMISSION_MISMATCH: "토큰 권한 범위를 벗어난 다운로드 요청입니다.",
     TOKEN_INVALID: "접근토큰이 누락되었거나 유효하지 않습니다.",
+    PACS_IMPORT_NOT_READY: "B PACS 수신 서비스가 아직 준비되지 않았습니다.",
+    PACS_IMPORT_DPOP_REQUIRED: "병원 간 반입에는 DPoP에 결속된 단기 다운로드 권한이 필요합니다.",
+    PACS_IMPORT_ORIGIN_OR_METHOD_INVALID: "허용된 의료진 웹 경로에서만 PACS 반입을 요청할 수 있습니다.",
+    PACS_IMPORT_BODY_NOT_ALLOWED: "반입 요청에는 영상 본문을 포함할 수 없습니다.",
+    DOWNLOAD_TOKEN_DENIED: "현재 동의 범위로 다운로드 권한을 발급할 수 없습니다.",
+    VIEW_CONTEXT_CHANGED: "환자 동의 또는 선택한 영상이 변경되어 요청을 중단했습니다.",
+    PACS_RECEIPT_INVALID: "B PACS가 반환한 UID·해시 검증 영수증이 올바르지 않습니다.",
     ORTHANC_QIDO_STUDY_FAILED: "Gateway가 Study 메타데이터를 조회하지 못했습니다.",
     ORTHANC_QIDO_SERIES_FAILED: "Gateway가 Series 메타데이터를 조회하지 못했습니다.",
     ORTHANC_QIDO_INSTANCE_FAILED: "Gateway가 Instance 메타데이터를 조회하지 못했습니다.",
@@ -4039,8 +4526,9 @@ function drawSyntheticBodyCt(ctx, w, h, progress, preset) {
 // Event handlers and heartbeat callbacks may run while the initial dashboard
 // awaits network I/O; they must not encounter uninitialized proof/viewer state.
 initializePatientComponents();
+receptionHome=initializeReceptionHome(document.querySelector('.share-reception'),()=>currentPersona==='DOCTOR');
 walletHome=createWalletHome({root:document.querySelector('#patient-portal-app [data-page="home"]'),navigate:route=>{
-  navigatePatientPage(({records:'phr',history:'activity',requests:'activity'})[route]||route);
+  navigatePatientPage(({records:'phr',history:'activity',requests:'visit'})[route]||route);
   document.querySelector('#patient-main')?.scrollIntoView({block:'start'});
   const destination=document.querySelector('#patient-portal-app [data-page]:not([hidden])');
   destination?.classList.add('mq-wallet-screen-enter');
@@ -4061,19 +4549,19 @@ patientHelper=createPatientHelper(document.querySelector('#patient-health-helper
   ask:async(question,{signal})=>{const result=await fetchJson('/api/v1/me/health-helper/questions',{
     method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({question}),signal
   });if(result.error)throw new Error(result.error);return result;}});
-createHelperSurface(document.querySelector('#patient-health-helper'),route=>navigatePatientPage(({records:'phr',requests:'activity'})[route]||route));
+createHelperSurface(document.querySelector('#patient-health-helper'),route=>navigatePatientPage(({records:'phr',requests:'visit'})[route]||route));
 faqAssistant=createFaqAssistant({root:document.querySelector('#patient-portal-app'),navigate:navigatePatientPage,available:()=>currentPersona==='PATIENT'});
 initNavigation();
 initConsentDateDefaults();
 shareReview = createShareReview({root:document.querySelector('[data-page="consent"]'), onBack:()=>navigatePatientPage('home'), read:()=>({
-  study:lastStudies.find(row=>row.studyInstanceUid===patientStudySelect?.value), seriesUid:patientSeriesSelect?.value,
+  study:patientStudySnapshotAvailable ? lastStudies.find(row=>row.studyInstanceUid===patientStudySelect?.value) : null, seriesUid:patientSeriesSelect?.value,
   source:sourceHospitalSelect?.value, target:targetHospitalSelect?.value, purpose:accessPurposeSelect?.value,
   permission:accessModeSelect?.value, from:consentValidFromInput?.value, until:consentValidUntilInput?.value,
   healthRecordIds:healthSharePicker.ids(),healthRecordTitles:healthSharePicker.titles(),
   patientName:demo.patientName, consent:selectConsentForStudy(lastConsents,{studyUid:patientStudySelect?.value,targetHospitalId:targetHospitalSelect?.value,preferredConsentId:latestConsentId})
 })});
 shareReview.refresh();
-createSharingSurface(document.querySelector('[data-page="sharing"]'),route=>navigatePatientPage(({records:'phr',requests:'activity'})[route]||route));
+createSharingSurface(document.querySelector('[data-page="sharing"]'),route=>navigatePatientPage(({records:'phr',requests:'visit'})[route]||route));
 patientSharing = createPatientSharing({root:document.querySelector('[data-page="sharing"]'),
   onPrepare: (study, target, draft) => {
     if (consentMutationPending || !sharingDraftModel({...draft,study,target}).valid) return;
@@ -4098,8 +4586,54 @@ patientHistory=createPatientHistory({root:document.querySelector('[data-page="ac
 clinicianHome=createClinicianHome(document.querySelector('#clinical-home'),{
   onSelect:uid=>selectStudy(uid), onOpen:openClinicianHomeViewer, onRefresh:()=>loadDashboard()
 });
+async function selectReceptionContext(receipt,study){
+    if(!receipt.consent||receipt.status!=='CONSENT_ACTIVE')throw Error('CONSENT_UNAVAILABLE');
+    if(receipt.patientId!==demo.patientId||!receipt.studies.some(s=>s.studyInstanceUid===study.studyInstanceUid))throw Error('PATIENT_CONTEXT_MISMATCH');
+    lastStudies=[study,...lastStudies.filter(s=>s.studyInstanceUid!==study.studyInstanceUid)];
+    lastConsents=[receipt.consent,...lastConsents.filter(c=>c.consentId!==receipt.consentId)];
+    latestConsentId=receipt.consentId;
+    demo.purpose=receipt.consent.purpose;demo.targetHospitalId=receipt.targetHospitalId;
+    if(accessPurposeSelect)accessPurposeSelect.value=receipt.consent.purpose;
+    clinicianHealth?.selectReception(receipt.consentId);
+    await selectStudy(study.studyInstanceUid);
+    renderDoctorStudies(lastStudies);
+    const context=document.querySelector('#reception-context');
+    if(context){context.hidden=false;context.textContent=`${demo.patientName||receipt.patientId} · ${study.description||study.modality||'공유 검사'} · ${receipt.consent.permission==='DOWNLOAD_ALLOWED'?'다운로드 허용':'열람만 허용'}`;}
+}
+receptionDesk=createReceptionDesk(document.querySelector('#clinical-home'),{
+  read:()=>fetchJson('/api/clinician/receptions',{cache:'no-store'}),
+  patientLabel:id=>id===demo.patientId?demo.patientName:id,
+  active:()=>currentPersona==='DOCTOR',navigate:navigateHospitalScreen,
+  select:selectReceptionContext
+});
+demoTools=initializeDemoTools({
+  read:()=>({persona:currentPersona,roles:capstoneAuth?.roles??(demoEnvironment(location.hostname)==='LOCAL'?['PATIENT','DOCTOR']:[]),
+    environment:demoEnvironment(location.hostname),ready:walletSnapshotReady,seriesUid:selectedSeriesUid,
+    study:lastStudies.find(s=>s.studyInstanceUid===selectedStudyUid),consent:getConsentForStudy(selectedStudyUid,lastConsents)}),
+  refresh:()=>loadDashboard(),
+  execute:async id=>{
+    const patientRoutes={'patient-home':'home',records:'phr',sharing:'sharing',history:'activity'};
+    if(patientRoutes[id]){if(currentPersona!=='PATIENT')switchPersona('PATIENT');navigatePatientPage(patientRoutes[id]);return;}
+    if(id==='simulate'){
+      navigateHospitalScreen('qr');await simulateQrScan();return;
+    }
+    if(currentPersona==='PATIENT')switchPersona('DOCTOR');
+    navigateHospitalScreen(({'doctor-home':'dashboard','clinical-records':'records',qr:'qr',pacs:'pacs-archive',journey:'exchange',audit:'audit',admin:'admin'})[id]);
+  }
+});
 bindEvents();
 await loadDashboard().catch(() => {});
 if (pendingPhrHandoffNonce) {
   await redeemPhrHandoff(pendingPhrHandoffNonce);
 }
+
+// Expose app controller interface for Video Showcase & Automated Testing
+window.app = {
+  switchPersona,
+  navigatePatientPage,
+  navigateHospitalScreen,
+  openPatientStudyViewer,
+  selectStudy,
+  loadDashboard,
+  demo,
+};

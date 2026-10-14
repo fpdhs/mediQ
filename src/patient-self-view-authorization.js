@@ -28,7 +28,7 @@ export class PatientSelfViewAuthorization {
       values:[claims.jti,tokenHash],query_timeout:5000});
     if(result.rows.length!==1)return null;
     const row=result.rows[0];
-    if(row.status!=='ACTIVE' || row.subject!==claims.sub || row.patient_id!==claims.patientId
+    if(row.status!=='ACTIVE' || (row.authenticated_subject??row.subject)!==claims.sub || row.patient_id!==claims.patientId
       || row.authority_type!=='PATIENT_SELF_VIEW' || row.permission!=='VIEW_ONLY' || row.source_hospital_id!==this.sourceHospitalId
       || row.viewing_gateway_id!==this.viewingGatewayId || row.study_instance_uid!==claims.studyInstanceUid
       || row.series_instance_uid!==claims.allowedSeriesUids[0] || row.proof_key_thumbprint!==claims.cnf.jkt
@@ -38,6 +38,7 @@ export class PatientSelfViewAuthorization {
       seriesInstanceUid:claims.allowedSeriesUids[0],requestedAction:'VIEW',principal:{role:'PATIENT',subject:claims.sub,patientId:claims.patientId,
         authMethod:'PATIENT_SELF_VIEW_GRANT',authorityType:'PATIENT_SELF_VIEW',issuer:claims.iss,audience:claims.aud,expiresAtMs:claims.exp*1000}});
     if(current.statusCode===503)throw new Error('AUTHORITY_DATABASE_UNAVAILABLE');
+    if(row.authenticated_subject && current.scope?.ownershipSubject!==row.subject)return null;
     return current.decision==='ALLOWED' && current.scope.refId===row.ref_id && current.scope.ownershipRevision===row.ownership_revision ? current : null;
   }
   async revalidatePreparationReceipt(value) {

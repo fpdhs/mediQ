@@ -34,3 +34,17 @@ test('four-tab navigation preserves secondary records/vault and existing consent
  for(const id of ['btn-wizard-confirm-submit','qr-box-wrap','qr-countdown-text','btn-revoke-qr','tab-records','tab-vault','tab-profile'])assert.equal([...html.matchAll(new RegExp(`id="${id}"`,'g'))].length,1,id);
  assert.ok(html.includes('data-tab="records"'));assert.ok(html.includes('data-tab="vault"'));
 });
+
+test('mobile safe-area overrides preserve bottom navigation clearance and accessible login buttons',()=>{
+ const mobile=readFileSync('public/ui/mobile.css','utf8');
+ const login=readFileSync('public/ui/capstone-login.css','utf8');
+ const entry=readFileSync('public/ui/demo-entry.css','utf8');
+ assert.match(mobile,/padding-bottom:calc\(100px \+ env\(safe-area-inset-bottom,0px\)\)/);
+ for(const area of ['top','left','right'])assert.ok(mobile.includes(`env(safe-area-inset-${area},0px)`));
+ assert.match(login,/mediq-mobile-login \.mediq-login-back \{min-height:48px/);
+ assert.match(entry,/mediq-mobile-login \.mediq-entry-motion \{min-height:48px/);
+ assert.match(login,/padding-bottom:calc\(32px \+ env\(safe-area-inset-bottom,0px\)\)/);
+ const html=readFileSync('public/mobile/index.html','utf8');
+ assert.match(html,/viewport-fit=cover/);
+ assert.doesNotMatch(html,/user-scalable=no|maximum-scale=1/);
+});

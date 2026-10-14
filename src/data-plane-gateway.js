@@ -19,6 +19,29 @@ export function boundedHelperHttps(origin, pathname, options) {
     || options.method !== 'POST' || !Number.isSafeInteger(options.maxBytes) || options.maxBytes > 32768) throw new Error('HELPER_TRANSPORT_SCOPE_INVALID');
   return boundedHttpsRequest(origin, pathname, options, 65000);
 }
+export const pacsImportTransportTimeoutMs = 55000;
+export function validatePacsImportTransportRequest(origin, pathname, options) {
+  let route;
+  try { route = parseDataPlaneRequest({ method: options?.method, path: pathname }, 'https://192.168.111.149:9443'); }
+  catch { throw new Error('PACS_IMPORT_TRANSPORT_SCOPE_INVALID'); }
+  const headers = options?.headers ?? {};
+  const headerNames = Object.keys(headers).sort().join(',');
+  if (origin !== 'https://10.90.88.2:9443' || route.importing !== true || options.method !== 'POST'
+    || options.body !== undefined || headerNames !== 'authorization,dpop'
+    || !/^DPoP [A-Za-z0-9_.-]+$/u.test(headers.authorization ?? '')
+    || typeof headers.dpop !== 'string' || headers.dpop.length < 1 || headers.dpop.length > 8192
+    || !options.tls || Object.keys(options.tls).join(',') !== 'ca'
+    || !(Buffer.isBuffer(options.tls.ca) || typeof options.tls.ca === 'string') || options.tls.ca.length === 0
+    || !Number.isSafeInteger(options.maxBytes) || options.maxBytes < 1 || options.maxBytes > 12582912
+    || !Number.isSafeInteger(options.timeoutMs) || options.timeoutMs < 1 || options.timeoutMs > pacsImportTransportTimeoutMs) {
+    throw new Error('PACS_IMPORT_TRANSPORT_SCOPE_INVALID');
+  }
+  return true;
+}
+export function boundedPacsImportHttps(origin, pathname, options) {
+  validatePacsImportTransportRequest(origin, pathname, options);
+  return boundedHttpsRequest(origin, pathname, options, pacsImportTransportTimeoutMs);
+}
 function boundedHttpsRequest(origin, pathname, { tls, method = "GET", headers = {}, body, maxBytes = 33554432, timeoutMs = 10000 }, deadlineLimit) {
   requireHttpsOrigin(origin);
   if (!Number.isSafeInteger(maxBytes) || maxBytes < 1 || maxBytes > 33554432 || !Number.isSafeInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > deadlineLimit) throw new Error("GATEWAY_LIMIT_INVALID");
@@ -71,6 +94,11 @@ export function createDataPlaneHandler({ publicBaseUrl, controlOrigin, orthancOr
     let route;
     try { route = parseDataPlaneRequest({ method: request.method, path: request.url }, publicBaseUrl); }
     catch { return json(400, "DATA_PLANE_ROUTE_INVALID"); }
+    if (route.importing && ((request.headers["content-length"] !== undefined && request.headers["content-length"] !== "0")
+      || request.headers["transfer-encoding"] !== undefined)) {
+      request.resume();
+      return json(400, "DATA_PLANE_REQUEST_BODY_NOT_ALLOWED");
+    }
     const authorization = request.headers.authorization;
     if (typeof authorization !== "string" || authorization.length > 16390) return json(401, "TOKEN_REQUIRED");
     const match = authorization.match(/^(DPoP|Bearer) ([A-Za-z0-9_.-]+)$/u);

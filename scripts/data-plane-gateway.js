@@ -39,7 +39,7 @@ const server = https.createServer({ cert: file("DATA_PLANE_TLS_CERT_FILE"), key:
 });
 server.headersTimeout = 10000;
 server.requestTimeout = 10000;
-server.timeout = 25000;
+server.timeout = encryptionRequired ? 60000 : 25000;
 server.keepAliveTimeout = 5000;
 server.listen(Number(process.env.DATA_PLANE_PORT ?? 8443), () => console.log("Data Plane Gateway listener ready; distributed MVP NOT VERIFIED"));
 function required(name) { if (!process.env[name]) throw new Error(`${name} required`); return process.env[name]; }

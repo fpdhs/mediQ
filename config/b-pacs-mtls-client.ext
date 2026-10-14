@@ -1,0 +1,4 @@
+basicConstraints=critical,CA:FALSE
+keyUsage=critical,digitalSignature
+extendedKeyUsage=clientAuth
+subjectAltName=URI:spiffe://highpass.local/hospital-b/pacs-receiver

@@ -37,11 +37,13 @@ export function validateHelperOutput(value, evidence, corpus = HELPER_CORPUS) {
 
 export class HealthHelperRag {
   constructor({ model = null, audit, now = Date.now, timeoutMs = 15000, corpus = HELPER_CORPUS,
-    mode = 'SOURCE_GUIDANCE' } = {}) {
+    mode = 'SOURCE_GUIDANCE', syntheticScenario = null, translationRag = null } = {}) {
     if (typeof audit !== 'function') throw new Error('Helper audit is required');
     this.model = model; this.audit = audit; this.now = now; this.timeoutMs = timeoutMs;
     if (!['SOURCE_GUIDANCE', 'GENERATION', 'VISIT_PREPARATION'].includes(mode)) throw new Error('Helper mode is invalid');
     this.mode = mode; // Trusted constructor configuration, never a request-field override.
+    this.syntheticScenario = typeof syntheticScenario === 'function' ? syntheticScenario : null;
+    this.translationRag = typeof translationRag === 'function' ? translationRag : null;
     // Trusted server configuration only; no request field or environment approval bypass.
     this.corpus = structuredClone(corpus);
     this.windows = new Map(); this.active = new Set();
@@ -57,9 +59,35 @@ export class HealthHelperRag {
       || typeof body.question !== 'string' || !body.question.trim() || body.question.length > 600) return reject(422, 'HELPER_INPUT_INVALID');
     const question = body.question.trim();
     // Only a canonical topic reaches the model. Original free text and records never do.
-    if (/진단|확진|약|처방|복용|치료|응급|숨.*(?:차|막)|가슴.*(?:아프|통증)|암인가|암이야|암인지/u.test(question)) {
+    if (/진단|확진|(?<![가-힣])약(?:[은는이가을를도과와에]|이나|으로)?(?![가-힣])|약물|의약품|처방|복용|치료|응급|숨.*(?:차|막)|가슴.*(?:아프|통증)|암인가|암이야|암인지/u.test(question)) {
       await log('SUCCESS', 'HELPER_CLINICAL_REQUEST_REFUSED');
       return { requestId, status: 'REFUSED', answer: '진단이나 치료 판단은 제공하지 않아요. 증상과 검사 결과는 의료진에게 확인해 주세요. 긴급한 증상이 있으면 응급진료를 이용해 주세요.', sources: [], questions: [], recordContext: 'NOT_CONNECTED' };
+    }
+    if (this.syntheticScenario) {
+      let scenario;
+      try { scenario = this.syntheticScenario({ principal, question }); }
+      catch { return reject(503, 'HELPER_SCENARIO_UNAVAILABLE'); }
+      if (scenario) {
+        await log('SUCCESS', 'HELPER_SYNTHETIC_SCENARIO_PROVENANCE');
+        return { requestId, ...scenario };
+      }
+    }
+    if (this.translationRag) {
+      const now=this.now(),key=principal.subject;
+      for(const [id,window] of this.windows)if(now-window.start>=60000)this.windows.delete(id);
+      const entry=this.windows.get(key)??{start:now,count:0};
+      if(entry.count>=5||this.active.has(key)||this.active.size>=4||(!this.windows.has(key)&&this.windows.size>=1000))
+        return reject(429,'HELPER_RATE_LIMITED');
+      entry.count++;this.windows.set(key,entry);this.active.add(key);
+      const controller=new AbortController();let timer;
+      try{
+        await log('SUCCESS','HELPER_TRANSLATION_RAG_STARTED');
+        const result=await Promise.race([this.translationRag(question,{signal:controller.signal}),
+          new Promise((_,fail)=>{timer=setTimeout(()=>{controller.abort();fail(new HelperError(504,'HELPER_MODEL_TIMEOUT'));},this.timeoutMs);})]);
+        await log('SUCCESS',result.generationUsed?'HELPER_TRANSLATION_ANSWER_GENERATED':'HELPER_TRANSLATION_EVIDENCE_DELIVERED');
+        return {requestId,...result};
+      }catch(error){const code=error instanceof HelperError?error.code:'HELPER_UNAVAILABLE';await log('FAIL',code);throw new HelperError(error.statusCode??503,code);}
+      finally{clearTimeout(timer);controller.abort();this.active.delete(key);}
     }
     if (this.mode === 'SOURCE_GUIDANCE') {
       const sources = retrieveKdcaLinks(question);

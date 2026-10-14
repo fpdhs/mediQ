@@ -1,0 +1,6 @@
+**
+!src/
+!src/b-pacs-storage-boundary.js
+!src/b-pacs-mtls-service.js
+!scripts/
+!scripts/start-b-pacs-mtls.js

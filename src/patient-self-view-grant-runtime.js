@@ -6,14 +6,17 @@ import { PatientSelfViewAuthorization } from './patient-self-view-authorization.
 import { InternalServiceProvider, requireInternalServiceScope } from './auth.js';
 import {PatientBoundKeyRelease,PostgresPatientKeyReleaseRepository} from './patient-bound-key-release.js';
 import {createPatientKeyReleaseHttpHandler} from './patient-key-release-http-handler.js';
+import {createPatientEntraOwnershipResolver} from './patient-entra-ownership-binding.js';
+import {patientPublicOrigins} from './patient-public-origins.js';
 
 export async function createPatientSelfViewGrantRuntime({store,service,env=process.env}) {
   if(env.HIPASS_CAPSTONE_PATIENT_GRANTS!=='1')return null;
-  if(env.HIPASS_CONTROL_PLANE_ONLY!=='1' || env.HIPASS_STORE!=='postgres' || env.AUTH_MODE!=='TEST'
+  if(env.HIPASS_CONTROL_PLANE_ONLY!=='1' || env.HIPASS_STORE!=='postgres' || !['TEST','ENTRA_OIDC'].includes(env.AUTH_MODE)
     || env.HIPASS_DPOP_REQUIRED!=='1' || env.HIPASS_CAPSTONE_SINGLE_WRITER!=='1'
     || !env.HIPASS_PATIENT_AUTHORITY_DATABASE_URL || !env.HIPASS_INGRESS_SECRET
     || env.JWT_ISSUER!=='highpass-capstone-test-idp' || env.JWT_AUDIENCE!=='highpass-capstone-api')
     throw new Error('PATIENT_GRANT_PROFILE_REQUIRED');
+  const origins=patientPublicOrigins(env,service.publicBaseUrl);
   requireInternalServiceScope(new InternalServiceProvider(env).authenticate({headers:{'x-hipass-service-token':env.HIPASS_PATIENT_SELF_VIEW_SERVICE_TOKEN}}),
     'gateway:patient-self-view-authorize');
   if(env.HIPASS_CAPSTONE_PATIENT_KEY_RELEASE==='1')requireInternalServiceScope(
@@ -35,12 +38,19 @@ export async function createPatientSelfViewGrantRuntime({store,service,env=proce
       AND to_regclass('public.capstone_patient_self_view_grants') IS NOT NULL
       AND to_regprocedure('public.capstone_patient_lock_audit()') IS NOT NULL AS ready`)).rows[0];
     if(ready?.ready!==true)throw new Error('PATIENT_AUTHORITY_MIGRATION_REQUIRED');
-    const issuer=new PatientSelfViewGrantService({authority:new PatientSelfViewAuthorityReader({pool,enabled:true}),
-      persistence:createPatientSelfViewPersistence({store,pool,enabled:true,singleWriter:true}),proofService:service,
-      keyProvider:service.dicomTokenKeyProvider,allowedOrigin:service.publicBaseUrl,enabled:true});
+    if(env.AUTH_MODE==='ENTRA_OIDC') {
+      const bindingColumn=(await pool.query(`SELECT EXISTS(SELECT 1 FROM information_schema.columns
+        WHERE table_schema='public' AND table_name='capstone_patient_self_view_grants'
+        AND column_name='authenticated_subject') AS ready`)).rows[0];
+      if(bindingColumn?.ready!==true)throw new Error('PATIENT_AUTHORITY_MIGRATION_REQUIRED');
+    }
+    const resolveEntraOwnership=createPatientEntraOwnershipResolver(env);
+    const issuer=new PatientSelfViewGrantService({authority:new PatientSelfViewAuthorityReader({pool,enabled:true,resolveEntraOwnership}),
+      persistence:createPatientSelfViewPersistence({store,pool,enabled:true,singleWriter:true,resolveEntraOwnership}),proofService:service,
+      keyProvider:service.dicomTokenKeyProvider,allowedOrigin:origins.issuance,enabled:true});
     const authorizer=new PatientSelfViewAuthorization({pool,
-      authority:new PatientSelfViewAuthorityReader({pool,enabled:true,allowIssuedGrant:true}),service,
-      keyProvider:service.dicomTokenKeyProvider,publicBaseUrl:service.publicBaseUrl,
+      authority:new PatientSelfViewAuthorityReader({pool,enabled:true,allowIssuedGrant:true,resolveEntraOwnership}),service,
+      keyProvider:service.dicomTokenKeyProvider,publicBaseUrl:origins.images,
       sourceHospitalId:env.HIPASS_DATA_PLANE_SOURCE_HOSPITAL_ID,enabled:true});
     let routeKeyRelease=null;
     if(env.HIPASS_CAPSTONE_PATIENT_KEY_RELEASE==='1'){

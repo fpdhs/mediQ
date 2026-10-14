@@ -1,7 +1,9 @@
-"""Prepare two-account Entra web configuration. No deployment or public ingress.
+"""Prepare base Entra web actors and optionally a separately nominated security reviewer. No deployment or public ingress.
 
 Default is read-only. --apply creates dedicated single-tenant SPA/API registrations
-and assigns only the two accepted guests. No Graph permissions or Azure RBAC grants.
+and assigns the two base accepted guests; an explicitly supplied
+--security-admin-object-id adds one separately nominated accepted guest. No Graph
+permissions or Azure RBAC grants.
 Private identity configuration and receipts stay in ACL-protected ignored artifacts.
 """
 import argparse
@@ -18,6 +20,8 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 TENANT = 'ad21525c-fc0f-4dbc-a403-67ce00add0e4'
 SUB = 'a3c0e7d4-ce09-4991-946b-88574869edd9'
 REDIRECT = 'https://192.168.111.149:9443/entra-redirect.html'
+PUBLIC_REDIRECT = 'https://highpass-demo.japaneast.cloudapp.azure.com/entra-redirect.html'
+ALLOWED_REDIRECTS = {REDIRECT, PUBLIC_REDIRECT}
 NAMES = {'API': 'highpass-synthetic-web-api-20261013', 'SPA': 'highpass-synthetic-web-spa-20261013'}
 
 
@@ -35,7 +39,7 @@ def protected_folder():
     return folder
 
 
-def actor_map(users):
+def actor_map(users, security_admin_object_id=None):
     if len(users) != 2 or {u['role'] for u in users} != {'PATIENT', 'DOCTOR'}:
         raise ValueError('TWO_ROLES_REQUIRED')
     actors = []
@@ -49,19 +53,38 @@ def actor_map(users):
             actors.append(dict(objectId=user['objectId'], actorId='synthetic-doctor-b', role='DOCTOR', doctorId='DOC-B-01', hospitalId='HOSP-B'))
     if len({a['objectId'] for a in actors}) != 2:
         raise ValueError('DISTINCT_USERS_REQUIRED')
+    if security_admin_object_id:
+        security_id = str(uuid.UUID(security_admin_object_id))
+        if security_id.lower() in {a['objectId'].lower() for a in actors}:
+            raise ValueError('SECURITY_ADMIN_MUST_BE_SEPARATE')
+        actors.append(dict(objectId=security_id, actorId='synthetic-security-auditor', role='SECURITY_ADMIN'))
     return dict(schemaVersion=1, tenantId=TENANT, actors=actors)
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--users-receipt', required=True)
+    parser.add_argument('--security-admin-object-id', help='Optional accepted Guest object ID; requires explicit nomination and is not inferred from the doctor account.')
+    parser.add_argument('--redirect-uri', choices=sorted(ALLOWED_REDIRECTS), default=REDIRECT,
+                        help='Use one of the explicitly approved existing web origins.')
     parser.add_argument('--apply', action='store_true')
     args = parser.parse_args()
     receipt = (ROOT / args.users_receipt).resolve()
     if not receipt.is_relative_to((ROOT / 'artifacts/azure').resolve()):
         raise SystemExit('PROTECTED_USER_RECEIPT_REQUIRED')
-    users = json.loads(receipt.read_text(encoding='utf8'))['users']
-    mapping = actor_map(users)
+    receipt_data = json.loads(receipt.read_text(encoding='utf8'))
+    if isinstance(receipt_data.get('users'), list):
+        users = receipt_data['users']
+    elif receipt_data.get('schemaVersion') == 1 and receipt_data.get('tenantId') == TENANT and isinstance(receipt_data.get('actors'), list):
+        base_actors = [actor for actor in receipt_data['actors'] if actor.get('role') in {'PATIENT', 'DOCTOR'}]
+        if {actor.get('role') for actor in base_actors} != {'PATIENT', 'DOCTOR'} or len(base_actors) != 2:
+            raise SystemExit('PROTECTED_PATIENT_DOCTOR_ACTOR_MAP_REQUIRED')
+        users = [dict(objectId=actor['objectId'], role=actor['role']) for actor in base_actors]
+    else:
+        raise SystemExit('PROTECTED_USER_RECEIPT_REQUIRED')
+    if args.security_admin_object_id:
+        try: uuid.UUID(args.security_admin_object_id)
+        except ValueError: raise SystemExit('SECURITY_ADMIN_OBJECT_ID_INVALID')
     spec = importlib.util.spec_from_file_location('entra_identity', ROOT / 'scripts/capstone-key-identities.py')
     identity = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(identity)
@@ -76,10 +99,20 @@ def main():
         account = identity.azure('account', 'show')
         if account['id'] != SUB or account['tenantId'] != TENANT:
             raise RuntimeError('APPROVED_TENANT_REQUIRED')
+        verified_users = []
         for user in users:
             live = graph('get', 'users/' + user['objectId'] + '?$select=id,userType,externalUserState')
             if live['id'] != user['objectId'] or live['userType'] != 'Guest' or live.get('externalUserState') != 'Accepted':
                 raise RuntimeError('LIVE_ACCEPTED_USER_REQUIRED')
+            verified_users.append({**user, 'userType': live['userType'], 'externalUserState': live['externalUserState']})
+        users = verified_users
+        assignment_users = list(users)
+        if args.security_admin_object_id:
+            live = graph('get', 'users/' + args.security_admin_object_id + '?$select=id,userType,externalUserState')
+            if live['id'].lower() != args.security_admin_object_id.lower() or live['userType'] != 'Guest' or live.get('externalUserState') != 'Accepted':
+                raise RuntimeError('LIVE_ACCEPTED_SECURITY_REVIEWER_REQUIRED')
+            assignment_users.append(dict(objectId=live['id'], role='SECURITY_ADMIN'))
+        mapping = actor_map(users, args.security_admin_object_id)
         for kind, name in NAMES.items():
             phase = kind + '_REGISTRATION'
             query = urlencode({'$filter': "displayName eq '" + name + "'"})
@@ -93,9 +126,9 @@ def main():
                     payload['api'] = dict(requestedAccessTokenVersion=2, oauth2PermissionScopes=[dict(
                         id=str(uuid.uuid4()), value='access_as_user', type='Admin', isEnabled=True,
                         adminConsentDisplayName='Access Highpass synthetic demo',
-                        adminConsentDescription='Access only the server-assigned synthetic patient or doctor.')])
+                        adminConsentDescription='Access only server-assigned synthetic patient, doctor, or separately mapped security reviewer.')])
                 else:
-                    payload['spa'] = dict(redirectUris=[REDIRECT])
+                    payload['spa'] = dict(redirectUris=[args.redirect_uri])
                 found = [graph('post', 'applications', payload)]
                 if kind == 'API':
                     graph('patch', 'applications/' + found[0]['id'], dict(identifierUris=['api://' + found[0]['appId']]))
@@ -109,7 +142,10 @@ def main():
                 scopes = app['api']['oauth2PermissionScopes']
                 if len(scopes) != 1 or scopes[0]['value'] != 'access_as_user' or scopes[0]['isEnabled'] is not True or app['api']['requestedAccessTokenVersion'] != 2:
                     raise RuntimeError('API_SCOPE_CONFLICT')
-            elif app['spa']['redirectUris'] != [REDIRECT]:
+            elif (not isinstance(app['spa'].get('redirectUris'), list)
+                  or not app['spa']['redirectUris']
+                  or any(uri not in ALLOWED_REDIRECTS for uri in app['spa']['redirectUris'])
+                  or args.redirect_uri not in app['spa']['redirectUris']):
                 raise RuntimeError('SPA_REDIRECT_CONFLICT')
             result['apps'][kind] = dict(status='REGISTERED', objectId=app['id'], appId=app['appId'], configuration=app)
         if args.apply and all(v.get('appId') for v in result['apps'].values()):
@@ -132,13 +168,13 @@ def main():
                 sp = found[0] if found else graph('post', 'servicePrincipals', dict(appId=app['appId'],appRoleAssignmentRequired=True))
                 graph('patch', 'servicePrincipals/' + sp['id'], dict(appRoleAssignmentRequired=True))
                 assignments = graph('get', 'servicePrincipals/' + sp['id'] + '/appRoleAssignedTo')['value']
-                if any(a['principalId'] not in {u['objectId'] for u in users} for a in assignments):
+                if any(a['principalId'] not in {u['objectId'] for u in assignment_users} for a in assignments):
                     raise RuntimeError('UNEXPECTED_APP_ASSIGNMENT')
-                for user in users:
+                for user in assignment_users:
                     if not any(a['principalId'] == user['objectId'] for a in assignments):
                         graph('post', 'servicePrincipals/' + sp['id'] + '/appRoleAssignedTo', dict(principalId=user['objectId'],resourceId=sp['id'],appRoleId='00000000-0000-0000-0000-000000000000'))
                 readback = graph('get', 'servicePrincipals/' + sp['id'] + '/appRoleAssignedTo')['value']
-                if len(readback) != 2 or {a['principalId'] for a in readback} != {u['objectId'] for u in users}:
+                if len(readback) != len(assignment_users) or {a['principalId'] for a in readback} != {u['objectId'] for u in assignment_users}:
                     raise RuntimeError('ASSIGNMENT_READBACK_FAILED')
                 app['assignmentRequired'] = graph('get', 'servicePrincipals/' + sp['id'])['appRoleAssignmentRequired']
                 if app['assignmentRequired'] is not True:
@@ -152,7 +188,7 @@ def main():
                 if len(principals) != 1 or principals[0]['appRoleAssignmentRequired'] is not True:
                     raise RuntimeError('ASSIGNMENT_REQUIRED_READBACK_FAILED')
                 assignments = graph('get', 'servicePrincipals/' + principals[0]['id'] + '/appRoleAssignedTo')['value']
-                if len(assignments) != 2 or {a['principalId'] for a in assignments} != {u['objectId'] for u in users}:
+                if len(assignments) != len(assignment_users) or {a['principalId'] for a in assignments} != {u['objectId'] for u in assignment_users}:
                     raise RuntimeError('ASSIGNMENT_READBACK_FAILED')
                 if any(a['appRoleId'] != '00000000-0000-0000-0000-000000000000' for a in assignments):
                     raise RuntimeError('UNEXPECTED_ROLE_ASSIGNMENT')
@@ -165,7 +201,7 @@ def main():
             if api['configuration']['api']['preAuthorizedApplications'] != [dict(appId=spa['appId'],delegatedPermissionIds=[scope_id])]:
                 raise RuntimeError('API_PREAUTHORIZATION_READBACK_FAILED')
             config = dict(AUTH_MODE='ENTRA_OIDC', ENTRA_TENANT_ID=TENANT, ENTRA_SPA_CLIENT_ID=spa['appId'],
-                          ENTRA_API_AUDIENCE=api['appId'], ENTRA_API_SCOPE='access_as_user', ENTRA_REDIRECT_URI=REDIRECT,
+                          ENTRA_API_AUDIENCE=api['appId'], ENTRA_API_SCOPE='access_as_user', ENTRA_REDIRECT_URI=args.redirect_uri,
                           HIPASS_ENTRA_ACTOR_MAP_FILE='/run/config/entra-actors.json', HIPASS_CAPSTONE_MOCK_IDP='0')
             (folder / 'runtime-config.json').write_text(json.dumps(config,indent=2),encoding='utf8')
             (folder / 'entra-actors.json').write_text(json.dumps(mapping,indent=2),encoding='utf8')

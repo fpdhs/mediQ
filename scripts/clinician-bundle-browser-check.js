@@ -9,10 +9,11 @@ async(page)=>{
     if(route==='viewer')await app.locator('.mq-viewer-back').click();
   }
   await page.locator('#open-clinician-tools').click();
-  for(const route of ['pacs-archive','exchange','audit','admin']){
-    const target=page.locator(`#clinician-tools [data-view-jump="${route}"]`);
+  for(const route of ['pacs','journey','doctor-home']){
+    const target=page.locator(`#clinician-tools [data-demo-action="${route}"]`);
     if(await target.count()!==1)throw Error('TOOL_MISSING_'+route);
   }
+  if(await page.locator('#clinician-tools [data-demo-action="sharing"]').count())throw Error('PATIENT_MENU_IN_DOCTOR_PANEL');
   await page.locator('.demo-tools-close').click();
   await app.locator('[data-view="dashboard"]').click();
   const widths=[];

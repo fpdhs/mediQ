@@ -1,0 +1,55 @@
+{
+ admin off
+ auto_https disable_redirects
+ https_port 8443
+ order coraza_waf first
+ log default {
+  level ERROR
+ }
+ servers {
+  timeouts {
+   read_header 10s
+   read_body 50s
+   write 55s
+   idle 30s
+  }
+ }
+}
+highpass-demo.japaneast.cloudapp.azure.com {
+ tls {
+  issuer acme {
+   dir https://acme-v02.api.letsencrypt.org/directory
+   disable_http_challenge
+  }
+ }
+ coraza_waf {
+  directives `
+   SecRuleEngine On
+   SecRequestBodyAccess On
+   SecRequestBodyLimit 32768
+   SecRequestBodyNoFilesLimit 32768
+   SecRequestBodyLimitAction Reject
+   SecResponseBodyAccess Off
+   SecAuditEngine RelevantOnly
+   SecAuditLog /dev/stdout
+   SecAuditLogParts AZ
+   SecDebugLogLevel 0
+   Include /opt/coraza/config/crs-setup.conf
+   Include /opt/coraza/owasp-crs/rules/*.conf
+  `
+ }
+ header {
+  Strict-Transport-Security "max-age=86400"
+  -Server
+ }
+ reverse_proxy web:8080 {
+  header_up X-Highpass-Client-IP {remote_host}
+  header_up -X-Hipass-Service-Token
+  header_up -X-Hipass-Ingress-Signature
+  header_up -X-Hipass-Ingress-Time
+  transport http {
+   dial_timeout 5s
+   response_header_timeout 50s
+  }
+ }
+}

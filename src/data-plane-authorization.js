@@ -52,7 +52,7 @@ export async function authorizeDataPlane(service, input, configuration) {
   let route;
   try {
     if (!configuration.sourceHospitalId || !configuration.publicBaseUrl) throw new Error("DATA_PLANE_NOT_CONFIGURED");
-    route = parseDataPlaneRequest(input, configuration.publicBaseUrl);
+    route = parseDataPlaneRequest(input, dataPlaneProofOrigin(input, configuration));
     if (route.importing && configuration.pacsImportEnabled !== true) return denied(403, "PACS_IMPORT_DISABLED");
     if (route.importing && input.authorizationScheme !== 'DPoP') return denied(403, 'PACS_IMPORT_PROOF_REQUIRED');
     if (!isIP(input.clientIp) || !["DPoP", "Bearer"].includes(input.authorizationScheme) || typeof input.token !== "string" || input.token.length > 16384 || (input.dpopProof && (typeof input.dpopProof !== "string" || input.dpopProof.length > 16384))) throw new Error("DATA_PLANE_CONTEXT_INVALID");
@@ -93,6 +93,21 @@ export async function authorizeDataPlane(service, input, configuration) {
   const encoded = Buffer.from(JSON.stringify(grant)).toString("base64url");
   const mac = createHmac("sha256", service.tokenSecret).update("data-plane-receipt-v1:" + encoded).digest("base64url");
   return { status: 200, body: { ...scope, receipt: `${encoded}.${mac}` } };
+}
+
+// URI selection is NOT authorization: the signature, ath, key binding and replay
+// ledger still validate below. Only the explicitly configured HTTPS alias is accepted.
+export function dataPlaneProofOrigin(input, configuration) {
+  const alias=configuration.clinicianPublicBaseUrl;
+  if(alias!=='https://highpass-images-b.japaneast.cloudapp.azure.com')return configuration.publicBaseUrl;
+  try {
+    const parts=input.dpopProof?.split('.');
+    if(parts?.length!==3||parts[1].length>12000)return configuration.publicBaseUrl;
+    const htu=JSON.parse(Buffer.from(parts[1],'base64url').toString('utf8')).htu;
+    const url=new URL(htu);
+    if(url.origin===alias&&!url.username&&!url.password&&!url.search&&!url.hash)return alias;
+  }catch{}
+  return configuration.publicBaseUrl;
 }
 
 // A signed short-lived receipt prevents the Gateway from choosing audit actor,

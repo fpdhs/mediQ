@@ -1,5 +1,97 @@
 # Azure 합성 웹 Edge·NSG 및 복구 계획
 
+## 현재 로그인 화면 — 2026-10-13 15:29 KST
+
+기존 진입 화면의 **환자로 시작하기 / 의료진으로 시작하기 → 지갑 로그인 화면 → Microsoft 계정으로 로그인** 흐름을 공개 웹/PWA에 반영했다. 기존 디자인 자산을 유지하는 방향으로 화면 전환과 인증 동작만 변경했다. 관련 요구사항 FR-001~025, FR-037~041(기존 서버 인증/권한/감사 경로 유지).
+
+원인: 배포된 `public/ui/demo-entry.js`는 `isOpen()`만 반환했으나 새 로그인 버튼이 `landing.open()`을 호출했다. 배포본에 해당 기능을 포함하고 기존 역할 버튼을 복원했다. Entra 화면에서는 ID/PW·발표자 키 입력을 숨기고 required/disabled 상태도 함께 정리했다. 역할 선택은 안내이며 실제 역할은 서버 매핑으로 결정한다.
+
+인증은 MSAL 5.25.0의 `loginRedirect`/`handleRedirectPromise`를 사용한다. SDK는 memoryStorage에서 redirect를 거부하므로 탭 단위 sessionStorage를 사용하고 응답 처리의 finally에서 `clearCache()`를 실행한다. 인증 결과는 서버 identity 검증 후 메모리의 세션으로 제공한다. localStorage/사용자 비밀번호 저장 없음. 기존 redirect bridge/등록 URI를 유지한다. [Microsoft redirect bridge](https://learn.microsoft.com/en-us/entra/msal/javascript/browser/redirect-bridge).
+
+- 최종 Web/PWA 이미지: `sha256:e977863303f17943f626c1fde4070f5a8fc3e4312f6a92319f8699a9781b4b53`
+- 증적: `artifacts/azure/entra-web-20261013T062042Z-a70610/result.json`, **DRAFT / UNASSIGNED**. HEAD `049aa44bfd11c9db286ff890e72d2edb613fc86d`, dirty; HEAD 전체가 아닌 로그인 파일 3개만 배포.
+- 변경: `public/capstone-auth.js`, `public/entra-auth.js`. 배포에 `public/ui/demo-entry.js`의 현재 open 기능도 포함했다. 추가: `scripts/public-login-release.py`, `test/entra-redirect-login.test.js`.
+- Control 컨테이너 ID 유지 확인. DB·DICOM·NSG·Entra 등록 변경 없음. 커밋·푸시 없음.
+
+| 확인 항목 | 결과 | 근거 |
+|---|---|---|
+| 웹 환자 진입 → 지갑 로그인 → Microsoft 입력 화면 | PASS | 실제 브라우저에서 버튼 순차 클릭, 현재 탭의 Microsoft 로그인 입력창 확인 |
+| 의료진 진입과 시작 화면으로 돌아가기 | PASS | 실제 브라우저에서 역할 제목 및 돌아가기 확인 |
+| 모바일 경로 → 지갑 로그인 → Microsoft 입력 화면 | PASS | `/mobile/`에서 실제 순차 클릭 및 Microsoft 입력창 확인; 실기기 시험과 구분 |
+| 설정/세션/서버 거부 및 redirect 집중 시험 | PASS | `node --test test/entra-browser-auth.test.js test/entra-redirect-login.test.js`, 5/5, exit 0, 최종 167.0235ms |
+| 기존 로그인 사전확인·모바일 인증 회귀 | PASS | `node --test test/capstone-login-preflight.test.js test/mobile-capstone-auth.test.js`, 15/15, exit 0, 1050.4583ms |
+| 계정 인증 후 복귀·홈·동의 종단 | NOT VERIFIED | 실제 계정 자격증명을 입력하지 않았으며 Microsoft 로그인 입력창까지만 확인 |
+
+첫 UI 후보는 기존 로그인 창 연결에 성공했지만 SDK memoryStorage 조건 때문에 Microsoft 이동에 실패했다. 최종 후보는 위 조건 수정 후 이동 성공. 초기 후보 receipt `artifacts/azure/entra-web-20261013T061400Z-980822` 보존. 전체 보안 스캔/전체 MVP 시험을 새로 수행했다는 판정은 하지 않는다.
+
+배포 명령 `python scripts/public-login-release.py`, 두 후보 각각 exit 0. 빌드/업로드/배포 전체 경과는 별도 계측하지 않았다. 최종 파일 SHA-256은 result.json에 기록했다. 공개 페이지/API/비밀번호의 범위는 이전 공개 계약과 동일하다.
+
+Web만 이전 후보로 복구할 때 승인된 Cloud SSH에서 다음을 사용한다(DB/volume 변경 없음). 이 최종 복구 명령은 실행하지 않았다.
+```sh
+sudo -n docker compose -p hp-public-web -f /home/highpassadmin/.highpass-login-entra-web-20261013T062042Z-a70610/before.json up -d --no-deps --pull never web
+```
+이 복구 파일은 최초 구형 UI가 아니라 직전 UI 후보를 복원한다. 최초 공개 Web 기준선은 `sha256:1b780bf49fb603e196f5b6a860aeed2937fb9beee56e12f42d921b7d13498c9f`이며 최초 공개 서비스 전체 복구 절차는 아래 이력을 참고한다.
+
+다음 작업 한 개: 허용 환자 계정으로 **Microsoft 인증 완료 → 원래 웹/PWA 경로 복귀 → 홈** 확인. 전체 MVP/v3 완료 판정 없음.
+
+## 현재 상태 — 2026-10-13 15:05 KST 기존 VM 인터넷 웹 공개
+
+사용자가 기존 Azure VM + HTTPS + 웹 방화벽 + Entra 방식을 선택하여 배포했다. 아래의 미배포/승인 대기 문구는 이전 이력이다. 이번 범위는 **공개 로그인 진입 화면과 제한된 메타데이터 API**이며 전체 앱/영상 종단 서비스 완료가 아니다. 신규 증적은 **DRAFT / UNASSIGNED**.
+
+- 웹: <https://highpass-demo.japaneast.cloudapp.azure.com/>
+- 모바일 PWA 진입: <https://highpass-demo.japaneast.cloudapp.azure.com/mobile/>
+- 관측 HEAD `049aa44bfd11c9db286ff890e72d2edb613fc86d`, dirty. 작업 트리의 다른 RAG 변경은 배포에 포함하지 않았다. 배포 식별자는 아래 이미지/파일이며 HEAD 전체 배포가 아니다.
+- 기존 Cloud VM의 NIC `10.89.0.4:443`에 별도 Edge. 기존 overlay ingress와 PostgreSQL 컨테이너는 재생성하지 않았다. 새 VM/Front Door/관리형 WAF를 만들지 않았으며 기존 VM·저장·트래픽 비용은 계속 발생한다.
+- Caddy + Coraza/OWASP CRS를 사용한다. 인터넷 inbound 추가는 `Allow-Highpass-Public-HTTPS`, priority 130, Internet → `10.89.0.4` TCP 443 하나다. SSH·VPN·DB·PACS 포트를 추가 공개하지 않았다. HTTP 80 미개방, TLS-ALPN 인증서 발급 방식이다.
+- Let's Encrypt 정상 신뢰 인증서, TLS 1.3 접속 관측. 만료 `2027-01-11 05:04:10 UTC`. 자동 갱신 설정은 있으나 갱신 주기 실제 수행은 NOT VERIFIED.
+- Entra SPA에 공개 `/entra-redirect.html`을 추가하고 기존 사설 redirect를 보존했다. 허용 환자·의료진 매핑만 사용하며 공개 개발용 ID/PW·발표자 키 경로는 차단한다.
+
+### 배포 식별자와 변경 범위
+
+- Control: `sha256:0bdae4ad431840879d6f44a7f9bad2f2f480405a8fdad46f2efcd8e90a434928`
+- Web/PWA: `sha256:1b780bf49fb603e196f5b6a860aeed2937fb9beee56e12f42d921b7d13498c9f`
+- WAF: `sha256:627229dd936934d773cf1a8de77ec9ae89d547b1a891e6da3b46b0282bb694cc`
+- 인증 전용 기존 후보에 환자 grant 런타임의 `TEST / ENTRA_OIDC` 허용 조건을 추가했다. 동의·DPoP·키 발급·DB 최소권한 조건은 유지했다. 이전 후보의 시험/스캔을 이 최종 이미지의 재검증 결과로 승계하지 않는다.
+- 별도 공개 서버 `scripts/start-public-web.js`, `infra/azure/public-web.Caddyfile`, 배포/복구 도구 `scripts/public-web-deploy.py`, `scripts/public-web-remote.py`. 공개 서버는 허용 API만 프록시하며 Bearer 인증과 기존 서버 정책을 사용한다. 메타데이터 요청의 내부 ingress 서명을 생성하고 외부 service-token을 전달하지 않는다. HTML에는 기존 capstone 인증 표시를 유지한다.
+- 관련 FR: FR-001~025(인증/동의/범위), FR-037~041(감사/접근 경계). 신규 전체 NFR 준수 판정을 하지 않는다.
+
+### 실행 결과와 한계
+
+| 관측 | 결과 | 근거 |
+|---|---|---|
+| HTTPS 웹·모바일 진입 | PASS | 정상 CA 검증 GET 각각 200, 두 실제 브라우저에 Microsoft Entra 로그인 버튼 표시 |
+| 공개 auth-config | PASS | 200, ENTRA_OIDC 및 공개 redirect 일치 |
+| 미인증 identity | PASS | 401 |
+| 공개 DICOM·감사 경로 | PASS | `/dicomweb/studies`, `/api/audit-logs` 403 |
+| Control·Web·WAF 기동 | PASS | running, restart 0, Control healthy |
+| 실제 Microsoft 계정 로그인 후 홈·동의 | NOT VERIFIED | 이번에는 로그인 화면까지 확인 |
+| 휴대폰 LTE/5G 실제 접속 | NOT VERIFIED | 인터넷 허용 설정과 데스크톱 공개 접속 확인만 수행 |
+| 인터넷 CT·700장 전송·B PACS 수신 | NOT VERIFIED | 사설 Data Plane 경로 미연결, 공개 경로 차단 유지 |
+| 기존 B 사설 포털 인증 UI 정렬 | NOT VERIFIED | B 포털 이미지는 이번에 변경하지 않음; Control은 Entra로 전환되어 이전 TEST 로그인 호환을 보장하지 않음 |
+| 전체 보안 회귀·최종 이미지 재스캔 | NOT VERIFIED | 사용자 지시에 따라 반복 전체 검증을 재개하지 않음 |
+
+최초 후보 기동은 `PATIENT_GRANT_PROFILE_REQUIRED`로 실패하여 기존 Control 이미지로 자동 복구했다. 해당 시작 조건 수정 후 위 최종 후보 기동에 성공했다. 첫 인증서 발급은 NSG 개방 전 연결 timeout으로 실패했고, 개방 후 자동 재시도에서 정상 발급됐다. 실패 이력을 정책 DENY나 PASS로 변경하지 않는다. 존재하지 않는 추정 경로 `/ui/patient-wallet-home.css`를 진단 조회한 404는 실제 HTML의 `/ui/wallet-home.css`와 다르며 페이지 자산 실패로 해석하지 않는다.
+
+실행 명령: `python scripts/entra-candidate.py --build-capture artifacts/azure/entra-web-20261013T051144Z-e56d9a`, 이후 `python scripts/public-web-deploy.py stage`, `activate`, `open`, `status` (후속 명령에는 아래 receipt 사용). 최종 각 명령 exit 0. 초기 activate 두 번은 exit 2/도구상 실패였으며 복구됨. 전체 경과 시간은 별도 계측하지 않았다. `node --check scripts/start-public-web.js` exit 0. 실제 공개 URL 최소 접속 확인은 exit 0이며 전체 종단 시험이 아니다.
+
+증적: `artifacts/azure/entra-web-20261013T055820Z-c7711a/{stage,activate,open,status}-result.json`. 초기 실패 receipt `artifacts/azure/entra-web-20261013T054821Z-958bd7` 보존. 비밀정보 포함 가능 운영 원본은 artifacts 내부에 두고 Git/채팅으로 내보내지 않는다.
+
+### 재현 및 복구
+
+상태 조회:
+```powershell
+python scripts/public-web-deploy.py status --receipt artifacts/azure/entra-web-20261013T055820Z-c7711a
+```
+
+필요 시 복구(이번 공개 NSG 규칙만 제거 → 공개 서비스 정지 → 기존 Control 복원, DB/volume 삭제 없음):
+```powershell
+python scripts/public-web-deploy.py rollback --receipt artifacts/azure/entra-web-20261013T055820Z-c7711a
+```
+
+최종 공개 배포의 이 복구 명령은 **아직 실행하지 않았다**. 초기 실패의 Control 자동 복구와 구분한다. Entra 공개 redirect 등록과 TLS 파일은 복구 시 보존된다. 서버 배포 파일 위치는 `/home/highpassadmin/.highpass-public-20261013T055820Z-c7711a`; TLS private key와 기존 ingress secret은 공개 정적 경로가 아니다.
+
+다음 작업 한 개: **허용 환자 계정으로 공개 주소 로그인 → 홈 진입**. 영상 Data Plane 인터넷 연결과 B 인증 화면 정렬은 별도 미완료로 남긴다. CAPSTONE MVP/v3 완료를 선언하지 않는다. 커밋·푸시 없음.
+
 ## 2026-10-13 12:19 KST DNS 적용 — 외부 로그인 서비스는 미배포
 
 사용자가 `highpass-demo` 이름 및 휴대폰 외부망에서 로그인 후 접속하는 방향을 선택했다. 기존 Public IP에 DNS label만 설정했고 독립 GET에서 `highpass-demo.japaneast.cloudapp.azure.com`을 확인했다. **DNS 설정 PASS / 웹 HTTPS·외부 로그인 NOT VERIFIED**. 초기 CLI `check-dns-name`은 미지원으로 FAIL(변경 없음), 공식 ARM `checkDnsNameAvailability` GET으로 대체해 성공했다. 기존 지정망 /32 제한을 아직 유지하고 있으며 일반 인터넷 허용으로 변경하지 않았다.
