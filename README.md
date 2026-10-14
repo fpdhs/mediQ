@@ -73,16 +73,16 @@
       <sub>수신 병원, 열람 목적, 유효기간, 허용 Study/Series 범위 지정</sub>
     </td>
     <td width="50%" align="center">
-      <b>6. AI 건강도우미 RAG & 근거 서랍</b><br/>
-      <img src="docs/assets/images/05_health_helper_rag.png" alt="AI 건강도우미 RAG 워크벤치" width="100%"/><br/>
-      <sub>프롬프트 격리 질의응답 및 미국 국립의학도서관(MedlinePlus) 원문 근거 연동</sub>
+      <b>6. AI 건강도우미 진료 준비</b><br/>
+      <img src="docs/assets/images/05_health_helper_rag.png" alt="AI 건강도우미 진료 준비" width="100%"/><br/>
+      <sub>혈청 AFP 검사 주제 연동, 질문 카드 스튜디오 및 진료 질문 준비</sub>
     </td>
   </tr>
   <tr>
     <td width="50%" align="center">
-      <b>7. 의료진 OHIF DICOM CT 뷰어</b><br/>
-      <img src="docs/assets/images/07_clinician_dicom_viewer.jpg" alt="의료진 DICOM CT 뷰어" width="100%"/><br/>
-      <sub>5분 유효 단기 토큰을 통한 WADO-RS 프레임 Lazy Loading 스트리밍</sub>
+      <b>7. 의료진 복부 CT DICOM 뷰어</b><br/>
+      <img src="docs/assets/images/07_clinician_dicom_viewer.png" alt="의료진 DICOM CT 뷰어" width="100%"/><br/>
+      <sub>5분 유효 단기 토큰 기반 700 Slices 다중 단면 Lazy Loading 스트리밍</sub>
     </td>
     <td width="50%" align="center">
       <b>8. 보안 관제 콘솔 & 불변 감사로그</b><br/>
