@@ -74,13 +74,41 @@ test('Screening Glossary: matches Kidney, Urinalysis, Hemoglobin, Vitals', () =>
   assert.equal(matchScreeningGlossary('폐기능검사')?.item.id, 'pulmonary-function');
 });
 
+test('Screening Glossary: matches Major Liver Diseases (Cirrhosis, Liver Cancer, Fatty Liver)', () => {
+  const cirrhosisQueries = ['간경화', '간경화란?', '간경화가 뭐야?', '간경변증', '간경변증이란', '간경변증에 대해 알려주세요', '간경화에 대해서 알려달라'];
+  for (const q of cirrhosisQueries) {
+    const res = matchScreeningGlossary(q);
+    assert.ok(res, `Expected match for: ${q}`);
+    assert.equal(res.item.id, 'cirrhosis');
+    assert.match(res.response.answer, /간경변증/);
+    assert.ok(res.response.questions.length >= 2);
+  }
+
+  const cancerQueries = ['간암', '간암이란?', '간암이 뭐야?', '간세포암', '간세포암이란 무엇인가요?', 'HCC', '간 종양'];
+  for (const q of cancerQueries) {
+    const res = matchScreeningGlossary(q);
+    assert.ok(res, `Expected match for: ${q}`);
+    assert.equal(res.item.id, 'liver-cancer');
+    assert.match(res.response.answer, /간세포암/);
+    assert.ok(res.response.questions.length >= 2);
+  }
+
+  assert.equal(matchScreeningGlossary('지방간')?.item.id, 'fatty-liver');
+  assert.equal(matchScreeningGlossary('지방간이란?')?.item.id, 'fatty-liver');
+  assert.equal(matchScreeningGlossary('만성 간염')?.item.id, 'chronic-hepatitis');
+});
+
 test('Safety Guardrail: clinical diagnosis or cancer queries are NOT intercepted', () => {
   const unsafeQueries = [
     'afp 수치가 15인데 암인가요?',
     '간암 진단해줘',
     '수치가 높은데 암인가',
     '확진 판정인가요?',
-    '약 처방해줘'
+    '약 처방해줘',
+    '나 간암인가요?',
+    '간경화에 무슨 약을 먹어야 하나요?',
+    '간암 3기 생존율은 어떻게 되나요?',
+    '간경화 완치 약 알려줘'
   ];
 
   for (const q of unsafeQueries) {
@@ -89,3 +117,4 @@ test('Safety Guardrail: clinical diagnosis or cancer queries are NOT intercepted
     assert.equal(res, null, `Unsafe query must not be intercepted: ${q}`);
   }
 });
+

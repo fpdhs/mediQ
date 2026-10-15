@@ -13,6 +13,7 @@ test('colloquial cirrhosis questions retrieve evidence and answer without false 
 
   const rag = await createPatientTranslationRag({
     env,
+    enableGlossaryInterceptor: false,
     generateAnswer: async (retrieval) => {
       assert.equal(retrieval.topic, '190');
       return {
@@ -131,9 +132,9 @@ test('health screening glossary interceptor delivers instant definitions for sta
     audit: async () => {}
   });
 
-  const patient = { role: 'PATIENT', subject: 'sub-glossary', patientId: 'p-glossary' };
-
-  for (const q of ['AFP', '간 초음파', '흉부 CT', '공복혈당', 'HbA1c']) {
+  let idx = 0;
+  for (const q of ['AFP', '간 초음파', '흉부 CT', '공복혈당', 'HbA1c', '간경화', '간암']) {
+    const patient = { role: 'PATIENT', subject: `sub-glossary-${++idx}`, patientId: 'p-glossary' };
     const res = await helper.ask(patient, { question: q });
     assert.equal(res.status, 'RETRIEVED');
     assert.equal(res.generationUsed, false);

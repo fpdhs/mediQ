@@ -207,6 +207,18 @@ assert.equal(ctChest.status,'RETRIEVED');assert.equal(ctChest.generationUsed,fal
 assert.match(ctChest.answer,/흉부 CT 검사/u);
 checks.push({test:'CHEST_CT_STANDALONE_QUERY',result:'PASS',status:ctChest.status});
 
+// 2d. Standalone Cirrhosis (intercepted by screening glossary)
+const cirrAlone=await helper.ask(principal,{question:'간경화'});
+assert.equal(cirrAlone.status,'RETRIEVED');assert.equal(cirrAlone.generationUsed,false);
+assert.match(cirrAlone.answer,/간경변증/u);
+checks.push({test:'CIRRHOSIS_STANDALONE_QUERY',result:'PASS',status:cirrAlone.status});
+
+// 2e. Standalone Liver Cancer (intercepted by screening glossary)
+const cancerAlone=await helper.ask(principal,{question:'간암'});
+assert.equal(cancerAlone.status,'RETRIEVED');assert.equal(cancerAlone.generationUsed,false);
+assert.match(cancerAlone.answer,/간세포암/u);
+checks.push({test:'LIVER_CANCER_STANDALONE_QUERY',result:'PASS',status:cancerAlone.status});
+
 // 3. Colloquial cirrhosis question: "간경화에 대해서 알려달라"
 const cirr1=await helper.ask(principal,{question:'간경화에 대해서 알려달라'});
 assert.ok(cirr1.status==='GENERATED'||cirr1.status==='RETRIEVED', `Unexpected status: ${cirr1.status}`);

@@ -1,9 +1,10 @@
-// Medical Screening Glossary Interceptor for Health Helper
-// Provides instant, verified, patient-friendly definitions for all standard health checkup items
-// (AFP, Liver Ultrasound, Chest CT, AST, ALT, GGT, Blood Glucose, HbA1c, Lipids, Urinalysis, etc.)
+// Medical Screening & Major Disease Glossary Interceptor for Health Helper
+// Provides instant, verified, patient-friendly definitions for:
+// - Standard Health Checkup Tests (AFP, Liver Ultrasound, Chest CT, AST, ALT, GGT, Blood Glucose, HbA1c, Lipids, etc.)
+// - Major Presentation Diseases (Liver Cirrhosis / 간경변증, Liver Cancer / 간암 / HCC, Fatty Liver, Chronic Hepatitis)
 // Adheres strictly to non-diagnostic medical law (의료법 제27조 무면허 의료행위 / 진단 오인 금지)
 
-export const GLOSSARY_QUERY_SUFFIX = /^\s*(?:(?:은|는|이|가|의|이란|란|뜻|정의|검사|검사란|검사는|검사가|수치|목적|준비|이해|측정|측정법)\s*)*(?:가\s*뭐야|가\s*뭔가요|는\s*뭐야|는\s*뭔가요|란\s*뭐야|란\s*뭔가요|이\s*뭐야|이\s*뭔가요|알려줘|알려주세요|설명해줘|설명해주세요)?(?:\s*[?？.!]*)$/iu;
+export const GLOSSARY_QUERY_SUFFIX = /^\s*(?:(?:은|는|이|가|의|이란|란|뜻|정의|검사|검사란|검사는|검사가|수치|목적|준비|이해|측정|측정법)\s*)*(?:가\s*뭐야|가\s*뭔가요|는\s*뭐야|는\s*뭔가요|란\s*뭐야|란\s*뭔가요|이\s*뭐야|이\s*뭔가요|이란\s*무엇인가요|란\s*무엇인가요|에\s*대해(?:서)?\s*(?:알려달라|알려줘|알려주세요|설명해줘|설명해주세요)|알려줘|알려주세요|설명해줘|설명해주세요)?(?:\s*[?？.!]*)$/iu;
 
 export function matchGlossaryTerm(termRegex, text) {
   if (typeof text !== 'string') return false;
@@ -15,6 +16,104 @@ export function matchGlossaryTerm(termRegex, text) {
 }
 
 export const HEALTH_SCREENING_GLOSSARY = Object.freeze([
+  // === 주요 질환 (Major Diseases) ===
+  {
+    id: 'cirrhosis',
+    name: '간경변증 (간경화, Liver Cirrhosis)',
+    category: '주요 간 질환',
+    termPattern: /^(?:간\s*경변(?:증)?|간\s*경화|\bcirrhosis\b)/iu,
+    definition: '‘간경화’의 표준 의학용어는 ‘간경변증’입니다. 만성 B형·C형 간염, 잦은 음주, 지방간 등으로 인해 간세포가 장기간 파괴되고 재생되는 과정이 반복되면서, 정상 간 조직이 딱딱한 섬유화 조직으로 대체되어 간 본래의 해독 및 대사 기능이 저하되는 만성 간 질환입니다.',
+    normalContext: '초기에는 뚜렷한 증상이 없을 수 있으나(보상성), 병이 진행되면 황달, 복수, 하지 부종, 간성 혼수, 위식도 정맥류 출혈 등의 합병증(비보상성)이 동반될 수 있습니다.',
+    caution: '⚠️ 중요: 간경변증 환자는 간암(간세포암) 발생의 가장 강력한 고위험군입니다. 따라서 간경변증이 있다면 자각 증상이 없더라도 6개월마다 혈액검사(혈청 AFP)와 영상검사(간 초음파)를 정기적으로 시행하는 감시 검사가 필수적입니다. 민간요법이나 검증되지 않은 건강기능식품 복용은 급성 간부전을 초래할 수 있으므로 절대 피해야 합니다.',
+    disclaimer: '본 정보는 질병관리청 국가건강정보포털 및 대한간학회 진료지침을 기반으로 한 비임상 일반 의학 정보이며, 개인의 질병 진단이나 치료를 대신할 수 없습니다. 정확한 병기 판정과 관리는 담당 전문의와 상의하세요.',
+    suggestedQuestions: [
+      '현재 제 간경변증 상태(보상성 vs 비보상성)와 간 기능 잔여 정도는 어떤가요?',
+      '간암 조기 발견을 위한 6개월 주기 AFP 검사와 간 초음파 정기검사 일정은 어떻게 되나요?',
+      '식단 관리(저염식, 단백질 섭취 등)와 일상생활에서 피해야 할 약물이나 식품이 있나요?'
+    ],
+    sources: [
+      {
+        id: 'kdca-cirrhosis-6560',
+        title: '간경변증',
+        institution: '질병관리청 국가건강정보포털',
+        url: 'https://health.kdca.go.kr/healthinfo/biz/health/gnrlzHealthInfo/gnrlzHealthInfo/gnrlzHealthInfoView.do?cntnts_sn=6560',
+        section: '질환 개요 및 관리'
+      }
+    ]
+  },
+  {
+    id: 'liver-cancer',
+    name: '간암 (간세포암, Hepatocellular Carcinoma)',
+    category: '주요 간 질환',
+    termPattern: /^(?:간\s*암|간\s*세포\s*암|\bhcc\b|간\s*종양)/iu,
+    definition: '간을 이루는 간세포에서 일차적으로 발생하는 악성 종양(암)입니다. 전체 간암의 약 90% 이상이 간세포암종에 해당하며, 대부분 만성 B형·C형 간염이나 간경변증 등 만성 간 질환을 앓고 있는 고위험군에서 주로 발생합니다.',
+    normalContext: '간은 ‘침묵의 장기’로 불리며, 조기에는 자각 증상이 거의 없어 정기 감시검사(혈청 AFP + 간 초음파)를 통해 발견되는 경우가 많습니다. 진행 시 우상복부 통증, 체중 감소, 피로감, 황달 등이 나타날 수 있습니다.',
+    caution: '⚠️ 중요: 간 초음파에서 의심스러운 결절(혹)이나 종괴가 관찰되면, 정확한 크기·위치·병기 판정과 치료 방침(수술, 고주파열치료, 간동맥화학색전술 등)을 수립하기 위해 다단계 조영 증강 CT나 간 정밀 MRI 영상검사를 즉시 시행해야 합니다. 타 병원 진료나 2차 소견(전원) 시에는 기존 촬영한 고해상도 DICOM 원본 영상을 MediQ 플랫폼 등을 통해 안전하게 전송·공유하는 것이 중복 검사와 불필요한 방사선 노출을 방지하는 핵심입니다.',
+    disclaimer: '본 정보는 국가암정보센터 및 대한간암학회 가이드라인을 바탕으로 한 비임상 일반 암 정보이며, 환자 개인의 암 확진 판정이나 병기 진단을 대신할 수 없습니다. 정확한 진단과 치료 계획은 담당 암 전문의와 상의하세요.',
+    suggestedQuestions: [
+      '간암 선별을 위해 혈청 AFP와 초음파 외에 조영 증강 CT 검사가 필요한 상황인가요?',
+      '의심 병변이 발견되었을 때 상급병원 전원 및 DICOM 영상 공유 절차는 어떻게 되나요?',
+      '만성 간 질환이 있는 경우 권장되는 간암 감시검사 주기와 추적 방법은 무엇인가요?'
+    ],
+    sources: [
+      {
+        id: 'school-demo-medical-test-afp-tumor-marker',
+        title: '간세포암 및 종양표지자 검사',
+        institution: '국가암정보센터 / MedlinePlus',
+        url: 'https://medlineplus.gov/lab-tests/alpha-fetoprotein-afp-tumor-marker-test/',
+        section: '간암 개요 및 선별'
+      }
+    ]
+  },
+  {
+    id: 'fatty-liver',
+    name: '지방간 (지방간질환, Fatty Liver Disease)',
+    category: '주요 간 질환',
+    termPattern: /^(?:지방\s*간(?:질환)?|지방\s*간염|\bnafld\b|\bmasld\b)/iu,
+    definition: '간세포 내에 지방(주로 중성지방)이 간 무게의 5% 이상 과도하게 쌓이는 상태를 말합니다. 음주가 주원인인 알코올성 지방간과, 비만·당뇨·이상지질혈증·대사증후군 등과 밀접하게 연관된 대사이상 지방간질환(MASLD / 비알코올성 지방간)으로 구분됩니다.',
+    normalContext: '건강검진 복부 초음파 검사에서 간 실질이 하얗게(고에코) 관찰되어 흔히 발견되며, 혈액검사에서 간 효소(AST, ALT, GGT) 수치가 동반 상승하기도 합니다.',
+    caution: '⚠️ 단순 지방간은 비교적 가역적이지만, 방치하여 간세포 괴사와 염증이 동반되는 ‘지방간염’으로 악화될 경우 간경변증 및 간암으로 서서히 진행할 수 있습니다. 체중 감량(5~10%), 규칙적인 유산소 운동, 식습관 개선이 가장 효과적인 치료법입니다.',
+    disclaimer: '질병관리청 및 대한간학회 지방간 진료지침 기준 일반 정보입니다.',
+    suggestedQuestions: [
+      '초음파상 지방간 정도(경도/중등도/중증)와 간 효소 수치 상승과의 연관성은 어떤가요?',
+      '지방간 개선을 위해 권장되는 식단 조절과 목표 체중 감량치는 어느 정도인가요?',
+      '지방간염이나 섬유화 여부를 확인하기 위해 추가 검사(간 섬유화 스캔 등)가 필요한가요?'
+    ],
+    sources: [
+      {
+        id: 'medlineplus-lft',
+        title: '지방간 및 간기능 검사',
+        institution: '질병관리청 / MedlinePlus',
+        url: 'https://medlineplus.gov/lab-tests/liver-function-tests/',
+        section: '지방간 개요'
+      }
+    ]
+  },
+  {
+    id: 'chronic-hepatitis',
+    name: '만성 간염 (Chronic Hepatitis)',
+    category: '주요 간 질환',
+    termPattern: /^(?:만성\s*간염|간염\s*질환)/iu,
+    definition: '간에 생기는 염증과 간세포 파괴가 6개월 이상 지속되는 상태를 말합니다. 주로 B형 간염 바이러스나 C형 간염 바이러스 감염이 주원인이며, 장기간 방치할 경우 간경변증과 간암으로 점진적으로 진행할 수 있는 주요 선행 만성 질환입니다.',
+    normalContext: '혈액검사를 통해 간 효소 수치(AST, ALT)와 간염 바이러스 항원/항체 및 바이러스 DNA/RNA 정량검사를 시행하여 염증 활성도와 전염력을 평가합니다.',
+    caution: '⚠️ 자각 증상이 거의 없어 검진을 통해서만 발견되는 경우가 많습니다. 만성 B형 및 C형 간염 환자는 간암 발생의 고위험군이므로 정기적인 항바이러스제 복용과 함께 6개월 주기 간 초음파 및 혈청 AFP 추적 관찰이 필수적입니다.',
+    disclaimer: '대한간학회 만성 B형/C형 간염 진료 가이드라인 기준 일반 정보입니다.',
+    suggestedQuestions: [
+      '현재 바이러스 증식 상태와 항바이러스제 치료 시작 기준에 해당하는가요?',
+      '간경변증이나 간암 예방을 위한 정기 감시검사 주기는 어떻게 되나요?'
+    ],
+    sources: [
+      {
+        id: 'medlineplus-hepatitis',
+        title: '만성 간염 관리',
+        institution: '질병관리청 / MedlinePlus',
+        url: 'https://medlineplus.gov/lab-tests/hepatitis-testing/',
+        section: '만성 간염 개요'
+      }
+    ]
+  },
+
+  // === 주요 검사 (Health Screening Tests) ===
   {
     id: 'afp',
     name: '알파태아단백(AFP) 종양표지자 검사',
@@ -392,10 +491,10 @@ export const HEALTH_SCREENING_GLOSSARY = Object.freeze([
 export function isClinicalDiagnosisRequest(question) {
   if (typeof question !== 'string') return false;
   // Patterns asking for diagnosis, staging, medication, prescription, or cancer confirmation
-  return /(?:암인가|암이야|암인지|암.*(?:맞|아니|확정|진단|판별)|진단해|확진|몇기|말기|생존율|죽나요|치료법|처방|복용|약.*추천)/u.test(question);
+  return /(?:암인가|암이야|암인지|암.*(?:맞|아니|확정|진단|판별)|진단해|확진|몇기|말기|생존율|죽나요|치료법|치료제|완치|처방|복용|먹어야|먹는.*약|약(?:[은는이가을를도과와에]|이나|으로)?(?![가-힣])|약물|약.*추천)/u.test(question);
 }
 
-// Match user question against the health screening glossary
+// Match user question against the health screening & major disease glossary
 export function matchScreeningGlossary(question) {
   if (typeof question !== 'string') return null;
   const q = question.trim();
@@ -406,13 +505,17 @@ export function matchScreeningGlossary(question) {
 
   for (const item of HEALTH_SCREENING_GLOSSARY) {
     if (matchGlossaryTerm(item.termPattern, q)) {
+      const isDisease = item.category === '주요 간 질환';
+      const section1 = isDisease ? '질환 개요 및 정의' : '검사 개요 및 목적';
+      const section2 = isDisease ? '진료 및 검사 연계' : '일반적 참고 기준';
+
       // Build rich, structured patient answer
       const answer = `${item.name} 안내
 
-■ 검사 개요 및 목적:
+■ ${section1}:
 ${item.definition}
 
-■ 일반적 참고 기준:
+■ ${section2}:
 ${item.normalContext}
 
 ${item.caution}
