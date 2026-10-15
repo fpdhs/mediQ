@@ -1,0 +1,170 @@
+{
+  "status": "DRAFT / UNASSIGNED",
+  "clinicalUse": false,
+  "serviceDeployment": false,
+  "notesSha256": "sha256:0113d79b512d0535ba27bfef44a2813abd7ea2b0015891d623727f9ba2ada463",
+  "sourceCode": "src/health-helper-scenario-evidence.js",
+  "topics": 26,
+  "policy": "https://medlineplus.gov/about/using/usingcontent/",
+  "sources": [
+    {
+      "url": "https://medlineplus.gov/about/using/usingcontent/",
+      "file": "sources/692ef3b996a3cc4851308ebf0cea72e7edd5e993a83b05e88f8febd0c49112d8.html",
+      "sha256": "sha256:395448c1bd29d61919a77a0481aa4ae7775a22bd42fb921d3d5303c332befb85",
+      "fetchedAt": "2026-10-12T07:56:59.472Z",
+      "scope": "Snapshot provenance only; HTML/nav/linked references/images not indexed"
+    },
+    {
+      "url": "https://medlineplus.gov/ctscans.html",
+      "file": "sources/d3654245e58b409360c9523c6c40ce4c09625b92347ea69b6aded33cc8d0707d.html",
+      "sha256": "sha256:f0e22a9b9736921b15f7687877d198e7c601375a79980b2abb3683d1580f88a3",
+      "fetchedAt": "2026-10-12T07:57:01.218Z",
+      "scope": "Snapshot provenance only; HTML/nav/linked references/images not indexed"
+    },
+    {
+      "url": "https://medlineplus.gov/lab-tests/alpha-fetoprotein-afp-tumor-marker-test/",
+      "file": "sources/a275b3d75e691a25e2568d9539b42abec13c6f37bae13026ee8528d702f221c6.html",
+      "sha256": "sha256:c2345ee2f32648c658a4c54f6ba23eb8e4c1cfc404e927e46b1302705d2b6712",
+      "fetchedAt": "2026-10-12T07:57:01.047Z",
+      "scope": "Snapshot provenance only; HTML/nav/linked references/images not indexed"
+    },
+    {
+      "url": "https://medlineplus.gov/lab-tests/alt-blood-test/",
+      "file": "sources/45c7afb27db4c48940a2b50b1301f68c48c76b9a3ad101ade926792c9a64b505.html",
+      "sha256": "sha256:82bb7e3e7bf10e57a1731f2335bc47f27ffc86dc0ee137246570c17b0c89d8a9",
+      "fetchedAt": "2026-10-12T07:57:00.282Z",
+      "scope": "Snapshot provenance only; HTML/nav/linked references/images not indexed"
+    },
+    {
+      "url": "https://medlineplus.gov/lab-tests/ast-test/",
+      "file": "sources/4399642c96ac06edc173984477546b3fc49f1ab3023793946cf3b75abb5637c1.html",
+      "sha256": "sha256:385100e6d2c26f7af9cf9c3880283d32ff3e22bbd66a1dfb0d8ece0bfe51d1c8",
+      "fetchedAt": "2026-10-12T07:57:00.114Z",
+      "scope": "Snapshot provenance only; HTML/nav/linked references/images not indexed"
+    },
+    {
+      "url": "https://medlineplus.gov/lab-tests/blood-glucose-test/",
+      "file": "sources/83c4bc21670bd61ef8f5317bac972475e386321b8d9cdbbd2c7653ed593a12fe.html",
+      "sha256": "sha256:0824e5a78afe659ee835b10813e3917ce723b495ff060b27e64a508ad84d6cbf",
+      "fetchedAt": "2026-10-12T07:57:00.120Z",
+      "scope": "Snapshot provenance only; HTML/nav/linked references/images not indexed"
+    },
+    {
+      "url": "https://medlineplus.gov/lab-tests/cholesterol-levels/",
+      "file": "sources/770cd8d33f1f23a4459ad70fef630753bfeff2bdc9f6ad84eb2d2d8b8302b055.html",
+      "sha256": "sha256:aed2a5c0066c9dca4a0786065ed5fd0e9839e9f5ac96aee7de450831b9eabb88",
+      "fetchedAt": "2026-10-12T07:57:00.777Z",
+      "scope": "Snapshot provenance only; HTML/nav/linked references/images not indexed"
+    },
+    {
+      "url": "https://medlineplus.gov/lab-tests/creatinine-test/",
+      "file": "sources/75cd5d5af60a4857c728f36fb2cc9e37ad2e9c282784fbc6f4e7b65ccdacc3e6.html",
+      "sha256": "sha256:99ac9b7c921593eadad8b801e0302e8d7475d5662c27ee5e7a1015a6c8a59d45",
+      "fetchedAt": "2026-10-12T07:57:00.296Z",
+      "scope": "Snapshot provenance only; HTML/nav/linked references/images not indexed"
+    },
+    {
+      "url": "https://medlineplus.gov/lab-tests/dental-exam/",
+      "file": "sources/61c2a05cf3a7eccff3ac15fb66aa6b289ea468823b412fa68c8591977c97d53f.html",
+      "sha256": "sha256:f9122cce7c617294ebf9f481c8424d9dee85a2cc2f4980db13db5992308893df",
+      "fetchedAt": "2026-10-12T07:57:01.046Z",
+      "scope": "Snapshot provenance only; HTML/nav/linked references/images not indexed"
+    },
+    {
+      "url": "https://medlineplus.gov/lab-tests/estimated-glomerular-filtration-rate-egfr-and-gfr-tests/",
+      "file": "sources/31a3b9da453a06785dc1ab9fd23b457ccb7c136e0e0eb29bce96b9b69b6bc238.html",
+      "sha256": "sha256:0c2cad7fb77a8f72f50836ec33b4654bc0dc3d47622d099c8024c01ca8c6a3f0",
+      "fetchedAt": "2026-10-12T07:57:00.611Z",
+      "scope": "Snapshot provenance only; HTML/nav/linked references/images not indexed"
+    },
+    {
+      "url": "https://medlineplus.gov/lab-tests/gamma-glutamyl-transferase-ggt-test/",
+      "file": "sources/247de67aae811d1d9849a1eb812cb0e9efdd68efdbf0a42c4b0784778323b362.html",
+      "sha256": "sha256:5e969291f9a495768111dbe1ab6bb84f7a59a34bcf9ade5b9931bb7af3b4ca75",
+      "fetchedAt": "2026-10-12T07:57:00.292Z",
+      "scope": "Snapshot provenance only; HTML/nav/linked references/images not indexed"
+    },
+    {
+      "url": "https://medlineplus.gov/lab-tests/hearing-tests-for-adults/",
+      "file": "sources/9e6accd1d7fafc9f4a89814058d4e7aa25dd9393cb00b33d08644ae829368288.html",
+      "sha256": "sha256:9892ed26d29382960a06fff3030d6dcf24015dab613a5a5a69ae271c094f9040",
+      "fetchedAt": "2026-10-12T07:57:00.106Z",
+      "scope": "Snapshot provenance only; HTML/nav/linked references/images not indexed"
+    },
+    {
+      "url": "https://medlineplus.gov/lab-tests/hemoglobin-test/",
+      "file": "sources/0abc3748a84d4eaf8d2b394efa62a39de6bf8597ae15289b7ceed96472f22b64.html",
+      "sha256": "sha256:a3e9e0c91c29da8541c55ca9b624aa46658d1c75931b5b5afb5f842869bde8ce",
+      "fetchedAt": "2026-10-12T07:56:59.853Z",
+      "scope": "Snapshot provenance only; HTML/nav/linked references/images not indexed"
+    },
+    {
+      "url": "https://medlineplus.gov/lab-tests/hepatitis-testing/",
+      "file": "sources/6fa457e64e1fdeac1206115acd7a8ee4a88386f9bb04df5daf40114e34be8c2f.html",
+      "sha256": "sha256:8b3f59d53a7faf7c31ade52d6b8a3d7a77c742a09e4268fbdf244cb51b4d061d",
+      "fetchedAt": "2026-10-12T07:57:00.808Z",
+      "scope": "Snapshot provenance only; HTML/nav/linked references/images not indexed"
+    },
+    {
+      "url": "https://medlineplus.gov/lab-tests/lung-function-tests/",
+      "file": "sources/2cdc58da921d857abb62d0eaaa730eca686e3f35a1a642d1b0c065a96e309205.html",
+      "sha256": "sha256:70d33cf191de50a89696a3dae31f704cf9d798da31fad25a7ebdb06a1ec88e63",
+      "fetchedAt": "2026-10-12T07:57:00.993Z",
+      "scope": "Snapshot provenance only; HTML/nav/linked references/images not indexed"
+    },
+    {
+      "url": "https://medlineplus.gov/lab-tests/measuring-blood-pressure/",
+      "file": "sources/0a28e064ac0b1e487b5d9b55ca30ce1c3bf5025d539624d2697123d6bbe6e788.html",
+      "sha256": "sha256:3e97f5ff958fbc30e817746d106411354dcb3ad5a7862e82120161ed00c2a1a1",
+      "fetchedAt": "2026-10-12T07:56:59.685Z",
+      "scope": "Snapshot provenance only; HTML/nav/linked references/images not indexed"
+    },
+    {
+      "url": "https://medlineplus.gov/lab-tests/obesity-screening/",
+      "file": "sources/ca5719081095b9099555d6171a089b3549090ddaed38e83ed48d4c7afe18fcc3.html",
+      "sha256": "sha256:76fbd51c6ce0543c726603126b11964dc28d836525facd954d849d2af398c732",
+      "fetchedAt": "2026-10-12T07:56:59.685Z",
+      "scope": "Snapshot provenance only; HTML/nav/linked references/images not indexed"
+    },
+    {
+      "url": "https://medlineplus.gov/lab-tests/protein-in-urine/",
+      "file": "sources/e571031c80f0ea3503130032d05481ec3b41faacd73c011a3d62b7c57e5e66bd.html",
+      "sha256": "sha256:51651dd6d551ed70f5fda1425faae459af54a96d981a6dedf9d6482572ed6b77",
+      "fetchedAt": "2026-10-12T07:57:00.768Z",
+      "scope": "Snapshot provenance only; HTML/nav/linked references/images not indexed"
+    },
+    {
+      "url": "https://medlineplus.gov/lab-tests/sonogram/",
+      "file": "sources/126bec1185510970b42e45a669cb182158af165e7d17d49a842bf7a74b4c12eb.html",
+      "sha256": "sha256:23ec380db581ff6bb22928f002f66374bb4db3a1d7a7a64ab657d0f91fc07279",
+      "fetchedAt": "2026-10-12T07:57:01.472Z",
+      "scope": "Snapshot provenance only; HTML/nav/linked references/images not indexed"
+    },
+    {
+      "url": "https://medlineplus.gov/lab-tests/triglycerides-test/",
+      "file": "sources/aa9d640ba9684158456500a671b0bbed9251c79e69808136544437c12d1b5553.html",
+      "sha256": "sha256:8906069b4215f7a0d6baefdbb8844c9fc48d1d9e28e440ead03e0dd3dcf00f9e",
+      "fetchedAt": "2026-10-12T07:57:00.780Z",
+      "scope": "Snapshot provenance only; HTML/nav/linked references/images not indexed"
+    },
+    {
+      "url": "https://medlineplus.gov/lab-tests/vision-screening/",
+      "file": "sources/290a47609c1d9520f48c5f577ca7f3e50851f20ec632e03482ff712913ba99ed.html",
+      "sha256": "sha256:b5da9366531c7f49d52dc7eb2f881b1a8fcaaa1f192c0f47324e4712997be336",
+      "fetchedAt": "2026-10-12T07:56:59.564Z",
+      "scope": "Snapshot provenance only; HTML/nav/linked references/images not indexed"
+    },
+    {
+      "url": "https://medlineplus.gov/xrays.html",
+      "file": "sources/69a182d27015e5869ad25320c3c2a12db75397b7f4feffc4088a007ed1657c77.html",
+      "sha256": "sha256:ef30779cd37df5641e4733e978f250e9334314c28fca7f4a4a58d160ea8d85b5",
+      "fetchedAt": "2026-10-12T07:57:01.046Z",
+      "scope": "Snapshot provenance only; HTML/nav/linked references/images not indexed"
+    }
+  ],
+  "medicalReview": "UNASSIGNED",
+  "supportedIntents": [
+    "CONCEPT"
+  ],
+  "excluded": "Numerical thresholds, diagnosis, treatment, blanket full-document translation and unsupported purposes/preparation/individual comparisons"
+}
