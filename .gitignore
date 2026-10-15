@@ -1,29 +1,22 @@
-# 자격증명 — 이 저장소는 공개다
 .env
 .env.*
 !.env.example
-*.token
-secrets.json
-
-# 데이터
-*.db
-*.sqlite
-*.sqlite3
+!.env.development
+!.env.test
+!.env.production.example
+!.env.staging.example
+node_modules/
+.pnpm-store/
+tmp/
 data/
-drafts/
-reports/
-
-# Python
-__pycache__/
-*.py[cod]
-.venv/
-venv/
-.mypy_cache/
-.ruff_cache/
-.pytest_cache/
-
-# OS / 에디터
-.DS_Store
-Thumbs.db
-.idea/
-.vscode/
+!docs/data/
+!docs/data/**
+artifacts/
+services/privacy-inference/checkpoints/
+models/openai-privacy-filter/
+*.safetensors
+evidence/generated/
+.agents/
+.codex/
+npm-debug.log*
+docker-compose.override.yml

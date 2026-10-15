@@ -1,0 +1,300 @@
+openapi: 3.1.0
+info:
+  title: Highpass Synthetic PHR API
+  version: 1.0.0-mvp
+  description: Patient-bound FHIR R4 metadata for the synthetic capstone MVP; not a production MyHealthWay integration.
+servers:
+  - url: https://localhost:3443
+paths:
+  /api/v1/me/phr/summary:
+    get:
+      operationId: getMyPhrSummary
+      security: [{patientOidc: [phr:read]}]
+      responses:
+        '200':
+          description: Patient-bound synthetic PHR summary
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/PhrSummaryEnvelope'}
+        default: {$ref: '#/components/responses/Problem'}
+  /api/v1/me/phr/imaging-studies:
+    get:
+      operationId: listMyPhrImagingStudies
+      security: [{patientOidc: [phr:read]}]
+      parameters:
+        - name: limit
+          in: query
+          schema: {type: integer, minimum: 1, maximum: 50, default: 20}
+      responses:
+        '200':
+          description: Patient-bound opaque ImagingStudy metadata
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ImagingStudyListEnvelope'}
+        default: {$ref: '#/components/responses/Problem'}
+  /api/v1/me/phr/imaging-studies/{imagingStudyRef}:
+    get:
+      operationId: getMyPhrImagingStudy
+      security: [{patientOidc: [phr:read]}]
+      parameters: [{$ref: '#/components/parameters/ImagingStudyRef'}]
+      responses:
+        '200':
+          description: One patient-bound opaque ImagingStudy
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ImagingStudyEnvelope'}
+        default: {$ref: '#/components/responses/Problem'}
+  /api/v1/me/phr/imaging-studies/{imagingStudyRef}/consents:
+    post:
+      operationId: createMyPhrImagingConsent
+      security: [{patientOidc: [phr:read, consent:write]}]
+      parameters: [{$ref: '#/components/parameters/ImagingStudyRef'}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/CreateImagingConsent'}
+      responses:
+        '201':
+          description: Consent created after server-side mapping and scope validation
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ConsentEnvelope'}
+        default: {$ref: '#/components/responses/Problem'}
+  /api/consents/{consentId}/handoff-ticket:
+    post:
+      operationId: issueConsentHandoffTicket
+      description: Issue one short-lived, one-time opaque Viewer handoff for the authenticated patient's active consent.
+      security: [{patientOidc: [consent:write]}]
+      parameters: [{$ref: '#/components/parameters/ConsentId'}]
+      responses:
+        '201':
+          description: Opaque handoff route issued; the response intentionally omits the authorized DICOM scope.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/HandoffTicket'}
+        '409':
+          description: Consent is inactive or an unused handoff already exists.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/SafeError'}
+        default: {$ref: '#/components/responses/Problem'}
+  /api/transfers/tickets/redeem-viewer:
+    post:
+      operationId: redeemViewerHandoff
+      description: Consume an opaque one-time handoff. Doctor and hospital come only from the authenticated principal; Study and Series scope come only from the stored ticket.
+      security: [{doctorOidc: [dicom:view]}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [nonce]
+              properties:
+                nonce: {type: string, pattern: '^[A-Za-z0-9_-]{22,128}$'}
+      responses:
+        '200':
+          description: Handoff consumed and a short-lived in-memory Viewer token issued.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ViewerHandoffResult'}
+        '403':
+          description: Safe fail-closed denial for invalid, expired, revoked, replayed, or institution-mismatched handoff.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ViewerHandoffDenied'}
+        default: {$ref: '#/components/responses/Problem'}
+components:
+  securitySchemes:
+    patientOidc:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://idp.invalid/authorize
+          tokenUrl: https://idp.invalid/token
+          scopes:
+            phr:read: Read the authenticated patient's PHR
+            consent:write: Create patient consent
+    doctorOidc:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://idp.invalid/authorize
+          tokenUrl: https://idp.invalid/token
+          scopes:
+            dicom:view: Redeem an authorized Viewer handoff
+  parameters:
+    ImagingStudyRef:
+      name: imagingStudyRef
+      in: path
+      required: true
+      description: Server-issued opaque reference; never a DICOM UID.
+      schema: {type: string, pattern: '^phr_[A-Za-z0-9_-]{32,}$'}
+    ConsentId:
+      name: consentId
+      in: path
+      required: true
+      description: Server-issued consent identifier bound to the authenticated patient.
+      schema: {type: string, minLength: 8, maxLength: 128}
+  responses:
+    Problem:
+      description: Safe problem response without internal paths, tokens, or identifiers
+      content:
+        application/problem+json:
+          schema: {$ref: '#/components/schemas/Problem'}
+  schemas:
+    Meta:
+      type: object
+      required: [correlationId, requestedAt]
+      properties:
+        correlationId: {type: string}
+        requestedAt: {type: string, format: date-time}
+    PatientSummary:
+      type: object
+      required: [patientRef, displayName, synthetic]
+      properties:
+        patientRef: {type: string, description: Opaque patient reference}
+        displayName: {type: string}
+        active: {type: [boolean, 'null']}
+        synthetic: {type: boolean, const: true}
+    Counts:
+      type: object
+      additionalProperties: false
+      properties:
+        encounters: {type: integer, minimum: 0}
+        conditions: {type: integer, minimum: 0}
+        medications: {type: integer, minimum: 0}
+        observations: {type: integer, minimum: 0}
+        diagnosticReports: {type: integer, minimum: 0}
+        imagingStudies: {type: integer, minimum: 0}
+    PhrSummaryEnvelope:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: object
+          required: [patient, counts]
+          properties:
+            patient: {$ref: '#/components/schemas/PatientSummary'}
+            counts: {$ref: '#/components/schemas/Counts'}
+        meta: {$ref: '#/components/schemas/Meta'}
+    ImagingStudy:
+      type: object
+      additionalProperties: false
+      required: [imagingStudyRef, metadataStatus, mappingStatus, accessStatus, synthetic]
+      properties:
+        imagingStudyRef: {type: string, description: Opaque reference}
+        metadataStatus: {type: string, enum: [AVAILABLE]}
+        mappingStatus: {type: string, enum: [MAPPED, NOT_MAPPED, CONFLICT, SOURCE_UNAVAILABLE]}
+        accessStatus: {type: string, enum: [CONSENT_REQUIRED, ACCESS_DENIED, SOURCE_UNAVAILABLE]}
+        status: {type: string}
+        started: {type: string}
+        modality: {type: array, items: {type: object}}
+        description: {type: string}
+        numberOfSeries: {type: [integer, 'null'], minimum: 0}
+        numberOfInstances: {type: [integer, 'null'], minimum: 0}
+        sourceOrganizationRef: {type: string}
+        synthetic: {type: boolean, const: true}
+    ImagingStudyEnvelope:
+      type: object
+      properties:
+        data: {$ref: '#/components/schemas/ImagingStudy'}
+        meta: {$ref: '#/components/schemas/Meta'}
+    ImagingStudyListEnvelope:
+      type: object
+      properties:
+        data: {type: array, items: {$ref: '#/components/schemas/ImagingStudy'}}
+        meta: {$ref: '#/components/schemas/Meta'}
+    CreateImagingConsent:
+      type: object
+      additionalProperties: false
+      required: [targetHospitalId, purpose, permission, validUntil]
+      properties:
+        targetHospitalId: {type: string}
+        purpose: {type: string, enum: [TREATMENT, TRANSFER, CONSULTATION]}
+        permission: {type: string, enum: [VIEW_ONLY, DOWNLOAD_ALLOWED]}
+        validFrom: {type: string, format: date-time}
+        validUntil: {type: string, format: date-time}
+    ConsentEnvelope:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            consentId: {type: string}
+            imagingStudyRef: {type: string}
+            status: {type: string, enum: [ACTIVE]}
+            permission: {type: string, enum: [VIEW_ONLY, DOWNLOAD_ALLOWED]}
+            purpose: {type: string}
+            targetHospitalId: {type: string}
+            validFrom: {type: string, format: date-time}
+            validUntil: {type: string, format: date-time}
+            scopeCount: {type: integer, minimum: 1}
+        meta: {$ref: '#/components/schemas/Meta'}
+    HandoffTicket:
+      type: object
+      additionalProperties: false
+      required: [ticketId, consentId, ticket, qr]
+      properties:
+        ticketId: {type: string}
+        consentId: {type: string}
+        ticket:
+          type: object
+          additionalProperties: false
+          required: [ticketId, status, targetHospitalId, expiresAt]
+          properties:
+            ticketId: {type: string}
+            status: {type: string, enum: [ISSUED]}
+            targetHospitalId: {type: string}
+            expiresAt: {type: string, format: date-time}
+        qr:
+          type: object
+          additionalProperties: false
+          required: [payload, expiresAt]
+          properties:
+            payload: {type: string, description: Same-origin path containing only a one-time opaque nonce.}
+            expiresAt: {type: string, format: date-time}
+    ViewerHandoffResult:
+      type: object
+      required: [decision, accessToken, expiresAt, viewerContext]
+      properties:
+        decision: {type: string, const: ALLOWED}
+        accessToken: {type: string, description: Short-lived token retained in browser memory only.}
+        expiresAt: {type: string, format: date-time}
+        permission: {type: string, enum: [VIEW_ONLY, DOWNLOAD_ALLOWED]}
+        viewerContext:
+          type: object
+          description: Authorized scope returned only after doctor and ticket validation; never placed in the URL.
+          required: [studyInstanceUid, permission, targetHospitalId]
+          properties:
+            studyInstanceUid: {type: string}
+            seriesInstanceUid: {type: [string, 'null']}
+            permission: {type: string, enum: [VIEW_ONLY, DOWNLOAD_ALLOWED]}
+            targetHospitalId: {type: string}
+    ViewerHandoffDenied:
+      type: object
+      required: [decision, reasonCode]
+      properties:
+        decision: {type: string, const: DENIED}
+        reasonCode: {type: string}
+        auditSessionId: {type: string}
+    SafeError:
+      type: object
+      required: [error]
+      properties:
+        error: {type: string}
+        details: {type: array, items: {type: string}}
+    Problem:
+      type: object
+      required: [type, title, status, code, requestId]
+      properties:
+        type: {type: string}
+        title: {type: string}
+        status: {type: integer}
+        code: {type: string}
+        requestId: {type: string}
+        traceId: {type: string}
+        auditSessionId: {type: string}
+        retryable: {type: boolean}
