@@ -1,6 +1,7 @@
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
+import os from 'node:os';
 
 const PORT = 3098;
 const ROOT = path.resolve('.');
@@ -43,6 +44,30 @@ const server = http.createServer((req, res) => {
   }
 });
 
-server.listen(PORT, '127.0.0.1', () => {
-  console.log(`[Architecture Motion Server] Running at http://127.0.0.1:${PORT}/architecture-motion.html`);
+function getLocalIpAddresses() {
+  const interfaces = os.networkInterfaces();
+  const addresses = [];
+  for (const name of Object.keys(interfaces)) {
+    for (const net of interfaces[name] || []) {
+      if (net.family === 'IPv4' && !net.internal) {
+        addresses.push({ name, ip: net.address });
+      }
+    }
+  }
+  return addresses;
+}
+
+server.listen(PORT, '0.0.0.0', () => {
+  const localIps = getLocalIpAddresses();
+  console.log(`\n======================================================`);
+  console.log(`[Architecture Motion Server] Running!`);
+  console.log(` - Local Loopback:  http://127.0.0.1:${PORT}/architecture-motion.html`);
+  console.log(` - Local Loopback:  http://localhost:${PORT}/architecture-motion.html`);
+  if (localIps.length > 0) {
+    console.log(` - Network (LAN):`);
+    localIps.forEach(({ name, ip }) => {
+      console.log(`    • [${name}] http://${ip}:${PORT}/architecture-motion.html`);
+    });
+  }
+  console.log(`======================================================\n`);
 });
