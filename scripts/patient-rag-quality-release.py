@@ -40,7 +40,8 @@ print(json.dumps(dict(containers=out,files=files)))""", 40)
             'src/health-helper-medlineplus.js',
             'src/health-helper-school-demo-medical-tests.js',
             'src/health-helper-korean-morpho.js',
-            'src/health-helper-intent-classifier.js'
+            'src/health-helper-intent-classifier.js',
+            'src/health-helper-glossary-interceptor.js'
         ]
         patches = {'control': {}, 'web': {}}
         for p in control_files:
@@ -89,7 +90,8 @@ print(json.dumps(dict(containers=out,files=files)))""", 40)
                 'health-helper-http.test.js',
                 'patient-helper.test.js',
                 'health-helper-cirrhosis-retrieval.test.js',
-                'health-helper-korean-morpho.test.js'
+                'health-helper-korean-morpho.test.js',
+                'health-helper-glossary-interceptor.test.js'
             ]
             for name in test_files:
                 upload('tests/' + name, (ROOT / 'test' / name).read_bytes())
@@ -115,7 +117,7 @@ def operation(folder, phase):
     test_cmd=['docker'""", 1)
         operator = operator.replace("    test_cmd+=['-v',str(folder/'tests')", """    test_cmd+=['-v',str(folder/'test-web-public')+':/app/public:ro']
     test_cmd+=['-v',str(folder/'tests')""", 1)
-        operator = operator.replace("'--test','/app/test/scenario-health-standard.test.js'", "'--test','/app/test/health-helper-patient-translation.test.js','/app/test/health-helper-http.test.js','/app/test/patient-helper.test.js','/app/test/health-helper-cirrhosis-retrieval.test.js','/app/test/health-helper-korean-morpho.test.js'")
+        operator = operator.replace("'--test','/app/test/scenario-health-standard.test.js'", "'--test','/app/test/health-helper-patient-translation.test.js','/app/test/health-helper-http.test.js','/app/test/patient-helper.test.js','/app/test/health-helper-cirrhosis-retrieval.test.js','/app/test/health-helper-korean-morpho.test.js','/app/test/health-helper-glossary-interceptor.test.js'")
 
         program = 'MANIFEST=' + repr(manifest) + '\nPHASE=' + repr(phase) + '\n' + operator
         result = runtime.remote(client, 'CLOUD', None, program, 540 if phase == 'build' else 300)
@@ -187,17 +189,23 @@ assert.match(afp.sources[0].reviewNote,/HOLD/);
 assert.doesNotMatch(afp.answer+afp.sources.map(source=>source.contextNote).join(' '),/QA|HOLD|UNASSIGNED|색인 PASS|미해결 이슈/);
 checks.push({test:'AFP_QUESTION',result:'PASS',status:afp.status,sourceCount:afp.sources.length});
 
-// 2a. Standalone AFP question
+// 2a. Standalone AFP question (intercepted by screening glossary)
 const afpAlone=await helper.ask(principal,{question:'AFP'});
-assert.equal(afpAlone.status,'GENERATED');assert.equal(afpAlone.generationUsed,true);
-assert.match(afpAlone.answer,/혈액 검체에서 AFP/u);
+assert.equal(afpAlone.status,'RETRIEVED');assert.equal(afpAlone.generationUsed,false);
+assert.match(afpAlone.answer,/알파태아단백/u);
 checks.push({test:'AFP_STANDALONE_QUERY',result:'PASS',status:afpAlone.status});
 
-// 2b. Standalone Liver Ultrasound
+// 2b. Standalone Liver Ultrasound (intercepted by screening glossary)
 const usLiver=await helper.ask(principal,{question:'간 초음파'});
-assert.equal(usLiver.status,'GENERATED');assert.equal(usLiver.generationUsed,true);
-assert.match(usLiver.answer,/간, 담낭, 췌장 또는 비장을 포함한 복부 장기/u);
+assert.equal(usLiver.status,'RETRIEVED');assert.equal(usLiver.generationUsed,false);
+assert.match(usLiver.answer,/간 초음파 검사/u);
 checks.push({test:'LIVER_ULTRASOUND_STANDALONE_QUERY',result:'PASS',status:usLiver.status});
+
+// 2c. Standalone Chest CT (intercepted by screening glossary)
+const ctChest=await helper.ask(principal,{question:'흉부 CT'});
+assert.equal(ctChest.status,'RETRIEVED');assert.equal(ctChest.generationUsed,false);
+assert.match(ctChest.answer,/흉부 CT 검사/u);
+checks.push({test:'CHEST_CT_STANDALONE_QUERY',result:'PASS',status:ctChest.status});
 
 // 3. Colloquial cirrhosis question: "간경화에 대해서 알려달라"
 const cirr1=await helper.ask(principal,{question:'간경화에 대해서 알려달라'});
