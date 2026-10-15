@@ -10,10 +10,10 @@ const findings = [];
 
 const patterns = [
   { id: "PRIVATE_KEY_BLOCK", pattern: /-----BEGIN (RSA |EC |OPENSSH |)?PRIVATE KEY-----/ },
-  { id: "AWS_ACCESS_KEY_ID", pattern: /AKIA[0-9A-Z]{16}/ },
-  { id: "OPENAI_API_KEY", pattern: /sk-[A-Za-z0-9_-]{32,}/ },
-  { id: "GITHUB_TOKEN", pattern: /gh[pousr]_[A-Za-z0-9_]{36,}/ },
-  { id: "SLACK_TOKEN", pattern: /xox[baprs]-[A-Za-z0-9-]{20,}/ },
+  { id: "AWS_ACCESS_KEY_ID", pattern: /(?<![A-Za-z0-9])AKIA[0-9A-Z]{16}/ },
+  { id: "OPENAI_API_KEY", pattern: /(?<![A-Za-z0-9])sk-[A-Za-z0-9_-]{32,}/ },
+  { id: "GITHUB_TOKEN", pattern: /(?<![A-Za-z0-9])gh[pousr]_[A-Za-z0-9_]{36,}/ },
+  { id: "SLACK_TOKEN", pattern: /(?<![A-Za-z0-9])xox[baprs]-[A-Za-z0-9-]{20,}/ },
 ];
 
 await scanDir(root);
