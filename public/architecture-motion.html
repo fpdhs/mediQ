@@ -3,291 +3,411 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MediQ 아키텍처 흐름도 인터랙티브 모션 익스플레이너</title>
+  <title>MediQ Architecture Flow — System Observability Console</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
   <style>
     :root {
-      --bg: #090e17;
-      --panel-bg: rgba(15, 23, 42, 0.85);
-      --card-bg: rgba(30, 41, 59, 0.9);
-      --border: rgba(148, 163, 184, 0.2);
+      --bg-dark: #060913;
+      --bg-panel: rgba(13, 20, 36, 0.75);
+      --bg-card: rgba(19, 30, 54, 0.65);
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-active: rgba(56, 189, 248, 0.4);
       --primary: #38bdf8;
-      --accent: #2563eb;
-      --orange: #f97316;
-      --green: #10b981;
-      --gold: #fbbf24;
-      --text: #f8fafc;
+      --accent: #0284c7;
+      --emerald: #10b981;
+      --amber: #f59e0b;
+      --rose: #f43f5e;
+      --text-main: #f8fafc;
       --text-muted: #94a3b8;
+      --text-dim: #64748b;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      background: var(--bg-dark);
+      background-image: 
+        radial-gradient(ellipse at 50% -20%, rgba(14, 165, 233, 0.15) 0%, transparent 70%),
+        radial-gradient(circle at 100% 100%, rgba(30, 58, 138, 0.08) 0%, transparent 50%);
+      color: var(--text-main);
       overflow: hidden;
       height: 100vh;
       display: flex;
       flex-direction: column;
     }
 
-    /* Top Navigation Header */
+    /* Top Glass Header */
     header {
-      height: 64px;
-      background: rgba(15, 23, 42, 0.95);
-      border-bottom: 1px solid var(--border);
+      height: 60px;
+      background: rgba(10, 15, 29, 0.85);
+      border-bottom: 1px solid var(--border-subtle);
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 0 24px;
       z-index: 100;
-      backdrop-filter: blur(8px);
+      backdrop-filter: blur(20px) saturate(180%);
     }
 
-    .brand {
+    .brand-group {
       display: flex;
       align-items: center;
       gap: 12px;
     }
     .brand-badge {
-      background: linear-gradient(135deg, #0284c7, #2563eb);
-      color: white;
+      background: linear-gradient(135deg, rgba(2, 132, 199, 0.2), rgba(14, 165, 233, 0.4));
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      color: #7dd3fc;
       font-size: 11px;
       font-weight: 700;
-      padding: 4px 8px;
+      padding: 3px 8px;
       border-radius: 6px;
       letter-spacing: 0.5px;
     }
     .brand-title {
-      font-size: 18px;
+      font-size: 17px;
       font-weight: 700;
-      color: #fff;
-    }
-    .brand-sub {
-      font-size: 13px;
-      color: var(--text-muted);
+      letter-spacing: -0.3px;
+      background: linear-gradient(180deg, #ffffff 30%, #cbd5e1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
-    /* Step Selector Pills in Header */
-    .step-pills {
+    /* Segmented Step Control */
+    .segmented-control {
       display: flex;
       align-items: center;
-      gap: 6px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border-subtle);
+      padding: 3px;
+      border-radius: 30px;
+      gap: 2px;
     }
-    .step-pill {
-      background: rgba(30, 41, 59, 0.8);
-      border: 1px solid var(--border);
+    .seg-btn {
+      background: transparent;
+      border: none;
       color: var(--text-muted);
-      font-size: 13px;
+      font-family: inherit;
+      font-size: 12px;
       font-weight: 600;
-      padding: 6px 12px;
+      padding: 5px 12px;
       border-radius: 20px;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .step-pill:hover {
-      background: rgba(56, 189, 248, 0.15);
-      color: #38bdf8;
-      border-color: #38bdf8;
-    }
-    .step-pill.active {
-      background: #0284c7;
+    .seg-btn:hover {
       color: #fff;
-      border-color: #38bdf8;
-      box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .seg-btn.active {
+      background: linear-gradient(135deg, #0284c7, #0369a1);
+      color: #fff;
+      box-shadow: 0 2px 10px rgba(2, 132, 199, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
     }
 
+    /* Header Actions */
     .header-actions {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
-    .btn {
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      border: 1px solid var(--border);
-      transition: all 0.2s ease;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .btn-play {
-      background: linear-gradient(135deg, #10b981, #059669);
-      color: white;
-      border: none;
-    }
-    .btn-play:hover { filter: brightness(1.1); transform: scale(1.02); }
-    .btn-record {
-      background: rgba(239, 68, 68, 0.2);
-      border-color: #ef4444;
-      color: #fca5a5;
-    }
-    .btn-record:hover { background: #ef4444; color: white; }
-    .btn-record.recording {
-      background: #ef4444;
-      color: white;
-      animation: pulseRecord 1.5s infinite;
-    }
-    @keyframes pulseRecord {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-      50% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
-    }
-    .btn-sound {
-      background: rgba(30, 41, 59, 0.8);
+    .action-icon-btn {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
       color: var(--text-muted);
-    }
-    .btn-sound.on { color: #38bdf8; border-color: #38bdf8; }
-
-    /* Main Stage */
-    main {
-      flex: 1;
-      position: relative;
-      background: #05080f;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-    }
-
-    canvas {
-      box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: contain;
-    }
-
-    /* Floating System Role & Explanation HUD Card */
-    .hud-overlay {
-      position: absolute;
-      bottom: 24px;
-      left: 24px;
-      width: 520px;
-      background: var(--card-bg);
-      border: 1px solid rgba(56, 189, 248, 0.3);
-      border-radius: 16px;
-      padding: 20px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(16px);
-      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-      z-index: 50;
-      pointer-events: auto;
-    }
-    .hud-badge {
+      height: 36px;
+      padding: 0 12px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      font-weight: 600;
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      font-size: 11px;
-      font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 20px;
-      background: rgba(56, 189, 248, 0.15);
-      color: #38bdf8;
-      border: 1px solid rgba(56, 189, 248, 0.3);
-      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
     }
-    .hud-title {
-      font-size: 20px;
-      font-weight: 700;
+    .action-icon-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
       color: #fff;
-      margin-bottom: 8px;
+      border-color: rgba(255, 255, 255, 0.15);
     }
-    .hud-role {
-      font-size: 14px;
-      color: #cbd5e1;
-      line-height: 1.5;
-      margin-bottom: 12px;
+    .action-icon-btn.active {
+      color: var(--primary);
+      border-color: var(--primary);
+      background: rgba(56, 189, 248, 0.1);
     }
-    .hud-rule {
-      background: rgba(15, 23, 42, 0.6);
-      border-left: 3px solid #38bdf8;
-      padding: 10px 12px;
-      border-radius: 4px;
-      font-size: 12.5px;
-      color: #93c5fd;
-      line-height: 1.4;
-      margin-bottom: 12px;
+    .btn-record-glow {
+      background: rgba(244, 63, 94, 0.15);
+      border-color: rgba(244, 63, 94, 0.4);
+      color: #fda4af;
     }
-    .hud-script {
-      font-size: 13px;
-      color: #fbbf24;
-      background: rgba(251, 191, 36, 0.08);
-      border: 1px dashed rgba(251, 191, 36, 0.3);
-      padding: 10px 12px;
-      border-radius: 8px;
-      line-height: 1.4;
+    .btn-record-glow:hover {
+      background: rgba(244, 63, 94, 0.3);
+      color: #fff;
     }
-    .hud-script span {
-      font-weight: 700;
-      color: #fef08a;
-      display: block;
-      margin-bottom: 2px;
+    .btn-record-glow.recording {
+      background: #f43f5e;
+      color: #fff;
+      animation: pulseRecord 1.5s infinite;
+    }
+    @keyframes pulseRecord {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.6); }
+      50% { box-shadow: 0 0 0 8px rgba(244, 63, 94, 0); }
     }
 
-    /* Progress bar on HUD */
-    .progress-bar-wrap {
+    /* Main Container: Split Stage & Inspector */
+    .app-body {
+      flex: 1;
+      display: flex;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Left: Canvas Stage (Clean, Open, 16:9) */
+    .stage-container {
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at center, #0a1122 0%, #050811 100%);
+      overflow: hidden;
+    }
+    canvas {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      box-shadow: 0 0 60px rgba(0, 0, 0, 0.9);
+    }
+
+    /* Right: Sleek Floating Glassmorphism Inspector Panel */
+    .inspector-panel {
+      width: 440px;
+      background: var(--bg-panel);
+      border-left: 1px solid var(--border-subtle);
+      backdrop-filter: blur(28px) saturate(190%);
+      display: flex;
+      flex-direction: column;
+      padding: 24px;
+      gap: 20px;
+      overflow-y: auto;
+      z-index: 50;
+      box-shadow: -10px 0 40px rgba(0, 0, 0, 0.5);
+      transition: transform 0.3s ease;
+    }
+
+    .inspector-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .step-counter-tag {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: var(--primary);
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      padding: 4px 10px;
+      border-radius: 20px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .live-status-pill {
+      font-size: 11px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #34d399;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+    .live-dot {
+      width: 6px;
+      height: 6px;
+      background: #34d399;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #34d399;
+      animation: blinkDot 1.6s infinite ease-in-out;
+    }
+    @keyframes blinkDot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.8); }
+    }
+
+    .system-title-box h2 {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.4px;
+      color: #fff;
+      line-height: 1.3;
+      margin-bottom: 8px;
+    }
+    .system-title-box p {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* Core Architecture Invariant Callout */
+    .invariant-card {
+      background: linear-gradient(145deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.8));
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 12px;
+      padding: 16px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.4);
+    }
+    .invariant-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: linear-gradient(180deg, var(--primary), var(--emerald));
+    }
+    .invariant-tag {
+      font-size: 11.5px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: #38bdf8;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .invariant-body {
+      font-size: 13.5px;
+      color: #e2e8f0;
+      line-height: 1.5;
+    }
+
+    /* Specs & Highlights List */
+    .specs-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .spec-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13px;
+      color: #cbd5e1;
+      line-height: 1.4;
+    }
+    .spec-item-icon {
+      font-size: 14px;
+      color: var(--primary);
+      margin-top: 1px;
+    }
+
+    /* Technical Chips Tag Cloud */
+    .tech-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 4px;
+    }
+    .chip {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      color: #cbd5e1;
+      font-size: 11px;
+      font-weight: 600;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      padding: 4px 9px;
+      border-radius: 6px;
+    }
+
+    /* Bottom Scrubber Floating Island */
+    .scrubber-island {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(calc(-50% - 220px)); /* center relative to canvas area */
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 40px;
+      padding: 8px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      z-index: 60;
+      transition: all 0.3s ease;
+    }
+    .island-btn {
+      background: transparent;
+      border: none;
+      color: #cbd5e1;
+      cursor: pointer;
+      font-size: 14px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+    }
+    .island-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+    .island-btn-main {
+      background: #0284c7;
+      color: #fff;
+      box-shadow: 0 0 12px rgba(2, 132, 199, 0.5);
+    }
+    .island-btn-main:hover {
+      background: #0369a1;
+      transform: scale(1.05);
+    }
+
+    .timeline-track-wrap {
+      width: 240px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .timeline-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10.5px;
+      font-weight: 600;
+      color: var(--text-dim);
+    }
+    .timeline-track {
       width: 100%;
       height: 4px;
       background: rgba(255, 255, 255, 0.1);
       border-radius: 2px;
-      margin-top: 14px;
       overflow: hidden;
+      cursor: pointer;
     }
-    .progress-bar {
+    .timeline-fill {
       height: 100%;
       width: 0%;
       background: linear-gradient(90deg, #38bdf8, #10b981);
       transition: width 0.1s linear;
     }
 
-    /* Bottom Control Bar */
-    .bottom-controls {
-      position: absolute;
-      bottom: 24px;
-      right: 24px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(15, 23, 42, 0.9);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 8px 12px;
-      backdrop-filter: blur(12px);
-      z-index: 50;
-    }
-    .ctrl-btn {
-      background: rgba(30, 41, 59, 0.8);
-      border: 1px solid var(--border);
-      color: #fff;
-      width: 36px;
-      height: 36px;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 14px;
-      transition: all 0.2s ease;
-    }
-    .ctrl-btn:hover {
-      background: #0284c7;
-      border-color: #38bdf8;
-    }
-    .step-display {
-      font-size: 13px;
-      font-weight: 700;
-      color: #38bdf8;
-      padding: 0 12px;
-    }
-
     /* Recording Badge Overlay */
     .rec-indicator {
       position: absolute;
       top: 80px;
-      right: 24px;
-      background: rgba(239, 68, 68, 0.9);
+      left: 24px;
+      background: rgba(244, 63, 94, 0.9);
       color: white;
       padding: 6px 14px;
       border-radius: 20px;
@@ -296,7 +416,7 @@
       display: none;
       align-items: center;
       gap: 8px;
-      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+      box-shadow: 0 4px 16px rgba(244, 63, 94, 0.4);
       z-index: 80;
     }
     .rec-dot {
@@ -314,74 +434,123 @@
 </head>
 <body>
 
-  <!-- Top Header -->
+  <!-- Top Navigation Glass Header -->
   <header>
-    <div class="brand">
-      <span class="brand-badge">INTERACTIVE ARCHITECTURE</span>
-      <div>
-        <div class="brand-title">MediQ 시스템 흐름도 모션 익스플레이너</div>
-        <div class="brand-sub">Azure Control Plane + 병원 분산 Data Plane 8단계 아키텍처</div>
-      </div>
+    <div class="brand-group">
+      <span class="brand-badge">ARCHITECTURE OBSERVABILITY</span>
+      <div class="brand-title">MediQ System Flow Console</div>
     </div>
 
-    <!-- Step Selector -->
-    <div class="step-pills" id="stepPills">
-      <button class="step-pill active" data-step="0">0. 전체 조망</button>
-      <button class="step-pill" data-step="1">❶ Entra ID</button>
-      <button class="step-pill" data-step="2">❷ 동의 생성</button>
-      <button class="step-pill" data-step="3">❸ 티켓 발급</button>
-      <button class="step-pill" data-step="4">❹ QR 접수</button>
-      <button class="step-pill" data-step="5">❺❻ ABAC 인가</button>
-      <button class="step-pill" data-step="6">❼ Gateway</button>
-      <button class="step-pill" data-step="7">❽ CT 스트리밍</button>
-      <button class="step-pill" data-step="8">★ 완결</button>
+    <!-- Segmented Step Controller -->
+    <div class="segmented-control" id="segmentedControl">
+      <button class="seg-btn active" data-step="0">0. 조망</button>
+      <button class="seg-btn" data-step="1">❶ Entra ID</button>
+      <button class="seg-btn" data-step="2">❷ 동의 생성</button>
+      <button class="seg-btn" data-step="3">❸ 티켓 발급</button>
+      <button class="seg-btn" data-step="4">❹ QR 접수</button>
+      <button class="seg-btn" data-step="5">❺❻ ABAC 인가</button>
+      <button class="seg-btn" data-step="6">❼ Gateway</button>
+      <button class="seg-btn" data-step="7">❽ CT 스트리밍</button>
+      <button class="seg-btn" data-step="8">★ 완결</button>
     </div>
 
-    <!-- Header Actions -->
+    <!-- Right Actions -->
     <div class="header-actions">
-      <button class="btn btn-sound on" id="btnSound">🔊 효과음 ON</button>
-      <button class="btn btn-play" id="btnPlay">▶ 자동 재생</button>
-      <button class="btn btn-record" id="btnRecord">⏺ 비디오 녹화 (MP4)</button>
+      <button class="action-icon-btn active" id="btnSound" title="사운드 효과음">🔊 Sound</button>
+      <button class="action-icon-btn" id="btnFullscreen" title="전체화면 전환">⛶ Fullscreen</button>
+      <button class="action-icon-btn btn-record-glow" id="btnRecord" title="1080p 무손실 비디오 추출">⏺ Export MP4</button>
     </div>
   </header>
 
   <!-- Recording Indicator -->
   <div class="rec-indicator" id="recIndicator">
     <div class="rec-dot"></div>
-    <span>REC 1080p 60FPS 자동 렌더링 중...</span>
+    <span>REC 1080p 60FPS 무손실 비디오 렌더링 중...</span>
   </div>
 
-  <!-- Stage -->
-  <main id="stage">
-    <canvas id="canvas" width="1920" height="1080"></canvas>
+  <!-- App Body: Left Stage, Right Inspector -->
+  <div class="app-body">
+    
+    <!-- Stage Area (Clean 16:9 Canvas) -->
+    <div class="stage-container" id="stageContainer">
+      <canvas id="canvas" width="1920" height="1080"></canvas>
 
-    <!-- Floating System Role & Explanation HUD -->
-    <div class="hud-overlay" id="hud">
-      <div class="hud-badge" id="hudBadge">STEP 00 / 08 · 아키텍처 개요</div>
-      <div class="hud-title" id="hudTitle">MediQ — 환자 동의 기반 의료영상 공유</div>
-      <div class="hud-role" id="hudRole">Azure Control Plane과 병원 로컬 Data Plane을 물리적으로 분리하여, 클라우드에 원본 영상을 영구 보관하지 않는 Zero Cloud Storage 플랫폼입니다.</div>
-      <div class="hud-rule" id="hudRule"><strong>[핵심 원칙]</strong> 원본은 각 병원 PACS에 분산 보관하며, 단기 HMAC 토큰을 통해서만 승인된 영상이 직통 스트리밍됩니다.</div>
-      <div class="hud-script" id="hudScript">
-        <span>🎙️ 발표 나레이션 가이드:</span>
-        "지금 보시는 구성도는 하이패스 MediQ의 전체 아키텍처입니다. 신원 인증과 권한 인가를 분리하고 11단계 보안 검증을 거치는 8단계 흐름을 차례로 살펴보겠습니다."
-      </div>
-      <div class="progress-bar-wrap">
-        <div class="progress-bar" id="progressBar"></div>
+      <!-- Bottom Scrubber Floating Island -->
+      <div class="scrubber-island" id="scrubberIsland">
+        <button class="island-btn" id="btnPrev" title="이전 단계">⏮</button>
+        <button class="island-btn island-btn-main" id="btnPlay" title="자동 재생 / 일시정지">▶</button>
+        <button class="island-btn" id="btnNext" title="다음 단계">⏭</button>
+        <div class="timeline-track-wrap">
+          <div class="timeline-meta">
+            <span id="timeStepText">STEP 00 / 08</span>
+            <span id="timeElapsedText">00:00 / 01:10</span>
+          </div>
+          <div class="timeline-track" id="timelineTrack">
+            <div class="timeline-fill" id="timelineFill"></div>
+          </div>
+        </div>
+        <button class="island-btn" id="btnReset" title="처음으로 리셋">🔄</button>
       </div>
     </div>
 
-    <!-- Bottom Controls -->
-    <div class="bottom-controls">
-      <button class="ctrl-btn" id="btnPrev" title="이전 단계">⏮</button>
-      <div class="step-display" id="stepDisplay">0 / 8</div>
-      <button class="ctrl-btn" id="btnNext" title="다음 단계">⏭</button>
-      <button class="ctrl-btn" id="btnReset" title="처음으로 리셋">🔄</button>
-    </div>
-  </main>
+    <!-- Right Sleek Glassmorphism Inspector Panel -->
+    <aside class="inspector-panel" id="inspectorPanel">
+      <div class="inspector-header">
+        <div class="step-counter-tag" id="stepCounterTag">STEP 00 · ARCHITECTURE</div>
+        <div class="live-status-pill" id="liveStatusPill">
+          <div class="live-dot"></div>
+          <span id="liveStatusText">SYSTEM ACTIVE</span>
+        </div>
+      </div>
+
+      <div class="system-title-box">
+        <h2 id="sysTitle">MediQ — 환자 동의 기반 의료영상 공유</h2>
+        <p id="sysRole">Azure Control Plane과 온프레미스 Hospital Data Plane을 물리적으로 분리한 차세대 의료영상 교류 플랫폼</p>
+      </div>
+
+      <!-- Invariant Highlight Card -->
+      <div class="invariant-card">
+        <div class="invariant-tag" id="invariantTag">⚡ ZERO CLOUD STORAGE INVARIANT</div>
+        <div class="invariant-body" id="invariantBody">
+          의료영상 원본을 클라우드 DB에 영구 보관하지 않고, 오직 암호화된 동의 메타데이터와 감사로그만 관리합니다.
+        </div>
+      </div>
+
+      <!-- Detailed Specs List -->
+      <div class="specs-group" id="specsGroup">
+        <div class="spec-item">
+          <span class="spec-item-icon">✔</span>
+          <span id="spec1">인증(Who)과 인가(What)의 물리적 단계 분리</span>
+        </div>
+        <div class="spec-item">
+          <span class="spec-item-icon">✔</span>
+          <span id="spec2">11개 교집합 조건 전수 검증 기반 Fail-Closed 통제</span>
+        </div>
+        <div class="spec-item">
+          <span class="spec-item-icon">✔</span>
+          <span id="spec3">WADO-RS 표준 기반 700 Slices CT 무지연 스트리밍</span>
+        </div>
+      </div>
+
+      <!-- Technical Chips Cloud -->
+      <div>
+        <div style="font-size: 11px; font-weight: 700; color: var(--text-dim); text-transform: uppercase; margin-bottom: 6px;">Technical Stack & Protocol</div>
+        <div class="tech-chips" id="techChips">
+          <span class="chip">Zero Storage</span>
+          <span class="chip">ABAC 11</span>
+          <span class="chip">HMAC-SHA256</span>
+          <span class="chip">WireGuard</span>
+          <span class="chip">mTLS</span>
+          <span class="chip">WADO-RS</span>
+        </div>
+      </div>
+    </aside>
+
+  </div>
 
   <script>
     // -------------------------------------------------------------
-    // Architecture Step Definitions & Path Waypoints
+    // High-Tech Architecture Step Definitions
     // -------------------------------------------------------------
     const IMG_W = 1672;
     const IMG_H = 941;
@@ -389,11 +558,19 @@
     const STEPS = [
       {
         id: 0,
-        badge: "STEP 00 / 08 · 전체 시스템 조망",
+        tag: "STEP 00 · OVERVIEW",
+        status: "SYSTEM ACTIVE",
         title: "MediQ — 환자 동의 기반 의료영상 공유",
         role: "Azure Cloud Control Plane과 온프레미스 Hospital Data Plane을 물리적으로 분리한 차세대 의료영상 교류 플랫폼입니다.",
-        rule: "<strong>[Zero Cloud Storage 원칙]</strong> 클라우드 중앙 DB에 DICOM 원본을 절대 지속 저장하지 않으며 오직 동의와 권한 메타데이터만 관리합니다.",
-        script: "지금 보시는 구성도는 하이패스 MediQ의 전체 아키텍처입니다. 신원 인증과 권한 인가를 분리하고 11단계 보안 검증을 거치는 8단계 종단 흐름을 순서대로 살펴보겠습니다.",
+        invariantTag: "⚡ ZERO CLOUD STORAGE INVARIANT",
+        invariantBody: "클라우드 중앙 DB에 DICOM 원본을 절대 지속 저장하지 않으며 오직 동의와 권한 메타데이터만 관리합니다.",
+        specs: [
+          "신원 인증(Entra ID)과 의료영상 접근 인가의 물리적 분리",
+          "환자 스마트폰을 통한 특정 Study/Series 미세 범위 동의 지정",
+          "11개 교집합 조건 통과 시에만 5~10분 유효 단기 토큰 발급",
+          "병원 로컬 PACS 간 WireGuard 사설망 직통 WADO-RS 스트리밍"
+        ],
+        chips: ["Control Plane", "Data Plane", "Zero Storage", "ABAC 11", "WireGuard", "LUKS2"],
         camera: { cx: 836, cy: 470, scale: 1.0 },
         duration: 7000,
         highlight: null,
@@ -401,11 +578,18 @@
       },
       {
         id: 1,
-        badge: "STEP 01 / 08 · 로그인 및 신원 확인",
+        tag: "STEP 01 · IDENTITY PROVIDER",
+        status: "ENTRA ID VERIFIED",
         title: "❶ 환자·의료진 Microsoft 로그인",
-        role: "<strong>Microsoft Entra ID (IdP)</strong>를 통해 사용자의 디지털 신원(Identity)을 검증하고 사내 연합 계정으로 안전하게 매핑합니다.",
-        rule: "<strong>[보안 원칙: 인증 ≠ 인가 분리]</strong> '누구인가?(로그인 인증)'와 '무엇을 볼 수 있는가?(의료영상 접근 권한)'를 엄격히 분리하여 계정 탈취 시에도 영상이 무단 노출되지 않습니다.",
-        script: "첫 번째 단계는 신원 인증입니다. 환자와 의료진은 Microsoft Entra ID를 통해 신원을 확인합니다. 하지만 로그인에 성공했다고 영상이 열리는 것이 아니라, 권한 검증이라는 별도의 문을 통과해야 합니다.",
+        role: "Microsoft Entra ID(IdP)를 통해 사용자의 디지털 신원(Identity)을 검증하고 사내 연합 계정으로 안전하게 매핑합니다.",
+        invariantTag: "🔒 AUTHENTICATION ≠ AUTHORIZATION",
+        invariantBody: "'누구인가?(로그인 인증)'와 '무엇을 볼 수 있는가?(접근 권한)'를 엄격히 분리하여 계정이 탈취되더라도 영상이 노출되지 않습니다.",
+        specs: [
+          "Microsoft 계정 연동 및 사내 연합형 계정 안전 매핑",
+          "로그인 성공 시에도 의료영상 접근 권한은 자동 부여 금지",
+          "환자 동의 및 진료 목적 검증은 완전히 별개 단계로 격리"
+        ],
+        chips: ["Microsoft Entra ID", "OIDC / OAuth 2.0", "Zero Privilege Leak"],
         camera: { cx: 560, cy: 190, scale: 1.55 },
         highlight: { x: 345, y: 85, w: 735, h: 120, title: "Microsoft Entra ID", color: "#38bdf8" },
         duration: 7500,
@@ -415,11 +599,18 @@
       },
       {
         id: 2,
-        badge: "STEP 02 / 08 · 동의 범위 설정",
+        tag: "STEP 02 · PATIENT CONSENT",
+        status: "USER SCOPE DEFINED",
         title: "❷ 환자 공유 범위·병원·기간·검사 선택",
-        role: "환자가 모바일 PWA에서 <strong>수신 병원(B병원), 진료 목적, 유효 기간, 허용 검사(복부 CT)</strong>를 미세 단위로 지정하여 공유를 요청합니다.",
-        rule: "<strong>[보안 통제: 포괄 동의 금지]</strong> 전체 의무기록을 무차별 개방하지 않고, 이번 진료에 필요한 특정 Study 및 Series UID 단위로만 범위를 좁힙니다.",
-        script: "두 번째 단계에서 환자는 스마트폰을 통해 자신의 의료 지갑에서 공유할 병원과 유효기간, 그리고 필요한 복부 CT 검사만을 콕 집어 명시적 동의 범위를 설정합니다.",
+        role: "환자가 모바일 PWA에서 수신 병원(B병원), 진료 목적, 유효 기간, 허용 검사(복부 CT)를 미세 단위로 지정하여 공유를 요청합니다.",
+        invariantTag: "🚫 NO BROAD / UNRESTRICTED CONSENT",
+        invariantBody: "전체 의무기록을 무차별 개방하지 않고, 이번 진료에 필요한 특정 Study 및 Series UID 단위로만 공유 범위를 한정합니다.",
+        specs: [
+          "A대학병원에서 B대학병원으로 수신 기관 명확히 지정",
+          "진료 목적으로 한정, 1일~30일 사이 유효기간 설정",
+          "NSG 443 포트만 개방 및 OWASP CRS Caddy/Coraza WAF 보호"
+        ],
+        chips: ["Patient PWA", "HTTPS 443", "Caddy WAF", "Coraza CRS"],
         camera: { cx: 480, cy: 370, scale: 1.5 },
         highlight: { x: 450, y: 350, w: 230, h: 160, title: "공개 HTTPS Edge & PWA", color: "#38bdf8" },
         duration: 7500,
@@ -429,11 +620,18 @@
       },
       {
         id: 3,
-        badge: "STEP 03 / 08 · 동의 저장 & QR 발급",
+        tag: "STEP 03 · TICKET ISSUANCE",
+        status: "ENCRYPTED METADATA STORED",
         title: "❸ 동의 저장 및 QR 티켓 발급",
-        role: "설정된 동의 조건이 <strong>Control Plane API</strong>로 전달되어 <strong>PostgreSQL</strong>에 기록되고, <strong>Azure Key Vault</strong>의 암호화 키를 연동하여 QR 티켓을 생성합니다.",
-        rule: "<strong>[아키텍처 불변식: Zero Storage]</strong> '별도 DICOM 지속 저장 없음!' 원본 영상 파일은 1바이트도 클라우드로 올라오지 않으며 오직 접근 동의 메타데이터만 보관됩니다.",
-        script: "세 번째 단계에서 서버는 환자의 동의 조건을 암호화하여 저장하고 QR 공유 티켓을 발행합니다. 이때 클라우드 중앙 서버에는 대용량 영상 파일이 전혀 저장되지 않습니다.",
+        role: "설정된 동의 조건이 Control Plane API로 전달되어 PostgreSQL에 기록되고, Azure Key Vault 연동으로 암호화 티켓을 생성합니다.",
+        invariantTag: "⚡ ZERO CLOUD STORAGE INVARIANT",
+        invariantBody: "'별도 DICOM 지속 저장 없음!' 원본 영상 파일은 클라우드로 올라오지 않으며 오직 동의 메타데이터와 감사로그만 보관됩니다.",
+        specs: [
+          "PostgreSQL에 최소 메타데이터(동의 상태, Study UID)만 기록",
+          "Azure Key Vault의 wrap/unwrap 키 보호로 데이터 무결성 보장",
+          "환자에게 접수용 고유 QR 공유 티켓 발급"
+        ],
+        chips: ["PostgreSQL 16", "Azure Key Vault", "Private Endpoint", "QR Ticket"],
         camera: { cx: 800, cy: 500, scale: 1.55 },
         highlight: { x: 800, y: 350, w: 280, h: 180, title: "Control Plane API + PostgreSQL", color: "#10b981" },
         duration: 8000,
@@ -444,11 +642,18 @@
       },
       {
         id: 4,
-        badge: "STEP 04 / 08 · 의료진 접수",
+        tag: "STEP 04 · CLINICIAN INTAKE",
+        status: "L4 RELAY TUNNELING",
         title: "❹ 의료진 QR 접수 및 요청 시작",
-        role: "B병원 진료실의 의료진이 환자가 제시한 QR 티켓을 스캔하여 영상 조회 절차를 시작합니다. <strong>B병원 TCP L4 중계</strong>를 통해 통신이 중계됩니다.",
-        rule: "<strong>[보안 원칙: QR은 단순 접수 수단]</strong> QR 코드 자체에 영상이나 무제한 권한이 들어있지 않으며, 반드시 백엔드 인가 엔진을 거쳐야만 합니다.",
-        script: "네 번째 단계로, B병원 진료실 의사가 환자의 QR 티켓을 접수합니다. 이 요청은 안전한 TLS 터널링을 통해 Control 서버로 전달되어 의사의 소속과 권한 검증에 들어갑니다.",
+        role: "B병원 진료실의 의료진이 환자가 제시한 QR 티켓을 스캔하여 영상 조회 절차를 시작합니다. B병원 TCP L4 중계로 안전 통신합니다.",
+        invariantTag: "🛡️ QR IS A PASSING CONDUIT ONLY",
+        invariantBody: "QR 코드 자체에 영상이나 무제한 권한이 포함되어 있지 않으며, 반드시 백엔드 인가 엔진의 재검증을 거쳐야 합니다.",
+        specs: [
+          "의료진 업무망과 외부 인터넷 간 L4 중계 및 TLS 터널링 보호",
+          "Control Plane API 권한 위임 없이 접수 요청만 안전 전달",
+          "의사 면허 및 소속 병원 일치 여부 1차 확인"
+        ],
+        chips: ["TCP L4 Relay", "TLS Tunneling", "Clinician Web", "QR Intake"],
         camera: { cx: 580, cy: 540, scale: 1.55 },
         highlight: { x: 550, y: 520, w: 260, h: 100, title: "B병원 TCP 중계 (L4/TLS)", color: "#f97316" },
         duration: 7500,
@@ -458,11 +663,18 @@
       },
       {
         id: 5,
-        badge: "STEP 05 & 06 / 08 · ABAC 11단계 인가",
+        tag: "STEP 05 · ABAC INFERENCE",
+        status: "11-FACTOR INTERSECTION MATCHED",
         title: "❺ ❻ 동의 조회 & 5분 단기 토큰 발급",
-        role: "<strong>Control Plane API</strong>가 환자 동의, 유효기간, 의사 소속병원, 검사 UID 등 <strong>11개 조건을 교집합 전수 검증</strong>하고 5분 유효 단기 토큰을 서명합니다.",
-        rule: "<strong>[보안 원칙: Fail-Closed]</strong> 11개 조건 중 단 하나라도 어긋나면 즉시 요청을 차단하고 상세 사유 코드를 감사로그에 남기며, 통과 시에만 단기 HMAC 토큰을 발행합니다.",
-        script: "다섯 번째와 여섯 번째 단계는 가장 중요한 핵심 보안 관문입니다. 서버가 11가지 인가 조건을 전수 검증하여, 모두 통과했을 때만 5분간 유효한 단기 서명 토큰을 발급합니다.",
+        role: "Control Plane API가 환자 동의, 유효기간, 의사 소속병원, 검사 UID 등 11개 조건을 교집합 전수 검증하고 5분 단기 토큰을 서명합니다.",
+        invariantTag: "⏱️ 5-MINUTE SHORT-LIVED TOKEN",
+        invariantBody: "11개 조건 중 단 하나라도 어긋나면 즉시 요청을 Fail-Closed 차단하며, 통과 시에만 5~10분 유효 단기 HMAC 서명 토큰을 발행합니다.",
+        specs: [
+          "ACTIVE 상태, 유효기간, 요청병원, 의사소속, UID 전수 일치 확인",
+          "영구 고정 URL 금지 ➔ 5~10분 유효 단기 HMAC-SHA256 토큰 발급",
+          "모든 거부 사유(DOCTOR_MISMATCH 등) 실시간 감사로그 기록"
+        ],
+        chips: ["ABAC 11-Factor", "HMAC-SHA256", "Fail-Closed", "Scoped Token"],
         camera: { cx: 880, cy: 450, scale: 1.8 },
         highlight: { x: 800, y: 350, w: 160, h: 180, title: "Control Plane API (ABAC Engine)", color: "#fbbf24" },
         duration: 8500,
@@ -472,11 +684,18 @@
       },
       {
         id: 6,
-        badge: "STEP 07 / 08 · Gateway 경계 검증",
+        tag: "STEP 06 · GATEWAY VERIFICATION",
+        status: "DPOP KEY BOUND VERIFIED",
         title: "❼ Gateway L2 · DPoP · 환자 동의 재검증",
-        role: "<strong>가상 병원 B의 Portal / Gateway</strong>가 발급된 단기 토큰, DPoP 바인딩 키, 요청 스코프를 병원 내부 경계 진입 전 최종 재확인합니다.",
-        rule: "<strong>[심층 방어: Gateway 독립 검증]</strong> 클라우드 신뢰에만 의존하지 않고 병원 데이터 진입 게이트웨이에서 다중 보안 검증을 수행합니다.",
-        script: "일곱 번째 단계로, B병원 게이트웨이가 수신된 단기 토큰의 서명과 유효기간을 다시 한번 철저히 검증하여 안전성을 확증합니다.",
+        role: "가상 병원 B의 Portal / Gateway가 발급된 단기 토큰, DPoP 바인딩 키, 요청 스코프를 병원 내부 경계 진입 전 최종 재확인합니다.",
+        invariantTag: "🏰 GATEWAY DEFENSE-IN-DEPTH",
+        invariantBody: "클라우드 신뢰에만 의존하지 않고 병원 데이터 진입 게이트웨이에서 다중 보안 검증을 수행하여 위조를 원천 차단합니다.",
+        specs: [
+          "B 전용 HTTPS TLS 터널링 및 복호화 검증",
+          "DPoP-bound 단기 토큰과 요청 스코프 일치 확인",
+          "승인된 영상에 한해서만 수신 및 휘발성 열람 허용"
+        ],
+        chips: ["DPoP Binding", "mTLS Gateway", "Scoped Egress", "L2 Security"],
         camera: { cx: 1420, cy: 590, scale: 1.55 },
         highlight: { x: 1460, y: 490, w: 185, h: 80, title: "B Portal / Gateway", color: "#38bdf8" },
         duration: 7500,
@@ -486,11 +705,18 @@
       },
       {
         id: 7,
-        badge: "STEP 08 / 08 · 고속 영상 스트리밍",
+        tag: "STEP 07 · DICOMWEB STREAMING",
+        status: "700 SLICES STREAMING",
         title: "❽ 승인된 영상만 WireGuard 직통 스트리밍",
-        role: "<strong>A병원 Orthanc PACS</strong>에서 <strong>B병원 수신 PACS</strong>로 700장 복부 CT 영상이 <strong>WireGuard 암호화 사설망</strong>을 통해 지연 없이 다이렉트 스트리밍됩니다.",
-        rule: "<strong>[Lazy Loading & 암호화 보관]</strong> Study 전체 무차별 다운로드가 아닌 프레임 단위 필요 최소 전송이며, B병원 8GiB LUKS2 볼륨에 안전하게 임시 보관됩니다.",
-        script: "마지막 여덟 번째 단계입니다. A병원 PACS에 안전하게 보관되어 있던 700장의 복부 CT 영상이 WireGuard 사설망을 타고 B병원 진료실 뷰어로 무지연 스트리밍되어 의사가 즉시 정밀 판독을 진행합니다.",
+        role: "A병원 Orthanc PACS에서 B병원 수신 PACS로 700장 복부 CT 영상이 WireGuard 암호화 사설망을 통해 지연 없이 다이렉트 스트리밍됩니다.",
+        invariantTag: "📦 WADO-RS LAZY LOADING & LUKS2",
+        invariantBody: "Study 전체 무차별 다운로드가 아닌 프레임 단위 필요 최소 전송이며, B병원 8GiB LUKS2 볼륨에 안전하게 임시 보관됩니다.",
+        specs: [
+          "WireGuard 사설 Overlay 터널링으로 병원 간 통신 보호",
+          "WADO-RS 프레임 단위 스트리밍으로 700 Slices CT 무지연 판독",
+          "의료진 PC 로컬 다운로드 차단 및 진료 완료 후 안전한 파기"
+        ],
+        chips: ["WireGuard 51820", "WADO-RS", "700 Slices CT", "8GiB LUKS2 Volume"],
         camera: { cx: 1380, cy: 450, scale: 1.45 },
         highlight: { x: 1190, y: 85, w: 465, h: 690, title: "병원 간 직통 DICOM 스트리밍", color: "#f97316" },
         duration: 9000,
@@ -500,11 +726,19 @@
       },
       {
         id: 8,
-        badge: "완결 · 아키텍처 가치 완결",
+        tag: "STEP 08 · ARCHITECTURE VALUE",
+        status: "SECURE ECOSYSTEM COMPLETE",
         title: "환자 동의로 열고, 증거와 감사로 닫는다",
         role: "모든 영상 접근 이력은 위·변조가 불가능한 감사로그로 영구 기록되어 완벽한 사후 추적성을 보장합니다.",
-        rule: "<strong>[차세대 의료정보 교류 표준]</strong> CD 발급비 0원, 불필요한 방사선 피폭 예방, 진료 연속성 확보, 마이데이터 주권 실현!",
-        script: "이로써 환자의 명시적 동의로 시작하여, 원본은 안전하게 병원에 지키고, 철저한 감사로그로 완결되는 하이패스 MediQ의 안전한 데이터 생태계가 증명되었습니다. 경청해 주셔서 감사합니다.",
+        invariantTag: "💎 NEXT-GEN DIGITAL HEALTHCARE",
+        invariantBody: "CD 발급비 0원, 불필요한 방사선 피폭 예방, 진료 연속성 확보, 마이데이터 주권 완결!",
+        specs: [
+          "환자 주도의 세분화된 접근 권한 부여 및 원클릭 동의 철회",
+          "Zero Cloud Storage로 클라우드 의료 데이터 유출 위험 원천 제거",
+          "글로벌 표준 DICOMweb / HL7 FHIR 완벽 준수로 기존 PACS 즉시 호환",
+          "전체 열람·거부 트랜잭션 1초 단위 불변 감사로그 기록"
+        ],
+        chips: ["Patient Sovereignty", "Zero Storage", "Audit Chain", "FHIR / DICOMweb"],
         camera: { cx: 836, cy: 470, scale: 1.0 },
         highlight: null,
         duration: 8000,
@@ -527,6 +761,7 @@
     let stepStartTime = Date.now();
     let particles = [];
     let isSoundOn = true;
+    let radarPing = { active: false, x: 0, y: 0, r: 0, maxR: 80, color: '#38bdf8' };
 
     // Web Audio Synthesizer
     let audioCtx = null;
@@ -553,25 +788,31 @@
     let recordedChunks = [];
     let isRecording = false;
 
-    // Particle Generator
-    class FlowParticle {
+    // Streamlined Comet Particle
+    class CometParticle {
       constructor(path, speed = 0.008) {
         this.path = path;
         this.progress = Math.random();
         this.speed = speed * (0.8 + Math.random() * 0.4);
         this.color = path.color || '#38bdf8';
-        this.size = 3.5 + Math.random() * 2.5;
+        this.history = [];
       }
       update() {
         this.progress += this.speed;
-        if (this.progress > 1) this.progress = 0;
+        if (this.progress > 1) {
+          this.progress = 0;
+          this.history = [];
+        }
+        const pos = this.getPos(this.progress);
+        this.history.unshift(pos);
+        if (this.history.length > 6) this.history.pop();
       }
-      getPos() {
+      getPos(pVal) {
         const pts = this.path.pts;
         if (!pts || pts.length < 2) return {x: 0, y: 0};
         const totalSegments = pts.length - 1;
-        const segIdx = Math.min(Math.floor(this.progress * totalSegments), totalSegments - 1);
-        const segProgress = (this.progress * totalSegments) - segIdx;
+        const segIdx = Math.min(Math.floor(pVal * totalSegments), totalSegments - 1);
+        const segProgress = (pVal * totalSegments) - segIdx;
         const p1 = pts[segIdx];
         const p2 = pts[segIdx + 1];
         return {
@@ -585,31 +826,64 @@
       particles = [];
       if (!step.paths || step.paths.length === 0) return;
       step.paths.forEach(p => {
-        const count = p.color === '#f97316' ? 45 : 22; // More dense particles for CT data stream!
+        const count = p.color === '#f97316' ? 50 : 25;
         for (let i = 0; i < count; i++) {
-          particles.push(new FlowParticle(p, p.color === '#f97316' ? 0.012 : 0.008));
+          particles.push(new CometParticle(p, p.color === '#f97316' ? 0.013 : 0.009));
         }
       });
     }
 
-    // Update UI HUD
-    function updateHud(step) {
-      document.getElementById('hudBadge').innerText = step.badge;
-      document.getElementById('hudTitle').innerText = step.title;
-      document.getElementById('hudRole').innerHTML = step.role;
-      document.getElementById('hudRule').innerHTML = step.rule;
-      document.getElementById('hudScript').innerHTML = `<span>🎙️ 발표 나레이션 가이드:</span>"${step.script}"`;
-      document.getElementById('stepDisplay').innerText = `${step.id} / 8`;
+    function triggerRadarPing(hl) {
+      if (!hl) { radarPing.active = false; return; }
+      radarPing.active = true;
+      radarPing.x = hl.x + hl.w / 2;
+      radarPing.y = hl.y + hl.h / 2;
+      radarPing.r = 10;
+      radarPing.maxR = Math.max(hl.w, hl.h) * 0.7;
+      radarPing.color = hl.color;
+    }
 
-      // Update pills
-      document.querySelectorAll('.step-pill').forEach((pill, idx) => {
-        pill.classList.toggle('active', idx === step.id);
+    // Update Right Inspector Panel
+    function updateInspector(step) {
+      document.getElementById('stepCounterTag').innerText = step.tag;
+      document.getElementById('liveStatusText').innerText = step.status;
+      document.getElementById('sysTitle').innerText = step.title;
+      document.getElementById('sysRole').innerText = step.role;
+      document.getElementById('invariantTag').innerText = step.invariantTag;
+      document.getElementById('invariantBody').innerText = step.invariantBody;
+
+      // Update Specs
+      const specsGroup = document.getElementById('specsGroup');
+      specsGroup.innerHTML = '';
+      step.specs.forEach(s => {
+        const div = document.createElement('div');
+        div.className = 'spec-item';
+        div.innerHTML = `<span class="spec-item-icon">✔</span><span>${s}</span>`;
+        specsGroup.appendChild(div);
       });
 
-      // Sound effect
-      if (step.id === 5) playBeep(880, 'triangle', 0.3, 0.1); // Golden ABAC chime!
-      else if (step.id === 7) playBeep(520, 'sawtooth', 0.25, 0.08); // CT Streaming whoosh!
-      else playBeep(440 + step.id * 50, 'sine', 0.18, 0.08);
+      // Update Tech Chips
+      const chipsBox = document.getElementById('techChips');
+      chipsBox.innerHTML = '';
+      step.chips.forEach(c => {
+        const span = document.createElement('span');
+        span.className = 'chip';
+        span.innerText = c;
+        chipsBox.appendChild(span);
+      });
+
+      // Update Header Segments
+      document.querySelectorAll('.seg-btn').forEach((btn, idx) => {
+        btn.classList.toggle('active', idx === step.id);
+      });
+
+      document.getElementById('timeStepText').innerText = `STEP ${String(step.id).padStart(2, '0')} / 08`;
+
+      // Trigger Radar Ping & Audio Chimes
+      triggerRadarPing(step.highlight);
+      if (step.id === 5) playBeep(880, 'triangle', 0.25, 0.09);
+      else if (step.id === 7) playBeep(520, 'sawtooth', 0.2, 0.08);
+      else playBeep(440 + step.id * 40, 'sine', 0.15, 0.07);
     }
 
     function goToStep(idx) {
@@ -617,23 +891,23 @@
       const step = STEPS[currentStepIdx];
       stepStartTime = Date.now();
       initParticles(step);
-      updateHud(step);
+      updateInspector(step);
     }
 
-    // Main Animation Loop
+    // Main Render Loop
     function render() {
       requestAnimationFrame(render);
 
       const step = STEPS[currentStepIdx];
       const targetCam = step.camera;
 
-      // Smooth camera interpolation (lerp)
-      camera.x += (targetCam.cx - camera.x) * 0.06;
-      camera.y += (targetCam.cy - camera.y) * 0.06;
-      camera.scale += (targetCam.scale - camera.scale) * 0.06;
+      // Smooth camera interpolation
+      camera.x += (targetCam.cx - camera.x) * 0.07;
+      camera.y += (targetCam.cy - camera.y) * 0.07;
+      camera.scale += (targetCam.scale - camera.scale) * 0.07;
 
       // Clear Canvas
-      ctx.fillStyle = '#05080f';
+      ctx.fillStyle = '#060913';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       if (!img.complete) return;
@@ -644,70 +918,113 @@
       ctx.scale(camera.scale, camera.scale);
       ctx.translate(-camera.x, -camera.y);
 
-      // Draw Base Architecture Diagram
+      // Draw Base Diagram
       ctx.drawImage(img, 0, 0, IMG_W, IMG_H);
 
-      // Draw Highlight Box if active
-      if (step.highlight) {
-        const hl = step.highlight;
-        const now = Date.now();
-        const pulse = Math.sin(now * 0.005) * 0.2 + 0.8;
-
+      // Radar Ping Ripple Wave
+      if (radarPing.active) {
+        radarPing.r += 2.2;
+        const progress = radarPing.r / radarPing.maxR;
+        if (progress >= 1) {
+          radarPing.r = 10;
+        }
+        const alpha = Math.max(0, 1 - progress);
         ctx.save();
-        ctx.strokeStyle = hl.color;
-        ctx.lineWidth = 4 * pulse;
-        ctx.shadowColor = hl.color;
-        ctx.shadowBlur = 20 * pulse;
-        ctx.strokeRect(hl.x, hl.y, hl.w, hl.h);
-
-        // Highlight corner accents
-        ctx.fillStyle = hl.color;
-        const cLen = 14;
-        ctx.fillRect(hl.x - 3, hl.y - 3, cLen, 6);
-        ctx.fillRect(hl.x - 3, hl.y - 3, 6, cLen);
-        ctx.fillRect(hl.x + hl.w - cLen + 3, hl.y - 3, cLen, 6);
-        ctx.fillRect(hl.x + hl.w - 3, hl.y - 3, 6, cLen);
-        ctx.fillRect(hl.x - 3, hl.y + hl.h - 3, cLen, 6);
-        ctx.fillRect(hl.x - 3, hl.y + hl.h - cLen + 3, 6, cLen);
-        ctx.fillRect(hl.x + hl.w - cLen + 3, hl.y + hl.h - 3, cLen, 6);
-        ctx.fillRect(hl.x + hl.w - 3, hl.y + hl.h - cLen + 3, 6, cLen);
+        ctx.beginPath();
+        ctx.arc(radarPing.x, radarPing.y, radarPing.r, 0, Math.PI * 2);
+        ctx.strokeStyle = radarPing.color;
+        ctx.lineWidth = 2.5;
+        ctx.globalAlpha = alpha * 0.8;
+        ctx.shadowColor = radarPing.color;
+        ctx.shadowBlur = 16;
+        ctx.stroke();
         ctx.restore();
       }
 
-      // Draw Animated Particles
+      // Draw Glowing Highlight Box
+      if (step.highlight) {
+        const hl = step.highlight;
+        const now = Date.now();
+        const pulse = Math.sin(now * 0.005) * 0.15 + 0.85;
+
+        ctx.save();
+        ctx.strokeStyle = hl.color;
+        ctx.lineWidth = 3.5 * pulse;
+        ctx.shadowColor = hl.color;
+        ctx.shadowBlur = 24 * pulse;
+        ctx.strokeRect(hl.x, hl.y, hl.w, hl.h);
+
+        // Cyber corner accents
+        ctx.fillStyle = hl.color;
+        const cLen = 16;
+        ctx.fillRect(hl.x - 3, hl.y - 3, cLen, 5);
+        ctx.fillRect(hl.x - 3, hl.y - 3, 5, cLen);
+        ctx.fillRect(hl.x + hl.w - cLen + 3, hl.y - 3, cLen, 5);
+        ctx.fillRect(hl.x + hl.w - 3, hl.y - 3, 5, cLen);
+        ctx.fillRect(hl.x - 3, hl.y + hl.h - 3, cLen, 5);
+        ctx.fillRect(hl.x - 3, hl.y + hl.h - cLen + 3, 5, cLen);
+        ctx.fillRect(hl.x + hl.w - cLen + 3, hl.y + hl.h - 3, cLen, 5);
+        ctx.fillRect(hl.x + hl.w - 3, hl.y + hl.h - cLen + 3, 5, cLen);
+        ctx.restore();
+      }
+
+      // Draw Comet Particles with Light Trails
       particles.forEach(p => {
         p.update();
-        const pos = p.getPos();
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(pos.x, pos.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = p.color;
-        ctx.shadowColor = p.color;
-        ctx.shadowBlur = 12;
-        ctx.fill();
-        ctx.restore();
+        if (p.history.length > 1) {
+          ctx.save();
+          ctx.beginPath();
+          ctx.moveTo(p.history[0].x, p.history[0].y);
+          for (let i = 1; i < p.history.length; i++) {
+            ctx.lineTo(p.history[i].x, p.history[i].y);
+          }
+          ctx.strokeStyle = p.color;
+          ctx.lineWidth = 2.5;
+          ctx.globalAlpha = 0.45;
+          ctx.stroke();
+
+          // Particle Head
+          ctx.beginPath();
+          ctx.arc(p.history[0].x, p.history[0].y, 4, 0, Math.PI * 2);
+          ctx.fillStyle = '#fff';
+          ctx.shadowColor = p.color;
+          ctx.shadowBlur = 14;
+          ctx.fill();
+          ctx.restore();
+        }
       });
 
       ctx.restore();
 
-      // Update Auto Play Progress
+      // Subtle Stage Vignette
+      const grad = ctx.createRadialGradient(canvas.width / 2, canvas.height / 2, 400, canvas.width / 2, canvas.height / 2, canvas.width / 1.5);
+      grad.addColorStop(0, 'rgba(0,0,0,0)');
+      grad.addColorStop(1, 'rgba(6,9,19,0.7)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Auto Play & Timeline Tracking
       if (isPlaying) {
         const elapsed = Date.now() - stepStartTime;
         const progressPct = Math.min((elapsed / step.duration) * 100, 100);
-        document.getElementById('progressBar').style.width = `${progressPct}%`;
+        document.getElementById('timelineFill').style.width = `${progressPct}%`;
+
+        // Elapsed time display
+        const totalSec = Math.floor(elapsed / 1000);
+        const remSec = Math.floor((step.duration - elapsed) / 1000);
+        document.getElementById('timeElapsedText').innerText = `00:${String(totalSec).padStart(2, '0')} / 00:${String(Math.floor(step.duration / 1000)).padStart(2, '0')}`;
 
         if (elapsed >= step.duration) {
           if (currentStepIdx < STEPS.length - 1) {
             goToStep(currentStepIdx + 1);
           } else {
-            // Finished
             if (isRecording) stopRecording();
             isPlaying = false;
-            document.getElementById('btnPlay').innerText = '▶ 다시 재생';
+            document.getElementById('btnPlay').innerText = '▶';
           }
         }
       } else {
-        document.getElementById('progressBar').style.width = '0%';
+        document.getElementById('timelineFill').style.width = '0%';
       }
     }
 
@@ -720,12 +1037,10 @@
       recordedChunks = [];
 
       document.getElementById('recIndicator').style.display = 'flex';
-      document.getElementById('btnRecord').innerText = '⏹ 녹화 중단 및 다운로드';
+      document.getElementById('btnRecord').innerText = '⏹ STOP REC';
       document.getElementById('btnRecord').classList.add('recording');
 
-      // 60FPS High-Bitrate Capture Stream
       const stream = canvas.captureStream(60);
-      
       const options = { mimeType: 'video/webm;codecs=vp9' };
       if (!MediaRecorder.isTypeSupported(options.mimeType)) {
         options.mimeType = 'video/webm';
@@ -740,25 +1055,23 @@
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `mediq-architecture-walkthrough-${Date.now()}.webm`;
+        a.download = `mediq-architecture-flow-1080p-${Date.now()}.webm`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
 
         document.getElementById('recIndicator').style.display = 'none';
-        document.getElementById('btnRecord').innerText = '⏺ 비디오 녹화 (MP4)';
+        document.getElementById('btnRecord').innerText = '⏺ Export MP4';
         document.getElementById('btnRecord').classList.remove('recording');
         isRecording = false;
-        alert('비디오 녹화가 완료되었습니다! 브라우저 다운로드 폴더에 영상 파일이 저장되었습니다.');
+        alert('고화질 비디오 추출이 완료되었습니다! 다운로드 폴더를 확인해 주세요.');
       };
 
       mediaRecorder.start(100);
-
-      // Start play from beginning
       goToStep(0);
       isPlaying = true;
-      document.getElementById('btnPlay').innerText = '⏸ 일시 정지';
+      document.getElementById('btnPlay').innerText = '⏸';
     }
 
     function stopRecording() {
@@ -773,48 +1086,53 @@
     document.getElementById('btnPlay').addEventListener('click', () => {
       isPlaying = !isPlaying;
       stepStartTime = Date.now();
-      document.getElementById('btnPlay').innerText = isPlaying ? '⏸ 일시 정지' : '▶ 자동 재생';
+      document.getElementById('btnPlay').innerText = isPlaying ? '⏸' : '▶';
     });
 
     document.getElementById('btnPrev').addEventListener('click', () => {
       isPlaying = false;
-      document.getElementById('btnPlay').innerText = '▶ 자동 재생';
+      document.getElementById('btnPlay').innerText = '▶';
       goToStep(currentStepIdx - 1);
     });
 
     document.getElementById('btnNext').addEventListener('click', () => {
       isPlaying = false;
-      document.getElementById('btnPlay').innerText = '▶ 자동 재생';
+      document.getElementById('btnPlay').innerText = '▶';
       goToStep(currentStepIdx + 1);
     });
 
     document.getElementById('btnReset').addEventListener('click', () => {
       isPlaying = false;
-      document.getElementById('btnPlay').innerText = '▶ 자동 재생';
+      document.getElementById('btnPlay').innerText = '▶';
       goToStep(0);
     });
 
-    document.querySelectorAll('.step-pill').forEach(pill => {
-      pill.addEventListener('click', () => {
+    document.querySelectorAll('.seg-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
         isPlaying = false;
-        document.getElementById('btnPlay').innerText = '▶ 자동 재생';
-        goToStep(parseInt(pill.getAttribute('data-step'), 10));
+        document.getElementById('btnPlay').innerText = '▶';
+        goToStep(parseInt(btn.getAttribute('data-step'), 10));
       });
     });
 
     document.getElementById('btnSound').addEventListener('click', () => {
       isSoundOn = !isSoundOn;
       const btn = document.getElementById('btnSound');
-      btn.innerText = isSoundOn ? '🔊 효과음 ON' : '🔇 효과음 OFF';
-      btn.classList.toggle('on', isSoundOn);
+      btn.innerText = isSoundOn ? '🔊 Sound' : '🔇 Mute';
+      btn.classList.toggle('active', isSoundOn);
+    });
+
+    document.getElementById('btnFullscreen').addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
     });
 
     document.getElementById('btnRecord').addEventListener('click', () => {
-      if (!isRecording) {
-        startRecording();
-      } else {
-        stopRecording();
-      }
+      if (!isRecording) startRecording();
+      else stopRecording();
     });
 
     // Keyboard Shortcuts
@@ -826,10 +1144,12 @@
         document.getElementById('btnNext').click();
       } else if (e.code === 'ArrowLeft') {
         document.getElementById('btnPrev').click();
+      } else if (e.code === 'KeyF') {
+        document.getElementById('btnFullscreen').click();
       }
     });
 
-    // Start Loop
+    // Initialize
     img.onload = () => {
       goToStep(0);
       render();
