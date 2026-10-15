@@ -3,14 +3,20 @@
 > *CD 없는 병원 간 진료 연속성 확보 · Zero Cloud Storage · Security by Design*
 
 <p align="center">
+  <a href="https://sureasdufo1-hue.github.io/Highpass-Project/" target="_blank">
+    <img src="https://img.shields.io/badge/Interactive_Portal-GitHub_Pages_대문_열기-00C7B7?style=for-the-badge&logo=githubpages&logoColor=white" alt="Interactive Landing Gate" />
+  </a>
   <img src="https://img.shields.io/badge/Platform-HiPass_v3-0052CC?style=for-the-badge&logo=mediamonkey&logoColor=white" alt="HiPass Platform" />
   <img src="https://img.shields.io/badge/Node.js-v24_ESM-339933?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js" />
   <img src="https://img.shields.io/badge/Cloud-Azure_VM-0078D4?style=for-the-badge&logo=microsoftazure&logoColor=white" alt="Azure" />
+  <img src="https://img.shields.io/badge/Auth-Real_Microsoft_Entra_ID-7C3AED?style=for-the-badge&logo=microsoft&logoColor=white" alt="Microsoft Entra ID" />
   <img src="https://img.shields.io/badge/Docker-Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker" />
   <img src="https://img.shields.io/badge/Medical_Standard-DICOMweb_/_HL7_FHIR-E11D48?style=for-the-badge" alt="DICOMweb / FHIR" />
   <img src="https://img.shields.io/badge/Database-PostgreSQL_16_RLS-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL RLS" />
-  <img src="https://img.shields.io/badge/Local_LLM-Ollama_Qwen_3.5_4B-7C3AED?style=for-the-badge" alt="Ollama LLM" />
 </p>
+
+> 🚀 **인터랙티브 웹 대문 바로가기**:  
+> 본 프로젝트의 듀얼 패러다임(`Clinical Continuity ⇄ Zero-Cloud Security`), 실제 Microsoft Entra ID 인증 증적, 12대 기술 혁신, 24종 고화질 4K 실증 스크린샷 갤러리 및 실무 기술 Q&A 20선은 **[MediQ Highpass 엔터프라이즈 인터랙티브 포털 (GitHub Pages)](https://sureasdufo1-hue.github.io/Highpass-Project/)**에서 즉시 인터랙티브하게 체험하실 수 있습니다. (로컬 확인: `docs/index.html`)
 
 ---
 
@@ -25,12 +31,13 @@
 
 | 환경 | 엔드포인트 / URL | 설명 | 상태 |
 |---|---|---|---|
+| **인터랙티브 포털 대문** | [https://sureasdufo1-hue.github.io/Highpass-Project/](https://sureasdufo1-hue.github.io/Highpass-Project/) | GitHub Pages 인터랙티브 대문 및 24종 4K 증적 갤러리 | **PAGES OPERATIONAL** |
 | **Azure Live 환자웹** | [https://highpass-demo.japaneast.cloudapp.azure.com/hipass/](https://highpass-demo.japaneast.cloudapp.azure.com/hipass/) | Azure VM 멀티 컨테이너 실배포 환경 | **LIVE OPERATIONAL** |
 | **로컬 워크벤치 프리뷰** | `http://127.0.0.1:3099/` | 개발용 인터랙티브 RAG 및 UI 검증 워크벤치 | **LOCAL ACTIVE** |
 | **OHIF DICOM Viewer** | `https://localhost:3443/` (로컬 Compose) | DICOMweb 연동 웹 의료영상 뷰어 | **DOCKER VERIFIED** |
 | **Control Plane API** | `https://localhost:3443/api/` | 환자 동의, 접근통제, 단기 토큰 발급 API | **DOCKER VERIFIED** |
 
-> ⚠️ **공지**: 본 플랫폼은 합성 데이터(Synthetic Data) 기반 기술 검증 PoC이며, 실제 환자 개인정보나 실제 병원 망에는 연결되지 않습니다. 실제 Microsoft Entra ID 환자 브라우저 로그인은 시뮬레이션 상태(`NOT VERIFIED`)입니다.
+> 🛡️ **보안 및 신원 인증 실증**: 본 플랫폼의 신원 인증은 **실제 Microsoft Entra ID (구 Azure AD) 엔터프라이즈 테넌트 OIDC/OAuth2 연동** 및 **사용자 계정별 App Role (`PATIENT`, `DOCTOR`, `SECURITY_ADMIN`) 부여**를 통해 엔드투엔드로 실증되었습니다. (의료 데이터는 연구·검증용 합성 데이터(Synthetic Data) 기반으로 운영됩니다)
 
 ---
 
@@ -392,7 +399,7 @@ node scripts/start-health-helper-preview.js
 | **Azure 라이브 실컨테이너** | 실서버 배포 및 11개 핵심 시나리오(HCC, AFP, 간경화 등) | **PASS** | Azure VM 컨테이너(`control-1`, `web-1`) 라이브 검증 |
 | **ABAC 토큰 보안** | 5분 유효시간 만료, 허용 범위 외 접근 거부 | **PASS** | 토큰 만료 후 401/403 Fail-Closed 확인 |
 | **PostgreSQL RLS** | 테넌트/환자 격리 RLS 양성/음성 보안 게이트 | **PASS** | `pnpm run privacy:db-gate` 통과 |
-| **실제 Entra ID 로그인** | 실 브라우저 Microsoft 계정 인증 E2E | **NOT VERIFIED** | MVP 범위에 따른 모의 계정 시뮬레이션 상태 |
+| **실제 Entra ID 로그인** | 실 브라우저 Microsoft Entra ID OIDC 계정 인증 및 App Role (`PATIENT`, `DOCTOR`, `SECURITY_ADMIN`) 매핑 E2E | **PASS** | 실제 테넌트(`ad21525c...`) OAuth2 인가 엔드포인트 연동 및 RS256 서명 검증 완료 (화면 02, 03, 08, 19, 20 증적) |
 
 ---
 
