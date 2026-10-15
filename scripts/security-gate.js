@@ -23,6 +23,10 @@ for (const item of commands) {
     ? runPnpm(pnpmRuntime.commandPath, item.args, { env: process.env, cwd: process.cwd(), runner: timedRunner })
     : timedRunner(item.command, item.args, {});
   const blocked = item.name === "dependency-audit" && isRegistryEnvironmentFailure(result);
+  if (result.status !== 0 && !blocked) {
+    if (result.stdout) console.error(`[security-gate] ${item.name} stdout:\n`, result.stdout);
+    if (result.stderr) console.error(`[security-gate] ${item.name} stderr:\n`, result.stderr);
+  }
   results.push({
     name: item.name,
     status: result.status === 0 ? "PASS" : blocked ? "ENVIRONMENT_BLOCKED" : "FAIL",
@@ -46,7 +50,7 @@ process.exit(ok ? 0 : environmentBlocked ? 2 : 1);
 
 function trim(value) {
   const text = String(value ?? "").trim();
-  return text.length > 1200 ? `${text.slice(0, 1200)}...` : text;
+  return text.length > 4000 ? `...${text.slice(-4000)}` : text;
 }
 
 function isRegistryEnvironmentFailure(result) {
