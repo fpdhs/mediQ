@@ -9,7 +9,9 @@ node_modules/
 __pycache__/
 *.pyc
 .pnpm-store/
-tmp/
+tmp/*
+!tmp/certs/
+!tmp/certs/**
 data/
 !docs/data/
 !docs/data/**
