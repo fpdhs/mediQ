@@ -4,6 +4,7 @@ import {loadSchoolDemoMedicalTestAddendum,retrieveSchoolDemoCandidateEvidence} f
 import {generateCandidateAnswer} from './health-helper-candidate-generation.js';
 import {sourceGuidanceFromEvidence} from './health-helper-medlineplus.js';
 import {refinePatientMedicalKorean} from './health-helper-korean-refinement.js';
+import {matchScreeningGlossary} from './health-helper-glossary-interceptor.js';
 
 // Patient copy is separate from internal review metadata and evidence gates.
 function patientPresentation(result){
@@ -60,7 +61,7 @@ export function patientTranslationFetch(env=process.env){
  };
 }
 
-export async function createPatientTranslationRag({env=process.env,generateAnswer}={}){
+export async function createPatientTranslationRag({env=process.env,generateAnswer,enableGlossaryInterceptor=true}={}){
  if(env.HIPASS_HEALTH_HELPER_TRANSLATION_RAG!=='school-demo')return null;
  if(env.HIPASS_CAPSTONE_MAIN_SCENARIO!=='HCC')throw Error('HELPER_TRANSLATION_DEMO_PROFILE_REQUIRED');
  const base=await loadUploadedCorpus(new URL('../data/medlineplus-upload-ko-20261012-v3/',import.meta.url),{includeQaHolds:true});
@@ -71,6 +72,13 @@ export async function createPatientTranslationRag({env=process.env,generateAnswe
  const metadata={corpusVersion:base.version,medicalTestsVersion:supplement.version,
   profile:'SCHOOL_DEMO_TRANSLATION_RAG',clinicalUse:false,recordContext:'NOT_CONNECTED'};
  return async(question,{signal})=>{
+  if(enableGlossaryInterceptor && env.HIPASS_HEALTH_HELPER_GLOSSARY_INTERCEPTOR!=='false'){
+   const glossaryMatch=matchScreeningGlossary(question);
+   if(glossaryMatch){
+    return patientPresentation({...metadata,...glossaryMatch.response,
+     responseMode:'SCREENING_GLOSSARY_INTERCEPT',questionOrigin:'PROJECT_TEMPLATE'});
+   }
+  }
   const retrieval=retrieveSchoolDemoCandidateEvidence(question,corpus,supplement);
   if(retrieval.status!=='CANDIDATE')return {...metadata,status:retrieval.status,generationUsed:false,sources:[],questions:[],
    answer:retrieval.status==='PERSONAL_INPUT_NOT_SUPPORTED'?'개인 검사 수치와 증상 해석은 지원하지 않아요. 검사 이름이나 일반적인 목적을 질문해 주세요.':

@@ -68,6 +68,7 @@ test('standalone and colloquial medical test questions (AFP, ultrasound) retriev
   let capturedRetrieval = null;
   const rag = await createPatientTranslationRag({
     env,
+    enableGlossaryInterceptor: false,
     generateAnswer: async (retrieval) => {
       capturedRetrieval = retrieval;
       return {
@@ -117,3 +118,29 @@ test('standalone and colloquial medical test questions (AFP, ultrasound) retriev
   const diagRefuse = await helper.ask(patient, { question: '내 AFP로 간암인지 진단해 주세요' });
   assert.equal(diagRefuse.status, 'REFUSED');
 });
+
+test('health screening glossary interceptor delivers instant definitions for standalone queries without model generation', async () => {
+  const env = {
+    HIPASS_HEALTH_HELPER_TRANSLATION_RAG: 'school-demo',
+    HIPASS_CAPSTONE_MAIN_SCENARIO: 'HCC'
+  };
+
+  const rag = await createPatientTranslationRag({ env });
+  const helper = new HealthHelperRag({
+    translationRag: rag,
+    audit: async () => {}
+  });
+
+  const patient = { role: 'PATIENT', subject: 'sub-glossary', patientId: 'p-glossary' };
+
+  for (const q of ['AFP', '간 초음파', '흉부 CT', '공복혈당', 'HbA1c']) {
+    const res = await helper.ask(patient, { question: q });
+    assert.equal(res.status, 'RETRIEVED');
+    assert.equal(res.generationUsed, false);
+    assert.equal(res.responseMode, 'SCREENING_GLOSSARY_INTERCEPT');
+    assert.ok(res.answer.length > 50);
+    assert.ok(res.questions.length >= 2);
+    assert.ok(res.sources.length >= 1);
+  }
+});
+
