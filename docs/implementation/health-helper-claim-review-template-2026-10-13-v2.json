@@ -1,0 +1,1979 @@
+{
+  "schemaVersion": "health-helper-claim-review-template/2",
+  "status": "REVIEW_ONLY_NOT_SERVICE_APPROVED",
+  "generatedAt": "2026-10-13",
+  "sourceLocatorArtifact": {
+    "file": "health-helper-cross-test-source-locators-2026-10-13-v4.json",
+    "sha256": "sha256:9e4734435b1d2292e02cb4198c97c5d4b1135046aecc0f7d7bbb0e052c2728c5"
+  },
+  "instructions": [
+    "Review only the exact candidate text, source URL, source snapshot hash and paragraph IDs listed for each record.",
+    "Paragraph IDs are location suggestions only; no paragraph-to-claim semantic match has been made.",
+    "Use an organization-assigned reviewer ID, not a personal name, email, patient record or free-text patient example.",
+    "Record the rationale and review date for every non-UNASSESSED decision; a decision cannot be inferred from another review axis.",
+    "Any source, candidate text, paragraph locator or hash change requires a new locator/template version and a fresh review.",
+    "This template records review input only. It does not authenticate reviewer identity or qualifications and cannot approve service use or deployment.",
+    "For every claim, an independent SOURCE_EVIDENCE_REVIEWER must assess the exact claim against the listed source paragraphs.",
+    "DIRECT_SUPPORT requires at least one identified paragraph to support the full claim, including its conditions and uncertainty; paragraph location alone is not support.",
+    "Use PARTIAL_SUPPORT, NO_SUPPORT or AMBIGUOUS when the exact claim is not fully supported; include the relevant paragraph IDs and reasoning in the rationale.",
+    "A source-support decision is review input only and does not approve the content, grant reuse rights, or enable patient-service use."
+  ],
+  "requiredReviewerRoles": {
+    "rights": "RIGHTS_REVIEWER",
+    "translation": "TRANSLATION_REVIEWER",
+    "clinical": "CLINICAL_REVIEWER",
+    "disposition": "CURATION_EDITOR",
+    "sourceSupport": "SOURCE_EVIDENCE_REVIEWER"
+  },
+  "decisionEnums": {
+    "rights": [
+      "UNASSESSED",
+      "PUBLIC_DOMAIN_SCOPE_MATCH",
+      "PERMISSION_REQUIRED",
+      "LINK_ONLY",
+      "HOLD"
+    ],
+    "translation": [
+      "UNASSESSED",
+      "FAITHFUL",
+      "CORRECTION_REQUIRED",
+      "NOT_APPLICABLE"
+    ],
+    "clinical": [
+      "UNASSESSED",
+      "ACCEPTABLE_WITHIN_SCOPE",
+      "REVISION_REQUIRED",
+      "REJECTED"
+    ],
+    "disposition": [
+      "UNASSESSED",
+      "RETAIN_DRAFT",
+      "REVISE",
+      "EXCLUDE"
+    ],
+    "sourceSupport": [
+      "UNASSESSED",
+      "DIRECT_SUPPORT",
+      "PARTIAL_SUPPORT",
+      "NO_SUPPORT",
+      "AMBIGUOUS"
+    ]
+  },
+  "sourceCount": 14,
+  "claimCount": 30,
+  "sources": [
+    {
+      "sourceUrl": "https://medlineplus.gov/lab-tests/alpha-fetoprotein-afp-tumor-marker-test/",
+      "snapshot": "AFP v2",
+      "sourceSnapshotPath": "data/health-helper-afp-evidence-20261012-v2/sources/a275b3d75e691a25e2568d9539b42abec13c6f37bae13026ee8528d702f221c6.html",
+      "sourcePageSha256": "sha256:c2345ee2f32648c658a4c54f6ba23eb8e4c1cfc404e927e46b1302705d2b6712",
+      "sourceUpdatedAt": "2026-06-30",
+      "rightsReview": {
+        "decision": "UNASSESSED",
+        "reviewerId": null,
+        "reviewerRole": null,
+        "reviewedAt": null,
+        "rationale": null
+      }
+    },
+    {
+      "sourceUrl": "https://medlineplus.gov/lab-tests/alt-blood-test/",
+      "snapshot": "Liver v4",
+      "sourceSnapshotPath": "data/health-helper-liver-evidence-20261013-v4/sources/45c7afb27db4c48940a2b50b1301f68c48c76b9a3ad101ade926792c9a64b505.html",
+      "sourcePageSha256": "sha256:82bb7e3e7bf10e57a1731f2335bc47f27ffc86dc0ee137246570c17b0c89d8a9",
+      "sourceUpdatedAt": "2024-11-05",
+      "rightsReview": {
+        "decision": "UNASSESSED",
+        "reviewerId": null,
+        "reviewerRole": null,
+        "reviewedAt": null,
+        "rationale": null
+      }
+    },
+    {
+      "sourceUrl": "https://medlineplus.gov/lab-tests/ast-test/",
+      "snapshot": "Liver v4",
+      "sourceSnapshotPath": "data/health-helper-liver-evidence-20261013-v4/sources/4399642c96ac06edc173984477546b3fc49f1ab3023793946cf3b75abb5637c1.html",
+      "sourcePageSha256": "sha256:385100e6d2c26f7af9cf9c3880283d32ff3e22bbd66a1dfb0d8ece0bfe51d1c8",
+      "sourceUpdatedAt": "2024-11-05",
+      "rightsReview": {
+        "decision": "UNASSESSED",
+        "reviewerId": null,
+        "reviewerRole": null,
+        "reviewedAt": null,
+        "rationale": null
+      }
+    },
+    {
+      "sourceUrl": "https://medlineplus.gov/lab-tests/cholesterol-levels/",
+      "snapshot": "Screening v3",
+      "sourceSnapshotPath": "data/health-helper-screening-evidence-20261013-v3/sources/770cd8d33f1f23a4459ad70fef630753bfeff2bdc9f6ad84eb2d2d8b8302b055.html",
+      "sourcePageSha256": "sha256:aed2a5c0066c9dca4a0786065ed5fd0e9839e9f5ac96aee7de450831b9eabb88",
+      "sourceUpdatedAt": "2024-10-15",
+      "rightsReview": {
+        "decision": "UNASSESSED",
+        "reviewerId": null,
+        "reviewerRole": null,
+        "reviewedAt": null,
+        "rationale": null
+      }
+    },
+    {
+      "sourceUrl": "https://medlineplus.gov/lab-tests/dental-exam/",
+      "snapshot": "Screening v3",
+      "sourceSnapshotPath": "data/health-helper-screening-evidence-20261013-v3/sources/61c2a05cf3a7eccff3ac15fb66aa6b289ea468823b412fa68c8591977c97d53f.html",
+      "sourcePageSha256": "sha256:f9122cce7c617294ebf9f481c8424d9dee85a2cc2f4980db13db5992308893df",
+      "sourceUpdatedAt": "2026-08-25",
+      "rightsReview": {
+        "decision": "UNASSESSED",
+        "reviewerId": null,
+        "reviewerRole": null,
+        "reviewedAt": null,
+        "rationale": null
+      }
+    },
+    {
+      "sourceUrl": "https://medlineplus.gov/lab-tests/estimated-glomerular-filtration-rate-egfr-and-gfr-tests/",
+      "snapshot": "Screening v3",
+      "sourceSnapshotPath": "data/health-helper-screening-evidence-20261013-v3/sources/31a3b9da453a06785dc1ab9fd23b457ccb7c136e0e0eb29bce96b9b69b6bc238.html",
+      "sourcePageSha256": "sha256:0c2cad7fb77a8f72f50836ec33b4654bc0dc3d47622d099c8024c01ca8c6a3f0",
+      "sourceUpdatedAt": "2026-09-30",
+      "rightsReview": {
+        "decision": "UNASSESSED",
+        "reviewerId": null,
+        "reviewerRole": null,
+        "reviewedAt": null,
+        "rationale": null
+      }
+    },
+    {
+      "sourceUrl": "https://medlineplus.gov/lab-tests/gamma-glutamyl-transferase-ggt-test/",
+      "snapshot": "Liver v4",
+      "sourceSnapshotPath": "data/health-helper-liver-evidence-20261013-v4/sources/247de67aae811d1d9849a1eb812cb0e9efdd68efdbf0a42c4b0784778323b362.html",
+      "sourcePageSha256": "sha256:5e969291f9a495768111dbe1ab6bb84f7a59a34bcf9ade5b9931bb7af3b4ca75",
+      "sourceUpdatedAt": "2024-07-29",
+      "rightsReview": {
+        "decision": "UNASSESSED",
+        "reviewerId": null,
+        "reviewerRole": null,
+        "reviewedAt": null,
+        "rationale": null
+      }
+    },
+    {
+      "sourceUrl": "https://medlineplus.gov/lab-tests/hearing-tests-for-adults/",
+      "snapshot": "Screening v3",
+      "sourceSnapshotPath": "data/health-helper-screening-evidence-20261013-v3/sources/9e6accd1d7fafc9f4a89814058d4e7aa25dd9393cb00b33d08644ae829368288.html",
+      "sourcePageSha256": "sha256:9892ed26d29382960a06fff3030d6dcf24015dab613a5a5a69ae271c094f9040",
+      "sourceUpdatedAt": "2023-10-25",
+      "rightsReview": {
+        "decision": "UNASSESSED",
+        "reviewerId": null,
+        "reviewerRole": null,
+        "reviewedAt": null,
+        "rationale": null
+      }
+    },
+    {
+      "sourceUrl": "https://medlineplus.gov/lab-tests/hemoglobin-test/",
+      "snapshot": "Screening v3",
+      "sourceSnapshotPath": "data/health-helper-screening-evidence-20261013-v3/sources/0abc3748a84d4eaf8d2b394efa62a39de6bf8597ae15289b7ceed96472f22b64.html",
+      "sourcePageSha256": "sha256:a3e9e0c91c29da8541c55ca9b624aa46658d1c75931b5b5afb5f842869bde8ce",
+      "sourceUpdatedAt": "2024-10-27",
+      "rightsReview": {
+        "decision": "UNASSESSED",
+        "reviewerId": null,
+        "reviewerRole": null,
+        "reviewedAt": null,
+        "rationale": null
+      }
+    },
+    {
+      "sourceUrl": "https://medlineplus.gov/lab-tests/hepatitis-testing/",
+      "snapshot": "Screening v3",
+      "sourceSnapshotPath": "data/health-helper-screening-evidence-20261013-v3/sources/6fa457e64e1fdeac1206115acd7a8ee4a88386f9bb04df5daf40114e34be8c2f.html",
+      "sourcePageSha256": "sha256:8b3f59d53a7faf7c31ade52d6b8a3d7a77c742a09e4268fbdf244cb51b4d061d",
+      "sourceUpdatedAt": "2025-09-29",
+      "rightsReview": {
+        "decision": "UNASSESSED",
+        "reviewerId": null,
+        "reviewerRole": null,
+        "reviewedAt": null,
+        "rationale": null
+      }
+    },
+    {
+      "sourceUrl": "https://medlineplus.gov/lab-tests/lung-function-tests/",
+      "snapshot": "Scenario 20261012",
+      "sourceSnapshotPath": "data/health-helper-scenario-evidence-20261012/sources/2cdc58da921d857abb62d0eaaa730eca686e3f35a1a642d1b0c065a96e309205.html",
+      "sourcePageSha256": "sha256:70d33cf191de50a89696a3dae31f704cf9d798da31fad25a7ebdb06a1ec88e63",
+      "sourceUpdatedAt": "2023-10-24",
+      "rightsReview": {
+        "decision": "UNASSESSED",
+        "reviewerId": null,
+        "reviewerRole": null,
+        "reviewedAt": null,
+        "rationale": null
+      }
+    },
+    {
+      "sourceUrl": "https://medlineplus.gov/lab-tests/protein-in-urine/",
+      "snapshot": "Screening v3",
+      "sourceSnapshotPath": "data/health-helper-screening-evidence-20261013-v3/sources/e571031c80f0ea3503130032d05481ec3b41faacd73c011a3d62b7c57e5e66bd.html",
+      "sourcePageSha256": "sha256:51651dd6d551ed70f5fda1425faae459af54a96d981a6dedf9d6482572ed6b77",
+      "sourceUpdatedAt": "2024-12-02",
+      "rightsReview": {
+        "decision": "UNASSESSED",
+        "reviewerId": null,
+        "reviewerRole": null,
+        "reviewedAt": null,
+        "rationale": null
+      }
+    },
+    {
+      "sourceUrl": "https://medlineplus.gov/lab-tests/triglycerides-test/",
+      "snapshot": "Screening v3",
+      "sourceSnapshotPath": "data/health-helper-screening-evidence-20261013-v3/sources/aa9d640ba9684158456500a671b0bbed9251c79e69808136544437c12d1b5553.html",
+      "sourcePageSha256": "sha256:8906069b4215f7a0d6baefdbb8844c9fc48d1d9e28e440ead03e0dd3dcf00f9e",
+      "sourceUpdatedAt": "2024-12-09",
+      "rightsReview": {
+        "decision": "UNASSESSED",
+        "reviewerId": null,
+        "reviewerRole": null,
+        "reviewedAt": null,
+        "rationale": null
+      }
+    },
+    {
+      "sourceUrl": "https://medlineplus.gov/lab-tests/vision-screening/",
+      "snapshot": "Screening v3",
+      "sourceSnapshotPath": "data/health-helper-screening-evidence-20261013-v3/sources/290a47609c1d9520f48c5f577ca7f3e50851f20ec632e03482ff712913ba99ed.html",
+      "sourcePageSha256": "sha256:b5da9366531c7f49d52dc7eb2f881b1a8fcaaa1f192c0f47324e4712997be336",
+      "sourceUpdatedAt": "2026-07-15",
+      "rightsReview": {
+        "decision": "UNASSESSED",
+        "reviewerId": null,
+        "reviewerRole": null,
+        "reviewedAt": null,
+        "rationale": null
+      }
+    }
+  ],
+  "claims": [
+    {
+      "claimId": "screening-vision-purpose-claim-1",
+      "chunkId": "screening-vision-purpose",
+      "topic": "시력 · 좌 / 우",
+      "claimText": "시력 선별검사는 가까운 곳과 먼 곳을 얼마나 잘 보는지 확인하고, 필요하면 더 종합적인 눈 검사를 안내하는 데 쓰입니다.",
+      "claimSha256": "b06d9c76050752d87fcef46e4b929a8501a6c7e91506867ac025ed0e26b79761",
+      "sourceUrl": "https://medlineplus.gov/lab-tests/vision-screening/",
+      "sourcePageSha256": "sha256:b5da9366531c7f49d52dc7eb2f881b1a8fcaaa1f192c0f47324e4712997be336",
+      "sourceSections": [
+        "What is vision screening? · What is it used for?"
+      ],
+      "candidateSourceParagraphIds": [
+        "p5-d87a823294a0",
+        "p6-da0b4e2e4429",
+        "p7-26b0c91aca20",
+        "p8-2f2389c05849",
+        "p9-29d5c55baf60",
+        "p10-c804ed0426a3",
+        "p11-ec4bac734525",
+        "p12-1a4a153287d4",
+        "p13-a6c3ccbee7de",
+        "p14-835546ae43a9"
+      ],
+      "review": {
+        "rights": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "translation": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "clinical": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "disposition": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "sourceSupport": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null,
+          "assessedParagraphIds": []
+        }
+      }
+    },
+    {
+      "claimId": "screening-hearing-limits-claim-1",
+      "chunkId": "screening-hearing-limits",
+      "topic": "청력 · 좌 / 우",
+      "claimText": "청력검사 결과가 청력 저하의 원인을 항상 확정하는 것은 아닙니다.",
+      "claimSha256": "2a4a6f15bd36ffeb41d3f0a166b93a8cc51d168f9af5a9a5ba2b934c7f636ab5",
+      "sourceUrl": "https://medlineplus.gov/lab-tests/hearing-tests-for-adults/",
+      "sourcePageSha256": "sha256:9892ed26d29382960a06fff3030d6dcf24015dab613a5a5a69ae271c094f9040",
+      "sourceSections": [
+        "What do the results mean?"
+      ],
+      "candidateSourceParagraphIds": [
+        "p25-552eb1117f81",
+        "p26-954c414eb127",
+        "p27-c09d68c5d2ed",
+        "p28-7a2e41c21641"
+      ],
+      "review": {
+        "rights": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "translation": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "clinical": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "disposition": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "sourceSupport": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null,
+          "assessedParagraphIds": []
+        }
+      }
+    },
+    {
+      "claimId": "screening-hearing-limits-claim-2",
+      "chunkId": "screening-hearing-limits",
+      "topic": "청력 · 좌 / 우",
+      "claimText": "MedlinePlus는 경우에 따라 원인을 진단하기 위해 추가 검사가 필요할 수 있다고 안내합니다.",
+      "claimSha256": "1839334ae121067d23ac1bc42acc1990f6ba3441dc73017f49a62792ccbff1ea",
+      "sourceUrl": "https://medlineplus.gov/lab-tests/hearing-tests-for-adults/",
+      "sourcePageSha256": "sha256:9892ed26d29382960a06fff3030d6dcf24015dab613a5a5a69ae271c094f9040",
+      "sourceSections": [
+        "What do the results mean?"
+      ],
+      "candidateSourceParagraphIds": [
+        "p25-552eb1117f81",
+        "p26-954c414eb127",
+        "p27-c09d68c5d2ed",
+        "p28-7a2e41c21641"
+      ],
+      "review": {
+        "rights": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "translation": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "clinical": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "disposition": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "sourceSupport": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null,
+          "assessedParagraphIds": []
+        }
+      }
+    },
+    {
+      "claimId": "screening-hemoglobin-purpose-claim-1",
+      "chunkId": "screening-hemoglobin-purpose",
+      "topic": "혈색소",
+      "claimText": "혈색소는 적혈구에서 산소를 운반하는 단백질이며, 혈색소 검사는 혈액 속 양을 측정해 빈혈 등을 확인하는 데 사용됩니다.",
+      "claimSha256": "9035a0301d60cf1c14b6f38834afad73ab6e439bdf115edbe400abb694ce65ac",
+      "sourceUrl": "https://medlineplus.gov/lab-tests/hemoglobin-test/",
+      "sourcePageSha256": "sha256:a3e9e0c91c29da8541c55ca9b624aa46658d1c75931b5b5afb5f842869bde8ce",
+      "sourceSections": [
+        "What is a Hemoglobin Test? · What is it used for?"
+      ],
+      "candidateSourceParagraphIds": [
+        "p5-256105bf83ea",
+        "p6-9b59af94fcd6",
+        "p7-04356494978e",
+        "p8-7e8f9af77f1b"
+      ],
+      "review": {
+        "rights": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "translation": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "clinical": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "disposition": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "sourceSupport": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null,
+          "assessedParagraphIds": []
+        }
+      }
+    },
+    {
+      "claimId": "screening-hemoglobin-purpose-claim-2",
+      "chunkId": "screening-hemoglobin-purpose",
+      "topic": "혈색소",
+      "claimText": "보통 전혈구검사의 일부로 측정됩니다.",
+      "claimSha256": "4635c884a95ded3ffd21cf01b9cfc219a5b9e7741d0873e6dca02c9054fcec1c",
+      "sourceUrl": "https://medlineplus.gov/lab-tests/hemoglobin-test/",
+      "sourcePageSha256": "sha256:a3e9e0c91c29da8541c55ca9b624aa46658d1c75931b5b5afb5f842869bde8ce",
+      "sourceSections": [
+        "What is a Hemoglobin Test? · What is it used for?"
+      ],
+      "candidateSourceParagraphIds": [
+        "p5-256105bf83ea",
+        "p6-9b59af94fcd6",
+        "p7-04356494978e",
+        "p8-7e8f9af77f1b"
+      ],
+      "review": {
+        "rights": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "translation": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "clinical": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "disposition": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "sourceSupport": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null,
+          "assessedParagraphIds": []
+        }
+      }
+    },
+    {
+      "claimId": "liver-ast-purpose-claim-1",
+      "chunkId": "liver-ast-purpose",
+      "topic": "간 효소 AST",
+      "claimText": "AST 혈액검사는 혈액 속 AST 양을 측정하며, 간 문제를 살피거나 경과를 확인하는 데 도움을 줄 수 있습니다.",
+      "claimSha256": "bfc7b955f49c5f3b49e5ef52be038eda30c1c43116be041f7b88f1e762756a79",
+      "sourceUrl": "https://medlineplus.gov/lab-tests/ast-test/",
+      "sourcePageSha256": "sha256:385100e6d2c26f7af9cf9c3880283d32ff3e22bbd66a1dfb0d8ece0bfe51d1c8",
+      "sourceSections": [
+        "What is an AST test?"
+      ],
+      "candidateSourceParagraphIds": [
+        "p5-37636c2a604e",
+        "p6-e66cf8435077",
+        "p7-5fa82a89d954",
+        "p8-47b567517d71"
+      ],
+      "review": {
+        "rights": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "translation": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "clinical": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "disposition": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "sourceSupport": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null,
+          "assessedParagraphIds": []
+        }
+      }
+    },
+    {
+      "claimId": "liver-ast-purpose-claim-2",
+      "chunkId": "liver-ast-purpose",
+      "topic": "간 효소 AST",
+      "claimText": "AST는 단독으로 또는 다른 간기능 검사와 함께 시행될 수 있습니다.",
+      "claimSha256": "7cad38d9564c5259b4b87dd1e2cb9b777399ae51caabc0de368a6b1309fee48e",
+      "sourceUrl": "https://medlineplus.gov/lab-tests/ast-test/",
+      "sourcePageSha256": "sha256:385100e6d2c26f7af9cf9c3880283d32ff3e22bbd66a1dfb0d8ece0bfe51d1c8",
+      "sourceSections": [
+        "What is an AST test?"
+      ],
+      "candidateSourceParagraphIds": [
+        "p5-37636c2a604e",
+        "p6-e66cf8435077",
+        "p7-5fa82a89d954",
+        "p8-47b567517d71"
+      ],
+      "review": {
+        "rights": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "translation": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "clinical": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "disposition": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "sourceSupport": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null,
+          "assessedParagraphIds": []
+        }
+      }
+    },
+    {
+      "claimId": "liver-alt-purpose-claim-1",
+      "chunkId": "liver-alt-purpose",
+      "topic": "간 효소 ALT",
+      "claimText": "ALT 혈액검사는 간 건강을 살피고 간 관련 문제를 진단하거나 경과를 확인하는 데 도움을 줍니다.",
+      "claimSha256": "665a47908f976c15f36672dfd163c5d468bb17de280aabf75395a091961362f2",
+      "sourceUrl": "https://medlineplus.gov/lab-tests/alt-blood-test/",
+      "sourcePageSha256": "sha256:82bb7e3e7bf10e57a1731f2335bc47f27ffc86dc0ee137246570c17b0c89d8a9",
+      "sourceSections": [
+        "What is an ALT Blood Test? · Why do I need an ALT blood test?"
+      ],
+      "candidateSourceParagraphIds": [
+        "p5-255aa70a872f",
+        "p6-1df1e7ca0f37",
+        "p7-cf3b96981261",
+        "p8-511e70a722da",
+        "p10-2ecfc909a756",
+        "p11-276be6aba82b",
+        "p12-777c8082b9df"
+      ],
+      "review": {
+        "rights": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "translation": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "clinical": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "disposition": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "sourceSupport": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null,
+          "assessedParagraphIds": []
+        }
+      }
+    },
+    {
+      "claimId": "liver-alt-purpose-claim-2",
+      "chunkId": "liver-alt-purpose",
+      "topic": "간 효소 ALT",
+      "claimText": "보통 다른 간기능 검사와 함께 시행됩니다.",
+      "claimSha256": "9483664ef00741188bc971c89a558e03b7b4aab3b1ca4cc64e7014df59b4ac86",
+      "sourceUrl": "https://medlineplus.gov/lab-tests/alt-blood-test/",
+      "sourcePageSha256": "sha256:82bb7e3e7bf10e57a1731f2335bc47f27ffc86dc0ee137246570c17b0c89d8a9",
+      "sourceSections": [
+        "What is an ALT Blood Test? · Why do I need an ALT blood test?"
+      ],
+      "candidateSourceParagraphIds": [
+        "p5-255aa70a872f",
+        "p6-1df1e7ca0f37",
+        "p7-cf3b96981261",
+        "p8-511e70a722da",
+        "p10-2ecfc909a756",
+        "p11-276be6aba82b",
+        "p12-777c8082b9df"
+      ],
+      "review": {
+        "rights": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "translation": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "clinical": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "disposition": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "sourceSupport": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null,
+          "assessedParagraphIds": []
+        }
+      }
+    },
+    {
+      "claimId": "liver-ggt-purpose-claim-1",
+      "chunkId": "liver-ggt-purpose",
+      "topic": "간 효소 γ-GTP",
+      "claimText": "GGT 검사는 혈액 속 GGT를 측정해 간이나 담관 관련 문제를 살피는 데 도움을 줍니다.",
+      "claimSha256": "c8f16f841e8f84d2aea4affdb41ddb944ce3692facfcf0d5728ce96fbea64de2",
+      "sourceUrl": "https://medlineplus.gov/lab-tests/gamma-glutamyl-transferase-ggt-test/",
+      "sourcePageSha256": "sha256:5e969291f9a495768111dbe1ab6bb84f7a59a34bcf9ade5b9931bb7af3b4ca75",
+      "sourceSections": [
+        "What is a gamma-glutamyl transferase (GGT) test?"
+      ],
+      "candidateSourceParagraphIds": [
+        "p5-a7d003fa5868",
+        "p6-051b2875fadf",
+        "p7-500cb0951216",
+        "p8-e5b26b22ea1e"
+      ],
+      "review": {
+        "rights": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "translation": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "clinical": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "disposition": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "sourceSupport": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null,
+          "assessedParagraphIds": []
+        }
+      }
+    },
+    {
+      "claimId": "liver-ggt-purpose-claim-2",
+      "chunkId": "liver-ggt-purpose",
+      "topic": "간 효소 γ-GTP",
+      "claimText": "다른 간기능 검사, 특히 ALP 결과와 함께 확인할 수 있습니다.",
+      "claimSha256": "a1f40ac3e6849ce6f521f11f1923fa28e1d079bf4d767a7d95a89cc3b9918094",
+      "sourceUrl": "https://medlineplus.gov/lab-tests/gamma-glutamyl-transferase-ggt-test/",
+      "sourcePageSha256": "sha256:5e969291f9a495768111dbe1ab6bb84f7a59a34bcf9ade5b9931bb7af3b4ca75",
+      "sourceSections": [
+        "What is a gamma-glutamyl transferase (GGT) test?"
+      ],
+      "candidateSourceParagraphIds": [
+        "p5-a7d003fa5868",
+        "p6-051b2875fadf",
+        "p7-500cb0951216",
+        "p8-e5b26b22ea1e"
+      ],
+      "review": {
+        "rights": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "translation": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "clinical": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "disposition": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "sourceSupport": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null,
+          "assessedParagraphIds": []
+        }
+      }
+    },
+    {
+      "claimId": "screening-egfr-purpose-claim-1",
+      "chunkId": "screening-egfr-purpose",
+      "topic": "신장기능 eGFR",
+      "claimText": "eGFR은 신장이 혈액 속 노폐물을 걸러내는 정도를 추정하는 값입니다.",
+      "claimSha256": "274b6157c6125ddecbef9db641aad5896f3ea06287c4d0913e571f3f42f0253c",
+      "sourceUrl": "https://medlineplus.gov/lab-tests/estimated-glomerular-filtration-rate-egfr-and-gfr-tests/",
+      "sourcePageSha256": "sha256:0c2cad7fb77a8f72f50836ec33b4654bc0dc3d47622d099c8024c01ca8c6a3f0",
+      "sourceSections": [
+        "What are estimated glomerular filtration rate (eGFR) and GFR tests?"
+      ],
+      "candidateSourceParagraphIds": [
+        "p5-52c854c28255",
+        "p6-cfad3a38530e",
+        "p7-7590841d5f83",
+        "p8-b06a6bdc4d03",
+        "p9-65f3cd69ff99",
+        "p10-38a90147450a",
+        "p11-fbc45270e219"
+      ],
+      "review": {
+        "rights": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "translation": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "clinical": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "disposition": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "sourceSupport": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null,
+          "assessedParagraphIds": []
+        }
+      }
+    },
+    {
+      "claimId": "screening-egfr-purpose-claim-2",
+      "chunkId": "screening-egfr-purpose",
+      "topic": "신장기능 eGFR",
+      "claimText": "선별·평가·경과 확인에 쓰이며 혈청 크레아티닌으로 계산되는 경우가 많습니다.",
+      "claimSha256": "00317945222dd9fbbe5fc360d353c7201f0a772848e17f05f1051eb3e278abed",
+      "sourceUrl": "https://medlineplus.gov/lab-tests/estimated-glomerular-filtration-rate-egfr-and-gfr-tests/",
+      "sourcePageSha256": "sha256:0c2cad7fb77a8f72f50836ec33b4654bc0dc3d47622d099c8024c01ca8c6a3f0",
+      "sourceSections": [
+        "What are estimated glomerular filtration rate (eGFR) and GFR tests?"
+      ],
+      "candidateSourceParagraphIds": [
+        "p5-52c854c28255",
+        "p6-cfad3a38530e",
+        "p7-7590841d5f83",
+        "p8-b06a6bdc4d03",
+        "p9-65f3cd69ff99",
+        "p10-38a90147450a",
+        "p11-fbc45270e219"
+      ],
+      "review": {
+        "rights": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "translation": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "clinical": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "disposition": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "sourceSupport": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null,
+          "assessedParagraphIds": []
+        }
+      }
+    },
+    {
+      "claimId": "screening-urine-protein-purpose-claim-1",
+      "chunkId": "screening-urine-protein-purpose",
+      "topic": "요단백",
+      "claimText": "요단백 검사는 소변의 단백질 양을 확인하며, 일반 소변검사의 일부이거나 신장 문제를 살피고 경과를 확인하는 데 사용될 수 있습니다.",
+      "claimSha256": "f0dd26e414a91f7283bd02602717d7bef9a702e1c246642da881645c58b19967",
+      "sourceUrl": "https://medlineplus.gov/lab-tests/protein-in-urine/",
+      "sourcePageSha256": "sha256:51651dd6d551ed70f5fda1425faae459af54a96d981a6dedf9d6482572ed6b77",
+      "sourceSections": [
+        "What is a protein in urine test? · What is it used for?"
+      ],
+      "candidateSourceParagraphIds": [
+        "p5-640c2450f7b1",
+        "p6-3aff84e2e36f",
+        "p7-26e34f3fd3fc",
+        "p8-d3f0087ea419",
+        "p9-668f0ad7a25b"
+      ],
+      "review": {
+        "rights": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "translation": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "clinical": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "disposition": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "sourceSupport": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null,
+          "assessedParagraphIds": []
+        }
+      }
+    },
+    {
+      "claimId": "screening-total-cholesterol-purpose-claim-1",
+      "chunkId": "screening-total-cholesterol-purpose",
+      "topic": "총콜레스테롤",
+      "claimText": "총콜레스테롤은 혈액 속 전체 콜레스테롤 양으로 HDL과 LDL 등을 포함합니다.",
+      "claimSha256": "0b9c50ed837e73fe34371d3a58a93c52c2bd97bc5ee5213e993b60a7c9b5091d",
+      "sourceUrl": "https://medlineplus.gov/lab-tests/cholesterol-levels/",
+      "sourcePageSha256": "sha256:aed2a5c0066c9dca4a0786065ed5fd0e9839e9f5ac96aee7de450831b9eabb88",
+      "sourceSections": [
+        "What is it used for?"
+      ],
+      "candidateSourceParagraphIds": [
+        "p10-15a2d4828c2f",
+        "p11-9563ce23ee92",
+        "p12-a204d70f23fd"
+      ],
+      "review": {
+        "rights": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "translation": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "clinical": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "disposition": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "sourceSupport": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null,
+          "assessedParagraphIds": []
+        }
+      }
+    },
+    {
+      "claimId": "screening-total-cholesterol-purpose-claim-2",
+      "chunkId": "screening-total-cholesterol-purpose",
+      "topic": "총콜레스테롤",
+      "claimText": "지질검사는 심장질환 위험 정보를 얻는 데 사용됩니다.",
+      "claimSha256": "e0548331e8c74afee0078ccc07e5d1acf935775a2b202612f11da2f36553a27f",
+      "sourceUrl": "https://medlineplus.gov/lab-tests/cholesterol-levels/",
+      "sourcePageSha256": "sha256:aed2a5c0066c9dca4a0786065ed5fd0e9839e9f5ac96aee7de450831b9eabb88",
+      "sourceSections": [
+        "What is it used for?"
+      ],
+      "candidateSourceParagraphIds": [
+        "p10-15a2d4828c2f",
+        "p11-9563ce23ee92",
+        "p12-a204d70f23fd"
+      ],
+      "review": {
+        "rights": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "translation": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "clinical": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "disposition": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "sourceSupport": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null,
+          "assessedParagraphIds": []
+        }
+      }
+    },
+    {
+      "claimId": "screening-hdl-purpose-claim-1",
+      "chunkId": "screening-hdl-purpose",
+      "topic": "HDL 콜레스테롤",
+      "claimText": "HDL은 지질검사의 한 항목이며, MedlinePlus는 HDL이 혈액에서 LDL을 제거하는 데 도움을 준다고 설명합니다.",
+      "claimSha256": "3122456dc13c359583c2fd62133989193e8f07c96ca0a5f8f0bbe0c0e818949e",
+      "sourceUrl": "https://medlineplus.gov/lab-tests/cholesterol-levels/",
+      "sourcePageSha256": "sha256:aed2a5c0066c9dca4a0786065ed5fd0e9839e9f5ac96aee7de450831b9eabb88",
+      "sourceSections": [
+        "What is it used for?"
+      ],
+      "candidateSourceParagraphIds": [
+        "p10-15a2d4828c2f",
+        "p11-9563ce23ee92",
+        "p12-a204d70f23fd"
+      ],
+      "review": {
+        "rights": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "translation": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "clinical": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "disposition": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "sourceSupport": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null,
+          "assessedParagraphIds": []
+        }
+      }
+    },
+    {
+      "claimId": "screening-hdl-purpose-claim-2",
+      "chunkId": "screening-hdl-purpose",
+      "topic": "HDL 콜레스테롤",
+      "claimText": "결과는 다른 지질 수치와 함께 살펴봅니다.",
+      "claimSha256": "f3e43b5be7c0865d03bd5f2a597e24036834b90e75eada10101e781a7d040d11",
+      "sourceUrl": "https://medlineplus.gov/lab-tests/cholesterol-levels/",
+      "sourcePageSha256": "sha256:aed2a5c0066c9dca4a0786065ed5fd0e9839e9f5ac96aee7de450831b9eabb88",
+      "sourceSections": [
+        "What is it used for?"
+      ],
+      "candidateSourceParagraphIds": [
+        "p10-15a2d4828c2f",
+        "p11-9563ce23ee92",
+        "p12-a204d70f23fd"
+      ],
+      "review": {
+        "rights": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "translation": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "clinical": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "disposition": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "sourceSupport": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null,
+          "assessedParagraphIds": []
+        }
+      }
+    },
+    {
+      "claimId": "screening-ldl-purpose-claim-1",
+      "chunkId": "screening-ldl-purpose",
+      "topic": "LDL 콜레스테롤",
+      "claimText": "LDL은 지질검사의 한 항목입니다.",
+      "claimSha256": "7cd382ac4ca74fd23338812a760c91a058a2fbf378f5c14c149b8f9468a847a4",
+      "sourceUrl": "https://medlineplus.gov/lab-tests/cholesterol-levels/",
+      "sourcePageSha256": "sha256:aed2a5c0066c9dca4a0786065ed5fd0e9839e9f5ac96aee7de450831b9eabb88",
+      "sourceSections": [
+        "What is it used for?"
+      ],
+      "candidateSourceParagraphIds": [
+        "p10-15a2d4828c2f",
+        "p11-9563ce23ee92",
+        "p12-a204d70f23fd"
+      ],
+      "review": {
+        "rights": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "translation": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "clinical": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "disposition": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "sourceSupport": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null,
+          "assessedParagraphIds": []
+        }
+      }
+    },
+    {
+      "claimId": "screening-ldl-purpose-claim-2",
+      "chunkId": "screening-ldl-purpose",
+      "topic": "LDL 콜레스테롤",
+      "claimText": "MedlinePlus는 LDL이 동맥의 막힘을 일으키는 침착물의 주요 원천이라고 설명하며, 수치는 전체 지질검사와 함께 살펴봅니다.",
+      "claimSha256": "13828662c6668e2857cb0b3a822d3af5951f79073ae652f477968d534738cee7",
+      "sourceUrl": "https://medlineplus.gov/lab-tests/cholesterol-levels/",
+      "sourcePageSha256": "sha256:aed2a5c0066c9dca4a0786065ed5fd0e9839e9f5ac96aee7de450831b9eabb88",
+      "sourceSections": [
+        "What is it used for?"
+      ],
+      "candidateSourceParagraphIds": [
+        "p10-15a2d4828c2f",
+        "p11-9563ce23ee92",
+        "p12-a204d70f23fd"
+      ],
+      "review": {
+        "rights": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "translation": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "clinical": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "disposition": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "sourceSupport": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null,
+          "assessedParagraphIds": []
+        }
+      }
+    },
+    {
+      "claimId": "screening-triglycerides-limits-claim-1",
+      "chunkId": "screening-triglycerides-limits",
+      "topic": "중성지방",
+      "claimText": "중성지방 결과는 LDL·HDL 등 다른 지질 항목과 심혈관 위험 요인을 함께 고려해야 합니다.",
+      "claimSha256": "e357478297e59470215e14eb00c5a84f2729e6eef9f56f42f47fc9fd4db83a50",
+      "sourceUrl": "https://medlineplus.gov/lab-tests/triglycerides-test/",
+      "sourcePageSha256": "sha256:8906069b4215f7a0d6baefdbb8844c9fc48d1d9e28e440ead03e0dd3dcf00f9e",
+      "sourceSections": [
+        "What is it used for?"
+      ],
+      "candidateSourceParagraphIds": [
+        "p11-e5f4c673a70b",
+        "p12-8d7a2d11c953",
+        "p13-2c9684082c51"
+      ],
+      "review": {
+        "rights": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "translation": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "clinical": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "disposition": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "sourceSupport": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null,
+          "assessedParagraphIds": []
+        }
+      }
+    },
+    {
+      "claimId": "screening-triglycerides-limits-claim-2",
+      "chunkId": "screening-triglycerides-limits",
+      "topic": "중성지방",
+      "claimText": "이 후보는 수치만으로 개인의 심장질환 위험이나 치료 필요성을 판정하지 않습니다.",
+      "claimSha256": "5dc5cd0e132acc6cffda954a819584251d4ed276c8ee4b75eddf8ce4a9a13b92",
+      "sourceUrl": "https://medlineplus.gov/lab-tests/triglycerides-test/",
+      "sourcePageSha256": "sha256:8906069b4215f7a0d6baefdbb8844c9fc48d1d9e28e440ead03e0dd3dcf00f9e",
+      "sourceSections": [
+        "What is it used for?"
+      ],
+      "candidateSourceParagraphIds": [
+        "p11-e5f4c673a70b",
+        "p12-8d7a2d11c953",
+        "p13-2c9684082c51"
+      ],
+      "review": {
+        "rights": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "translation": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "clinical": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "disposition": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "sourceSupport": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null,
+          "assessedParagraphIds": []
+        }
+      }
+    },
+    {
+      "claimId": "screening-hcv-antibody-limits-claim-1",
+      "chunkId": "screening-hcv-antibody-limits",
+      "topic": "C형간염 항체",
+      "claimText": "C형간염 검사는 항체 결과만으로 현재 감염과 과거 감염 후 자연 소실을 구분하지 못합니다.",
+      "claimSha256": "c54aa1e9e3112c2e660f2b14784242cc197c3efe6c7b65f10282a0266d3cafc2",
+      "sourceUrl": "https://medlineplus.gov/lab-tests/hepatitis-testing/",
+      "sourcePageSha256": "sha256:8b3f59d53a7faf7c31ade52d6b8a3d7a77c742a09e4268fbdf244cb51b4d061d",
+      "sourceSections": [
+        "What is it used for? · What do the results mean?"
+      ],
+      "candidateSourceParagraphIds": [
+        "p8-56656d7ff5fc",
+        "p9-86495f42acf9",
+        "p18-43669fdbaa50",
+        "p19-2f9f6904f694",
+        "p20-b8cd1e735be0",
+        "p21-e4a9bf5455e1",
+        "p22-5c0621110e4d",
+        "p23-7a2e41c21641"
+      ],
+      "review": {
+        "rights": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "translation": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "clinical": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "disposition": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "sourceSupport": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null,
+          "assessedParagraphIds": []
+        }
+      }
+    },
+    {
+      "claimId": "screening-hcv-antibody-limits-claim-2",
+      "chunkId": "screening-hcv-antibody-limits",
+      "topic": "C형간염 항체",
+      "claimText": "의심되는 결과는 추가 검사로 확인할 수 있으므로 의료진에게 확인하세요.",
+      "claimSha256": "aa805cd35b43831be942c22eb17130bb7d0228506f88ba8aec97f21d8e799977",
+      "sourceUrl": "https://medlineplus.gov/lab-tests/hepatitis-testing/",
+      "sourcePageSha256": "sha256:8b3f59d53a7faf7c31ade52d6b8a3d7a77c742a09e4268fbdf244cb51b4d061d",
+      "sourceSections": [
+        "What is it used for? · What do the results mean?"
+      ],
+      "candidateSourceParagraphIds": [
+        "p8-56656d7ff5fc",
+        "p9-86495f42acf9",
+        "p18-43669fdbaa50",
+        "p19-2f9f6904f694",
+        "p20-b8cd1e735be0",
+        "p21-e4a9bf5455e1",
+        "p22-5c0621110e4d",
+        "p23-7a2e41c21641"
+      ],
+      "review": {
+        "rights": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "translation": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "clinical": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "disposition": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "sourceSupport": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null,
+          "assessedParagraphIds": []
+        }
+      }
+    },
+    {
+      "claimId": "scenario-21-claim-1",
+      "chunkId": "scenario-21",
+      "topic": "폐기능검사",
+      "claimText": "폐기능검사는 폐가 얼마나 잘 작동하는지 확인하는 여러 검사입니다.",
+      "claimSha256": "ac75660eced9908f1d18a615a030b06516ce2cf5b8dd209a265a2d53e8dd0b8c",
+      "sourceUrl": "https://medlineplus.gov/lab-tests/lung-function-tests/",
+      "sourcePageSha256": "sha256:70d33cf191de50a89696a3dae31f704cf9d798da31fad25a7ebdb06a1ec88e63",
+      "sourceSections": [
+        "What are lung function tests?"
+      ],
+      "candidateSourceParagraphIds": [
+        "p5-6dc398dff4bc",
+        "p6-bf34e7c6eb8f",
+        "p7-498338e390be",
+        "p8-d85068e876bb",
+        "p9-816bea0e6d81",
+        "p10-843f169e239e"
+      ],
+      "review": {
+        "rights": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "translation": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "clinical": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "disposition": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "sourceSupport": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null,
+          "assessedParagraphIds": []
+        }
+      }
+    },
+    {
+      "claimId": "scenario-21-claim-2",
+      "chunkId": "scenario-21",
+      "topic": "폐기능검사",
+      "claimText": "폐활량검사는 내쉬는 공기의 양과 속도를 측정하며 다른 검사와 함께 폐 질환을 평가하는 데 사용합니다.",
+      "claimSha256": "cd4244f71aa2fa97d850e12004b8e1f6e6573dc545eabf2b4792b9a7409fffa8",
+      "sourceUrl": "https://medlineplus.gov/lab-tests/lung-function-tests/",
+      "sourcePageSha256": "sha256:70d33cf191de50a89696a3dae31f704cf9d798da31fad25a7ebdb06a1ec88e63",
+      "sourceSections": [
+        "What are lung function tests?"
+      ],
+      "candidateSourceParagraphIds": [
+        "p5-6dc398dff4bc",
+        "p6-bf34e7c6eb8f",
+        "p7-498338e390be",
+        "p8-d85068e876bb",
+        "p9-816bea0e6d81",
+        "p10-843f169e239e"
+      ],
+      "review": {
+        "rights": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "translation": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "clinical": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "disposition": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "sourceSupport": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null,
+          "assessedParagraphIds": []
+        }
+      }
+    },
+    {
+      "claimId": "screening-dental-purpose-claim-1",
+      "chunkId": "screening-dental-purpose",
+      "topic": "구강검진",
+      "claimText": "구강검진은 치아와 잇몸을 살펴 충치나 잇몸 질환의 징후를 확인하고 구강 건강 문제를 일찍 찾는 데 사용됩니다.",
+      "claimSha256": "66e7f8de72989a51dabfad04ed51b68c4f032865fce37b801dc1d2f2710311da",
+      "sourceUrl": "https://medlineplus.gov/lab-tests/dental-exam/",
+      "sourcePageSha256": "sha256:f9122cce7c617294ebf9f481c8424d9dee85a2cc2f4980db13db5992308893df",
+      "sourceSections": [
+        "What is a dental exam? · What is it used for?"
+      ],
+      "candidateSourceParagraphIds": [
+        "p5-84bd548993f5",
+        "p6-bf4959b3524c",
+        "p7-ed51ea0549d0",
+        "p8-361db8380d94",
+        "p9-6f29db9e4e30",
+        "p10-77beb10e9a6c",
+        "p11-88c2d5dccbd0",
+        "p12-76742210dd92",
+        "p13-9303d501dfec",
+        "p14-8c04b2ec510c",
+        "p15-c9b56aa214aa",
+        "p16-8b10c7f1b483"
+      ],
+      "review": {
+        "rights": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "translation": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "clinical": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "disposition": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "sourceSupport": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null,
+          "assessedParagraphIds": []
+        }
+      }
+    },
+    {
+      "claimId": "screening-dental-purpose-claim-2",
+      "chunkId": "screening-dental-purpose",
+      "topic": "구강검진",
+      "claimText": "필요한 경우 치과 X선을 추가할 수 있습니다.",
+      "claimSha256": "ab265ffb9b6bb6077c5bdd25307e03ca2dc55e474efe93aa6919d6498e5ef46b",
+      "sourceUrl": "https://medlineplus.gov/lab-tests/dental-exam/",
+      "sourcePageSha256": "sha256:f9122cce7c617294ebf9f481c8424d9dee85a2cc2f4980db13db5992308893df",
+      "sourceSections": [
+        "What is a dental exam? · What is it used for?"
+      ],
+      "candidateSourceParagraphIds": [
+        "p5-84bd548993f5",
+        "p6-bf4959b3524c",
+        "p7-ed51ea0549d0",
+        "p8-361db8380d94",
+        "p9-6f29db9e4e30",
+        "p10-77beb10e9a6c",
+        "p11-88c2d5dccbd0",
+        "p12-76742210dd92",
+        "p13-9303d501dfec",
+        "p14-8c04b2ec510c",
+        "p15-c9b56aa214aa",
+        "p16-8b10c7f1b483"
+      ],
+      "review": {
+        "rights": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "translation": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "clinical": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "disposition": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "sourceSupport": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null,
+          "assessedParagraphIds": []
+        }
+      }
+    },
+    {
+      "claimId": "afp-detail-purpose-claim-1",
+      "chunkId": "afp-detail-purpose",
+      "topic": "혈청 AFP",
+      "claimText": "AFP 종양표지자 검사는 다른 검사와 함께 특정 암의 평가를 돕거나 이미 진단된 질환과 치료 경과를 살피는 데 사용됩니다.",
+      "claimSha256": "3ac361190573fb766d6e47dc561e2dfeb47ba5e39f18444464e3f7cbe286b316",
+      "sourceUrl": "https://medlineplus.gov/lab-tests/alpha-fetoprotein-afp-tumor-marker-test/",
+      "sourcePageSha256": "sha256:c2345ee2f32648c658a4c54f6ba23eb8e4c1cfc404e927e46b1302705d2b6712",
+      "sourceSections": [
+        "What is it used for?"
+      ],
+      "candidateSourceParagraphIds": [
+        "p10-1742f509023f",
+        "p11-95804f3db776"
+      ],
+      "review": {
+        "rights": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "translation": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "clinical": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "disposition": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "sourceSupport": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null,
+          "assessedParagraphIds": []
+        }
+      }
+    },
+    {
+      "claimId": "afp-detail-purpose-claim-2",
+      "chunkId": "afp-detail-purpose",
+      "topic": "혈청 AFP",
+      "claimText": "검사 목적은 환자의 건강 이력과 진료 상황에 따라 달라집니다.",
+      "claimSha256": "1b3b05915c7a8d8d123762add37d57457cec85dc1c81551ee417a8f1eac688e3",
+      "sourceUrl": "https://medlineplus.gov/lab-tests/alpha-fetoprotein-afp-tumor-marker-test/",
+      "sourcePageSha256": "sha256:c2345ee2f32648c658a4c54f6ba23eb8e4c1cfc404e927e46b1302705d2b6712",
+      "sourceSections": [
+        "What is it used for?"
+      ],
+      "candidateSourceParagraphIds": [
+        "p10-1742f509023f",
+        "p11-95804f3db776"
+      ],
+      "review": {
+        "rights": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "translation": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "clinical": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "disposition": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null
+        },
+        "sourceSupport": {
+          "decision": "UNASSESSED",
+          "reviewerId": null,
+          "reviewerRole": null,
+          "reviewedAt": null,
+          "rationale": null,
+          "assessedParagraphIds": []
+        }
+      }
+    }
+  ]
+}

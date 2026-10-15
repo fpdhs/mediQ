@@ -1,0 +1,11 @@
+FROM gcr.io/distroless/nodejs24-debian13:nonroot@sha256:9eeb7f5887d0e239e78264b06f7f11d2e14be534050481803a9e4728fcdd278e
+
+WORKDIR /app
+ENV NODE_ENV=production
+
+COPY --chown=65532:65532 src/b-pacs-storage-boundary.js ./src/b-pacs-storage-boundary.js
+COPY --chown=65532:65532 src/b-pacs-mtls-service.js ./src/b-pacs-mtls-service.js
+COPY --chown=65532:65532 scripts/start-b-pacs-mtls.js ./scripts/start-b-pacs-mtls.js
+
+USER 65532:65532
+CMD ["scripts/start-b-pacs-mtls.js"]

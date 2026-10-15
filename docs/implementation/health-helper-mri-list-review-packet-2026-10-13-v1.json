@@ -1,0 +1,297 @@
+{
+  "schemaVersion": "health-helper-mri-list-review-packet/1",
+  "artifactId": "health-helper-mri-list-review-packet-2026-10-13-v1",
+  "status": "REVIEW_ONLY_NOT_SERVICE_APPROVED",
+  "createdAt": "2026-10-13",
+  "purpose": "독립 검토자가 MRI 준비 목록 후보의 원문 위치, 번역 대응, 정확한 RAG 표시범위 및 권리 쟁점을 함께 검토하기 위한 입력 패킷",
+  "scope": {
+    "candidateOnly": true,
+    "clinicalUse": false,
+    "serviceEligible": false,
+    "patientEndpointEnabled": false,
+    "modelFineTuningPerformed": false,
+    "note": "이 작업은 자료 큐레이션 및 검색·출처표시 검토이며 모델 파라미터 학습이나 환자용 웹 배포가 아니다."
+  },
+  "candidateInput": {
+    "fileName": "medlineplus_ko_1017.jsonl",
+    "fileSha256": "sha256:7a396f2143b3f2894964e51ffca0f92089688abcbd24f0bae6787b56824712b7",
+    "recordId": "medlineplus-health-topics-en-3953",
+    "recordSha256": "sha256:7874be9597f734385522eeead4227b37e3e63a86b10bc45b95139765c8a728b4",
+    "recordSourceContentSha256": "sha256:8b363d26a9359ecd7e68e9a89749192ba1215de2625f449480bb6e3128f5a454",
+    "recordSourceSummarySha256": "sha256:f7b91ef41aae7d5f3f5b1cddfb0dbcc25e32aa4dca0d4f693cad0f91a1579297",
+    "translationStatus": "COMPLETE_TRANSLATION_WITH_ACTUAL_AI_REVIEW",
+    "translationFidelityStatus": "PASS",
+    "aiQaStatus": "PASS",
+    "independentReviewStatus": "NOT_INDEPENDENTLY_VERIFIED",
+    "ragCandidateStatus": "개발·검토용 후보",
+    "productionReady": false,
+    "retrievedAtDate": "2026-10-11"
+  },
+  "candidateCorpus": {
+    "version": "medlineplus-upload-ko-20261012-v3",
+    "status": "DRAFT / UNASSIGNED",
+    "inputSha256": "sha256:7a396f2143b3f2894964e51ffca0f92089688abcbd24f0bae6787b56824712b7",
+    "corpusSha256": "sha256:f2efe0eeb4bf58dcd00e62164a9ff0fa7a2da10fc461ef95a7c6c8ef117bdf96",
+    "clinicalUse": false,
+    "serviceDeployment": false,
+    "files": {
+      "corpus": "data/medlineplus-upload-ko-20261012-v3/corpus.json",
+      "manifest": "data/medlineplus-upload-ko-20261012-v3/manifest.json"
+    }
+  },
+  "source": {
+    "url": "https://medlineplus.gov/mriscans.html",
+    "titleEnglish": "MRI Scans",
+    "titleKoreanCandidate": "자기공명영상(MRI) 검사",
+    "sectionEnglish": "How do you prepare for an MRI scan?",
+    "sectionKoreanCandidate": "MRI 검사는 어떻게 준비하나요?",
+    "officialPageLastUpdatedAt": "2026-06-01",
+    "pageCheckedAt": "2026-10-13",
+    "officialPageLocator": {
+      "lineRange": [92, 109],
+      "note": "현재 공식 페이지의 접근 가능한 텍스트 locator. HTML 스냅샷 파일이나 페이지 해시는 저장소에 고정되어 있지 않음."
+    },
+    "localHtmlSnapshot": "NOT_STORED",
+    "sourceContentHashScope": "UTF-8 title_en + newline + effective original summary HTML",
+    "attribution": "Source: MedlinePlus, National Library of Medicine.",
+    "rightsPolicyUrl": "https://medlineplus.gov/about/using/usingcontent/",
+    "rightsReview": {
+      "decision": "UNASSESSED",
+      "reviewerId": null,
+      "reviewerRole": null,
+      "reviewedAt": null,
+      "rationale": "기존 권리 범위 메모는 /lab-tests/ 후보 페이지를 대상으로 하므로 이 /mriscans.html Health Topic 요약에 대한 제품 내 저장·번역·표시 권한을 확정하지 않는다. 이 URL 및 hearing aids 연결 링크의 경계를 별도 검토할 것."
+    }
+  },
+  "reviewContract": {
+    "requiredReviewerRoles": {
+      "sourceSupport": "SOURCE_EVIDENCE_REVIEWER",
+      "translation": "TRANSLATION_REVIEWER",
+      "clinical": "CLINICAL_REVIEWER",
+      "rights": "RIGHTS_REVIEWER",
+      "disposition": "CURATION_EDITOR"
+    },
+    "decisions": {
+      "sourceSupport": ["UNASSESSED", "DIRECT_SUPPORT", "PARTIAL_SUPPORT", "NO_SUPPORT", "AMBIGUOUS"],
+      "translation": ["UNASSESSED", "FAITHFUL", "CORRECTION_REQUIRED", "NOT_APPLICABLE"],
+      "clinical": ["UNASSESSED", "ACCEPTABLE_WITHIN_SCOPE", "REVISION_REQUIRED", "REJECTED"],
+      "rights": ["UNASSESSED", "PUBLIC_DOMAIN_SCOPE_MATCH", "PERMISSION_REQUIRED", "LINK_ONLY", "HOLD"],
+      "disposition": ["UNASSESSED", "RETAIN_DRAFT", "REVISE", "EXCLUDE"]
+    },
+    "instructions": [
+      "각 검토축은 서로 독립적으로 판단한다. AI QA PASS 또는 번역 충실도 PASS를 임상·권리 승인으로 간주하지 않는다.",
+      "SOURCE_EVIDENCE_REVIEWER는 각 claim의 sourceSegmentIds를 실제 원문과 대조하고, 결정과 근거 segment ID를 기록한다.",
+      "TRANSLATION_REVIEWER는 영문 segment와 한국어 후보 segment를 짝지어 의미·조건·수량·범위가 보존되는지 확인한다.",
+      "CLINICAL_REVIEWER는 환자용 표시로서 안전한 범위인지 판단한다. 기기별 MRI 안전성 또는 검사 가능 여부로 확장하지 않는다.",
+      "RIGHTS_REVIEWER는 이 정확한 URL, Health Topic summary 범위, 저장·번역·인용·UI 표시, 연결된 외부 페이지를 구분해 검토한다.",
+      "리뷰어 ID는 조직이 부여한 식별자를 사용한다. 이름, 이메일, 환자 사례를 기록하지 않는다.",
+      "이 패킷은 검토 입력일 뿐 승인·자격 인증·환자 서비스 배포 권한을 만들지 않는다. 검토 결과 반영 시 기존 파일을 덮어쓰지 말고 새 버전을 만든다."
+    ]
+  },
+  "sourceSegments": [
+    {
+      "sourceSegmentId": "3953-S0010",
+      "sourceBlockId": "3953-B0012",
+      "sourceBlockFragmentId": "3953-B0012-F01",
+      "sourceHtmlTag": "h3",
+      "sourceXPath": "/div/h3[3]",
+      "sectionPathEnglish": ["How do you prepare for an MRI scan?"],
+      "segmentType": "heading",
+      "listGroupId": null,
+      "sourceTextEnglish": "How do you prepare for an MRI scan?",
+      "translationKorean": "MRI 검사는 어떻게 준비하나요?",
+      "translationStatus": "translated",
+      "corpusChunkId": "upload-3953-3953-S0010-0",
+      "translationSha256": "sha256:f7b03a95907fa16743c4fa8a77c8d9cd8a66179f2e690286806fb9ac1d9431a7"
+    },
+    {
+      "sourceSegmentId": "3953-S0011",
+      "sourceBlockId": "3953-B0013",
+      "sourceBlockFragmentId": "3953-B0013-F01",
+      "sourceHtmlTag": "p",
+      "sourceXPath": "/div/p[5]",
+      "sectionPathEnglish": ["How do you prepare for an MRI scan?"],
+      "segmentType": "paragraph",
+      "listGroupId": null,
+      "sourceTextEnglish": "MRI machines use powerful magnets. Metal objects or implants can interfere with the scan and may be unsafe.",
+      "translationKorean": "MRI 장비는 강력한 자석을 사용합니다. 금속 물체나 삽입물은 검사를 방해할 수 있으며 안전하지 않을 수 있습니다.",
+      "translationStatus": "translated",
+      "corpusChunkId": "upload-3953-3953-S0011-0",
+      "translationSha256": "sha256:917a81d52323ca3d0858820c08b527108ea6287e0b77b1bc3d23ac02088d1dc1",
+      "useAsClaimSupport": false,
+      "note": "섹션 문맥만을 위한 참조이며 네 후보의 직접 claim 근거로 처리하지 않는다."
+    },
+    {
+      "sourceSegmentId": "3953-S0012",
+      "sourceBlockId": "3953-B0014",
+      "sourceBlockFragmentId": "3953-B0014-F01",
+      "sourceHtmlTag": "p",
+      "sourceXPath": "/div/p[6]",
+      "sectionPathEnglish": ["How do you prepare for an MRI scan?"],
+      "segmentType": "paragraph",
+      "listGroupId": null,
+      "sourceTextEnglish": "Before your MRI, you will need to remove items such as:",
+      "translationKorean": "MRI 전에는 다음과 같은 물품을 제거해야 합니다.",
+      "translationStatus": "translated",
+      "corpusChunkId": "upload-3953-3953-S0012-0",
+      "translationSha256": "sha256:6cd866ff9e8406745e3620c7a18d2ff26bd04326590eed9d4d32df2f0e8e1c38"
+    },
+    {
+      "sourceSegmentId": "3953-S0013",
+      "sourceBlockId": "3953-B0016",
+      "sourceBlockFragmentId": "3953-B0016-F01",
+      "sourceHtmlTag": "li",
+      "sourceXPath": "/div/ul[2]/li[1]",
+      "sectionPathEnglish": ["How do you prepare for an MRI scan?"],
+      "segmentType": "list_item",
+      "listGroupId": "3953-L002",
+      "listItemId": "3953-LI0004",
+      "sourceTextEnglish": "Jewelry and watches",
+      "translationKorean": "장신구와 시계",
+      "translationStatus": "translated",
+      "corpusChunkId": "upload-3953-3953-S0013-0",
+      "translationSha256": "sha256:d16add6657b3735d200bb8db1d2301f9512ca75c596f3e8a2ff3bca3488af00c"
+    },
+    {
+      "sourceSegmentId": "3953-S0014",
+      "sourceBlockId": "3953-B0017",
+      "sourceBlockFragmentId": "3953-B0017-F01",
+      "sourceHtmlTag": "li",
+      "sourceXPath": "/div/ul[2]/li[2]",
+      "sectionPathEnglish": ["How do you prepare for an MRI scan?"],
+      "segmentType": "list_item",
+      "listGroupId": "3953-L002",
+      "listItemId": "3953-LI0005",
+      "sourceTextEnglish": "Hairpins",
+      "translationKorean": "머리핀",
+      "translationStatus": "translated",
+      "corpusChunkId": "upload-3953-3953-S0014-0",
+      "translationSha256": "sha256:d36f54d3d4ef474fb7ae610d2a9a515955ba5448f1a9dc1c5f5c3e290c585e06"
+    },
+    {
+      "sourceSegmentId": "3953-S0015",
+      "sourceBlockId": "3953-B0018",
+      "sourceBlockFragmentId": "3953-B0018-F01",
+      "sourceHtmlTag": "li",
+      "sourceXPath": "/div/ul[2]/li[3]",
+      "sectionPathEnglish": ["How do you prepare for an MRI scan?"],
+      "segmentType": "list_item",
+      "listGroupId": "3953-L002",
+      "listItemId": "3953-LI0006",
+      "sourceTextEnglish": "Hearing aids",
+      "translationKorean": "보청기",
+      "translationStatus": "translated",
+      "corpusChunkId": "upload-3953-3953-S0015-0",
+      "translationSha256": "sha256:7af0bae6ff5f689babff10ce137c4742b7f56e6ccff590e99a4b53e11937b9f0"
+    },
+    {
+      "sourceSegmentId": "3953-S0016",
+      "sourceBlockId": "3953-B0019",
+      "sourceBlockFragmentId": "3953-B0019-F01",
+      "sourceHtmlTag": "p",
+      "sourceXPath": "/div/p[7]",
+      "sectionPathEnglish": ["How do you prepare for an MRI scan?"],
+      "segmentType": "paragraph",
+      "listGroupId": null,
+      "sourceTextEnglish": "Before your MRI, tell your health care provider if you:",
+      "translationKorean": "MRI 전에 다음에 해당하면 의료진에게 알리세요.",
+      "translationStatus": "translated",
+      "corpusChunkId": "upload-3953-3953-S0016-0",
+      "translationSha256": "sha256:ca4b46c3441034d0a481f397f3b14eb64f441fc66584c5dea56818d93b6c56a1"
+    },
+    {
+      "sourceSegmentId": "3953-S0022",
+      "sourceBlockId": "3953-B0026",
+      "sourceBlockFragmentId": "3953-B0026-F01",
+      "sourceHtmlTag": "li",
+      "sourceXPath": "/div/ul[3]/li[6]",
+      "sectionPathEnglish": ["How do you prepare for an MRI scan?"],
+      "segmentType": "list_item",
+      "listGroupId": "3953-L003",
+      "listItemId": "3953-LI0012",
+      "sourceTextEnglish": "Have metal or electronic devices in your body, such as a pacemaker, artificial joint, or other implants",
+      "translationKorean": "심박조율기, 인공관절 또는 다른 삽입물처럼 금속이나 전자장치가 몸속에 있는 경우",
+      "translationStatus": "translated",
+      "corpusChunkId": "upload-3953-3953-S0022-0",
+      "translationSha256": "sha256:cb0a03c39c416791b501507a0dfa5cb557abbeb22e98eb1f15767c2f9170222e"
+    }
+  ],
+  "claims": [
+    {
+      "claimId": "MRI-PREP-JEWELRY-001",
+      "question": "MRI 전에 장신구를 제거해야 하나요?",
+      "intent": "PREPARE",
+      "focus": "MRI_JEWELRY_REMOVAL",
+      "sourceSegmentIds": ["3953-S0012", "3953-S0013"],
+      "candidateDisplay": {
+        "kind": "LIST_GUIDANCE",
+        "heading": "MRI 전에는 다음과 같은 물품을 제거해야 합니다.",
+        "items": ["장신구와 시계"]
+      },
+      "scopeGuard": "목록 출처 안내만 검토한다. 개인별 지시로 단정하거나 기관별 안내를 대체하지 않는다.",
+      "review": {
+        "sourceSupport": {"decision": "UNASSESSED", "reviewerId": null, "reviewerRole": null, "reviewedAt": null, "rationale": null, "assessedSegmentIds": []},
+        "translation": {"decision": "UNASSESSED", "reviewerId": null, "reviewerRole": null, "reviewedAt": null, "rationale": null},
+        "clinical": {"decision": "UNASSESSED", "reviewerId": null, "reviewerRole": null, "reviewedAt": null, "rationale": null},
+        "disposition": {"decision": "UNASSESSED", "reviewerId": null, "reviewerRole": null, "reviewedAt": null, "rationale": null}
+      }
+    },
+    {
+      "claimId": "MRI-PREP-HAIRPIN-001",
+      "question": "MRI 전에 머리핀을 빼야 하나요?",
+      "intent": "PREPARE",
+      "focus": "MRI_JEWELRY_REMOVAL",
+      "sourceSegmentIds": ["3953-S0012", "3953-S0014"],
+      "candidateDisplay": {
+        "kind": "LIST_GUIDANCE",
+        "heading": "MRI 전에는 다음과 같은 물품을 제거해야 합니다.",
+        "items": ["머리핀"]
+      },
+      "scopeGuard": "목록 출처 안내만 검토한다. 개인별 지시로 단정하거나 기관별 안내를 대체하지 않는다.",
+      "review": {
+        "sourceSupport": {"decision": "UNASSESSED", "reviewerId": null, "reviewerRole": null, "reviewedAt": null, "rationale": null, "assessedSegmentIds": []},
+        "translation": {"decision": "UNASSESSED", "reviewerId": null, "reviewerRole": null, "reviewedAt": null, "rationale": null},
+        "clinical": {"decision": "UNASSESSED", "reviewerId": null, "reviewerRole": null, "reviewedAt": null, "rationale": null},
+        "disposition": {"decision": "UNASSESSED", "reviewerId": null, "reviewerRole": null, "reviewedAt": null, "rationale": null}
+      }
+    },
+    {
+      "claimId": "MRI-PREP-HEARING-AID-001",
+      "question": "MRI 전에 보청기를 빼야 하나요?",
+      "intent": "PREPARE",
+      "focus": "MRI_JEWELRY_REMOVAL",
+      "sourceSegmentIds": ["3953-S0012", "3953-S0015"],
+      "candidateDisplay": {
+        "kind": "LIST_GUIDANCE",
+        "heading": "MRI 전에는 다음과 같은 물품을 제거해야 합니다.",
+        "items": ["보청기"]
+      },
+      "scopeGuard": "목록 출처 안내만 검토한다. 개인별 지시로 단정하거나 기관별 안내를 대체하지 않는다.",
+      "review": {
+        "sourceSupport": {"decision": "UNASSESSED", "reviewerId": null, "reviewerRole": null, "reviewedAt": null, "rationale": null, "assessedSegmentIds": []},
+        "translation": {"decision": "UNASSESSED", "reviewerId": null, "reviewerRole": null, "reviewedAt": null, "rationale": null},
+        "clinical": {"decision": "UNASSESSED", "reviewerId": null, "reviewerRole": null, "reviewedAt": null, "rationale": null},
+        "disposition": {"decision": "UNASSESSED", "reviewerId": null, "reviewerRole": null, "reviewedAt": null, "rationale": null}
+      }
+    },
+    {
+      "claimId": "MRI-PREP-DEVICE-DISCLOSURE-001",
+      "question": "MRI 전에 심박조율기가 있으면 의료진에게 알려야 하나요?",
+      "intent": "PREPARE",
+      "focus": "MRI_DEVICE_DISCLOSURE",
+      "sourceSegmentIds": ["3953-S0016", "3953-S0022"],
+      "candidateDisplay": {
+        "kind": "LIST_GUIDANCE",
+        "heading": "MRI 전에 다음에 해당하면 의료진에게 알리세요.",
+        "items": ["심박조율기, 인공관절 또는 다른 삽입물처럼 금속이나 전자장치가 몸속에 있는 경우"]
+      },
+      "scopeGuard": "의료진에게 알리라는 출처 안내만 검토한다. 장치별 MRI 안전성·호환성·검사 가능 여부를 답하거나 추론하지 않는다.",
+      "review": {
+        "sourceSupport": {"decision": "UNASSESSED", "reviewerId": null, "reviewerRole": null, "reviewedAt": null, "rationale": null, "assessedSegmentIds": []},
+        "translation": {"decision": "UNASSESSED", "reviewerId": null, "reviewerRole": null, "reviewedAt": null, "rationale": null},
+        "clinical": {"decision": "UNASSESSED", "reviewerId": null, "reviewerRole": null, "reviewedAt": null, "rationale": null},
+        "disposition": {"decision": "UNASSESSED", "reviewerId": null, "reviewerRole": null, "reviewedAt": null, "rationale": null}
+      }
+    }
+  ]
+}

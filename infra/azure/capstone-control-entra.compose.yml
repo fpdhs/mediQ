@@ -1,0 +1,32 @@
+# Candidate only. Preserve all existing patient/key-release/catalog overlays.
+# Do not combine with the Mock IdP overlay. Existing deployment gates still apply.
+services:
+  control:
+    environment:
+      AUTH_MODE: ENTRA_OIDC
+      HIPASS_CAPSTONE_MOCK_IDP: '0'
+      ENTRA_TENANT_ID: ${ENTRA_TENANT_ID:?approved tenant required}
+      ENTRA_SPA_CLIENT_ID: ${ENTRA_SPA_CLIENT_ID:?dedicated SPA required}
+      ENTRA_API_AUDIENCE: ${ENTRA_API_AUDIENCE:?dedicated API required}
+      ENTRA_API_SCOPE: access_as_user
+      ENTRA_REDIRECT_URI: ${ENTRA_REDIRECT_URI:?exact same-origin HTTPS redirect required}
+      HIPASS_ENTRA_ACTOR_MAP_FILE: /run/config/entra-actors.json
+      HIPASS_ENTRA_METADATA_ORIGIN: http://entra-metadata:8080
+    volumes:
+      - ${HIPASS_ENTRA_CONFIG_DIR:?root-protected server-only directory}/entra-actors.json:/run/config/entra-actors.json:ro
+    networks: [entra_metadata_private]
+  entra-metadata:
+    image: ${HIPASS_ENTRA_METADATA_IMAGE:?digest-bound metadata candidate required}
+    command: [scripts/start-entra-metadata.js]
+    environment:
+      ENTRA_TENANT_ID: ${ENTRA_TENANT_ID:?approved tenant required}
+    networks: [entra_metadata_private, entra_egress]
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 64
+    mem_limit: 128m
+    restart: unless-stopped
+networks:
+  entra_metadata_private: {internal: true}
+  entra_egress: {}

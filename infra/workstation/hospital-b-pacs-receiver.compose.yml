@@ -1,0 +1,64 @@
+# Candidate only. Do NOT run before host encrypted-mount verification, dedicated
+# B mTLS issuance, pinned image scan and A/B/Control contract alignment.
+# No raw PACS ports; no Control/cloud volume; no overwrite/automatic cleanup.
+# MANUAL START ONLY: use b-pacs-receiver-start.py after the LUKS mount check.
+# A bind directory existing after reboot is NOT proof of an encrypted mount.
+services:
+  b-orthanc:
+    image: ${HIPASS_B_ORTHANC_IMAGE:?pinned reviewed Orthanc image required}
+    pull_policy: never
+    command: /etc/orthanc
+    user: "10001:10001"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=64m,uid=10001,gid=10001
+    volumes:
+      - ./orthanc/hospital-b-receiver.json:/etc/orthanc/orthanc.json:ro
+      - type: bind
+        source: ${HIPASS_B_PACS_ENCRYPTED_MOUNT:?verified B-local encrypted filesystem required}/orthanc-db
+        target: /var/lib/orthanc/db
+        bind:
+          create_host_path: false
+    networks: [b_pacs_private]
+    restart: 'no'
+    healthcheck:
+      test: [CMD, /usr/local/bin/busybox, wget, -T, '3', -q, -O, /dev/null, 'http://127.0.0.1:8042/system']
+      interval: 10s
+      timeout: 5s
+      retries: 12
+  b-pacs-mtls:
+    image: ${HIPASS_B_RECEIVER_IMAGE:?pinned reviewed receiver image required}
+    pull_policy: never
+    command: [scripts/start-b-pacs-mtls.js]
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=16m,uid=65532,gid=65532
+    environment:
+      B_PACS_TLS_CERT_FILE: /run/secrets/b-pacs-server.crt
+      B_PACS_TLS_KEY_FILE: /run/secrets/b-pacs-server.key
+      B_PACS_TLS_CA_FILE: /run/secrets/ca.crt
+      B_PACS_ENCRYPTED_LUKS_UUID: ${B_PACS_ENCRYPTED_LUKS_UUID:?verified LUKS UUID required}
+    volumes:
+      - ${HIPASS_B_PACS_SECRETS_DIR:?B root-protected secrets required}/b-pacs-server.crt:/run/secrets/b-pacs-server.crt:ro
+      - ${HIPASS_B_PACS_SECRETS_DIR}/b-pacs-server.key:/run/secrets/b-pacs-server.key:ro
+      - ${HIPASS_B_PACS_SECRETS_DIR}/ca.crt:/run/secrets/ca.crt:ro
+      - type: bind
+        source: ${HIPASS_B_PACS_ENCRYPTED_MOUNT:?verified B-local encrypted filesystem required}
+        target: /run/pacs-storage-check
+        read_only: true
+        bind:
+          create_host_path: false
+    networks: [b_pacs_private, b_pacs_receiver]
+    depends_on:
+      b-orthanc: {condition: service_healthy}
+    restart: 'no'
+networks:
+  b_pacs_private:
+    internal: true
+  b_pacs_receiver:
+    internal: true
+    name: highpass_b_pacs_receiver

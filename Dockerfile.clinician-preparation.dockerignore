@@ -1,0 +1,9 @@
+**
+!Dockerfile.clinician-preparation
+!artifacts/
+!artifacts/workstation/
+!artifacts/workstation/clinician-preparation-20261012T153204Z/
+!artifacts/workstation/clinician-preparation-20261012T153204Z/index.html
+!public/
+!public/ui/
+!public/ui/clinician-preparation.css

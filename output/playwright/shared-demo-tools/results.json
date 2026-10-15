@@ -1,0 +1,49 @@
+[
+  {
+    "width": 1440,
+    "result": "PASS",
+    "checks": [
+      "one shared dialog",
+      "role menus",
+      "focus containment",
+      "Escape and focus return",
+      "no overflow",
+      "no page errors"
+    ]
+  },
+  {
+    "width": 390,
+    "result": "PASS",
+    "checks": [
+      "one shared dialog",
+      "role menus",
+      "focus containment",
+      "Escape and focus return",
+      "no overflow",
+      "no page errors"
+    ]
+  },
+  {
+    "width": 320,
+    "result": "PASS",
+    "checks": [
+      "one shared dialog",
+      "role menus",
+      "focus containment",
+      "Escape and focus return",
+      "no overflow",
+      "no page errors"
+    ]
+  },
+  {
+    "result": "PASS",
+    "scope": "isolated synthetic UI fixture, not Azure authentication",
+    "checks": [
+      "public restrictions collapsed",
+      "all restricted actions disabled",
+      "no admin menu",
+      "consent not represented as access or receipt",
+      "no action executed"
+    ]
+  }
+]

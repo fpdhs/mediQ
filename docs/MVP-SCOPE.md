@@ -37,3 +37,7 @@
 - 실제 환자정보, 임상 판단 및 의료기관 운영: `N/A-MVP`
 
 `node scripts/mvp-verify.js`에서 핵심 로컬 게이트가 PASS여야 한다. 외부 또는 레지스트리 의존 항목은 숨김 없이 `ENVIRONMENT_BLOCKED`로 표시하며, 생성 증적은 검토 전 `DRAFT / UNASSIGNED`다.
+
+## 2026-10-10 시연환경 구분
+
+위 외부 항목의 KMS/HSM은 운영환경 준비를 뜻한다. 학생용 Azure Key Vault를 사용하는 합성 데이터 시연의 실제 wrap/키 발급·소비 및 Viewer 경로에는 별도 실행 증적이 있다. 이를 운영 KMS/HSM, 모든 클라우드 감사, 실제 병원 연동 또는 법률 승인 완료로 확대하지 않는다. 최신 exact 이미지·데이터·실행 범위·남은 항목은 [발표 환경 통합 상태](implementation/mediq-presentation-integration-status-2026-10-09.md)를 따른다. 학생용 Key Vault가 이미 제공된 시연 경로를 일괄 외부 자원 BLOCKED로 표시하지 않으며, 운영 전환과 전체 MVP/v3 완료 조건은 그대로 남긴다.

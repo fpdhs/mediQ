@@ -1,0 +1,41 @@
+.share-review {max-width:1060px;margin:0 auto;padding:32px 24px 60px;color:#192638;}
+.share-review .share-back {border:0;background:none;color:#5d6b77;padding:12px 0;font:inherit;cursor:pointer;}
+.share-review .page-head {margin:20px 0 30px;}
+#patient-portal-app .share-review .page-head h1 {font-size:clamp(30px,3.5vw,46px);line-height:1.22;letter-spacing:-1.6px;font-weight:750;}
+#patient-portal-app .share-review .page-head p {font-size:17px;color:#687581;margin-top:16px;}
+.share-notice {background:#fff4dd;border:1px solid #eadabb;border-radius:12px;padding:16px 20px;color:#705627;margin-bottom:24px;}
+.share-ticket {display:grid;grid-template-columns:1.65fr 1fr;border:1px solid #dce2dc;border-radius:24px;overflow:hidden;background:#fff;box-shadow:0 10px 28px #19263806;}
+.share-exam {padding:32px 36px;position:relative;}
+.share-exam {display:grid;grid-template-columns:minmax(0,1fr) 56px;column-gap:20px;align-content:start;}
+.share-exam > :not(.share-ticket-icon) {grid-column:1 / -1;min-width:0;overflow-wrap:anywhere;}
+.share-exam > p:first-of-type,.share-exam > h2 {grid-column:1;}
+.share-ticket-icon {grid-column:2;grid-row:1 / 3;align-self:start;display:grid;place-items:center;width:56px;height:56px;color:#386a5c;background:#edf3e9;border-radius:16px;}
+.share-ticket-icon svg {width:32px;height:32px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.share-ticket h2 {font-size:29px;letter-spacing:-1px;margin:18px 0;}
+.share-ticket p {line-height:1.7;margin:8px 0;}
+.share-exam small {display:inline-block;margin-top:18px;background:#f1f4f5;color:#64717a;padding:6px 10px;border-radius:6px;}
+.share-destination {background:#edf3e9;border-left:2px dashed #cbd8c8;padding:32px;display:flex;flex-direction:column;justify-content:center;}
+.share-destination span {font-size:13px;line-height:1.6;color:#526751;}
+.share-boundaries {display:grid;grid-template-columns:1fr 1fr;gap:48px;padding:30px 12px;border-bottom:1px solid #dfe4e6;}
+.share-review h3 {font-size:18px;margin:0 0 16px;}
+.share-boundaries p {font-size:15px;line-height:1.6;color:#5c6976;margin:10px 0;}
+.share-period {padding:26px 12px;}
+.share-period p {font-size:17px;line-height:1.6;}
+.share-period small,.share-caption {color:#6a7683;font-size:13px;}
+#patient-portal-app .share-review .dashboard-grid {display:flex;flex-direction:column;gap:24px;}
+#patient-portal-app .share-review .panel {box-shadow:none;border:0;background:transparent;}
+#patient-portal-app .share-review .panel-pad {padding:0;}
+.share-edit {background:white;border:1px solid #dde3e8;border-radius:14px;padding:18px 22px;margin-bottom:24px;}
+.share-edit summary {cursor:pointer;font-weight:650;font-size:15px;}
+.share-edit .hp-consent-grid {margin-top:22px;}
+.share-review .share-ack {display:flex;align-items:center;gap:12px;font-size:17px;font-weight:650;padding:18px 0;cursor:pointer;}
+.share-ack input {width:23px;height:23px;accent-color:#3566b8;flex-shrink:0;}
+.share-disclaimer {max-width:760px;color:#687581;font-size:14px;line-height:1.8;margin:0 0 24px;}
+.share-review .hp-consent-actions {display:flex;flex-wrap:wrap;gap:12px;}
+.share-review #patient-consent {background:#3566b8;border-color:#3566b8;border-radius:12px;padding:15px 24px;flex:1;}
+.share-review #patient-consent:disabled {opacity:.45;cursor:not-allowed;}
+.share-review .btn {border-radius:12px;min-height:48px;}
+.share-review .share-caption {margin:16px 0 24px;text-align:center;line-height:1.6;}
+.share-review :focus-visible {outline:3px solid #3566b8;outline-offset:4px;}
+.share-review aside {border-top:1px solid #e0e5e7;padding-top:24px;}
+@media(max-width:700px){.share-review{padding:24px 16px 40px;}.share-ticket{grid-template-columns:1fr;}.share-exam,.share-destination{padding:24px;}.share-destination{border-left:0;border-top:2px dashed #cbd8c8;}.share-boundaries{gap:20px;padding:24px 0;}.share-boundaries p{font-size:14px;}.share-review #patient-consent{flex-basis:100%;order:-1;}.share-review .share-ack{font-size:15px;}.share-ticket h2{font-size:25px;}}

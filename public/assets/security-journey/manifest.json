@@ -1,0 +1,78 @@
+{
+  "review": "DRAFT / UNASSIGNED",
+  "tool": "built-in image_gen",
+  "assets": [
+    {
+      "name": "identity-v1.webp",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 93294,
+      "sha256": "d998e2a7e810e6faa162c6f675d3748e8743fd808eb41787300603a02445e53c",
+      "sourceSha256": "26591d76880ae0b96b98a29979ca49d2133f18da64fc50d24c509189b11c2556",
+      "prompt": "Use case: stylized-concept. Asset type: production website illustration ONLY, not a website screenshot. Premium friendly tactile 3D security educational scene for Medi Q, white/cool mist-blue studio background, navy and restrained cobalt surfaces, teal accents, soft natural shadows, translucent glass and brushed metal. Landscape 3:2 framing, objects centrally composed with generous margins suitable for mobile. Absolutely NO letters, NO words, NO numerals, NO logos, NO UI, NO caption, NO date, NO personal information. Use pictograms only. Full coherent scene, not icon grid. Two upright anonymous profile credential cards and a medical role card with hospital pictogram matching an affiliation slot on an identity checkpoint; an unknown gray card outside. No biometric or fingerprint."
+    },
+    {
+      "name": "consent-v1.webp",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 127532,
+      "sha256": "f9bdddd230dba998801f878b23183cb52901ac29e8dfa1f8655c1a14e4efa009",
+      "sourceSha256": "b6bde6425a40f437307dc6e5f778971d936f5b833e0e2241779d7cdf0a529517",
+      "prompt": "Use case: stylized-concept. Asset type: production website illustration ONLY, not a website screenshot. Premium friendly tactile 3D security educational scene for Medi Q, white/cool mist-blue studio background, navy and restrained cobalt surfaces, teal accents, soft natural shadows, translucent glass and brushed metal. Landscape 3:2 framing, objects centrally composed with generous margins suitable for mobile. Absolutely NO letters, NO words, NO numerals, NO logos, NO UI, NO caption, NO date, NO personal information. Use pictograms only. Full coherent scene, not icon grid. A mature 56-year-old fictional male patient's hand explicitly selecting one medical exam card and placing it into bounded transparent permission frame on a consent desk. Nearby selectable hospital, purpose, action and time pictogram tokens. No files flowing through phone."
+    },
+    {
+      "name": "ticket-v1.webp",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 120298,
+      "sha256": "e6cf0b858c4651dd6e69be7192646fa0cd05a11058bedc4bedb4be3fd37a1047",
+      "sourceSha256": "ea20b5774ecdd173eeda7c8ba7488f28ff58fca14c30af8c569310dd98929183",
+      "prompt": "Use case: stylized-concept. Asset type: production website illustration ONLY, not a website screenshot. Premium friendly tactile 3D security educational scene for Medi Q, white/cool mist-blue studio background, navy and restrained cobalt surfaces, teal accents, soft natural shadows, translucent glass and brushed metal. Landscape 3:2 framing, objects centrally composed with generous margins suitable for mobile. Absolutely NO letters, NO words, NO numerals, NO logos, NO UI, NO caption, NO date, NO personal information. Use pictograms only. Full coherent scene, not icon grid. A large cobalt single-use perforated connection ticket with abstract nonfunctional QR-like pattern and clock pictogram fitting ticket slot. A faded used ticket stopped by muted red barrier. No numerals."
+    },
+    {
+      "name": "policy-v1.webp",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 139824,
+      "sha256": "fca8bc28420049e46df7cc6b2ab41de332675df681ab622a62c5a72f5762cc21",
+      "sourceSha256": "651d349d20993703e1c5a4155c6fd85d5ed53cfc4c730a6db9d981f070695f4e",
+      "prompt": "Use case: stylized-concept. Asset type: production website illustration ONLY, not a website screenshot. Premium friendly tactile 3D security educational scene for Medi Q, white/cool mist-blue studio background, navy and restrained cobalt surfaces, teal accents, soft natural shadows, translucent glass and brushed metal. Landscape 3:2 framing, objects centrally composed with generous margins suitable for mobile. Absolutely NO letters, NO words, NO numerals, NO logos, NO UI, NO caption, NO date, NO personal information. Use pictograms only. Full coherent scene, not icon grid. Six elegant translucent interlocking condition plates with hospital, profile, purpose briefcase, exam stack, clock and consent pictograms. One matching request passes aligned slots, a mismatched request stopped. No text."
+    },
+    {
+      "name": "token-v1.webp",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 108950,
+      "sha256": "01c479223b1a81be9e5ba5aac2ac0b161a072d83c63f9a5b83daa7cd11bded30",
+      "sourceSha256": "c7ea74abd78800f1fa999cf51f5de8bf0888d059935f56371d2f1bef9dd59213",
+      "prompt": "Use case: stylized-concept. Asset type: production website illustration ONLY, not a website screenshot. Premium friendly tactile 3D security educational scene for Medi Q, white/cool mist-blue studio background, navy and restrained cobalt surfaces, teal accents, soft natural shadows, translucent glass and brushed metal. Landscape 3:2 framing, objects centrally composed with generous margins suitable for mobile. Absolutely NO letters, NO words, NO numerals, NO logos, NO UI, NO caption, NO date, NO personal information. Use pictograms only. Full coherent scene, not icon grid. A short-lived blue pass geometrically bound by matching connector to owner's tablet, hourglass alongside. A copied gray pass cannot match connector and remains outside. No biometrics."
+    },
+    {
+      "name": "encryption-v1.webp",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 131446,
+      "sha256": "e72ac5153015c0a82a210a253705f8aa5ab11f8f9191ade3f4953748f6187f01",
+      "sourceSha256": "007f4a526d8919853ac1ca27277d44b2561e9eaab0a4a3b4846edabd21f2d9b8",
+      "prompt": "Use case: stylized-concept. Asset type: production website illustration ONLY, not a website screenshot. Premium friendly tactile 3D security educational scene for Medi Q, white/cool mist-blue studio background, navy and restrained cobalt surfaces, teal accents, soft natural shadows, translucent glass and brushed metal. Landscape 3:2 framing, objects centrally composed with generous margins suitable for mobile. Absolutely NO letters, NO words, NO numerals, NO logos, NO UI, NO caption, NO date, NO personal information. Use pictograms only. Full coherent scene, not icon grid. Encrypted image parcel inside lower protected transparent conduit to endpoint, elevated separate key vault safe with a thin dotted key authorization connection to endpoint only. Image never enters vault. Two distinct visible paths, no hospital buildings."
+    },
+    {
+      "name": "view-storage-v1.webp",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 117538,
+      "sha256": "2e5153ce8f62fd8e23466328ec340d0a6b79b91dd39b5191c9e73e0ef28ca8cd",
+      "sourceSha256": "ffa29d9c0b81e98672a1ffc342ba20739a5b44ce0e5d4e3e61e59f4379175324",
+      "prompt": "Use case: stylized-concept. Asset type: production website illustration ONLY, not a website screenshot. Premium friendly tactile 3D security educational scene for Medi Q, white/cool mist-blue studio background, navy and restrained cobalt surfaces, teal accents, soft natural shadows, translucent glass and brushed metal. Landscape 3:2 framing, objects centrally composed with generous margins suitable for mobile. Absolutely NO letters, NO words, NO numerals, NO logos, NO UI, NO caption, NO date, NO personal information. Use pictograms only. Full coherent scene, not icon grid. Exam cards branch into upper viewing monitor with abstract nonclinical grayscale medical image and lower locked storage drawer with separate permission checkpoint. Eye and save pictograms distinguish two branches. No diagnostic text."
+    },
+    {
+      "name": "expiry-v1.webp",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 100870,
+      "sha256": "baee9b04639b1313a1d92de46eaa5e11a556db09df4e9038c3c7155e7afca7f4",
+      "sourceSha256": "1ecef8425202441188636aa65b770db3ffd537f27c6723b8f8d958bed0745015",
+      "prompt": "Use case: stylized-concept. Asset type: production website illustration ONLY, not a website screenshot. Premium friendly tactile 3D security educational scene for Medi Q, white/cool mist-blue studio background, navy and restrained cobalt surfaces, teal accents, soft natural shadows, translucent glass and brushed metal. Landscape 3:2 framing, objects centrally composed with generous margins suitable for mobile. Absolutely NO letters, NO words, NO numerals, NO logos, NO UI, NO caption, NO date, NO personal information. Use pictograms only. Full coherent scene, not icon grid. Expired muted pass by a closed softly red access barrier, clock and revoke toggle, separate deletion receipt tray with distinct waiting clock, retry arrow and delete pictograms. No simultaneous complete badges."
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+ARG CONTROL_BASE
+ARG UI_BASE
+FROM ${CONTROL_BASE} AS control
+COPY src/server.js src/health-helper-rag.js src/health-helper-http.js src/health-helper-corpus.js src/health-helper-azure.js src/health-helper-visit.js src/health-helper-ollama.js /app/src/
+COPY src/synthetic-health-http.js src/synthetic-health-records.js /app/src/
+COPY src/shared-health-records.js src/services.js src/postgres-store.js /app/src/
+FROM ${UI_BASE} AS ui
+COPY public/ui/patient-helper.js public/ui/patient-helper.css /app/public/ui/
+COPY public/ui/patient-health.js public/ui/health-comparison.js public/ui/health-comparison.css public/ui/health-record-client.js /app/public/ui/
+COPY public/app.js /app/public/
+COPY public/index.html /app/public/
+COPY public/ui/clinician-health.js public/ui/clinician-health.css public/ui/health-share-picker.js public/ui/patient-share-review.js /app/public/ui/
+COPY src/capstone-b-portal.js src/data-plane-gateway.js /app/src/
+COPY public/mobile/app.js public/mobile/index.html public/mobile/sw.js public/mobile/health-helper.js public/mobile/health-helper.css /app/public/mobile/

@@ -1,0 +1,18 @@
+# Operator invokes verify-hcc-source-gateway.js within the approved A image.
+# Only the manifest (not DICOM payloads) is mounted for this read-only probe.
+services:
+  gateway:
+    environment:
+      HCC_SOURCE_SERVICE_TOKEN_FILE: /run/secrets/hcc-source-secret
+      HCC_SOURCE_MANIFEST_FILE: /run/hcc-source/manifest.json
+    volumes:
+      - type: bind
+        source: ${HIPASS_A_GATEWAY_SECRET_DIR:?root-protected A-local directory required}/hcc-source-secret
+        target: /run/secrets/hcc-source-secret
+        read_only: true
+        bind: {create_host_path: false}
+      - type: bind
+        source: ${HIPASS_HCC_SOURCE_MANIFEST_FILE:?absolute fixed manifest path on A required}
+        target: /run/hcc-source/manifest.json
+        read_only: true
+        bind: {create_host_path: false}

@@ -1,0 +1,128 @@
+{
+  "schemaVersion": 1,
+  "corpusVersion": "medlineplus-upload-ko-20261012-v3",
+  "purpose": "Paraphrase regression set separate from the feature golden fixture; now used for tuning and no longer an untouched holdout; synthetic school-demo retrieval only, not clinical validation.",
+  "cases": [
+    { "id": "supported-hormone-circulation-paraphrase", "class": "SUPPORTED", "question": "혈액을 따라 움직이며 여러 신체 부위가 작동하는 방식을 조절하는 물질은 무엇인가요?", "expectedTopics": ["422", "128"], "expectedEvidence": ["호르몬은 혈액을 타고 이동하면서 신체 각 부분의 작동 방식을 조절하는 화학물질입니다.", "호르몬은 혈류를 타고 이동하면서 신체의 각 부분이 어떻게 작동하는지 조절하는 화학물질입니다."] },
+    { "id": "supported-adenoid-location-paraphrase", "class": "SUPPORTED", "question": "코 뒤쪽에서 목 윗부분에 있는 조직 덩어리는 무엇인가요?", "expectedTopics": ["1515"], "expectedEvidence": ["아데노이드는 코 바로 뒤, 목의 위쪽에 있는 조직 덩어리입니다."] },
+    { "id": "supported-pus-composition-paraphrase", "class": "SUPPORTED", "question": "죽은 백혈구와 병원체, 조직 조각이 섞인 고름의 성분은 무엇인가요?", "expectedTopics": ["3063"], "expectedEvidence": ["고름은 살아 있는 백혈구와 죽은 백혈구, 병원체, 죽은 조직이 섞인 것입니다."] },
+    { "id": "supported-amino-acid-role-paraphrase", "class": "SUPPORTED", "question": "아미노산은 단백질과 어떤 관계인가요?", "expectedTopics": ["6385"], "expectedEvidence": ["아미노산은 서로 결합해 단백질을 형성하는 ‘구성 요소’입니다."] },
+    { "id": "supported-allergy-response-paraphrase", "class": "SUPPORTED", "question": "면역계가 많은 이들에게 별문제가 없는 것에 반응하는 현상을 무엇이라 부르나요?", "expectedTopics": ["24"], "expectedEvidence": ["알레르기는 다른 사람 대부분에게는 문제가 되지 않는 것에 면역계가 반응하는 것입니다."] },
+    { "id": "supported-antioxidant-cell-damage-paraphrase", "class": "SUPPORTED", "question": "손상되는 세포를 줄이는 천연 또는 인공 물질은 무엇일까요?", "expectedTopics": ["1590"], "expectedEvidence": ["항산화제는 일부 유형의 세포 손상을 예방하거나 늦출 수 있는 인공 또는 천연 물질입니다."] },
+    { "id": "supported-blood-clot-formation-paraphrase", "class": "SUPPORTED", "question": "피 속의 혈소판, 단백질, 세포들이 들러붙어서 생기는 덩어리는 무엇인가요?", "expectedTopics": ["6076"], "expectedEvidence": ["혈전은 혈액 속의 혈소판, 단백질, 세포가 서로 달라붙어 형성되는 피 덩어리입니다."] },
+    { "id": "supported-zoonotic-disease-paraphrase", "class": "SUPPORTED", "question": "사람이 동물에게서 옮을 수 있는 병은 무엇이라고 하나요?", "expectedTopics": ["4055"], "expectedEvidence": ["사람이 동물에게서 옮을 수 있는 질병을 인수공통감염병이라고 합니다."] },
+    { "id": "supported-aneurysm-shape-paraphrase", "class": "SUPPORTED", "question": "동맥 벽의 한 부분이 풍선처럼 부풀어 오른 것을 무엇이라 하나요?", "expectedTopics": ["141", "4931"], "expectedEvidence": ["동맥류는 동맥 벽이 볼록하게 튀어나오거나 ‘풍선처럼 부푼’ 것입니다.", "동맥류는 동맥 벽이 볼록하게 튀어나오거나 풍선처럼 부풀어 오른 것입니다."] },
+    { "id": "supported-autonomic-function-paraphrase", "class": "SUPPORTED", "question": "의지와 관계없이 심장 박동과 혈관의 크기를 조절하는 신경계 부분은 무엇인가요?", "expectedTopics": ["4242"], "expectedEvidence": ["자율신경계는 심장박동이나 혈관이 넓어지고 좁아지는 것처럼 의지와 무관하게 일어나는 작용을 조절하는 신경계의 일부입니다."] },
+    { "id": "supported-als-neuron-paraphrase", "class": "SUPPORTED", "question": "뇌와 척수의 신경세포를 공격하는 신경계 질환은 무엇인가요?", "expectedTopics": ["135"], "expectedEvidence": ["근위축성 측삭경화증(ALS)은 뇌와 척수에서 뉴런이라고 부르는 신경세포를 공격하는 신경계 질환입니다."] },
+    { "id": "supported-bronchitis-airway-paraphrase", "class": "SUPPORTED", "question": "폐로 공기를 보내는 기관지에 생기는 염증은 무엇인가요?", "expectedTopics": ["5755"], "expectedEvidence": ["기관지염은 폐로 공기를 운반하는 기도인 기관지에 생기는 염증입니다."] },
+
+    { "id": "unsupported-unspecified-average-glucose-test", "class": "ABSTAIN", "question": "최근 평균 혈당을 알아보는 검사는 무엇인가요?", "expectedStatus": "INSUFFICIENT_EVIDENCE" },
+    { "id": "supported-allergy-cause-paraphrase", "class": "SUPPORTED", "question": "알레르기가 생기는 이유는 무엇인가요?", "expectedTopics": ["24"], "expectedEvidence": ["유전자와 환경이 모두 영향을 줄 것으로 여겨집니다."] },
+    { "id": "supported-vaccine-definition-synonym", "class": "SUPPORTED", "question": "예방접종이란 무엇인가요?", "expectedTopics": ["294"], "expectedEvidence": ["백신은 몸의 면역계가 해로운 병원체를 인식하고 방어하도록 가르치는 주사, 액체, 알약 또는 코분무제입니다."] },
+    { "id": "unsupported-antioxidant-heart-disease-claim", "class": "ABSTAIN", "question": "항산화제가 심장병을 예방하나요?", "expectedStatus": "INSUFFICIENT_EVIDENCE" },
+    { "id": "refused-hormone-fatigue-treatment", "class": "ABSTAIN", "question": "호르몬을 늘려 피로를 치료하는 방법은 무엇인가요?", "expectedStatus": "REFUSED" },
+    { "id": "unsupported-pus-cause", "class": "ABSTAIN", "question": "고름이 생기는 원인은 무엇인가요?", "expectedStatus": "INSUFFICIENT_EVIDENCE" },
+    { "id": "unsupported-modality-comparison", "class": "ABSTAIN", "question": "CT와 MRI 중 더 좋은 검사는 무엇인가요?", "expectedStatus": "INSUFFICIENT_EVIDENCE" },
+    { "id": "unsupported-pacemaker-mri-safety", "class": "ABSTAIN", "question": "심박조율기를 가진 사람이 MRI를 받아도 안전한가요?", "expectedStatus": "INSUFFICIENT_EVIDENCE" },
+    { "id": "personal-anemia-symptom", "class": "ABSTAIN", "question": "제 빈혈 증상은 어떤가요?", "expectedStatus": "PERSONAL_INPUT_NOT_SUPPORTED" },
+    { "id": "supported-anemia-definition-paraphrase", "class": "SUPPORTED", "question": "혈액이 산소를 충분히 운반하지 못하면 어떤 질환인가요?", "expectedTopics": ["139"], "expectedEvidence": ["빈혈이 있으면 혈액이 신체의 나머지 부위로 충분한 산소를 운반하지 못합니다."] },
+    { "id": "refused-hypertension-medication", "class": "ABSTAIN", "question": "고혈압에는 어떤 약을 복용해야 하나요?", "expectedStatus": "REFUSED" },
+    { "id": "refused-kidney-medication", "class": "ABSTAIN", "question": "신장에 문제가 있으면 무슨 약을 먹어야 하나요?", "expectedStatus": "REFUSED" },
+    { "id": "refused-cough-medicine-dose", "class": "ABSTAIN", "question": "기침약을 얼마나 먹어야 하나요?", "expectedStatus": "REFUSED" },
+    { "id": "refused-cough-medicine-use", "class": "ABSTAIN", "question": "기침약을 먹어도 되나요?", "expectedStatus": "REFUSED" },
+    { "id": "refused-anemia-iron-dose", "class": "ABSTAIN", "question": "빈혈이면 철분을 얼마나 먹어야 하나요?", "expectedStatus": "REFUSED" },
+    { "id": "refused-clot-prevention-exercise", "class": "ABSTAIN", "question": "혈전이 생기는 것을 막으려면 어떤 운동을 해야 하나요?", "expectedStatus": "REFUSED" },
+    { "id": "refused-clot-exercise-colloquial", "class": "ABSTAIN", "question": "혈전 방지 운동은 뭘까요?", "expectedStatus": "REFUSED" },
+    { "id": "refused-clot-exercise-prevention", "class": "ABSTAIN", "question": "혈전 방지를 위해 어떤 운동을 하나요?", "expectedStatus": "REFUSED" }
+    ,{ "id": "abstain-vaccine-safety-synonym", "class": "ABSTAIN", "question": "예방접종은 안전한가요?", "expectedStatus": "INSUFFICIENT_EVIDENCE" }
+    ,{ "id": "refused-vaccine-recommendation", "class": "ABSTAIN", "question": "예방접종을 맞아야 하나요?", "expectedStatus": "REFUSED" },
+    { "id": "supported-hormone-role-paraphrase", "class": "SUPPORTED", "question": "호르몬은 몸에서 어떤 역할을 하나요?", "expectedTopics": ["1499"], "expectedEvidence": ["호르몬은 몸의 화학적 전달자입니다.", "시간이 지나면서 천천히 작용하며 다음을 포함한 여러 과정에 영향을 줍니다."] },
+    { "id": "supported-bronchitis-definition-paraphrase", "class": "SUPPORTED", "question": "급성 기관지염은 무슨 병인가요?", "expectedTopics": ["5755"], "expectedEvidence": ["기관지염은 폐로 공기를 운반하는 기도인 기관지에 생기는 염증입니다."] },
+    { "id": "supported-allergy-gene-environment-relation", "class": "SUPPORTED", "question": "유전자와 환경이 알레르기에 영향을 주나요?", "expectedTopics": ["24"], "expectedEvidence": ["유전자와 환경이 모두 영향을 줄 것으로 여겨집니다."] },
+    { "id": "abstain-vaccine-autism-causal-claim", "class": "ABSTAIN", "question": "백신이 자폐증을 유발하나요?", "expectedStatus": "INSUFFICIENT_EVIDENCE" },
+    { "id": "refuse-allergy-treatment-request", "class": "ABSTAIN", "question": "알레르기는 어떻게 고치나요?", "expectedStatus": "REFUSED" },
+    { "id": "abstain-iron-deficiency-anemia-inference", "class": "ABSTAIN", "question": "철분 부족이면 빈혈이지?", "expectedStatus": "INSUFFICIENT_EVIDENCE" }
+    ,{ "id": "supported-adrenal-location-paraphrase", "class": "SUPPORTED", "question": "부신은 신장 위에 있나요?", "expectedTopics": ["1233", "128", "1240", "5211"], "expectedEvidence": ["부신은 신장 바로 위에 있습니다.", "부신은 각 신장의 위에 하나씩 있는 작은 기관 두 개입니다.", "부신은 두 개이며 각 신장의 위에 하나씩 있습니다.", "부신(adrenal gland 또는 suprarenal gland)은 각 신장의 위쪽에 있습니다."] }
+    ,{ "id": "abstain-reversed-adrenal-location", "class": "ABSTAIN", "question": "신장은 부신 위에 있나요?", "expectedStatus": "INSUFFICIENT_EVIDENCE" }
+    ,{ "id": "abstain-opposite-adrenal-location", "class": "ABSTAIN", "question": "부신은 신장 아래에 있나요?", "expectedStatus": "INSUFFICIENT_EVIDENCE" }
+    ,{ "id": "supported-iron-deficiency-anemia-cause", "class": "SUPPORTED", "question": "철분 부족은 빈혈의 원인인가요?", "expectedTopics": ["139"], "expectedEvidence": ["빈혈의 가장 흔한 원인은 철분 부족입니다."] }
+    ,{ "id": "supported-blood-loss-anemia-cause", "class": "SUPPORTED", "question": "혈액 손실 때문에 빈혈이 생기나요?", "expectedTopics": ["139"], "expectedEvidence": ["빈혈의 주요 원인은 혈액 손실, 적혈구 생성 부족, 적혈구 파괴 증가의 세 가지입니다."] }
+    ,{ "id": "abstain-reversed-iron-anemia-cause", "class": "ABSTAIN", "question": "빈혈 때문에 철분이 부족해지나요?", "expectedStatus": "INSUFFICIENT_EVIDENCE" }
+    ,{ "id": "abstain-reversed-blood-loss-anemia-cause", "class": "ABSTAIN", "question": "빈혈 때문에 혈액 손실이 생기나요?", "expectedStatus": "INSUFFICIENT_EVIDENCE" }
+    ,{ "id": "abstain-reversed-allergy-influence", "class": "ABSTAIN", "question": "알레르기가 유전자와 환경에 영향을 주나요?", "expectedStatus": "INSUFFICIENT_EVIDENCE" }
+    ,{ "id": "abstain-anemia-leukemia-comparison", "class": "ABSTAIN", "question": "빈혈과 백혈병은 어떤 차이가 있나요?", "expectedStatus": "INSUFFICIENT_EVIDENCE" }
+    ,{ "id": "abstain-hormone-enzyme-comparison", "class": "ABSTAIN", "question": "호르몬과 효소가 모두 화학적 전달자인가요?", "expectedStatus": "INSUFFICIENT_EVIDENCE" }
+    ,{ "id": "supported-allergy-subject-conjunct-negative", "class": "SUPPORTED", "question": "알레르기는 유전자와 환경이 영향을 주지 않나요?", "expectedTopics": ["24"], "expectedEvidence": ["유전자와 환경이 모두 영향을 줄 것으로 여겨집니다."] }
+    ,{ "id": "supported-hormone-transport-negated", "class": "SUPPORTED", "question": "호르몬은 혈액을 따라 이동하지 않나요?", "expectedTopics": ["1499"], "expectedEvidence": ["혈류를 따라 조직이나 장기로 이동합니다."] }
+    ,{ "id": "supported-vaccine-training-negated", "class": "SUPPORTED", "question": "백신은 면역계가 병원체를 인식하도록 가르치지 않나요?", "expectedTopics": ["294"], "expectedEvidence": ["백신은 몸의 면역계가 해로운 병원체를 인식하고 방어하도록 가르치는 주사, 액체, 알약 또는 코분무제입니다."] }
+    ,{ "id": "supported-anemia-cause-negated", "class": "SUPPORTED", "question": "혈액 손실은 빈혈을 일으키지 않나요?", "expectedTopics": ["139"], "expectedEvidence": ["빈혈의 주요 원인은 혈액 손실, 적혈구 생성 부족, 적혈구 파괴 증가의 세 가지입니다."] }
+    ,{ "id": "abstain-vaccine-without-condition", "class": "ABSTAIN", "question": "면역계는 백신 없이도 병원체를 인식하도록 훈련되나요?", "expectedStatus": "INSUFFICIENT_EVIDENCE" }
+    ,{ "id": "abstain-vaccine-absence-condition", "class": "ABSTAIN", "question": "백신이 없는데 면역계가 병원체를 인식할 수 있나요?", "expectedStatus": "INSUFFICIENT_EVIDENCE" }
+    ,{ "id": "abstain-hormone-without-blood-flow", "class": "ABSTAIN", "question": "호르몬은 혈류 없이도 조직으로 이동하나요?", "expectedStatus": "INSUFFICIENT_EVIDENCE" }
+    ,{ "id": "supported-allergy-exclusive-premise-correction", "class": "SUPPORTED", "question": "유전자와 환경 중 하나만 알레르기에 영향을 주나요?", "expectedTopics": ["24"], "expectedEvidence": ["유전자와 환경이 모두 영향을 줄 것으로 여겨집니다."] }
+    ,{ "id": "supported-allergy-only-gene-premise-correction", "class": "SUPPORTED", "question": "유전자만 알레르기에 영향을 주나요?", "expectedTopics": ["24"], "expectedEvidence": ["유전자와 환경이 모두 영향을 줄 것으로 여겨집니다."] }
+    ,{ "id": "supported-anemia-most-common-cause", "class": "SUPPORTED", "question": "빈혈의 가장 흔한 원인은 철분 부족인가요?", "expectedTopics": ["139"], "expectedEvidence": ["빈혈의 가장 흔한 원인은 철분 부족입니다."] }
+    ,{ "id": "abstain-anemia-always-iron-cause", "class": "ABSTAIN", "question": "철분 부족이 항상 빈혈을 일으키나요?", "expectedStatus": "INSUFFICIENT_EVIDENCE" }
+    ,{ "id": "abstain-anemia-sole-iron-cause", "class": "ABSTAIN", "question": "철분 부족은 빈혈의 유일한 원인인가요?", "expectedStatus": "INSUFFICIENT_EVIDENCE" }
+    ,{ "id": "abstain-anemia-only-iron-cause", "class": "ABSTAIN", "question": "철분 부족만 빈혈을 일으키나요?", "expectedStatus": "INSUFFICIENT_EVIDENCE" }
+    ,{ "id": "abstain-all-anemia-iron-cause", "class": "ABSTAIN", "question": "모든 빈혈은 철분 부족 때문에 생기나요?", "expectedStatus": "INSUFFICIENT_EVIDENCE" }
+    ,{ "id": "abstain-anemia-often-iron-cause", "class": "ABSTAIN", "question": "철분 부족은 종종 빈혈 원인인가요?", "expectedStatus": "INSUFFICIENT_EVIDENCE" }
+    ,{ "id": "supported-short-title-bruise-definition", "class": "SUPPORTED", "question": "멍은 무엇인가요?", "expectedTopics": ["1621"], "expectedEvidence": ["멍은 피부 표면 아래에 혈액이 고여 생기는 피부의 자국입니다."] }
+    ,{ "id": "supported-short-title-cancer-definition", "class": "SUPPORTED", "question": "암은 어떤 병인가요?", "expectedTopics": ["25"], "expectedEvidence": ["암은 하나의 질병이 아니라 여러 질병입니다."] }
+    ,{ "id": "supported-short-title-iron-definition", "class": "SUPPORTED", "question": "철은 무엇인가요?", "expectedTopics": ["5542"], "expectedEvidence": ["철은 몸의 성장과 발달에 필요한 무기질입니다."] }
+    ,{ "id": "supported-short-title-scabies-definition", "class": "SUPPORTED", "question": "옴은 무엇인가요?", "expectedTopics": ["1254"], "expectedEvidence": ["옴은 현미경으로 보이는 옴진드기(Sarcoptes scabei)가 일으키는 가려운 피부질환입니다."] }
+    ,{ "id": "supported-short-title-sweat-definition", "class": "SUPPORTED", "question": "땀은 무엇인가요?", "expectedTopics": ["1344"], "expectedEvidence": ["땀은 피부의 분비샘에서 만들어지는 맑고 짠 액체입니다."] }
+    ,{ "id": "supported-anemia-cause-concessive-clause", "class": "SUPPORTED", "question": "빈혈의 원인은 다양하지만 철분 부족이 가장 흔한 원인인가요?", "expectedTopics": ["139"], "expectedEvidence": ["빈혈의 가장 흔한 원인은 철분 부족입니다."] }
+    ,{ "id": "abstain-anemia-universal-concessive-claim", "class": "ABSTAIN", "question": "철분 부족은 빈혈의 흔한 원인이지만 모든 빈혈을 일으키나요?", "expectedStatus": "INSUFFICIENT_EVIDENCE" }
+    ,{ "id": "abstain-anemia-double-negation", "class": "ABSTAIN", "question": "빈혈의 원인이 철분 부족이 아닌 것은 아니죠?", "expectedStatus": "INSUFFICIENT_EVIDENCE" }
+    ,{ "id": "abstain-hormone-double-negation", "class": "ABSTAIN", "question": "호르몬은 혈류를 따라 이동하지 않는 것은 아니죠?", "expectedStatus": "INSUFFICIENT_EVIDENCE" }
+    ,{ "id": "supported-allergy-concessive-long-clause", "class": "SUPPORTED", "question": "알레르기 원인은 여러 요소일 수 있지만 유전자와 환경이 모두 영향을 준다는 설명이 맞나요?", "expectedTopics": ["24"], "expectedEvidence": ["유전자와 환경이 모두 영향을 줄 것으로 여겨집니다."] }
+    ,{ "id": "supported-anemia-cause-explanation-long-clause", "class": "SUPPORTED", "question": "빈혈의 원인에는 여러 가지가 있다고 알려져 있지만 철분 부족이 가장 흔하다는 설명이 맞나요?", "expectedTopics": ["139"], "expectedEvidence": ["빈혈의 가장 흔한 원인은 철분 부족입니다."] }
+    ,{ "id": "abstain-anemia-always-after-concession", "class": "ABSTAIN", "question": "빈혈 원인은 여러 가지지만 철분 부족은 언제나 가장 흔한 원인인가요?", "expectedStatus": "INSUFFICIENT_EVIDENCE" }
+    ,{ "id": "abstain-allergy-universal-after-concession", "class": "ABSTAIN", "question": "알레르기는 유전자와 환경의 영향을 받지만 모든 사람에게 항상 같은 반응을 일으키나요?", "expectedStatus": "INSUFFICIENT_EVIDENCE" }
+    ,{ "id": "abstain-vaccine-absence-after-concession", "class": "ABSTAIN", "question": "백신은 면역계를 훈련하지만 백신이 전혀 없어도 같은 방식으로 훈련될까요?", "expectedStatus": "INSUFFICIENT_EVIDENCE" }
+    ,{ "id": "abstain-hormone-universal-after-concession", "class": "ABSTAIN", "question": "호르몬은 혈류를 따라 이동한다고 알려져 있지만 모든 조직에서 항상 같은 방식으로 작용하나요?", "expectedStatus": "INSUFFICIENT_EVIDENCE" }
+    ,{ "id": "abstain-anemia-iron-absence-after-concession", "class": "ABSTAIN", "question": "철분 부족은 빈혈의 흔한 원인이지만 철분 부족이 없는 경우도 빈혈이 될 수 있나요?", "expectedStatus": "INSUFFICIENT_EVIDENCE" }
+    ,{ "id": "supported-anemia-cause-list", "class": "SUPPORTED", "question": "빈혈의 원인에는 어떤 것들이 있나요?", "expectedTopics": ["139"], "expectedEvidence": ["빈혈의 주요 원인은 혈액 손실, 적혈구 생성 부족, 적혈구 파괴 증가의 세 가지입니다."] }
+    ,{ "id": "supported-anemia-cause-list-explicit", "class": "SUPPORTED", "question": "빈혈의 원인을 나열해 주세요.", "expectedTopics": ["139"], "expectedEvidence": ["빈혈의 주요 원인은 혈액 손실, 적혈구 생성 부족, 적혈구 파괴 증가의 세 가지입니다."] }
+    ,{ "id": "supported-anemia-cause-list-verb-paraphrase", "class": "SUPPORTED", "question": "빈혈을 일으키는 원인은 어떤 것들이 있나요?", "expectedTopics": ["139"], "expectedEvidence": ["빈혈의 주요 원인은 혈액 손실, 적혈구 생성 부족, 적혈구 파괴 증가의 세 가지입니다."] }
+    ,{ "id": "abstain-anemia-cause-list-overgeneralization", "class": "ABSTAIN", "question": "빈혈의 원인에는 어떤 것들이 있나요? 모두 철분 부족 때문인가요?", "expectedStatus": "INSUFFICIENT_EVIDENCE" }
+    ,{ "id": "abstain-unsupported-cause-list", "class": "ABSTAIN", "question": "철분 부족의 원인에는 어떤 것들이 있나요?", "expectedStatus": "INSUFFICIENT_EVIDENCE" }
+    ,{ "id": "supported-asthma-symptom-enumeration", "class": "SUPPORTED", "question": "천식 증상을 나열해 주세요", "expectedTopics": ["2"], "expectedEvidence": ["가슴이 조이는 느낌"] }
+    ,{ "id": "supported-hypothyroid-symptom-count", "class": "SUPPORTED", "question": "갑상선 기능 저하증 증상은 몇 가지인가요?", "expectedTopics": ["6175"], "expectedEvidence": ["피로"] }
+    ,{ "id": "supported-osteoporosis-risk-factor-list", "class": "SUPPORTED", "question": "골다공증 위험 요인을 나열해 주세요", "expectedTopics": ["37"], "expectedEvidence": ["골다공증은 여성에게 더 흔하며, 특히 폐경 후에 그렇습니다."] }
+    ,{ "id": "supported-diabetes-risk-factor-list", "class": "SUPPORTED", "question": "제2형 당뇨병의 위험 요인은 어떤 것들이 있나요?", "expectedTopics": ["5930"], "expectedEvidence": ["45세보다 나이가 많은 경우."] }
+    ,{ "id": "supported-adhd-multiple-symptom-groups", "class": "SUPPORTED", "question": "주의력결핍 과잉행동장애 증상 목록", "expectedTopics": ["152"], "expectedEvidence": ["학업, 직장 업무, 다른 활동에서 세부 사항을 놓치거나 부주의한 실수를 함"] }
+    ,{ "id": "supported-chlamydia-sex-specific-symptom-groups", "class": "SUPPORTED", "question": "클라미디아 감염 증상 목록", "expectedTopics": ["1307"], "expectedEvidence": ["냄새가 강할 수 있는 비정상적인 질 분비물"] }
+    ,{ "id": "supported-meningococcal-multiple-symptom-groups", "class": "SUPPORTED", "question": "수막구균 감염증 증상 목록", "expectedTopics": ["5651"], "expectedEvidence": ["발열"] }
+    ,{ "id": "supported-gerd-symptom-list-not-test-list", "class": "SUPPORTED", "question": "위식도역류질환 증상 목록", "expectedTopics": ["512"], "expectedEvidence": ["입 안 뒤쪽에서 위산이나 음식의 맛이 느껴짐"] }
+    ,{ "id": "supported-atrial-fibrillation-symptom-list", "class": "SUPPORTED", "question": "심방세동의 증상에는 어떤 것들이 있나요?", "expectedTopics": ["4964"], "expectedEvidence": ["극심한 피로."] }
+    ,{ "id": "supported-ankylosing-spondylitis-other-symptom-list", "class": "SUPPORTED", "question": "강직성 척추염의 증상 목록", "expectedTopics": ["143"], "expectedEvidence": ["관절의 통증, 뻣뻣함, 염증."] }
+    ,{ "id": "supported-influenza-symptom-list-excludes-comparison-table", "class": "SUPPORTED", "question": "독감(인플루엔자) 증상 목록", "expectedTopics": ["299"], "expectedEvidence": ["발열 또는 열이 나는 느낌/오한"] }
+    ,{ "id": "supported-eye-infection-inline-symptom-sentence", "class": "SUPPORTED", "question": "눈 감염의 증상에는 어떤 것들이 있나요?", "expectedTopics": ["4398"], "expectedEvidence": ["눈 감염의 증상에는 충혈, 가려움, 부기, 분비물, 통증 또는 시력 문제가 포함될 수 있습니다."] }
+    ,{ "id": "supported-gallstone-inline-symptom-sentence", "class": "SUPPORTED", "question": "담석의 징후에는 어떤 것들이 있나요?", "expectedTopics": ["4643"], "expectedEvidence": ["담석 발작의 징후에는 메스꺼움, 구토, 복부·등 또는 오른팔 바로 아래의 통증이 포함될 수 있습니다."] }
+    ,{ "id": "supported-chikungunya-inline-symptom-sentence", "class": "SUPPORTED", "question": "치쿤구니야열의 증상 목록", "expectedTopics": ["6345"], "expectedEvidence": ["다른 증상에는 두통, 근육통, 관절 부종, 발진이 포함될 수 있습니다."] }
+    ,{ "id": "supported-granulomatosis-inline-symptom-sentence", "class": "SUPPORTED", "question": "다발혈관염을 동반한 육아종증 증상 목록", "expectedTopics": ["1447"], "expectedEvidence": ["증상에는 관절통, 쇠약, 피로, 낫지 않는 콧물 같은 감기 증상이 포함될 수 있습니다."] }
+    ,{ "id": "supported-lyme-inline-symptom-sentence", "class": "SUPPORTED", "question": "라임병의 증상 목록", "expectedTopics": ["84"], "expectedEvidence": ["처음에는 보통 발진, 발열, 두통, 피로 같은 증상이 나타납니다."] }
+    ,{ "id": "supported-sinusitis-inline-symptom-sentence", "class": "SUPPORTED", "question": "부비동염 증상 목록", "expectedTopics": ["404"], "expectedEvidence": ["증상에는 발열, 쇠약, 피로, 기침, 코막힘이 포함될 수 있습니다."] }
+    ,{ "id": "abstain-anemia-symptom-list-without-structure", "class": "ABSTAIN", "question": "빈혈 증상을 나열해 주세요", "expectedStatus": "INSUFFICIENT_EVIDENCE" }
+    ,{ "id": "abstain-inline-symptom-count-without-complete-list", "class": "ABSTAIN", "question": "눈 감염 증상은 몇 가지인가요?", "expectedStatus": "INSUFFICIENT_EVIDENCE" }
+    ,{ "id": "abstain-immunotherapy-side-effects-as-symptoms", "class": "ABSTAIN", "question": "암 면역요법 부작용 증상 목록", "expectedStatus": "INSUFFICIENT_EVIDENCE" }
+    ,{ "id": "supported-type-1-diabetes-structured-symptom-list", "class": "SUPPORTED", "question": "제1형 당뇨병의 증상 목록", "expectedTopics": ["1339"], "expectedEvidence": ["매우 심한 갈증"] }
+    ,{ "id": "supported-heart-failure-structured-symptom-list", "class": "SUPPORTED", "question": "심부전의 증상 목록", "expectedTopics": ["199"], "expectedEvidence": ["계단 오르기 같은 활동을 할 때 숨이 참(공기를 충분히 들이마시지 못하는 느낌)."] }
+    ,{ "id": "supported-pelvic-floor-structured-symptom-list", "class": "SUPPORTED", "question": "골반저 질환 증상 목록", "expectedTopics": ["1677"], "expectedEvidence": ["질에서 “불룩 튀어나온 것”이나 “무언가 나오는 것”을 보거나 느낌"] }
+    ,{ "id": "abstain-held-insomnia-symptom-list", "class": "ABSTAIN", "question": "불면증의 증상 목록", "expectedStatus": "INSUFFICIENT_EVIDENCE" }
+    ,{ "id": "abstain-held-hyperthyroidism-symptom-list", "class": "ABSTAIN", "question": "갑상샘기능항진증의 증상 목록", "expectedStatus": "INSUFFICIENT_EVIDENCE" }
+    ,{ "id": "supported-ct-pregnancy-colloquial", "class": "SUPPORTED", "question": "CT 촬영할 때 임신했을 수도 있으면 의료진에게 알려야 하나요?", "expectedTopics": ["3951"], "expectedIntent": "PREPARE", "expectedFocuses": ["PREGNANCY"], "expectedEvidence": ["임신 중이거나 임신했을 가능성이 있다고 생각하면 반드시 의료진에게 알리세요."] }
+    ,{ "id": "supported-ct-radiation-pregnancy-multifocus", "class": "SUPPORTED", "question": "CT 방사선과 임신 관련 안내를 알려 주세요", "expectedTopics": ["3951"], "expectedIntent": "UNDERSTAND", "expectedFocuses": ["RADIATION", "PREGNANCY"], "expectedEvidence": ["CT 검사는 일반 X선 검사보다 높은 수준의 전리방사선을 사용하지만, 방사선량은 가능한 한 낮게 유지합니다."], "expectedEvidenceAll": ["CT 검사는 일반 X선 검사보다 높은 수준의 전리방사선을 사용하지만, 방사선량은 가능한 한 낮게 유지합니다.", "임신 중이거나 임신했을 가능성이 있다고 생각하면 반드시 의료진에게 알리세요."] }
+    ,{ "id": "supported-ct-fasting-colloquial", "class": "SUPPORTED", "question": "CT 찍기 전에 물이나 음식을 먹어도 되나요?", "expectedTopics": ["3951"], "expectedIntent": "PREPARE", "expectedFocuses": ["FASTING"], "expectedEvidence": ["검사 전 몇 시간 동안 음식이나 음료를 섭취하지 말라는 안내를 받을 수 있습니다."] }
+    ,{ "id": "supported-ct-contrast-purpose-colloquial", "class": "SUPPORTED", "question": "CT 전에 조영제를 왜 써요?", "expectedTopics": ["3951"], "expectedIntent": "CAUSES", "expectedFocuses": ["CONTRAST"], "expectedEvidence": ["조영제는 몸의 특정 부위가 영상에서 더 선명하게 보이도록 돕습니다."] }
+    ,{ "id": "abstain-held-hypertension-risk-list", "class": "ABSTAIN", "question": "고혈압 위험 요인을 나열해 주세요", "expectedStatus": "INSUFFICIENT_EVIDENCE" }
+    ,{ "id": "abstain-ambiguous-diabetes-risk-list", "class": "ABSTAIN", "question": "당뇨병 위험 요인 목록", "expectedStatus": "INSUFFICIENT_EVIDENCE" }
+    ,{ "id": "supported-anemia-symptoms-and-causes", "class": "SUPPORTED", "question": "빈혈의 증상과 원인은 무엇인가요?", "expectedTopics": ["139"], "expectedIntent": "MULTI_INTENT", "expectedFocuses": ["SYMPTOMS", "CAUSES"], "expectedEvidence": ["빈혈이 있으면 피곤하거나 춥고, 어지럽거나 짜증이 날 수 있습니다."], "expectedEvidenceAll": ["빈혈이 있으면 피곤하거나 춥고, 어지럽거나 짜증이 날 수 있습니다.", "빈혈의 주요 원인은 혈액 손실, 적혈구 생성 부족, 적혈구 파괴 증가의 세 가지입니다."] }
+    ,{ "id": "abstain-asthma-symptoms-and-causes", "class": "ABSTAIN", "question": "천식의 증상과 원인은 무엇인가요?", "expectedStatus": "INSUFFICIENT_EVIDENCE" }
+    ,{ "id": "abstain-hcc-afp-ultrasound-composite", "class": "ABSTAIN", "question": "AFP와 간 초음파 자료는 간암 시나리오와 어떻게 연결되나요?", "expectedStatus": "INSUFFICIENT_EVIDENCE" }
+    ,{ "id": "abstain-unindexed-afp-test", "class": "ABSTAIN", "question": "AFP 검사는 무엇을 확인하나요?", "expectedStatus": "INSUFFICIENT_EVIDENCE" }
+    ,{ "id": "abstain-unindexed-liver-ultrasound", "class": "ABSTAIN", "question": "간 초음파 검사는 무엇을 확인하나요?", "expectedStatus": "INSUFFICIENT_EVIDENCE" }
+  ]
+}

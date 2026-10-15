@@ -1,0 +1,11 @@
+/* Render-blocking, pre-module guard. UI only; server authentication still applies. */
+html[data-capstone="1"]:not([data-auth-ready="1"]) body > :not(#capstone-login) {
+  visibility: hidden;
+}
+html[data-capstone="1"] { background: #f5f7fa; }
+.mediq-auth-waiting {position:fixed;inset:0;z-index:2147483000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:28px;background:#edf3fa;color:#192638;font-family:"Medi Q Login",system-ui,sans-serif;text-align:center;}
+.mediq-auth-waiting[hidden] {display:none;}
+.mediq-auth-waiting img {width:min(240px,60vw);height:180px;object-fit:cover;border-radius:24px;box-shadow:0 16px 40px #234c7e26;}
+#capstone-login .mediq-auth-waiting h1 {margin:8px 0 0;font-size:clamp(22px,4vw,28px);letter-spacing:-.04em;line-height:1.4;}
+.mediq-auth-waiting p {margin:0;font-size:15px;color:#526781;}
+#capstone-login.mediq-auth-pending .mediq-entry,#capstone-login.mediq-auth-pending .mediq-login-shell {display:none!important;}

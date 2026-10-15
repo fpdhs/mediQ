@@ -1,0 +1,67 @@
+/* Blender v3 mesh renders supply all leather, stitching, fold and snap.
+   CSS only positions the render layers and accessible HTML papers. */
+.sharing-wallet-v2{--share-ink:#14243c;--share-blue:#3566b8;--share-muted:#61738d;color:var(--share-ink)}
+.sharing-wallet-v2 .sharing-expanded-card{background:transparent;border:0;box-shadow:none;padding:0}
+#patient-portal-app .sharing-wallet-v2 .page-head{display:block;padding:0;text-align:center;margin:12px 0 30px}
+#patient-portal-app .sharing-wallet-v2 .page-head h1{display:block;font-size:clamp(28px,3.2vw,42px);letter-spacing:-.045em}
+#patient-portal-app .sharing-wallet-v2 .page-head p{text-align:center;width:100%;margin:12px 0 0}
+.sharing-wallet-v2 .page-head h1 svg,.sharing-wallet-v2 .sharing-preparation-steps{display:none}
+.sharing-wallet-v2 .sharing-open-wallet.sharing-open-wallet{position:relative;isolation:isolate;padding:24px 7.5% 8%;background:none;border:0;border-radius:0;box-shadow:none;overflow:visible}
+.sharing-wallet-v2 .sharing-open-wallet:before,.sharing-wallet-v2 .sharing-open-wallet:after{content:'';display:block!important;position:absolute;inset:auto 0 0;width:100%;height:auto;aspect-ratio:18/11;background:center bottom/100% auto no-repeat;pointer-events:none;border:0;box-shadow:none;border-radius:0;transform:none}
+.sharing-wallet-v2 .sharing-open-wallet:before{background-image:url('/images/mediq-wallet-model-back.webp');z-index:-1;filter:drop-shadow(0 14px 14px #18345124)}
+.sharing-wallet-v2 .sharing-open-wallet:after{background-image:url('/images/mediq-wallet-model-front.webp');z-index:2}
+.sharing-wallet-v2 .sharing-paper{padding:0;background:none;border:0;box-shadow:none}
+.sharing-wallet-v2 .sharing-compose{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:7%;align-items:stretch}
+.sharing-wallet-v2 .sharing-compose .sharing-new,.sharing-wallet-v2 .sharing-summary.sharing-summary{position:relative;background:#fffefb;border:1px solid #dce5ef;border-radius:22px 22px 12px 12px;padding:28px 26px clamp(150px,19vw,240px);margin:0;box-shadow:0 3px 0 #d1dceb,0 10px 20px #071c3d24;transform:none;isolation:isolate;min-width:0}
+.sharing-wallet-v2 .sharing-summary.sharing-summary{display:flex;flex-direction:column;align-items:stretch;background:#eff4fc;border:1px solid #fff;padding:28px 26px clamp(150px,19vw,240px)}
+.sharing-wallet-v2 .sharing-compose .sharing-new:after,.sharing-wallet-v2 .sharing-summary.sharing-summary:after{display:none!important}
+.sharing-wallet-v2 .sharing-new>h2{font-size:21px;margin:0 0 20px}.sharing-wallet-v2 .sharing-new>p:first-of-type{display:none}
+.sharing-wallet-v2 .sharing-draft{grid-template-columns:1fr;gap:20px}
+.sharing-wallet-v2 .sharing-draft label{font-size:16px;font-weight:650;gap:10px;color:var(--share-ink)}
+.sharing-wallet-v2 .sharing-draft select,.sharing-wallet-v2 .sharing-draft input{font-size:16px;font-weight:450;min-height:52px;border-color:#cedbed;border-radius:10px;color:var(--share-ink)}
+.sharing-wallet-v2 .sharing-conditions{grid-template-columns:1fr 1fr;border:0;padding:0;margin-top:20px;gap:16px}
+.sharing-wallet-v2 .sharing-conditions label:has(input[type="datetime-local"]){grid-column:1/-1}
+.sharing-wallet-v2 .sharing-draft input,.sharing-wallet-v2 .sharing-draft select{width:100%;min-width:0;box-sizing:border-box}
+.sharing-wallet-v2 #sharing-target{min-height:64px;font-weight:650;background-color:#fafdff}
+.sharing-wallet-v2 .sharing-study-preview{display:flex;gap:14px;align-items:center;padding:16px;background:#f4f7fc;border:1px solid #d7e3f2;border-radius:12px;cursor:pointer;list-style:none;text-align:left}
+.sharing-study-preview::-webkit-details-marker{display:none}
+.sharing-wallet-v2 .sharing-study-picker{font-size:14px;margin:0 0 22px}.sharing-study-picker[open]{padding-bottom:14px;border-bottom:1px solid #e0e8f2}.sharing-study-picker label{display:grid;gap:8px;margin-top:14px}.sharing-wallet-v2 .sharing-study-picker select{width:100%;min-height:48px;padding:10px;border:1px solid #cedbed;border-radius:9px;font:inherit}
+.sharing-study-preview svg{width:34px;height:34px;flex:none;color:#3566b8}.sharing-study-preview strong{display:block;font-size:21px}.sharing-study-preview .sharing-study-identity{flex:1;min-width:0}.sharing-study-identity>span{display:block;margin-top:5px;font-size:14px;color:#61738d}.sharing-study-preview .sharing-study-change{flex:none;font-size:13px;color:#3566b8;border:1px solid #c8d9ef;border-radius:8px;padding:8px}
+.sharing-study-preview:hover{border-color:#7c9ccc;background:#eff5ff}
+.sharing-wallet-v2 .sharing-summary h2{color:var(--share-ink);font-size:22px;line-height:1.5;margin:16px 0 0}
+.sharing-wallet-v2 .sharing-summary-route{font-size:15px;margin:0;padding:12px 0 18px;font-weight:500}
+.sharing-wallet-v2 .sharing-summary-exam{font-size:32px;letter-spacing:-.045em;margin:20px 0 6px;color:var(--share-ink)}
+.sharing-wallet-v2 .sharing-summary dl{background:none;padding:12px 0;border-radius:0;font-size:15px;gap:13px 12px}
+.sharing-wallet-v2 .sharing-summary dt{color:var(--share-muted)}
+.sharing-wallet-v2 .sharing-summary small{display:block;padding:12px 0 0;font-size:13px;color:#61738d;line-height:1.7;text-align:center}
+.sharing-wallet-v2 .sharing-preparing{align-self:flex-start;font-weight:650;font-size:13px}
+.sharing-summary-period{border-top:1px solid #ccdbee;margin-top:6px;padding-top:18px}.sharing-summary-period>span{display:block;color:#61738d;font-size:14px;margin-bottom:8px}.sharing-summary-period strong{font-size:18px;line-height:1.6;word-break:keep-all;display:block}.sharing-summary-period summary{font-size:13px;color:#3566b8;cursor:pointer;padding:10px 0}.sharing-summary-period p{font-size:13px;line-height:1.7;margin:4px 0;overflow-wrap:anywhere}
+.sharing-summary-action{margin-top:auto;padding-top:22px}#sharing-draft-status:empty{display:none}
+.sharing-wallet-v2 .sharing-environment{margin-top:20px;font-size:13px;line-height:1.8;color:var(--share-muted)}
+.sharing-environment summary{cursor:pointer;padding:10px 0}.sharing-wallet-v2 .sharing-note{font-size:13px}
+.sharing-wallet-v2 .sharing-period-options{grid-column:1/-1;display:flex;gap:0;flex-wrap:wrap}
+.sharing-period-options button{flex:1;min-height:48px;border:1px solid #cedbed;background:#f3f6fb;color:#334e73;font:inherit;cursor:pointer}
+.sharing-period-options button:first-child{border-radius:9px 0 0 9px}.sharing-period-options button:last-child{border-radius:0 9px 9px 0}
+.sharing-period-options button[aria-pressed=true]{background:#3566b8;color:white;border-color:#3566b8}
+.sharing-wallet-v2 .sharing-existing{margin-top:36px}
+.sharing-wallet-v2>.mq-wallet-dock{display:none}
+#tab-share.sharing-wallet-v2 .sharing-expanded-card{background:transparent;padding:0;border:0;box-shadow:none}
+#tab-share.sharing-wallet-v2 #share-wizard-wrap{position:relative;isolation:isolate;background:none;padding:0 9% 17%;border-radius:0;box-shadow:none}
+#tab-share.sharing-wallet-v2 #share-wizard-wrap:before,#tab-share.sharing-wallet-v2 #share-wizard-wrap:after{content:'';position:absolute;inset:auto 0 0;aspect-ratio:9/11;background:center bottom/100% auto no-repeat;pointer-events:none;width:100%}
+#tab-share.sharing-wallet-v2 #share-wizard-wrap:before{background-image:url('/images/mediq-wallet-model-mobile-back.webp');z-index:-1;filter:drop-shadow(0 10px 10px #18345124)}
+#tab-share.sharing-wallet-v2 #share-wizard-wrap:after{background-image:url('/images/mediq-wallet-model-mobile-front.webp');z-index:2}
+#tab-share.sharing-wallet-v2 .wizard-step-pane{position:relative;background:#fffefb;border:1px solid #dce5ef;border-radius:18px;padding:22px 18px calc(43% + 24px)!important;box-shadow:0 3px 0 #d1dceb;overflow:visible}
+#tab-share.sharing-wallet-v2 .wizard-step-pane:after{display:none}
+#tab-share.sharing-wallet-v2 .section-title{display:block;font-size:30px;line-height:1.25;letter-spacing:-.04em;word-break:keep-all}#tab-share.sharing-wallet-v2 .section-title svg{display:none}#tab-share.sharing-wallet-v2 .section-sub{font-size:15px;word-break:keep-all;line-height:1.65}
+#tab-share.sharing-wallet-v2 .wizard-stepper{display:flex;align-items:center;gap:4px;background:#edf3fb;border:1px solid #d5e2f2;border-radius:12px;padding:8px;margin:0 0 16px;box-shadow:0 2px 4px #17345020}
+#tab-share.sharing-wallet-v2 .step-line{display:none}#tab-share.sharing-wallet-v2 .step-dot{flex:1;min-width:0;font-size:12px;line-height:1.5;padding:8px 2px;text-align:center;white-space:nowrap;color:#697b91;border-radius:7px}
+#tab-share.sharing-wallet-v2 .step-dot{transition:none}
+#tab-share.sharing-wallet-v2 .step-dot.active{color:#315d92;background:transparent}#tab-share.sharing-wallet-v2 .step-dot[aria-current=step]{background:#3566b8;color:#fff;box-shadow:0 2px 5px #25487720}
+#tab-share.sharing-wallet-v2 .wizard-box-title{font-size:21px;word-break:keep-all}#tab-share.sharing-wallet-v2 .wizard-box-desc{word-break:keep-all;font-size:14px}
+#tab-share.sharing-wallet-v2 .wizard-step-pane .btn-primary{box-shadow:none;min-height:48px;font-size:14px;white-space:normal}
+#tab-share.sharing-wallet-v2 .config-label{font-size:16px;color:#14243c}#tab-share.sharing-wallet-v2 .config-select{font-size:16px;min-height:52px;border:1px solid #cedbed;background:#fafdff;border-radius:10px}
+#tab-share.sharing-wallet-v2 .summary-card{background:#ecf3fc;border:1px solid #d3e1f1;padding:18px;border-radius:14px}
+.sharing-wallet-v2 button:focus-visible,.sharing-wallet-v2 summary:focus-visible{outline:3px solid #3566b8;outline-offset:3px}
+@media(max-width:850px){.sharing-wallet-v2 .sharing-compose{grid-template-columns:1fr;gap:24px}.sharing-wallet-v2 .sharing-open-wallet.sharing-open-wallet{padding:16px 9% 13%}.sharing-wallet-v2 .sharing-open-wallet:before,.sharing-wallet-v2 .sharing-open-wallet:after{aspect-ratio:9/11}.sharing-wallet-v2 .sharing-open-wallet:before{background-image:url('/images/mediq-wallet-model-mobile-back.webp')}.sharing-wallet-v2 .sharing-open-wallet:after{background-image:url('/images/mediq-wallet-model-mobile-front.webp')}.sharing-wallet-v2 .sharing-compose .sharing-new{padding:24px 20px}.sharing-wallet-v2 .sharing-summary.sharing-summary{padding:24px 20px 43%}.sharing-wallet-v2 .sharing-conditions{grid-template-columns:1fr 1fr}}
+@media(max-width:420px){.sharing-wallet-v2 .sharing-conditions{grid-template-columns:1fr}.sharing-wallet-v2 .sharing-period-options{grid-column:1}.sharing-wallet-v2 .sharing-compose .sharing-new{padding:20px 14px}.sharing-wallet-v2 .sharing-summary.sharing-summary{padding:20px 14px 43%}.sharing-wallet-v2 .sharing-draft input{font-size:14px}}
+@media(prefers-reduced-motion:reduce){.sharing-wallet-v2 *, .sharing-wallet-v2 *:before,.sharing-wallet-v2 *:after{animation:none!important;transition:none!important}}

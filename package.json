@@ -6,13 +6,22 @@
   "type": "module",
   "packageManager": "pnpm@11.7.0",
   "scripts": {
+    "prestart": "pnpm run build:entra-client",
+    "prestart:local": "pnpm run build:entra-client",
     "start": "node src/server.js",
+    "start:local": "node scripts/start-local.js",
+    "build:entra-client": "node scripts/build-entra-client.js",
+    "ui:clinician:stage": "python scripts/clinician-bundle-stage.py",
+    "ui:clinician:check": "python scripts/clinician-ui.py check",
+    "ui:clinician:build": "python scripts/clinician-ui.py build",
+    "ui:clinician:release": "python scripts/clinician-ui.py release",
     "start:json": "node src/server.js",
     "start:postgres": "node scripts/start-postgres.js",
-    "test": "node --test",
+    "test": "node --test --test-concurrency=4",
     "test:privacy": "node --test test/privacy-filter.test.js",
     "privacy:db-gate": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/privacy-db-gate.ps1",
     "privacy:model-smoke": "node scripts/privacy-model-smoke.js",
+    "privacy:verify-local": "node scripts/privacy-local-integration-check.js",
     "security:secrets": "node scripts/security-secret-scan.js",
     "security:network": "node scripts/security-network-check.js",
     "security:readiness": "node scripts/production-readiness-check.js",
@@ -24,6 +33,8 @@
     "e2e:https": "node scripts/e2e-integration-test.js",
     "phr:verify-mapping": "node scripts/verify-phr-imaging-mapping-compose.js",
     "phr:verify-mapping:local": "node scripts/verify-phr-imaging-mapping.js",
+    "rag:mri-review-progress": "node scripts/report-health-helper-mri-review-progress.js",
+    "rag:school-demo-medical-tests:eval": "node scripts/evaluate-health-helper-school-demo-medical-tests.js",
     "compliance:evidence": "node scripts/collect-compliance-evidence.js",
     "compliance:evidence:verify": "node scripts/verify-evidence-manifest.js",
     "test:cert-fixtures": "node scripts/cert-fixture-check.js",
@@ -35,9 +46,13 @@
     "mvp:demo": "node scripts/e2e-integration-test.js",
     "mvp:negative": "node scripts/mtls-negative-check.js",
     "mvp:verify": "node scripts/mvp-verify.js",
+    "mvp:synthetic": "node scripts/synthetic-validation.js",
+    "mvp:synthetic:preflight": "node scripts/synthetic-validation.js --preflight",
     "mvp:finalize": "node scripts/phase5-final-gate.js",
     "mvp:cleanup": "node scripts/mvp-verify.js --cleanup",
     "staging:smoke": "node scripts/staging-smoke-test.js",
+    "azure:preflight": "node scripts/azure-demo-preflight.js",
+    "workstation:preflight": "powershell -NoProfile -File scripts/workstation-demo-preflight.ps1",
     "sbom": "node scripts/generate-sbom.js"
   },
   "dependencies": {
@@ -45,5 +60,9 @@
   },
   "engines": {
     "node": ">=20"
+  },
+  "devDependencies": {
+    "@azure/msal-browser": "^5.25.0",
+    "esbuild": "^0.28.2"
   }
 }

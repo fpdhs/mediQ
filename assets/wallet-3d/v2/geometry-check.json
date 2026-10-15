@@ -1,0 +1,75 @@
+{
+  "scope": "BLENDER_MODEL_GEOMETRY_ONLY",
+  "review": "DRAFT / UNASSIGNED",
+  "status": "PASS",
+  "checks": [
+    {
+      "test": "Left outer leather is a thick editable mesh",
+      "status": "PASS"
+    },
+    {
+      "test": "Right outer leather is a thick editable mesh",
+      "status": "PASS"
+    },
+    {
+      "test": "Supple center hinge is a thick editable mesh",
+      "status": "PASS"
+    },
+    {
+      "test": "Left front pocket is a thick editable mesh",
+      "status": "PASS"
+    },
+    {
+      "test": "Right front pocket is a thick editable mesh",
+      "status": "PASS"
+    },
+    {
+      "test": "Original snap strap is a thick editable mesh",
+      "status": "PASS"
+    },
+    {
+      "test": "Left removable health card is a thick editable mesh",
+      "status": "PASS"
+    },
+    {
+      "test": "Right removable sharing card is a thick editable mesh",
+      "status": "PASS"
+    },
+    {
+      "test": "Left pocket stitches is physical thread geometry",
+      "status": "PASS"
+    },
+    {
+      "test": "Right pocket stitches is physical thread geometry",
+      "status": "PASS"
+    },
+    {
+      "test": "Strap stitching is physical thread geometry",
+      "status": "PASS"
+    },
+    {
+      "test": "Procedural leather normal network exists",
+      "status": "PASS"
+    },
+    {
+      "test": "Left card occlusion at y=-1.7",
+      "status": "PASS"
+    },
+    {
+      "test": "Left card occlusion at y=1.3",
+      "status": "PASS"
+    },
+    {
+      "test": "Right card occlusion at y=-1.7",
+      "status": "PASS"
+    },
+    {
+      "test": "Right card occlusion at y=1.3",
+      "status": "PASS"
+    },
+    {
+      "test": "No external textures required",
+      "status": "PASS"
+    }
+  ]
+}

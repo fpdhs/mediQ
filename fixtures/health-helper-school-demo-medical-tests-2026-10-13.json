@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 1,
+  "version": "medlineplus-medical-tests-school-demo-ko-20261013-v1",
+  "status": "DRAFT / UNASSIGNED",
+  "collection": "MedlinePlus Medical Tests",
+  "sourceLanguage": "English",
+  "language": "Korean",
+  "rightsStatus": "public_domain_medical_test_information",
+  "rightsPolicyUrl": "https://medlineplus.gov/about/using/usingcontent/",
+  "rightsCheckedAt": "2026-10-13",
+  "humanReview": "UNASSIGNED",
+  "clinicalUse": false,
+  "serviceDeployment": false,
+  "documents": [
+    {
+      "id": "school-demo-medical-test-afp-tumor-marker",
+      "titleEn": "Alpha Fetoprotein (AFP) Tumor Marker Test",
+      "titleKo": "알파태아단백(AFP) 종양표지자 검사",
+      "schoolDemoCandidateStatus": "PASS",
+      "sourceUrl": "https://medlineplus.gov/lab-tests/alpha-fetoprotein-afp-tumor-marker-test/",
+      "aliasesKo": [
+        "AFP",
+        "알파태아단백",
+        "AFP 검사",
+        "AFP 종양표지자 검사"
+      ],
+      "aiQaStatus": "HOLD",
+      "contentReview": "UNASSIGNED",
+      "sourceContentReview": "UNASSIGNED",
+      "unresolvedIssues": [
+        "한국어 번역의 독립 대조 및 임상 검토 미실시"
+      ],
+      "segments": [
+        {
+          "id": "AFP-DEF-01",
+          "sectionKo": "검사 개요",
+          "textEn": "An AFP tumor marker test is a blood test that measures the level of AFP (alpha-fetoprotein) in a sample of your blood.",
+          "textKo": "AFP 종양표지자 검사는 혈액 검체에서 AFP(알파태아단백) 수치를 측정하는 혈액검사입니다.",
+          "sourceSha256": "sha256:edd6f680cab41c72e89d426b0f7fa3c7f0f45b2c86a821eabc4352076d02409d",
+          "translationSha256": "sha256:224c11481528ccebfb654ae425be6ce34ae1a4e0f366c9788783a8cae53cabdc"
+        },
+        {
+          "id": "AFP-LIMIT-01",
+          "sectionKo": "검사 결과의 한계",
+          "textEn": "Because high levels of AFP don’t always mean cancer, health care providers don’t use the results from an AFP test alone to screen for or diagnose cancer.",
+          "textKo": "AFP 수치가 높다고 항상 암을 의미하지는 않으므로, 의료진은 AFP 검사 결과만으로 암을 선별하거나 진단하지 않습니다.",
+          "sourceSha256": "sha256:1487e413afbf3f1c0f343bc5fddbed23bdd70458ce131c8889d2981dcfc247fd",
+          "translationSha256": "sha256:8d6bb6eba8976688f951ae0ff11788f43e468c76bd31044b331a3fe06cc109c0"
+        },
+        {
+          "id": "AFP-USE-01",
+          "sectionKo": "검사 목적",
+          "textEn": "Monitor chronic liver diseases. In people with cirrhosis or chronic hepatitis B or C, AFP testing may be used with a liver ultrasound every six months to help detect liver cancer early.",
+          "textKo": "만성 간질환을 관찰하는 데에도 사용할 수 있습니다. 간경변증 또는 만성 B형·C형 간염이 있는 사람에게는 간암을 조기에 발견하는 데 도움을 주기 위해 AFP 검사와 간 초음파를 6개월마다 함께 사용할 수 있습니다.",
+          "sourceSha256": "sha256:2b8854886ff6cff86c6463b4535d67b2b36e91d39fc28b51f12e3201bc29f93d",
+          "translationSha256": "sha256:c980ed814f364fe74609a36766b0afb7bc80e2fe0ccaf82d7f21248e2bd68085"
+        },
+        {
+          "id": "AFP-RESULT-01",
+          "sectionKo": "검사 결과의 의미",
+          "textEn": "High levels of AFP may be a sign of cancer of the liver, ovaries, or testicles. However, high levels could also be a sign of liver injury and liver diseases that aren’t cancer.",
+          "textKo": "AFP 수치가 높으면 간암, 난소암 또는 고환암의 징후일 수 있습니다. 그러나 높은 수치는 암이 아닌 간 손상이나 간 질환의 징후일 수도 있습니다.",
+          "sourceSha256": "sha256:dbde9c4c3503bbc8a08f48023753a7484c1da77f0c00b5304073ab6cb17aa6b4",
+          "translationSha256": "sha256:de307601a7d0199a6244aa56afe90ceaa8d5abbc182f4cd9dd887a600542000e"
+        },
+        {
+          "id": "AFP-RESULT-02",
+          "sectionKo": "검사 결과의 의미",
+          "textEn": "Normal levels of AFP mean you’re less likely to have a cancer that causes high AFP levels. But a normal test result doesn’t rule out cancer because some people with these cancers have normal AFP levels.",
+          "textKo": "AFP 수치가 정상이면 AFP 수치를 높이는 암이 있을 가능성은 더 낮습니다. 그러나 이러한 암이 있어도 AFP 수치가 정상인 사람이 있으므로 정상 검사 결과만으로 암을 배제할 수는 없습니다.",
+          "sourceSha256": "sha256:54239367a547003408d7104d2cb32bfd867ef555db3a443fa512ac6a3212eeca",
+          "translationSha256": "sha256:6dd7153f0f802a9235f79d875f38c0c688ee5dd887cbe57aae431e7bbe4ce439"
+        }
+      ]
+    },
+    {
+      "id": "school-demo-medical-test-ultrasound",
+      "titleEn": "Ultrasound",
+      "titleKo": "초음파",
+      "schoolDemoCandidateStatus": "PASS",
+      "sourceUrl": "https://medlineplus.gov/lab-tests/sonogram/",
+      "aliasesKo": [
+        "초음파",
+        "간 초음파",
+        "복부 초음파",
+        "초음파 검사"
+      ],
+      "aiQaStatus": "HOLD",
+      "contentReview": "UNASSIGNED",
+      "sourceContentReview": "UNASSIGNED",
+      "unresolvedIssues": [
+        "한국어 번역의 독립 대조 및 임상 검토 미실시"
+      ],
+      "segments": [
+        {
+          "id": "US-DEF-01",
+          "sectionKo": "검사 개요",
+          "textEn": "An ultrasound is an imaging test that uses sound waves to make pictures (also known as a sonogram) of organs, tissues, and other structures inside your body.",
+          "textKo": "초음파는 음파를 이용해 신체 내부의 장기, 조직 및 다른 구조의 영상(초음파 영상)을 만드는 영상검사입니다.",
+          "sourceSha256": "sha256:d01c1cac1e76000ec46e8cd125cac9093248bb47534cdd7eb2e10d895d08a1e9",
+          "translationSha256": "sha256:41f69a12cc25ce3ec935803f22ccd4a696377dc8843d0e15d0659adeea9af1dc"
+        },
+        {
+          "id": "US-USE-01",
+          "sectionKo": "검사 목적",
+          "textEn": "An ultrasound can be used in different ways, depending on the type of ultrasound and which part of the body is being checked.",
+          "textKo": "초음파는 검사 종류와 살펴보는 신체 부위에 따라 서로 다른 방식으로 사용될 수 있습니다.",
+          "sourceSha256": "sha256:b7f482d539709e2c628f96ab78b5675d8651cb87d651c93903392114328896f5",
+          "translationSha256": "sha256:d366dbaad1b6c419ae32688b991a7baf2779b4180a628706792ca00db473faf5"
+        },
+        {
+          "id": "US-USE-02",
+          "sectionKo": "검사 목적",
+          "textEn": "Ultrasound may help diagnose medical conditions that involve many parts of the body, such as the organs in the abdomen (belly), including the liver, gallbladder, pancreas, or spleen.",
+          "textKo": "초음파는 간, 담낭, 췌장 또는 비장을 포함한 복부 장기 등 신체 여러 부위와 관련된 질환을 진단하는 데 도움이 될 수 있습니다.",
+          "sourceSha256": "sha256:aed89ab1a595d659fa4ecc40e4ac7a62d769c83cb71a1f955febe88d64df5c71",
+          "translationSha256": "sha256:a4285d1731ea54244e4b58478b8b49b89c3b5f309110122d398f4c53dcf05ae5"
+        },
+        {
+          "id": "US-RESULT-01",
+          "sectionKo": "검사 결과의 의미",
+          "textEn": "If you had diagnostic ultrasound, the meaning of your results will depend on which part of the body was being looked at.",
+          "textKo": "진단 초음파 결과의 의미는 어떤 신체 부위를 검사했는지에 따라 달라집니다.",
+          "sourceSha256": "sha256:4e2aa82b1c1893b20fa3f650a2a2c11e8791e214ccf24bce4dbacb26f4d91a9a",
+          "translationSha256": "sha256:e80f6ae2b946891cbe8256b71119c5a7e030e8c8bc3c013df9242c8324587f1b"
+        }
+      ]
+    }
+  ],
+  "bundleSha256": "sha256:185e4980f3bccfaeb500f0377569ffdd2a5fcb1e3e64bb5fffadd5e0849bbf77"
+}

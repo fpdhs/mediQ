@@ -1,0 +1,747 @@
+{
+  "title": "Health Helper cross-test candidate source locators",
+  "createdAt": "2026-10-13",
+  "status": "DRAFT / UNASSIGNED",
+  "purpose": "Reviewer aid for locating candidate sections and recording explicit editorial update dates from the fixed hashed page snapshots.",
+  "limitations": [
+    "Section-title presence does not establish semantic or clinical support.",
+    "All claim-to-source judgments remain UNASSESSED until independent human review.",
+    "Candidate text is not eligible for patient service, and no model weights were trained."
+  ],
+  "snapshots": [
+    "AFP v2",
+    "Liver v4",
+    "Scenario 20261012",
+    "Screening v3"
+  ],
+  "candidateCount": 16,
+  "claimCount": 30,
+  "candidates": [
+    {
+      "topic": "시력 · 좌 / 우",
+      "question": "시력 · 좌 / 우 다른 검사와 함께 보는 이유는 무엇인가요?",
+      "chunkId": "screening-vision-purpose",
+      "reviewStatus": "DRAFT / UNASSIGNED",
+      "clinicalUse": false,
+      "serviceEligible": false,
+      "candidateTextSha256": "b06d9c76050752d87fcef46e4b929a8501a6c7e91506867ac025ed0e26b79761",
+      "sourceUrl": "https://medlineplus.gov/lab-tests/vision-screening/",
+      "sourceUpdatedAt": "2026-07-15",
+      "snapshot": "Screening v3",
+      "sourceSnapshotPath": "data/health-helper-screening-evidence-20261013-v3/sources/290a47609c1d9520f48c5f577ca7f3e50851f20ec632e03482ff712913ba99ed.html",
+      "sourcePageSha256": "sha256:b5da9366531c7f49d52dc7eb2f881b1a8fcaaa1f192c0f47324e4712997be336",
+      "sectionPath": [
+        "What is vision screening? · What is it used for?"
+      ],
+      "sourceSectionFingerprints": [
+        {
+          "sectionTitle": "What is vision screening?",
+          "sectionHtmlSha256": "sha256:84b142245b8c29951318da89ce03c6013fc44ecf520c99fe4b60b589f5e78ec4"
+        },
+        {
+          "sectionTitle": "What is it used for?",
+          "sectionHtmlSha256": "sha256:034bee26ca935215d0446687231b6dd1e5839e08c99022abd258be3e13562201"
+        }
+      ],
+      "locatorMethod": "Exact H1-H6 heading title(s) in hashed local HTML snapshot",
+      "supportAssessment": "UNASSESSED",
+      "claims": [
+        {
+          "claimId": "screening-vision-purpose-claim-1",
+          "claimText": "시력 선별검사는 가까운 곳과 먼 곳을 얼마나 잘 보는지 확인하고, 필요하면 더 종합적인 눈 검사를 안내하는 데 쓰입니다.",
+          "claimSha256": "b06d9c76050752d87fcef46e4b929a8501a6c7e91506867ac025ed0e26b79761",
+          "sourceSections": [
+            "What is vision screening? · What is it used for?"
+          ],
+          "supportStatus": "UNASSESSED"
+        }
+      ]
+    },
+    {
+      "topic": "청력 · 좌 / 우",
+      "question": "청력 · 좌 / 우 다른 검사와 함께 보는 이유는 무엇인가요?",
+      "chunkId": "screening-hearing-limits",
+      "reviewStatus": "DRAFT / UNASSIGNED",
+      "clinicalUse": false,
+      "serviceEligible": false,
+      "candidateTextSha256": "20a783466ff57ebd2a81801e3bc5680e30be8f37c9dc722c8b07db60d5da727e",
+      "sourceUrl": "https://medlineplus.gov/lab-tests/hearing-tests-for-adults/",
+      "sourceUpdatedAt": "2023-10-25",
+      "snapshot": "Screening v3",
+      "sourceSnapshotPath": "data/health-helper-screening-evidence-20261013-v3/sources/9e6accd1d7fafc9f4a89814058d4e7aa25dd9393cb00b33d08644ae829368288.html",
+      "sourcePageSha256": "sha256:9892ed26d29382960a06fff3030d6dcf24015dab613a5a5a69ae271c094f9040",
+      "sectionPath": [
+        "What do the results mean?"
+      ],
+      "sourceSectionFingerprints": [
+        {
+          "sectionTitle": "What do the results mean?",
+          "sectionHtmlSha256": "sha256:ad248820d4e07a8f9a30db5e11679ab5c28553bcde03224f31a8a583b5eacf50"
+        }
+      ],
+      "locatorMethod": "Exact H1-H6 heading title(s) in hashed local HTML snapshot",
+      "supportAssessment": "UNASSESSED",
+      "claims": [
+        {
+          "claimId": "screening-hearing-limits-claim-1",
+          "claimText": "청력검사 결과가 청력 저하의 원인을 항상 확정하는 것은 아닙니다.",
+          "claimSha256": "2a4a6f15bd36ffeb41d3f0a166b93a8cc51d168f9af5a9a5ba2b934c7f636ab5",
+          "sourceSections": [
+            "What do the results mean?"
+          ],
+          "supportStatus": "UNASSESSED"
+        },
+        {
+          "claimId": "screening-hearing-limits-claim-2",
+          "claimText": "MedlinePlus는 경우에 따라 원인을 진단하기 위해 추가 검사가 필요할 수 있다고 안내합니다.",
+          "claimSha256": "1839334ae121067d23ac1bc42acc1990f6ba3441dc73017f49a62792ccbff1ea",
+          "sourceSections": [
+            "What do the results mean?"
+          ],
+          "supportStatus": "UNASSESSED"
+        }
+      ]
+    },
+    {
+      "topic": "혈색소",
+      "question": "혈색소 다른 검사와 함께 보는 이유는 무엇인가요?",
+      "chunkId": "screening-hemoglobin-purpose",
+      "reviewStatus": "DRAFT / UNASSIGNED",
+      "clinicalUse": false,
+      "serviceEligible": false,
+      "candidateTextSha256": "942c7fc6d6ec1acf2408935ac54e8695336e58c6c8404a60ea6a1dbf73ede92f",
+      "sourceUrl": "https://medlineplus.gov/lab-tests/hemoglobin-test/",
+      "sourceUpdatedAt": "2024-10-27",
+      "snapshot": "Screening v3",
+      "sourceSnapshotPath": "data/health-helper-screening-evidence-20261013-v3/sources/0abc3748a84d4eaf8d2b394efa62a39de6bf8597ae15289b7ceed96472f22b64.html",
+      "sourcePageSha256": "sha256:a3e9e0c91c29da8541c55ca9b624aa46658d1c75931b5b5afb5f842869bde8ce",
+      "sectionPath": [
+        "What is a Hemoglobin Test? · What is it used for?"
+      ],
+      "sourceSectionFingerprints": [
+        {
+          "sectionTitle": "What is a Hemoglobin Test?",
+          "sectionHtmlSha256": "sha256:6febc934fd40e9b0e4401e94ea8f610f4e33d3c996a1ec7cdc4244c88b6d2e0f"
+        },
+        {
+          "sectionTitle": "What is it used for?",
+          "sectionHtmlSha256": "sha256:90cbf5ac33808f1098002eb62451aa5b68255193fc13a74c793db2fab993d04a"
+        }
+      ],
+      "locatorMethod": "Exact H1-H6 heading title(s) in hashed local HTML snapshot",
+      "supportAssessment": "UNASSESSED",
+      "claims": [
+        {
+          "claimId": "screening-hemoglobin-purpose-claim-1",
+          "claimText": "혈색소는 적혈구에서 산소를 운반하는 단백질이며, 혈색소 검사는 혈액 속 양을 측정해 빈혈 등을 확인하는 데 사용됩니다.",
+          "claimSha256": "9035a0301d60cf1c14b6f38834afad73ab6e439bdf115edbe400abb694ce65ac",
+          "sourceSections": [
+            "What is a Hemoglobin Test? · What is it used for?"
+          ],
+          "supportStatus": "UNASSESSED"
+        },
+        {
+          "claimId": "screening-hemoglobin-purpose-claim-2",
+          "claimText": "보통 전혈구검사의 일부로 측정됩니다.",
+          "claimSha256": "4635c884a95ded3ffd21cf01b9cfc219a5b9e7741d0873e6dca02c9054fcec1c",
+          "sourceSections": [
+            "What is a Hemoglobin Test? · What is it used for?"
+          ],
+          "supportStatus": "UNASSESSED"
+        }
+      ]
+    },
+    {
+      "topic": "간 효소 AST",
+      "question": "간 효소 AST 다른 검사와 함께 보는 이유는 무엇인가요?",
+      "chunkId": "liver-ast-purpose",
+      "reviewStatus": "DRAFT / UNASSIGNED",
+      "clinicalUse": false,
+      "serviceEligible": false,
+      "candidateTextSha256": "b2d8c4b9bebfbf635ae33b476f98379a3a7c6754b7357450cbe6f556be23ff35",
+      "sourceUrl": "https://medlineplus.gov/lab-tests/ast-test/",
+      "sourceUpdatedAt": "2024-11-05",
+      "snapshot": "Liver v4",
+      "sourceSnapshotPath": "data/health-helper-liver-evidence-20261013-v4/sources/4399642c96ac06edc173984477546b3fc49f1ab3023793946cf3b75abb5637c1.html",
+      "sourcePageSha256": "sha256:385100e6d2c26f7af9cf9c3880283d32ff3e22bbd66a1dfb0d8ece0bfe51d1c8",
+      "sectionPath": [
+        "What is an AST test?"
+      ],
+      "sourceSectionFingerprints": [
+        {
+          "sectionTitle": "What is an AST test?",
+          "sectionHtmlSha256": "sha256:6889a41d9d4ff7bd128e321391a2576c141fd827146bb5bcedfb57270a80172c"
+        }
+      ],
+      "locatorMethod": "Exact H1-H6 heading title(s) in hashed local HTML snapshot",
+      "supportAssessment": "UNASSESSED",
+      "claims": [
+        {
+          "claimId": "liver-ast-purpose-claim-1",
+          "claimText": "AST 혈액검사는 혈액 속 AST 양을 측정하며, 간 문제를 살피거나 경과를 확인하는 데 도움을 줄 수 있습니다.",
+          "claimSha256": "bfc7b955f49c5f3b49e5ef52be038eda30c1c43116be041f7b88f1e762756a79",
+          "sourceSections": [
+            "What is an AST test?"
+          ],
+          "supportStatus": "UNASSESSED"
+        },
+        {
+          "claimId": "liver-ast-purpose-claim-2",
+          "claimText": "AST는 단독으로 또는 다른 간기능 검사와 함께 시행될 수 있습니다.",
+          "claimSha256": "7cad38d9564c5259b4b87dd1e2cb9b777399ae51caabc0de368a6b1309fee48e",
+          "sourceSections": [
+            "What is an AST test?"
+          ],
+          "supportStatus": "UNASSESSED"
+        }
+      ]
+    },
+    {
+      "topic": "간 효소 ALT",
+      "question": "간 효소 ALT 다른 검사와 함께 보는 이유는 무엇인가요?",
+      "chunkId": "liver-alt-purpose",
+      "reviewStatus": "DRAFT / UNASSIGNED",
+      "clinicalUse": false,
+      "serviceEligible": false,
+      "candidateTextSha256": "547e6e035fb223b5db55b961b5b96b229118933760e8c8e3fcdc64d34d1b73a6",
+      "sourceUrl": "https://medlineplus.gov/lab-tests/alt-blood-test/",
+      "sourceUpdatedAt": "2024-11-05",
+      "snapshot": "Liver v4",
+      "sourceSnapshotPath": "data/health-helper-liver-evidence-20261013-v4/sources/45c7afb27db4c48940a2b50b1301f68c48c76b9a3ad101ade926792c9a64b505.html",
+      "sourcePageSha256": "sha256:82bb7e3e7bf10e57a1731f2335bc47f27ffc86dc0ee137246570c17b0c89d8a9",
+      "sectionPath": [
+        "What is an ALT Blood Test? · Why do I need an ALT blood test?"
+      ],
+      "sourceSectionFingerprints": [
+        {
+          "sectionTitle": "What is an ALT Blood Test?",
+          "sectionHtmlSha256": "sha256:2dd8614ced6e41f56d1b542e40e3961f5979c136f9fc5d8acce030c5c34be971"
+        },
+        {
+          "sectionTitle": "Why do I need an ALT blood test?",
+          "sectionHtmlSha256": "sha256:855ed9b60077a3a5be9b2262487277e7f4e5837717d05a57c234e3582627af19"
+        }
+      ],
+      "locatorMethod": "Exact H1-H6 heading title(s) in hashed local HTML snapshot",
+      "supportAssessment": "UNASSESSED",
+      "claims": [
+        {
+          "claimId": "liver-alt-purpose-claim-1",
+          "claimText": "ALT 혈액검사는 간 건강을 살피고 간 관련 문제를 진단하거나 경과를 확인하는 데 도움을 줍니다.",
+          "claimSha256": "665a47908f976c15f36672dfd163c5d468bb17de280aabf75395a091961362f2",
+          "sourceSections": [
+            "What is an ALT Blood Test? · Why do I need an ALT blood test?"
+          ],
+          "supportStatus": "UNASSESSED"
+        },
+        {
+          "claimId": "liver-alt-purpose-claim-2",
+          "claimText": "보통 다른 간기능 검사와 함께 시행됩니다.",
+          "claimSha256": "9483664ef00741188bc971c89a558e03b7b4aab3b1ca4cc64e7014df59b4ac86",
+          "sourceSections": [
+            "What is an ALT Blood Test? · Why do I need an ALT blood test?"
+          ],
+          "supportStatus": "UNASSESSED"
+        }
+      ]
+    },
+    {
+      "topic": "간 효소 γ-GTP",
+      "question": "간 효소 γ-GTP 다른 검사와 함께 보는 이유는 무엇인가요?",
+      "chunkId": "liver-ggt-purpose",
+      "reviewStatus": "DRAFT / UNASSIGNED",
+      "clinicalUse": false,
+      "serviceEligible": false,
+      "candidateTextSha256": "8d51c5805d05b9c2fbd49dc4b05cee4a51de8b04a7ff7b235d08bc4664f81b34",
+      "sourceUrl": "https://medlineplus.gov/lab-tests/gamma-glutamyl-transferase-ggt-test/",
+      "sourceUpdatedAt": "2024-07-29",
+      "snapshot": "Liver v4",
+      "sourceSnapshotPath": "data/health-helper-liver-evidence-20261013-v4/sources/247de67aae811d1d9849a1eb812cb0e9efdd68efdbf0a42c4b0784778323b362.html",
+      "sourcePageSha256": "sha256:5e969291f9a495768111dbe1ab6bb84f7a59a34bcf9ade5b9931bb7af3b4ca75",
+      "sectionPath": [
+        "What is a gamma-glutamyl transferase (GGT) test?"
+      ],
+      "sourceSectionFingerprints": [
+        {
+          "sectionTitle": "What is a gamma-glutamyl transferase (GGT) test?",
+          "sectionHtmlSha256": "sha256:75d9083c5fee22109a7324af95d55b627be76859356940eaf55ef01449c66c29"
+        }
+      ],
+      "locatorMethod": "Exact H1-H6 heading title(s) in hashed local HTML snapshot",
+      "supportAssessment": "UNASSESSED",
+      "claims": [
+        {
+          "claimId": "liver-ggt-purpose-claim-1",
+          "claimText": "GGT 검사는 혈액 속 GGT를 측정해 간이나 담관 관련 문제를 살피는 데 도움을 줍니다.",
+          "claimSha256": "c8f16f841e8f84d2aea4affdb41ddb944ce3692facfcf0d5728ce96fbea64de2",
+          "sourceSections": [
+            "What is a gamma-glutamyl transferase (GGT) test?"
+          ],
+          "supportStatus": "UNASSESSED"
+        },
+        {
+          "claimId": "liver-ggt-purpose-claim-2",
+          "claimText": "다른 간기능 검사, 특히 ALP 결과와 함께 확인할 수 있습니다.",
+          "claimSha256": "a1f40ac3e6849ce6f521f11f1923fa28e1d079bf4d767a7d95a89cc3b9918094",
+          "sourceSections": [
+            "What is a gamma-glutamyl transferase (GGT) test?"
+          ],
+          "supportStatus": "UNASSESSED"
+        }
+      ]
+    },
+    {
+      "topic": "신장기능 eGFR",
+      "question": "신장기능 eGFR 다른 검사와 함께 보는 이유는 무엇인가요?",
+      "chunkId": "screening-egfr-purpose",
+      "reviewStatus": "DRAFT / UNASSIGNED",
+      "clinicalUse": false,
+      "serviceEligible": false,
+      "candidateTextSha256": "6a444338032c343e8701d12cece62c606197430b0b9cc793e27d7bbf576f4e49",
+      "sourceUrl": "https://medlineplus.gov/lab-tests/estimated-glomerular-filtration-rate-egfr-and-gfr-tests/",
+      "sourceUpdatedAt": "2026-09-30",
+      "snapshot": "Screening v3",
+      "sourceSnapshotPath": "data/health-helper-screening-evidence-20261013-v3/sources/31a3b9da453a06785dc1ab9fd23b457ccb7c136e0e0eb29bce96b9b69b6bc238.html",
+      "sourcePageSha256": "sha256:0c2cad7fb77a8f72f50836ec33b4654bc0dc3d47622d099c8024c01ca8c6a3f0",
+      "sectionPath": [
+        "What are estimated glomerular filtration rate (eGFR) and GFR tests?"
+      ],
+      "sourceSectionFingerprints": [
+        {
+          "sectionTitle": "What are estimated glomerular filtration rate (eGFR) and GFR tests?",
+          "sectionHtmlSha256": "sha256:916ef3ae9aa58969935d1ba0474f21ea347637f54860060cdc5f883e3acea534"
+        }
+      ],
+      "locatorMethod": "Exact H1-H6 heading title(s) in hashed local HTML snapshot",
+      "supportAssessment": "UNASSESSED",
+      "claims": [
+        {
+          "claimId": "screening-egfr-purpose-claim-1",
+          "claimText": "eGFR은 신장이 혈액 속 노폐물을 걸러내는 정도를 추정하는 값입니다.",
+          "claimSha256": "274b6157c6125ddecbef9db641aad5896f3ea06287c4d0913e571f3f42f0253c",
+          "sourceSections": [
+            "What are estimated glomerular filtration rate (eGFR) and GFR tests?"
+          ],
+          "supportStatus": "UNASSESSED"
+        },
+        {
+          "claimId": "screening-egfr-purpose-claim-2",
+          "claimText": "선별·평가·경과 확인에 쓰이며 혈청 크레아티닌으로 계산되는 경우가 많습니다.",
+          "claimSha256": "00317945222dd9fbbe5fc360d353c7201f0a772848e17f05f1051eb3e278abed",
+          "sourceSections": [
+            "What are estimated glomerular filtration rate (eGFR) and GFR tests?"
+          ],
+          "supportStatus": "UNASSESSED"
+        }
+      ]
+    },
+    {
+      "topic": "요단백",
+      "question": "요단백 다른 검사와 함께 보는 이유는 무엇인가요?",
+      "chunkId": "screening-urine-protein-purpose",
+      "reviewStatus": "DRAFT / UNASSIGNED",
+      "clinicalUse": false,
+      "serviceEligible": false,
+      "candidateTextSha256": "f0dd26e414a91f7283bd02602717d7bef9a702e1c246642da881645c58b19967",
+      "sourceUrl": "https://medlineplus.gov/lab-tests/protein-in-urine/",
+      "sourceUpdatedAt": "2024-12-02",
+      "snapshot": "Screening v3",
+      "sourceSnapshotPath": "data/health-helper-screening-evidence-20261013-v3/sources/e571031c80f0ea3503130032d05481ec3b41faacd73c011a3d62b7c57e5e66bd.html",
+      "sourcePageSha256": "sha256:51651dd6d551ed70f5fda1425faae459af54a96d981a6dedf9d6482572ed6b77",
+      "sectionPath": [
+        "What is a protein in urine test? · What is it used for?"
+      ],
+      "sourceSectionFingerprints": [
+        {
+          "sectionTitle": "What is a protein in urine test?",
+          "sectionHtmlSha256": "sha256:d640bff864c66bb835c4e16264961bdb97b0c2a16bebb8e7594c98ff9c28144f"
+        },
+        {
+          "sectionTitle": "What is it used for?",
+          "sectionHtmlSha256": "sha256:e1104c85d2e558807596bd300c97643573e517394e289410f9dda98502e76b2a"
+        }
+      ],
+      "locatorMethod": "Exact H1-H6 heading title(s) in hashed local HTML snapshot",
+      "supportAssessment": "UNASSESSED",
+      "claims": [
+        {
+          "claimId": "screening-urine-protein-purpose-claim-1",
+          "claimText": "요단백 검사는 소변의 단백질 양을 확인하며, 일반 소변검사의 일부이거나 신장 문제를 살피고 경과를 확인하는 데 사용될 수 있습니다.",
+          "claimSha256": "f0dd26e414a91f7283bd02602717d7bef9a702e1c246642da881645c58b19967",
+          "sourceSections": [
+            "What is a protein in urine test? · What is it used for?"
+          ],
+          "supportStatus": "UNASSESSED"
+        }
+      ]
+    },
+    {
+      "topic": "총콜레스테롤",
+      "question": "총콜레스테롤 다른 검사와 함께 보는 이유는 무엇인가요?",
+      "chunkId": "screening-total-cholesterol-purpose",
+      "reviewStatus": "DRAFT / UNASSIGNED",
+      "clinicalUse": false,
+      "serviceEligible": false,
+      "candidateTextSha256": "3ec14b3489cff09e95bf920f5e0ba6076682ea40ac627d58baa0cfdcba332fb8",
+      "sourceUrl": "https://medlineplus.gov/lab-tests/cholesterol-levels/",
+      "sourceUpdatedAt": "2024-10-15",
+      "snapshot": "Screening v3",
+      "sourceSnapshotPath": "data/health-helper-screening-evidence-20261013-v3/sources/770cd8d33f1f23a4459ad70fef630753bfeff2bdc9f6ad84eb2d2d8b8302b055.html",
+      "sourcePageSha256": "sha256:aed2a5c0066c9dca4a0786065ed5fd0e9839e9f5ac96aee7de450831b9eabb88",
+      "sectionPath": [
+        "What is it used for?"
+      ],
+      "sourceSectionFingerprints": [
+        {
+          "sectionTitle": "What is it used for?",
+          "sectionHtmlSha256": "sha256:7ca753463287d1a0938dcb2df9dff4af1517ab2dd858b04c5b5eec58589986fa"
+        }
+      ],
+      "locatorMethod": "Exact H1-H6 heading title(s) in hashed local HTML snapshot",
+      "supportAssessment": "UNASSESSED",
+      "claims": [
+        {
+          "claimId": "screening-total-cholesterol-purpose-claim-1",
+          "claimText": "총콜레스테롤은 혈액 속 전체 콜레스테롤 양으로 HDL과 LDL 등을 포함합니다.",
+          "claimSha256": "0b9c50ed837e73fe34371d3a58a93c52c2bd97bc5ee5213e993b60a7c9b5091d",
+          "sourceSections": [
+            "What is it used for?"
+          ],
+          "supportStatus": "UNASSESSED"
+        },
+        {
+          "claimId": "screening-total-cholesterol-purpose-claim-2",
+          "claimText": "지질검사는 심장질환 위험 정보를 얻는 데 사용됩니다.",
+          "claimSha256": "e0548331e8c74afee0078ccc07e5d1acf935775a2b202612f11da2f36553a27f",
+          "sourceSections": [
+            "What is it used for?"
+          ],
+          "supportStatus": "UNASSESSED"
+        }
+      ]
+    },
+    {
+      "topic": "HDL 콜레스테롤",
+      "question": "HDL 콜레스테롤 다른 검사와 함께 보는 이유는 무엇인가요?",
+      "chunkId": "screening-hdl-purpose",
+      "reviewStatus": "DRAFT / UNASSIGNED",
+      "clinicalUse": false,
+      "serviceEligible": false,
+      "candidateTextSha256": "3f1397595e6408f0da7b4c62dcd3c9ea358f8c9a17c39123365d88915e522481",
+      "sourceUrl": "https://medlineplus.gov/lab-tests/cholesterol-levels/",
+      "sourceUpdatedAt": "2024-10-15",
+      "snapshot": "Screening v3",
+      "sourceSnapshotPath": "data/health-helper-screening-evidence-20261013-v3/sources/770cd8d33f1f23a4459ad70fef630753bfeff2bdc9f6ad84eb2d2d8b8302b055.html",
+      "sourcePageSha256": "sha256:aed2a5c0066c9dca4a0786065ed5fd0e9839e9f5ac96aee7de450831b9eabb88",
+      "sectionPath": [
+        "What is it used for?"
+      ],
+      "sourceSectionFingerprints": [
+        {
+          "sectionTitle": "What is it used for?",
+          "sectionHtmlSha256": "sha256:7ca753463287d1a0938dcb2df9dff4af1517ab2dd858b04c5b5eec58589986fa"
+        }
+      ],
+      "locatorMethod": "Exact H1-H6 heading title(s) in hashed local HTML snapshot",
+      "supportAssessment": "UNASSESSED",
+      "claims": [
+        {
+          "claimId": "screening-hdl-purpose-claim-1",
+          "claimText": "HDL은 지질검사의 한 항목이며, MedlinePlus는 HDL이 혈액에서 LDL을 제거하는 데 도움을 준다고 설명합니다.",
+          "claimSha256": "3122456dc13c359583c2fd62133989193e8f07c96ca0a5f8f0bbe0c0e818949e",
+          "sourceSections": [
+            "What is it used for?"
+          ],
+          "supportStatus": "UNASSESSED"
+        },
+        {
+          "claimId": "screening-hdl-purpose-claim-2",
+          "claimText": "결과는 다른 지질 수치와 함께 살펴봅니다.",
+          "claimSha256": "f3e43b5be7c0865d03bd5f2a597e24036834b90e75eada10101e781a7d040d11",
+          "sourceSections": [
+            "What is it used for?"
+          ],
+          "supportStatus": "UNASSESSED"
+        }
+      ]
+    },
+    {
+      "topic": "LDL 콜레스테롤",
+      "question": "LDL 콜레스테롤 다른 검사와 함께 보는 이유는 무엇인가요?",
+      "chunkId": "screening-ldl-purpose",
+      "reviewStatus": "DRAFT / UNASSIGNED",
+      "clinicalUse": false,
+      "serviceEligible": false,
+      "candidateTextSha256": "e2176574e022bf724f1de15f966caf32f7130c34268b82f9c24562806cb7f745",
+      "sourceUrl": "https://medlineplus.gov/lab-tests/cholesterol-levels/",
+      "sourceUpdatedAt": "2024-10-15",
+      "snapshot": "Screening v3",
+      "sourceSnapshotPath": "data/health-helper-screening-evidence-20261013-v3/sources/770cd8d33f1f23a4459ad70fef630753bfeff2bdc9f6ad84eb2d2d8b8302b055.html",
+      "sourcePageSha256": "sha256:aed2a5c0066c9dca4a0786065ed5fd0e9839e9f5ac96aee7de450831b9eabb88",
+      "sectionPath": [
+        "What is it used for?"
+      ],
+      "sourceSectionFingerprints": [
+        {
+          "sectionTitle": "What is it used for?",
+          "sectionHtmlSha256": "sha256:7ca753463287d1a0938dcb2df9dff4af1517ab2dd858b04c5b5eec58589986fa"
+        }
+      ],
+      "locatorMethod": "Exact H1-H6 heading title(s) in hashed local HTML snapshot",
+      "supportAssessment": "UNASSESSED",
+      "claims": [
+        {
+          "claimId": "screening-ldl-purpose-claim-1",
+          "claimText": "LDL은 지질검사의 한 항목입니다.",
+          "claimSha256": "7cd382ac4ca74fd23338812a760c91a058a2fbf378f5c14c149b8f9468a847a4",
+          "sourceSections": [
+            "What is it used for?"
+          ],
+          "supportStatus": "UNASSESSED"
+        },
+        {
+          "claimId": "screening-ldl-purpose-claim-2",
+          "claimText": "MedlinePlus는 LDL이 동맥의 막힘을 일으키는 침착물의 주요 원천이라고 설명하며, 수치는 전체 지질검사와 함께 살펴봅니다.",
+          "claimSha256": "13828662c6668e2857cb0b3a822d3af5951f79073ae652f477968d534738cee7",
+          "sourceSections": [
+            "What is it used for?"
+          ],
+          "supportStatus": "UNASSESSED"
+        }
+      ]
+    },
+    {
+      "topic": "중성지방",
+      "question": "중성지방 다른 검사와 함께 보는 이유는 무엇인가요?",
+      "chunkId": "screening-triglycerides-limits",
+      "reviewStatus": "DRAFT / UNASSIGNED",
+      "clinicalUse": false,
+      "serviceEligible": false,
+      "candidateTextSha256": "0aca66857cab84b05b4676c140c4b9412b9fc0f24bfb11219921c574d3828154",
+      "sourceUrl": "https://medlineplus.gov/lab-tests/triglycerides-test/",
+      "sourceUpdatedAt": "2024-12-09",
+      "snapshot": "Screening v3",
+      "sourceSnapshotPath": "data/health-helper-screening-evidence-20261013-v3/sources/aa9d640ba9684158456500a671b0bbed9251c79e69808136544437c12d1b5553.html",
+      "sourcePageSha256": "sha256:8906069b4215f7a0d6baefdbb8844c9fc48d1d9e28e440ead03e0dd3dcf00f9e",
+      "sectionPath": [
+        "What is it used for?"
+      ],
+      "sourceSectionFingerprints": [
+        {
+          "sectionTitle": "What is it used for?",
+          "sectionHtmlSha256": "sha256:53eecf9dc3f8de4eff1a4a033c5c18056460ba9601ff9b8c78c533d733b763b1"
+        }
+      ],
+      "locatorMethod": "Exact H1-H6 heading title(s) in hashed local HTML snapshot",
+      "supportAssessment": "UNASSESSED",
+      "claims": [
+        {
+          "claimId": "screening-triglycerides-limits-claim-1",
+          "claimText": "중성지방 결과는 LDL·HDL 등 다른 지질 항목과 심혈관 위험 요인을 함께 고려해야 합니다.",
+          "claimSha256": "e357478297e59470215e14eb00c5a84f2729e6eef9f56f42f47fc9fd4db83a50",
+          "sourceSections": [
+            "What is it used for?"
+          ],
+          "supportStatus": "UNASSESSED"
+        },
+        {
+          "claimId": "screening-triglycerides-limits-claim-2",
+          "claimText": "이 후보는 수치만으로 개인의 심장질환 위험이나 치료 필요성을 판정하지 않습니다.",
+          "claimSha256": "5dc5cd0e132acc6cffda954a819584251d4ed276c8ee4b75eddf8ce4a9a13b92",
+          "sourceSections": [
+            "What is it used for?"
+          ],
+          "supportStatus": "UNASSESSED"
+        }
+      ]
+    },
+    {
+      "topic": "C형간염 항체",
+      "question": "C형간염 항체 다른 검사와 함께 보는 이유는 무엇인가요?",
+      "chunkId": "screening-hcv-antibody-limits",
+      "reviewStatus": "DRAFT / UNASSIGNED",
+      "clinicalUse": false,
+      "serviceEligible": false,
+      "candidateTextSha256": "9b192ee5e7a8652cfea64650a4bf478283128576add656ebea342635801e0f97",
+      "sourceUrl": "https://medlineplus.gov/lab-tests/hepatitis-testing/",
+      "sourceUpdatedAt": "2025-09-29",
+      "snapshot": "Screening v3",
+      "sourceSnapshotPath": "data/health-helper-screening-evidence-20261013-v3/sources/6fa457e64e1fdeac1206115acd7a8ee4a88386f9bb04df5daf40114e34be8c2f.html",
+      "sourcePageSha256": "sha256:8b3f59d53a7faf7c31ade52d6b8a3d7a77c742a09e4268fbdf244cb51b4d061d",
+      "sectionPath": [
+        "What is it used for? · What do the results mean?"
+      ],
+      "sourceSectionFingerprints": [
+        {
+          "sectionTitle": "What is it used for?",
+          "sectionHtmlSha256": "sha256:ffb7deb6803a07a9ae6a4924e994044843ccaf56cddcbf7822fab2f69171205d"
+        },
+        {
+          "sectionTitle": "What do the results mean?",
+          "sectionHtmlSha256": "sha256:7445d16ff2de7bac83d6f59144f137b8bf65895fde4bea714339223c0c91785a"
+        }
+      ],
+      "locatorMethod": "Exact H1-H6 heading title(s) in hashed local HTML snapshot",
+      "supportAssessment": "UNASSESSED",
+      "claims": [
+        {
+          "claimId": "screening-hcv-antibody-limits-claim-1",
+          "claimText": "C형간염 검사는 항체 결과만으로 현재 감염과 과거 감염 후 자연 소실을 구분하지 못합니다.",
+          "claimSha256": "c54aa1e9e3112c2e660f2b14784242cc197c3efe6c7b65f10282a0266d3cafc2",
+          "sourceSections": [
+            "What is it used for? · What do the results mean?"
+          ],
+          "supportStatus": "UNASSESSED"
+        },
+        {
+          "claimId": "screening-hcv-antibody-limits-claim-2",
+          "claimText": "의심되는 결과는 추가 검사로 확인할 수 있으므로 의료진에게 확인하세요.",
+          "claimSha256": "aa805cd35b43831be942c22eb17130bb7d0228506f88ba8aec97f21d8e799977",
+          "sourceSections": [
+            "What is it used for? · What do the results mean?"
+          ],
+          "supportStatus": "UNASSESSED"
+        }
+      ]
+    },
+    {
+      "topic": "폐기능검사",
+      "question": "폐기능검사 다른 검사와 함께 보는 이유는 무엇인가요?",
+      "chunkId": "scenario-21",
+      "reviewStatus": "DRAFT / UNASSIGNED",
+      "clinicalUse": false,
+      "serviceEligible": false,
+      "candidateTextSha256": "77ad1a709893a61eb821257cabeba7577b851e3c6c998b583f4047c38c9c1033",
+      "sourceUrl": "https://medlineplus.gov/lab-tests/lung-function-tests/",
+      "sourceUpdatedAt": "2023-10-24",
+      "snapshot": "Scenario 20261012",
+      "sourceSnapshotPath": "data/health-helper-scenario-evidence-20261012/sources/2cdc58da921d857abb62d0eaaa730eca686e3f35a1a642d1b0c065a96e309205.html",
+      "sourcePageSha256": "sha256:70d33cf191de50a89696a3dae31f704cf9d798da31fad25a7ebdb06a1ec88e63",
+      "sectionPath": [
+        "What are lung function tests?"
+      ],
+      "sourceSectionFingerprints": [
+        {
+          "sectionTitle": "What are lung function tests?",
+          "sectionHtmlSha256": "sha256:3fca895062aa565af809b8867b9e95c97b43f748f3244aaab915bb690c53bb52"
+        }
+      ],
+      "locatorMethod": "Exact H1-H6 heading title(s) in hashed local HTML snapshot",
+      "supportAssessment": "UNASSESSED",
+      "claims": [
+        {
+          "claimId": "scenario-21-claim-1",
+          "claimText": "폐기능검사는 폐가 얼마나 잘 작동하는지 확인하는 여러 검사입니다.",
+          "claimSha256": "ac75660eced9908f1d18a615a030b06516ce2cf5b8dd209a265a2d53e8dd0b8c",
+          "sourceSections": [
+            "What are lung function tests?"
+          ],
+          "supportStatus": "UNASSESSED"
+        },
+        {
+          "claimId": "scenario-21-claim-2",
+          "claimText": "폐활량검사는 내쉬는 공기의 양과 속도를 측정하며 다른 검사와 함께 폐 질환을 평가하는 데 사용합니다.",
+          "claimSha256": "cd4244f71aa2fa97d850e12004b8e1f6e6573dc545eabf2b4792b9a7409fffa8",
+          "sourceSections": [
+            "What are lung function tests?"
+          ],
+          "supportStatus": "UNASSESSED"
+        }
+      ]
+    },
+    {
+      "topic": "구강검진",
+      "question": "구강검진 다른 검사와 함께 보는 이유는 무엇인가요?",
+      "chunkId": "screening-dental-purpose",
+      "reviewStatus": "DRAFT / UNASSIGNED",
+      "clinicalUse": false,
+      "serviceEligible": false,
+      "candidateTextSha256": "a725b1e34ba1b3cfbad4cd7a10ec0f5f052e020fe12ed375dbc0cebe5f53d6fa",
+      "sourceUrl": "https://medlineplus.gov/lab-tests/dental-exam/",
+      "sourceUpdatedAt": "2026-08-25",
+      "snapshot": "Screening v3",
+      "sourceSnapshotPath": "data/health-helper-screening-evidence-20261013-v3/sources/61c2a05cf3a7eccff3ac15fb66aa6b289ea468823b412fa68c8591977c97d53f.html",
+      "sourcePageSha256": "sha256:f9122cce7c617294ebf9f481c8424d9dee85a2cc2f4980db13db5992308893df",
+      "sectionPath": [
+        "What is a dental exam? · What is it used for?"
+      ],
+      "sourceSectionFingerprints": [
+        {
+          "sectionTitle": "What is a dental exam?",
+          "sectionHtmlSha256": "sha256:9896a8847485cad1dd18c6338ea53237b69964b29028a815e86abfeada8d4f50"
+        },
+        {
+          "sectionTitle": "What is it used for?",
+          "sectionHtmlSha256": "sha256:304dd5609885772178c89643cfcbaf4fda1cbafb282861b1cd15f806292579f9"
+        }
+      ],
+      "locatorMethod": "Exact H1-H6 heading title(s) in hashed local HTML snapshot",
+      "supportAssessment": "UNASSESSED",
+      "claims": [
+        {
+          "claimId": "screening-dental-purpose-claim-1",
+          "claimText": "구강검진은 치아와 잇몸을 살펴 충치나 잇몸 질환의 징후를 확인하고 구강 건강 문제를 일찍 찾는 데 사용됩니다.",
+          "claimSha256": "66e7f8de72989a51dabfad04ed51b68c4f032865fce37b801dc1d2f2710311da",
+          "sourceSections": [
+            "What is a dental exam? · What is it used for?"
+          ],
+          "supportStatus": "UNASSESSED"
+        },
+        {
+          "claimId": "screening-dental-purpose-claim-2",
+          "claimText": "필요한 경우 치과 X선을 추가할 수 있습니다.",
+          "claimSha256": "ab265ffb9b6bb6077c5bdd25307e03ca2dc55e474efe93aa6919d6498e5ef46b",
+          "sourceSections": [
+            "What is a dental exam? · What is it used for?"
+          ],
+          "supportStatus": "UNASSESSED"
+        }
+      ]
+    },
+    {
+      "topic": "혈청 AFP",
+      "question": "혈청 AFP 다른 검사와 함께 보는 이유는 무엇인가요?",
+      "chunkId": "afp-detail-purpose",
+      "reviewStatus": "DRAFT / UNASSIGNED",
+      "clinicalUse": false,
+      "serviceEligible": false,
+      "candidateTextSha256": "447853179b15ac9303c2e5e8ce1bb8b1b7289f167a478616fdc5bbd0b34a6907",
+      "sourceUrl": "https://medlineplus.gov/lab-tests/alpha-fetoprotein-afp-tumor-marker-test/",
+      "sourceUpdatedAt": "2026-06-30",
+      "snapshot": "AFP v2",
+      "sourceSnapshotPath": "data/health-helper-afp-evidence-20261012-v2/sources/a275b3d75e691a25e2568d9539b42abec13c6f37bae13026ee8528d702f221c6.html",
+      "sourcePageSha256": "sha256:c2345ee2f32648c658a4c54f6ba23eb8e4c1cfc404e927e46b1302705d2b6712",
+      "sectionPath": [
+        "What is it used for?"
+      ],
+      "sourceSectionFingerprints": [
+        {
+          "sectionTitle": "What is it used for?",
+          "sectionHtmlSha256": "sha256:31aa26e32249b0263ab668b58aefacb7cf5dcb9fb10a64643abe228e74bc7e97"
+        }
+      ],
+      "locatorMethod": "Exact H1-H6 heading title(s) in hashed local HTML snapshot",
+      "supportAssessment": "UNASSESSED",
+      "claims": [
+        {
+          "claimId": "afp-detail-purpose-claim-1",
+          "claimText": "AFP 종양표지자 검사는 다른 검사와 함께 특정 암의 평가를 돕거나 이미 진단된 질환과 치료 경과를 살피는 데 사용됩니다.",
+          "claimSha256": "3ac361190573fb766d6e47dc561e2dfeb47ba5e39f18444464e3f7cbe286b316",
+          "sourceSections": [
+            "What is it used for?"
+          ],
+          "supportStatus": "UNASSESSED"
+        },
+        {
+          "claimId": "afp-detail-purpose-claim-2",
+          "claimText": "검사 목적은 환자의 건강 이력과 진료 상황에 따라 달라집니다.",
+          "claimSha256": "1b3b05915c7a8d8d123762add37d57457cec85dc1c81551ee417a8f1eac688e3",
+          "sourceSections": [
+            "What is it used for?"
+          ],
+          "supportStatus": "UNASSESSED"
+        }
+      ]
+    }
+  ]
+}

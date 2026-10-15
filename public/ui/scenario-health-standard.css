@@ -1,0 +1,9 @@
+.health-standard .scenario-record{padding:18px 0;border-bottom:1px solid #dbe4ef;min-width:0;overflow-wrap:anywhere}
+.health-standard .scenario-record summary{cursor:pointer;min-height:44px;align-content:center;font-weight:600;color:#193555}
+.health-standard .scenario-record dl{display:grid;grid-template-columns:minmax(120px,1fr) minmax(0,1fr);gap:12px;margin:16px 0}
+.health-standard .scenario-record dd{margin:0;font-weight:600}
+.health-standard .scenario-record img{max-width:100%;width:360px;height:auto;border-radius:12px}
+.health-standard .scenario-record button{min-height:44px}
+.health-standard #phr-fhir-json{white-space:pre-wrap;overflow-wrap:anywhere;max-height:400px;overflow:auto;background:#f3f6fa;padding:16px;font-size:12px}
+.health-standard .scenario-record summary:focus-visible{outline:3px solid #3269c8;outline-offset:3px}
+@media(max-width:600px){.health-standard .summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.health-standard .page-head{flex-wrap:wrap}.health-standard .summary-card{min-width:0}.health-standard{padding:16px}.health-standard .scenario-record dl{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}

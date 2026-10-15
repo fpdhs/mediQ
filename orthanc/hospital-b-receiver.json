@@ -1,0 +1,17 @@
+{
+  "Name": "Highpass B Synthetic Test PACS - Not For Clinical Use",
+  "StorageDirectory": "/var/lib/orthanc/db",
+  "IndexDirectory": "/var/lib/orthanc/db",
+  "RemoteAccessAllowed": true,
+  "AuthenticationEnabled": false,
+  "HttpServerEnabled": true,
+  "HttpPort": 8042,
+  "DicomServerEnabled": false,
+  "OverwriteInstances": false,
+  "StorageCompression": false,
+  "StoreDicom": true,
+  "MaximumStorageSize": 0,
+  "MaximumPatientCount": 0,
+  "HttpDescribeErrors": false,
+  "WebDavEnabled": false
+}

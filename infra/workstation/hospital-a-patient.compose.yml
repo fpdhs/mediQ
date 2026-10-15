@@ -1,0 +1,10 @@
+# Explicit patient self-view opt-in; preserve existing doctor/mTLS/Vault paths.
+services:
+  gateway:
+    environment:
+      CAPSTONE_PATIENT_SELF_VIEW_GATEWAY: '1'
+      CAPSTONE_PATIENT_IMAGE_ENCRYPTION_REQUIRED: '1'
+      PATIENT_DATA_PLANE_SOURCE_HOSPITAL_ID: HOSP-A
+      PATIENT_DATA_PLANE_SERVICE_TOKEN_FILE: /run/secrets/patient-a-service-secret
+    volumes:
+      - ${HIPASS_A_GATEWAY_SECRET_DIR:?root-protected A-local directory required}/patient-a-service-secret:/run/secrets/patient-a-service-secret:ro

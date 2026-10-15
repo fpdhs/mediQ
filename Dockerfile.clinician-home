@@ -1,0 +1,4 @@
+ARG CAPSTONE_BASE_IMAGE
+FROM ${CAPSTONE_BASE_IMAGE}
+COPY index.html /app/public/index.html
+COPY clinician-preparation.css /app/public/ui/clinician-preparation.css

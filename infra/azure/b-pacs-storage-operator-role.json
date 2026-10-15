@@ -1,0 +1,15 @@
+{
+  "Name": "Highpass B Storage Temporary Operator 20261013",
+  "IsCustom": true,
+  "Description": "Authenticated manual LUKS setup/recovery operator. Assign ONLY at the dedicated B storage key; no image keys, secrets, delete, purge or role management.",
+  "Actions": [],
+  "NotActions": [],
+  "DataActions": [
+    "Microsoft.KeyVault/vaults/keys/read",
+    "Microsoft.KeyVault/vaults/keys/wrap/action",
+    "Microsoft.KeyVault/vaults/keys/unwrap/action",
+    "Microsoft.KeyVault/vaults/keys/backup/action"
+  ],
+  "NotDataActions": [],
+  "AssignableScopes": ["/subscriptions/a3c0e7d4-ce09-4991-946b-88574869edd9/resourceGroups/rg-highpass-capstone-20261008"]
+}

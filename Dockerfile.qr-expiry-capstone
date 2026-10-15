@@ -1,0 +1,5 @@
+# Cloud Control-only delta; inherits the independently verified runtime config.
+# Pin the supplied local base tag to the reviewed sha256 before building.
+ARG CAPSTONE_BASE_IMAGE
+FROM ${CAPSTONE_BASE_IMAGE}
+COPY src/services.js /app/src/services.js

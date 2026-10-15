@@ -1,0 +1,4 @@
+ARG CAPSTONE_BASE_IMAGE
+FROM ${CAPSTONE_BASE_IMAGE}
+COPY src/auth.js src/capstone-hcc-catalog.js src/hcc-source-contract.js src/hcc-source-verification.js src/hcc-source-probe.js /app/src/
+COPY scripts/verify-hcc-source-gateway.js /app/scripts/
