@@ -463,7 +463,7 @@ function navigateFromPatientWallet(page) {
 }
 
 function navigateHospitalScreen(screen) {
-  if (capstoneAuth?.roles?.length === 1 && capstoneAuth.roles[0] === 'SECURITY_ADMIN' && screen !== 'audit') return;
+  if (typeof capstoneAuth !== 'undefined' && capstoneAuth?.roles?.length === 1 && capstoneAuth.roles[0] === 'SECURITY_ADMIN' && screen !== 'audit') return;
   const hospitalApp = document.querySelector("#hospital-saas-app");
   if (!hospitalApp) return;
   if (screen !== "viewer") {
@@ -545,7 +545,8 @@ function activateView(targetId) {
 // Event Bindings
 // --------------------------------------------------------------------------
 function bindEvents() {
-  initializeViewerStudio({ openViewer:openClinicianHomeViewer });
+  initializeViewerStudio({ openViewer:openClinicianHomeViewer, renewAccess:typeof renewViewerAccess !== 'undefined' ? renewViewerAccess : undefined,
+    canRenew:()=>currentPersona === "DOCTOR" && !consentMutationPending && !tokenRequestPending });
   const transferActions=initializeTransferActions({
     readHistory:()=>fetchJson('/api/pacs-transfer-jobs/history',{cache:'no-store'}),
     readJob:id=>fetchJson(`/api/pacs-transfer-jobs/${encodeURIComponent(id)}`,{cache:'no-store'}),
@@ -1569,7 +1570,9 @@ async function createPatientConsent(options = {}) {
   if (result.consentId) {
     if (result.status === "ACTIVE") acknowledgedConsent = { consentId: result.consentId, status: result.status };
     latestConsentId = result.consentId;
-    lastConsents=[result,...lastConsents.filter(c=>c.consentId!==result.consentId)];
+    if (typeof lastConsents !== 'undefined' && Array.isArray(lastConsents)) {
+      lastConsents=[result,...lastConsents.filter(c=>c.consentId!==result.consentId)];
+    }
     patientConsentReady = true;
     setPatientStatus("동의 완료 (ACTIVE)");
     showViewerMessage("환자 동의가 성공적으로 생성되었습니다.", "success");
@@ -1582,10 +1585,10 @@ async function createPatientConsent(options = {}) {
         updateVisitModePacket(handoff);
       }
     } catch {
-      patientQrController.clear('공유는 승인됐지만 QR 발급에 실패했습니다. QR 발급 버튼으로 다시 시도해 주세요.');
+      if (typeof patientQrController !== 'undefined') patientQrController.clear('공유는 승인됐지만 QR 발급에 실패했습니다. QR 발급 버튼으로 다시 시도해 주세요.');
     }
     broadcastSync("CONSENT_CREATED");
-    if(!latestTicketNonce)patientQrController.clear('공유는 승인됐지만 QR 발급을 확인하지 못했습니다. 기존 QR가 있다면 해당 화면을 이용해 주세요.');
+    if(!latestTicketNonce && typeof patientQrController !== 'undefined') patientQrController.clear('공유는 승인됐지만 QR 발급을 확인하지 못했습니다. 기존 QR가 있다면 해당 화면을 이용해 주세요.');
     navigatePatientPage("visit");
     showToast(latestTicketNonce ? "공유 동의가 생성되었습니다. 병원에 1회용 QR를 보여주세요." : "동의가 생성되었습니다. QR 발급 결과는 확인이 필요합니다.");
   } else {
@@ -1667,6 +1670,8 @@ function updateConsentOperationControls() {
   for (const control of document.querySelectorAll("#patient-consent, #patient-revoke, #btn-quick-approve, #btn-quick-revoke, #btn-activity-revoke, #patient-study-select, #patient-series-select, #source-hospital-select, #target-hospital-select, #access-purpose-select, #access-mode-select, #consent-valid-from, #consent-valid-until")) control.disabled = consentMutationPending;
   const tokenButton = document.querySelector("#doctor-request-token");
   if (tokenButton) tokenButton.disabled = consentMutationPending || tokenRequestPending;
+  const renewButton = document.querySelector("#studio-renew-access");
+  if (renewButton) renewButton.disabled = consentMutationPending || tokenRequestPending;
   shareReview?.refresh(consentMutationPending);
 }
 
@@ -1770,7 +1775,19 @@ function renderConsentHistory(consents) {
 // --------------------------------------------------------------------------
 // Doctor Access & Token Operations
 // --------------------------------------------------------------------------
-async function requestDoctorToken() {
+async function renewViewerAccess() {
+  if (currentPersona !== "DOCTOR" || consentMutationPending || tokenRequestPending) return;
+  const resume = { studyUid:selectedStudyUid, seriesUid:selectedSeriesUid, sopUid:selectedSopUid, index:currentSliceIndex };
+  // Keep only navigation position, never expired pixels or a reusable credential.
+  clearCountdownTimer();
+  hideSeriesImage();
+  latestToken = null;
+  latestTokenInfo = null;
+  setDownloadState();
+  return requestDoctorToken({ resume });
+}
+
+async function requestDoctorToken(options = {}) {
   if (consentMutationPending || tokenRequestPending) {
     return { decision: "DENIED", reasonCode: "CONSENT_OPERATION_IN_PROGRESS" };
   }
@@ -1817,7 +1834,7 @@ async function requestDoctorToken() {
     await loadSeriesForActiveToken();
     if (consentMutationPending || latestToken !== result.accessToken) return { decision: "DENIED", reasonCode: "VIEW_CONTEXT_CHANGED" };
     if (lastSeries.length > 0) {
-      await loadInstancesForSelectedSeries();
+      await loadInstancesForSelectedSeries(options);
     }
   } else {
     latestToken = null;
@@ -1884,7 +1901,7 @@ async function loadSeriesForActiveToken() {
   showViewerMessage("Series 메타데이터를 불러왔습니다. Series를 선택하여 Instance를 스트리밍하세요.", "success");
 }
 
-async function loadInstancesForSelectedSeries() {
+async function loadInstancesForSelectedSeries(options = {}) {
   if (!requireToken()) return;
   if (!selectedSeriesUid && lastSeries.length > 0) {
     const firstUid = dicomValue(lastSeries[0], "0020000E");
@@ -1900,7 +1917,10 @@ async function loadInstancesForSelectedSeries() {
   stopCinePlayback();
   clearSliceBlobCache();
 
-  const result = await getJson(`/dicomweb/studies/${selectedStudyUid}/series/${selectedSeriesUid}/instances`, latestToken);
+  const requestedToken = latestToken;
+  const requestedContext = currentTokenRequestContext();
+  const result = await getJson(`/dicomweb/studies/${selectedStudyUid}/series/${selectedSeriesUid}/instances`, requestedToken);
+  if (requestedToken !== latestToken || requestedContext !== currentTokenRequestContext() || !patientConsentReady || consentMutationPending) return;
   renderOutput(result);
   if (!Array.isArray(result) || result.length === 0) {
     lastInstances = [];
@@ -1921,11 +1941,16 @@ async function loadInstancesForSelectedSeries() {
 
   totalSlices = lastInstances.length;
   currentSliceIndex = 0;
+  const resume = options.resume;
+  if (resume?.studyUid === selectedStudyUid && resume.seriesUid === selectedSeriesUid) {
+    const previous = lastInstances.findIndex(row => dicomValue(row, "00080018") === resume.sopUid);
+    currentSliceIndex = previous >= 0 ? previous : Math.max(0, Math.min(totalSlices - 1, Number.isInteger(resume.index) ? resume.index : 0));
+  }
   updateSliceControlsUi();
   renderTransferSelection();
   showViewerMessage(`Instance 메타데이터 ${totalSlices}건을 확인했습니다. 마우스 휠 또는 Cine 재생으로 단면을 탐색하세요.`, "success");
 
-  await displaySlice(0);
+  await displaySlice(currentSliceIndex);
 }
 
 function updateSliceControlsUi() {
@@ -2170,11 +2195,13 @@ function renderSeries(seriesRows) {
     return;
   }
 
+  const activeUid = seriesRows.some(row => dicomValue(row, "0020000E") === selectedSeriesUid)
+    ? selectedSeriesUid : dicomValue(seriesRows[0], "0020000E");
   container.innerHTML = seriesRows.map((series, index) => {
     const seriesUid = dicomValue(series, "0020000E");
     const description = dicomValue(series, "0008103E") || "Series";
     return `
-      <button type="button" class="mq-thumb ${index === 0 ? "selected" : ""}" aria-pressed="${index === 0}" data-viewer-series-uid="${escapeHtml(seriesUid)}">
+      <button type="button" class="mq-thumb ${seriesUid === activeUid ? "selected" : ""}" aria-pressed="${seriesUid === activeUid}" data-viewer-series-uid="${escapeHtml(seriesUid)}">
         <img class="hp-series-preview" alt="승인된 Series 단면 미리보기" hidden>
         <strong>${index + 1}. ${escapeHtml(description)}</strong>
         <span class="studio-series-meta">시리즈 ${index + 1} · ${escapeHtml(dicomValue(series, "00080060") || 'DICOM')}</span>
@@ -2194,7 +2221,7 @@ function renderSeries(seriesRows) {
     });
   });
 
-  const firstUid = seriesRows[0] ? dicomValue(seriesRows[0], "0020000E") : "";
+  const firstUid = activeUid;
   if (firstUid) {
     selectedSeriesUid = firstUid;
     hideSeriesImage();
@@ -2522,12 +2549,13 @@ function startCountdownTimer(expiresAtIso) {
       countdownTimerId = null;
       stopCinePlayback();
       clearSliceBlobCache();
+      hideSeriesImage();
       badge.textContent = "토큰 만료됨 (재발급 필요)";
       latestToken = null;
       latestTokenInfo = null;
       if (viewerStatus) viewerStatus.textContent = "Token expired";
       setDownloadState();
-      showViewerMessage("접근토큰이 만료되었습니다. 새 토큰을 요청하세요.", "warning");
+      showViewerMessage("열람 권한이 만료되었습니다. 상단의 ‘계속 열람’을 눌러 공유 동의를 다시 확인해 주세요.", "warning");
       updatePipelineSteps();
       return;
     }
@@ -3410,7 +3438,7 @@ async function redeemScannedNonce(nonce, inputMethod='CAMERA') {
     statusPill.className = "mq-badge mq-badge-warn";
   }
 
-  const redemptionPath=location.hostname==='highpass-demo.japaneast.cloudapp.azure.com'?'/api/demo/qr/redeem':'/api/transfers/tickets/redeem-viewer';
+  const redemptionPath = (typeof location !== 'undefined' && location.hostname === 'highpass-demo.japaneast.cloudapp.azure.com') ? '/api/demo/qr/redeem' : '/api/transfers/tickets/redeem-viewer';
   const result = await postJson(redemptionPath, { nonce, inputMethod });
   if (result?.decision === "ALLOWED" && result.accessToken) {
     latestToken = result.accessToken;
@@ -3450,10 +3478,10 @@ async function redeemScannedNonce(nonce, inputMethod='CAMERA') {
 
     // Reception succeeded even if a separate dashboard refresh is unavailable.
     await loadDashboard().catch(()=>{});
-    const receptions=await fetchJson('/api/clinician/receptions',{cache:'no-store'});
-    const receipt=receptions.receptions?.find(row=>row.ticketId===result.ticketId);
+    const receptions = typeof fetchJson === 'function' ? await fetchJson('/api/clinician/receptions',{cache:'no-store'}).catch(()=>({})) : {};
+    const receipt = receptions?.receptions?.find(row=>row.ticketId===result.ticketId);
     if(receipt){
-      if(receipt.studies[0])await selectReceptionContext(receipt,receipt.studies[0]);
+      if(receipt.studies?.[0])await selectReceptionContext(receipt,receipt.studies[0]);
       else clinicianHealth?.selectReception(receipt.consentId);
       receptionHome?.update(receipt,demo.patientName||receipt.patientId);
     }
@@ -3978,7 +4006,7 @@ async function proofFetch(path, options = {}) {
     headers.set("dpop", `${input}.${proofBase64(signature)}`);
   }
   const imageDeadline = document.documentElement.dataset.capstone === "1" && url.pathname.startsWith("/dicomweb/") && url.pathname.includes("/instances/") && !url.pathname.endsWith("/metadata");
-  return fetch(url.href, { ...options, headers,credentials:externalImage?'omit':options.credentials,redirect:externalImage?'error':options.redirect,cache:externalImage?'no-store':options.cache, signal: options.signal ?? AbortSignal.timeout(imageDeadline ? 45000 : 20000) });
+  return fetch(url.href, { ...options, headers,credentials:externalImage?'omit':options.credentials,redirect:externalImage?'error':options.redirect,cache:externalImage?'no-store':options.cache, signal: options.signal ?? AbortSignal.timeout(imageDeadline ? 35000 : 20000) });
 }
 
 function developmentPrincipalHeaders(path) {

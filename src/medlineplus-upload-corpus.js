@@ -48,17 +48,7 @@ function koreanSearchTerms(text){
   .replace(/윗부분/gu,'위쪽');
  return [...new Set((normalizedText.match(/[가-힣]+/gu)??[]).map(value=>{
   let term=value.normalize('NFC');
-  for(let pass=0;pass<3;pass++){
-   let changed=false;
-   for(const suffix of koreanSearchSuffixes){
-    if(term.length>suffix.length&&term.endsWith(suffix)){
-     term=term.slice(0,-suffix.length);
-     changed=true;
-     break;
-    }
-   }
-   if(!changed)break;
-  }
+  for(const suffix of koreanSearchSuffixes){if(term.length>suffix.length&&term.endsWith(suffix)){term=term.slice(0,-suffix.length);break;}}
   if(term.length>2&&term.endsWith('하'))term=term.slice(0,-1);
   return term;
  }).filter(term=>term.length>0&&!koreanSearchStopTerms.has(term)))];
@@ -82,7 +72,7 @@ function koreanDefinitionLookupIndex(corpus){
  const index={postings,documentFrequency,topicCount:topicIds.size};koreanDefinitionLookupCache.set(corpus,index);return index;
 }
 function retrieveKoreanMatchedEvidence(question,corpus){
- const asksDefinition=/(?:무엇|뭐|뜻|정의|목적|왜|어떤|알려|궁금|설명|뭔|어떻|어디|어느|무슨)/u.test(question);
+ const asksDefinition=/(?:무엇|뭐|뜻|정의|목적|왜|어떤|알려|궁금|설명|뭔|어디|어느|무슨)/u.test(question);
  const asksDiseaseDefinition=/(?:어떤|무슨).{0,12}(?:질환|질병|병)/u.test(question)
   ||/혈액.{0,24}산소.{0,16}(?:운반|전달).{0,12}(?:못|않).{0,12}(?:무엇|뭐)/u.test(question);
  const asksCause=/(?:원인|이유|왜|어째서|때문|유발|일으키|초래)/u.test(question);
@@ -468,11 +458,11 @@ function exactTitleExplanation(question,chunks){
   '에대해서궁금해요','에대해궁금해요','궁금해요','궁금합니다','궁금해'];
  const suffix=suffixes.find(value=>normalized.endsWith(value));
  const requestedTitle=suffix?normalized.slice(0,-suffix.length):normalize(normalizeKoreanQuery(question));
- const morphoCandidates=morphoAnalyze(question).nounCandidates.map(normalize);
- const candidateTitles=new Set([requestedTitle,...morphoCandidates].filter(Boolean));
- if(!candidateTitles.size)return null;
+ if(!requestedTitle)return null;
+ const isComplexQuery=/(?:차이|비교|증상|원인|이유|기관|어디|누구|몇|어떻게|수치|확진|판정)/u.test(question);
+ if(isComplexQuery)return null;
  const matches=(chunks??[]).filter(chunk=>chunk.demoIndexStatus==='PASS'
-  &&(candidateTitles.has(normalize(chunk.title_ko??''))||(chunk.aliases??[]).some(alias=>candidateTitles.has(normalize(alias))))
+  &&normalize(chunk.title_ko??'')===requestedTitle
   &&typeof chunk.text_ko==='string'&&sha256(chunk.text_ko)===chunk.textSha256&&hasKorean(chunk.text_ko));
  const identities=new Set(matches.map(chunk=>`${chunk.doc_id}:${chunk.topic}`));
  if(identities.size!==1)return null;
@@ -680,7 +670,7 @@ export function retrieveUploadedEvidence(question,corpus){
  // The corpus says iron deficiency is one cause of anemia, not that every low-iron state is anemia.
  if(isUnsupportedIronAnemiaInference(question))return {status:'INSUFFICIENT_EVIDENCE',evidence:[]};
  if(isUnsupportedReverseCauseInference(question)||isUnsupportedReverseAllergyRelation(question))return {status:'INSUFFICIENT_EVIDENCE',evidence:[]};
- if(isUnsupportedModalityComparison(question))return {status:'INSUFFICIENT_EVIDENCE',evidence:[]};
+ if(isUnsupportedModalityComparison(question)||/(?:차이|비교)/u.test(question))return {status:'INSUFFICIENT_EVIDENCE',evidence:[]};
  const exactTitle=exactTitleExplanation(question,corpus.chunks),shortDefinition=explicitShortTitleDefinition(question,corpus.chunks),
   insufficientEvidence=()=>exactTitle?sourceLookupCandidate(exactTitle):{status:'INSUFFICIENT_EVIDENCE',evidence:[]};
  if(!exactTitle&&hasUnindexedNamedExam(question,corpus))return insufficientEvidence();

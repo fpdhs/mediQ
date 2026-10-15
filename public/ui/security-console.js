@@ -1,4 +1,5 @@
 import { showSecurityReport } from './security-report.js';
+import {createPeriodReportPanel} from './security-period-panel.js';
 const mounted = new WeakMap();
 const bad = new Set(['DENIED','FAIL','FAILED','ERROR','FAILURE']);
 const names = { TOKEN_EXPIRED:'토큰 유효기간 만료', CONSENT_EXPIRED:'동의 기간 만료', CONSENT_REVOKED:'동의 철회', SCOPE_MISMATCH:'검사 범위 불일치', HOSPITAL_MISMATCH:'수신 병원 불일치', ROLE_NOT_ALLOWED:'허용되지 않은 역할', TOKEN_INVALID:'유효하지 않은 토큰', DOWNLOAD_NOT_ALLOWED:'다운로드 미허용', SECURITY_CONSOLE_DENIED:'관제실 접근 거부', SECURITY_OVERVIEW_READ:'관제 기록 조회', SECURITY_EVENTS_SEARCHED:'이벤트 검색', SECURITY_REPORT_GENERATED:'사건 보고서 생성', TOKEN_ISSUED:'접근 토큰 발급', IMAGE_VIEWED:'의료영상 열람', CONSENT_CREATED:'공유 동의 생성', CONSENT_REVOKED:'공유 동의 철회' };
@@ -6,12 +7,13 @@ const reviewNames = {UNREVIEWED:'검토 전',REVIEWED:'검토 완료',INVESTIGAT
 const colors = {'허용·성공':'#52c6b2','거부·실패':'#ff947e','기타·경보':'#aab9ed'};
 function el(tag,text,cls){const node=document.createElement(tag);if(text!=null)node.textContent=text;if(cls)node.className=cls;return node;}
 function button(text,fn,cls='sc-button'){const node=el('button',text,cls);node.type='button';node.addEventListener('click',fn);return node;}
-function time(value){return Number.isFinite(Date.parse(value))?new Date(value).toLocaleString('ko-KR'):'시각 미확인';}
+function time(value){return Number.isFinite(Date.parse(value))?new Date(value).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'}):'시각 미확인';}
 function title(value){return names[value]||value||'미확인';}
 function saveFile(name,body,type){const url=URL.createObjectURL(new Blob([body],{type}));const link=el('a');link.href=url;link.download=name;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 export function reportCsv(report){
   const quote=value=>{let text=String(value??'');if(/^[\s]*[=+\-@]/u.test(text))text="'"+text;return '"'+text.replaceAll('"','""')+'"';};
   const rows=[['보고서 ID',report.reportId],['상태',report.status],['생성 시각',report.generatedAt],['범위 시작',report.scope.from],['범위 종료',report.scope.until],['SHA-256',report.fingerprint],['주의',...report.limitations],[],['시각','출처','행위','결과','사유','기관','이벤트 참조','검토 상태','검토 메모']];
+  if(report.mode==='PERIOD')rows.splice(7,0,['보고서 유형','기간 보고서'],['시간대','Asia/Seoul'],['필터',JSON.stringify(report.scope.filters)],['집계 대상',report.summary.total],['상세 수록',report.events.length],['출처 범위',JSON.stringify(report.scope.sources)],...report.summary.outcomes.map(item=>['결과 집계',item.label,item.count]),...report.summary.hours.map(item=>['시간 집계',item.label,item.count]));
   for(const event of report.events)rows.push([event.time,event.source,event.action,event.result,event.reasonCode,event.hospitalId,event.eventRef,event.review?.status||'UNREVIEWED',event.review?.note||'']);
   return '\ufeff'+rows.map(row=>row.map(quote).join(',')).join('\r\n');
 }
@@ -23,7 +25,7 @@ export function renderSecurityConsole(root,api){
   if(!state){state={api,selected:new Map(),version:0,until:null};mounted.set(root,state);build(root,state);}
   state.api=api;root.closest('[data-screen="audit"]')?.classList.add('security-console-active');
   if(api.state==='loading'){state.status.textContent='감사 자료를 연결하고 있어요.';return;}
-  if(api.state!=='ready'){state.status.textContent='관제 자료를 불러오지 못했습니다. 로그인과 연결 상태를 확인해 주세요.';state.heroCount.textContent='—';state.charts.replaceChildren(el('p','집계 미확인 · 조회 실패를 0건으로 표시하지 않습니다.'));return;}
+  if(api.state!=='ready'){state.periodPanel?.clear();state.status.textContent='관제 자료를 불러오지 못했습니다. 로그인과 연결 상태를 확인해 주세요.';state.heroCount.textContent='—';state.charts.replaceChildren(el('p','집계 미확인 · 조회 실패를 0건으로 표시하지 않습니다.'));return;}
   state.overview=api.overview;state.until=null;load(state);
 }
 function build(root,state){
@@ -39,19 +41,23 @@ function build(root,state){
   state.result=select('결과',[['','모든 결과'],['허용·성공','허용·성공'],['거부·실패','거부·실패'],['기타·경보','기타·경보']]);
   state.review=select('검토 상태',[['','모든 상태'],...Object.entries(reviewNames)]);
   state.hospital=select('기관·자원',[['','모든 기관·자원']]);
-  state.period=select('조회 기간',[['24','최근 24시간'],['6','최근 6시간'],['1','최근 1시간']]);
+  state.period={value:'24'};
   const submit=el('button','검색','sc-button sc-primary');submit.type='submit';form.append(submit,button('필터 초기화',()=>{for(const node of [state.search,state.source,state.result,state.review,state.hospital])node.value='';state.category='';state.action='';load(state);}));
   form.addEventListener('submit',event=>{event.preventDefault();state.category='';state.action='';load(state);});state.explorer.append(form);
   state.count=el('p','—','sc-count');state.list=el('div',null,'sc-events');state.pager=el('div',null,'sc-pager');state.explorer.append(state.count,state.list,state.pager);
   const side=el('aside',null,'sc-side');state.detail=el('section',null,'sc-detail');state.detail.append(el('h3','사건을 따라가 볼까요?'),el('p','이벤트를 선택하면 관련 흐름과 검토 기록을 확인할 수 있어요.'));state.basket=el('section',null,'sc-basket');side.append(state.detail,state.basket);work.append(state.explorer,side);root.append(work);drawBasket(state);
+  const periodRoot=el('section',null,'sc-period-panel');work.before(periodRoot);
+  state.periodPanel=createPeriodReportPanel({root:periodRoot,getApi:()=>state.api,getData:()=>state.data,onRange:range=>{state.range=range;state.until=null;return load(state);},getSelected:()=>[...state.selected.values()],printReport,reportCsv,saveFile});
   const boundary=el('details',null,'sc-boundary');boundary.append(el('summary','조회 범위와 기록 연결 확인'));state.boundary=el('p','확인 전');boundary.append(state.boundary);root.append(boundary);
 }
 async function load(state,page=0){
   const version=++state.version;state.loading=true;drawBasket(state);state.status.textContent='이벤트와 집계를 불러오는 중…';
   const query=new URLSearchParams({page:String(page),hours:state.period.value});if(state.until)query.set('until',state.until);
+  if(state.range){query.delete('hours');query.set('from',state.range.from);query.set('until',state.range.until);}
   for(const[key,value]of Object.entries({q:state.search.value,source:state.source.value,result:state.result.value,review:state.review.value,hospital:state.hospital.value,category:state.category,action:state.action}))if(value)query.set(key,value);
-  try{const data=await state.api.fetchJson('/api/security/events?'+query,{signal:AbortSignal.timeout(15000),cache:'no-store'});if(version!==state.version)return;state.data=data;state.until=data.until;state.loading=false;state.status.textContent=`조회 기준 ${time(data.until)} · 이전 ${data.query.hours}시간`;drawSources(state);drawCharts(state);drawEvents(state);drawBasket(state);}
-  catch{if(version!==state.version)return;state.loading=false;drawBasket(state);state.status.textContent='이벤트 조회 실패 · 기존 선택 기록은 유지됩니다.';state.charts.replaceChildren(el('p','집계를 확인할 수 없습니다. 다시 불러오기를 눌러 주세요.'));state.list.replaceChildren(el('p','이벤트를 조회하지 못했습니다.'));}
+  state.periodPanel?.setLoading(true);
+  try{const data=await state.api.fetchJson('/api/security/events?'+query,{signal:AbortSignal.timeout(15000),cache:'no-store'});if(version!==state.version)return;state.data=data;state.until=data.until;state.loading=false;state.status.textContent=`${time(data.from)} ~ ${time(data.until)} · 한국시간`;drawSources(state);drawCharts(state);drawEvents(state);drawBasket(state);state.periodPanel?.setLoading(false);}
+  catch{if(version!==state.version)return;state.loading=false;drawBasket(state);state.periodPanel?.setLoading(false,true);state.status.textContent='이벤트 조회 실패 · 기존 선택 기록은 유지됩니다.';state.charts.replaceChildren(el('p','집계를 확인할 수 없습니다. 다시 불러오기를 눌러 주세요.'));state.list.replaceChildren(el('p','이벤트를 조회하지 못했습니다.'));}
 }
 function drawSources(state){
   const {sources}=state.data;state.sources.replaceChildren();
@@ -98,7 +104,7 @@ async function showDetail(state,event){
   const version=(state.detailVersion||0)+1;state.detailVersion=version;const host=state.detail;host.replaceChildren(el('h3',title(event.action)),el('p',`${time(event.time)} · ${event.resultGroup}`));const list=el('dl');for(const[label,value]of [['출처',event.source],['기관·자원',event.hospitalId],['주체 유형',event.actorType],['사유',title(event.reasonCode)],['이벤트 참조',event.eventRef],['검토',reviewNames[event.review?.status||'UNREVIEWED']]]){list.append(el('dt',label),el('dd',value));}host.append(list);if(event.review?.note)host.append(el('p','검토 메모: '+event.review.note));host.append(button('보고서에 담기 / 빼기',()=>{toggleSelected(state,event);drawEvents(state);}));
   if(event.auditSessionId&&event.auditSessionId!=='UNKNOWN'){
     const flow=el('ol',null,'sc-flow');host.append(el('h4','같은 실행의 연결 기록'),flow);
-    try{const query=new URLSearchParams({session:event.auditSessionId,until:state.until,hours:state.period.value});const data=await state.api.fetchJson('/api/security/events?'+query,{cache:'no-store',signal:AbortSignal.timeout(15000)});if(version!==state.detailVersion)return;for(const related of [...data.events].reverse())flow.append(el('li',`${time(related.time)} · ${title(related.action)} · ${related.result}`));flow.append(el('li',`관련 ${data.total}건 중 최신 ${data.events.length}건 · 같은 감사 세션 기준`));}catch{if(version===state.detailVersion)flow.append(el('li','관련 흐름을 불러오지 못했습니다.'));}
+    try{const query=new URLSearchParams({session:event.auditSessionId,until:state.data.until,from:state.data.from});const data=await state.api.fetchJson('/api/security/events?'+query,{cache:'no-store',signal:AbortSignal.timeout(15000)});if(version!==state.detailVersion)return;for(const related of [...data.events].reverse())flow.append(el('li',`${time(related.time)} · ${title(related.action)} · ${related.result}`));flow.append(el('li',`관련 ${data.total}건 중 최신 ${data.events.length}건 · 같은 감사 세션 기준`));}catch{if(version===state.detailVersion)flow.append(el('li','관련 흐름을 불러오지 못했습니다.'));}
   }else host.append(el('p','공통 감사 세션이 없어 다른 이벤트와 자동 연결하지 않았습니다.'));
   if(['AZURE_KEYVAULT','WAF','ENTRA'].includes(event.source)||bad.has(event.result)){
     const form=el('form',null,'sc-review');form.append(el('h4','검토 기록 남기기'));const statusLabel=el('label','검토 상태'),select=el('select');for(const[value,label]of Object.entries(reviewNames).filter(([value])=>value!=='UNREVIEWED'))select.add(new Option(label,value));statusLabel.append(select);const noteLabel=el('label','운영 메모'),note=el('input');note.maxLength=160;note.placeholder='환자 식별정보 없이 조치 내용 기록';noteLabel.append(note);const submit=el('button','검토 이력 추가','sc-button sc-primary');submit.type='submit';const feedback=el('p');feedback.setAttribute('role','status');form.append(statusLabel,noteLabel,submit,feedback);host.append(form);form.addEventListener('submit',async action=>{action.preventDefault();submit.disabled=true;try{await state.api.postJson('/api/security/reviews',{source:event.source,eventRef:event.eventRef,status:select.value,note:note.value});feedback.textContent='검토 이력을 추가했습니다.';state.api.refresh();}catch{feedback.textContent='검토를 저장하지 못했습니다. 메모의 식별정보와 이벤트 유효성을 확인해 주세요.';submit.disabled=false;}});
@@ -111,7 +117,7 @@ function drawBasket(state){
 async function exportReport(state,format){
   if(state.exporting||state.loading||!state.until||!state.selected.size)return;
   state.exporting=true;state.reportMessage='선택한 근거로 보고서를 만들고 있어요.';drawBasket(state);
-  try{const query=new URLSearchParams({until:state.until,hours:state.period.value});const report=await state.api.postJson('/api/security/reports?'+query,{events:[...state.selected.values()].map(event=>({source:event.source,eventRef:event.eventRef})),format});
+  try{const query=new URLSearchParams({until:state.data.until,from:state.data.from});const report=await state.api.postJson('/api/security/reports?'+query,{events:[...state.selected.values()].map(event=>({source:event.source,eventRef:event.eventRef})),format});
     if(format==='PRINT')printReport(report);else if(format==='CSV')saveFile(report.reportId+'.csv',reportCsv(report),'text/csv;charset=utf-8');else saveFile(report.reportId+'.json',JSON.stringify(report,null,2),'application/json');state.reportMessage=`초안 생성 완료 · ${report.events.length}건 · ${report.reportId}`;
   }catch{state.reportMessage='보고서를 생성하지 못했습니다. 로그인·출처 연결 상태를 확인하고 만료된 이벤트는 다시 선택해 주세요.';}
   finally{state.exporting=false;drawBasket(state);}

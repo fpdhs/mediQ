@@ -18,7 +18,12 @@ body:has(#hospital-saas-app.mq-focus-viewer:not([hidden])) > .mq-demo-tools { di
 #hospital-saas-app #viewer-screen .studio-wordmark { font-size:19px; font-weight:650; letter-spacing:-.05em; white-space:nowrap; }
 #hospital-saas-app #viewer-screen .studio-wordmark span { color:var(--studio-muted); font-weight:400; margin-left:8px; letter-spacing:-.03em; }
 #hospital-saas-app #viewer-screen #studio-patient-label { font-size:13px; font-weight:500; border-left:1px solid var(--studio-line); padding-left:24px; white-space:nowrap; }
-#hospital-saas-app #viewer-screen .studio-top-actions { margin-left:auto; display:flex; gap:14px; align-items:center; }
+#hospital-saas-app #viewer-screen .studio-top-actions { margin-left:auto; display:flex; flex-wrap:wrap; gap:14px; align-items:center; }
+#hospital-saas-app #viewer-screen .studio-renew-access {display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:10px 14px;color:var(--studio-text,#e8f1f3);background:var(--studio-panel,#25353a);border:1px solid #708b91;border-radius:10px;white-space:nowrap;}
+#hospital-saas-app #viewer-screen .studio-renew-access svg {width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;}
+#hospital-saas-app #viewer-screen .studio-renew-access:hover:not(:disabled) {background:#344a50;}
+#hospital-saas-app #viewer-screen .studio-renew-access:focus-visible {outline:3px solid #8ddad3;outline-offset:3px;}
+#hospital-saas-app #viewer-screen .studio-renew-access:disabled {opacity:.6;cursor:wait;}
 #hospital-saas-app #viewer-screen .mq-countdown-box { display:flex; gap:7px; align-items:center; border:0; padding:0; color:var(--studio-muted); background:transparent; font-size:12px; font-weight:400; white-space:nowrap; }
 #hospital-saas-app #viewer-screen #viewer-countdown { color:var(--studio-text); font-variant-numeric:tabular-nums; }
 #hospital-saas-app #viewer-screen .studio-status { font-size:12px; color:var(--studio-muted); max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }

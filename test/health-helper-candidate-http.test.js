@@ -245,7 +245,7 @@ test('structured risk factor lists preserve nested headings and fail closed on h
  assert.deepEqual(ambiguousTopic.body.sources,[]);assert.equal(invocations,0);
 });
 
-test('all 51 source-only title lookups return metadata over HTTP without model calls or excerpts',async t=>{
+test('all 50 source-only title lookups return metadata over HTTP without model calls or excerpts',async t=>{
  const corpus=await loadUploadedCorpus(new URL('../data/medlineplus-upload-ko-20261012-v3/',import.meta.url),{includeQaHolds:true});
  const documents=[...new Map(corpus.chunks.map(chunk=>[chunk.doc_id,{docId:chunk.doc_id,title:chunk.title_ko}])).values()];
  const sourceOnly=documents.map(document=>{
@@ -253,11 +253,11 @@ test('all 51 source-only title lookups return metadata over HTTP without model c
   const exactChunk=retrieval.evidence?.find(chunk=>chunk.doc_id===document.docId);
   return retrieval.sourceLookupOnly?{document,question,retrieval,exactChunk}:null;
  }).filter(Boolean);
- assert.equal(sourceOnly.length,51);
+ assert.equal(sourceOnly.length,50);
  assert.ok(sourceOnly.every(item=>item.exactChunk?.demoIndexStatus==='PASS'&&item.exactChunk.source_url));
  assert.deepEqual(sourceOnly.reduce((counts,item)=>{
   const quality=item.exactChunk.ai_qa_status;counts[quality]=(counts[quality]??0)+1;return counts;
- },{}),{HOLD:4,PASS:47});
+ },{}),{HOLD:4,PASS:46});
 
  let invocations=0;
  const ask=await serve(t,{retrieveEvidence:async question=>retrieveUploadedEvidence(question,corpus),

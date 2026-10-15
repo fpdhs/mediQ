@@ -77,7 +77,7 @@ export function mountPatientWalletDock(root,page,navigate){
   root.querySelectorAll('.mq-wallet-dock').forEach(dock=>{if(dock!==existing)dock.remove();});
   if(existing?.dataset.walletPage===page)return existing;
   root.querySelectorAll('.mq-wallet-dock').forEach(dock=>dock.remove());
-  const dock=createWalletDock({selected,navigate:route=>navigate(({records:'phr',requests:'visit'})[route]||route)});
+  const dock=createWalletDock({selected,navigate:route=>navigate(({records:'phr',requests:'activity'})[route]||route)});
   dock.dataset.walletPage=page;
   root.append(dock);
   return dock;

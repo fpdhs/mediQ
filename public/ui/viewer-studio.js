@@ -17,7 +17,7 @@ export function prepareImagingWorkspace(root=document){
   const title=desk.querySelector('.mq-title h2');if(title)title.textContent='환자 영상';
   desk.classList.add('imaging-focus');
 }
-export function initializeViewerStudio({ root = document, openViewer }) {
+export function initializeViewerStudio({ root = document, openViewer, renewAccess, canRenew = () => true }) {
   prepareImagingWorkspace(root);
   const find = selector => root.querySelector(selector);
   const screen = find('#viewer-screen');
@@ -48,6 +48,27 @@ export function initializeViewerStudio({ root = document, openViewer }) {
     }
   });
   const openButton = find('#studio-open-image');
+  const renewButton = find('#studio-renew-access');
+  const renewLabel = renewButton?.querySelector('span');
+  const countdown = find('#viewer-countdown');
+  let renewing = false;
+  const updateRenewLabel = () => {
+    if (renewLabel) renewLabel.textContent = renewing ? '접근 확인 중…' : countdown?.textContent.includes('만료') ? '계속 열람' : '열람 권한 갱신';
+  };
+  if (countdown) new MutationObserver(updateRenewLabel).observe(countdown,{childList:true,subtree:true,characterData:true});
+  renewButton?.addEventListener('click', async () => {
+    if (renewing || renewButton.disabled) return;
+    renewing = true;
+    renewButton.disabled = true;
+    renewButton.setAttribute('aria-busy','true');
+    updateRenewLabel();
+    try { await renewAccess(); }
+    catch {
+      const status = find('#viewer-alert');
+      if (status) { status.textContent='열람 권한을 갱신하지 못했습니다. 로그인 상태와 공유 동의를 확인해 주세요.'; status.dataset.tone='fail'; }
+    }
+    finally { renewing=false; renewButton.disabled=!canRenew(); renewButton.setAttribute('aria-busy','false'); updateRenewLabel(); }
+  });
   openButton?.addEventListener('click', async () => {
     openButton.disabled = true;
     openButton.textContent = '접근 확인 중…';

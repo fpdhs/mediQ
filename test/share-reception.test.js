@@ -31,8 +31,8 @@ test('in-flight duplicate is ignored and transport failure restores controls',as
   assert.match(f.node('#qr-handoff-status').textContent,/연결 상태 확인 필요/);
   assert.equal(f.context.latestToken,null);
 });
-test('allowed response shows server identity and follows existing Viewer path',async()=>{
+test('allowed response shows server identity and follows reception desk path',async()=>{
   const f=fixture(async()=>({decision:'ALLOWED',accessToken:'test-only',patientId:'server-patient',ticketId:'ticket-test',viewerContext:{studyInstanceUid:'1.2.3',permission:'VIEW_ONLY'}}));
-  await f.run();assert.equal(f.node('#qr-scanned-patient').textContent,'server-patient');assert.equal(f.context.screen,'viewer');
+  await f.run();assert.equal(f.node('#qr-scanned-patient').textContent,'server-patient');assert.equal(f.context.screen,'dashboard');
   assert.equal(f.node('#qr-manual-submit').disabled,false);
 });

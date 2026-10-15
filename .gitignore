@@ -22,6 +22,8 @@ evidence/generated/
 .playwright-cli/
 output/clinician-health-regression-*.log
 .codex/
+.codex-*/
+output/*.pptx
 public/vendor/
 npm-debug.log*
 docker-compose.override.yml

@@ -52,6 +52,7 @@ import { createPacsTransferJobRuntime } from "./pacs-transfer-job-runtime.js";
 import { findAzureKeyVaultAuditEvent, listAzureKeyVaultAudit } from './azure-keyvault-audit.js';
 import { toSecurityAuditView } from './security-observatory-view.js';
 import { buildEventIndex, parseEventQuery, createSecurityReport } from './security-console.js';
+import {createPeriodSecurityReport,readSecurityReportSnapshot} from './security-period-report.js';
 import { listWafAudit } from './waf-audit.js';
 import { listEntraAudit } from './entra-audit.js';
 
@@ -836,22 +837,28 @@ async function routeApi(request, response, url) {
     response.setHeader('cache-control', 'no-store');
     let query;
     try { query = parseEventQuery(url.searchParams); } catch { return sendError(response, 400, 'SECURITY_QUERY_INVALID'); }
-    const reviews = [...store.get('auditLogs')].reverse().filter(log => log.action === 'SECURITY_REVIEW_RECORDED').map(toSecurityReviewView).filter(Boolean);
-    const [azure, waf, entra] = await Promise.all([listAzureKeyVaultAudit(), listWafAudit(), listEntraAudit()]);
-    const index = buildEventIndex(store.get('auditLogs'), azure, reviews, query, waf, entra);
-    let report;
-    if (method === 'POST') {
-      try { report = createSecurityReport(index, await readJson(request, { maxBytes: 16384, strictUtf8: true }), principalActorId(principal)); }
-      catch (error) { return sendError(response, error.message === 'SECURITY_REPORT_EVENT_UNAVAILABLE' ? 409 : 400, 'SECURITY_REPORT_INVALID_OR_EVENT_UNAVAILABLE'); }
+    let body,index,report;
+    if(method==='POST')body=await readJson(request,{maxBytes:16384,strictUtf8:true});
+    if(body?.snapshotId){
+      try{report=readSecurityReportSnapshot(body,principalActorId(principal));}
+      catch{return sendError(response,409,'SECURITY_REPORT_SNAPSHOT_UNAVAILABLE');}
+    }else{
+      const reviews = [...store.get('auditLogs')].reverse().filter(log => log.action === 'SECURITY_REVIEW_RECORDED').map(toSecurityReviewView).filter(Boolean);
+      const [azure, waf, entra] = await Promise.all([listAzureKeyVaultAudit(), listWafAudit(), listEntraAudit()]);
+      index = buildEventIndex(store.get('auditLogs'), azure, reviews, query, waf, entra);
+      if (method === 'POST') {
+        try { report = body?.mode==='PERIOD'?createPeriodSecurityReport(index,body,principalActorId(principal)):createSecurityReport(index,body,principalActorId(principal)); }
+        catch (error) { return sendError(response, error.message === 'SECURITY_REPORT_EVENT_UNAVAILABLE' ? 409 : 400, 'SECURITY_REPORT_INVALID_OR_EVENT_UNAVAILABLE'); }
+      }
     }
     const meta = requestMeta(request, principal);
     await service.writeAudit({ actorType: principal.role, actorId: principalActorId(principal),
-      action: report ? 'SECURITY_REPORT_GENERATED' : 'SECURITY_EVENTS_SEARCHED', result: 'SUCCESS',
-      reasonCode: report ? `REPORT_${report.requestedFormat}_GENERATED` : 'SECURITY_ADMIN_AUTHORIZED',
+      action: body?.snapshotId ? 'SECURITY_REPORT_EXPORTED' : report ? 'SECURITY_REPORT_GENERATED' : 'SECURITY_EVENTS_SEARCHED', result: 'SUCCESS',
+      reasonCode: report ? `REPORT_${body.format}_${body.snapshotId?'EXPORTED':'GENERATED'}` : 'SECURITY_ADMIN_AUTHORIZED',
       auditSessionId: report?.reportId ?? principal.sessionId ?? undefined, ipAddress: meta.ipAddress });
     await store.save();
     if (report) return sendJson(response, 201, report);
-    const { allEvents, ...view } = index;
+    const { allEvents, filteredEvents, ...view } = index;
     return sendJson(response, 200, view);
   }
 

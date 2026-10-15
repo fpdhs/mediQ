@@ -5,3 +5,5 @@
 .global-persona-brand .brand-title::before { content:''; display:inline-block; width:140px; height:64px; background:#fff url('/brand/mediq-source.png') no-repeat -146px -368px; background-size:435px 778px; vertical-align:middle; }
 .mobile-header .brand { gap:0; }
 .auth-card > .mediq-logo { margin:0 auto 12px; }
+/* Transparent vector wordmark for the dark imaging header; light headers stay unchanged. */
+#hospital-saas-app:has(#clinical-desk.imaging-focus:not([hidden])) .mq-brand-name.mediq-logo { background:transparent url('/brand/mediq-dark.svg') center / contain no-repeat; }

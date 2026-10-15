@@ -1,5 +1,6 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { toSecurityAuditView } from './security-observatory-view.js';
+import {rememberSecurityReport} from './security-period-report.js';
 
 const BAD = new Set(['DENIED', 'FAIL', 'FAILED', 'ERROR', 'FAILURE']);
 export function eventCategory(action = '') {
@@ -15,20 +16,22 @@ export function resultGroup(result) {
   return BAD.has(value) ? '거부·실패' : ['SUCCESS', 'ALLOWED', 'OK', 'SUCCEEDED'].includes(value) ? '허용·성공' : '기타·경보';
 }
 export function parseEventQuery(params, now = new Date()) {
-  const allowed = ['q', 'source', 'result', 'category', 'action', 'hospital', 'review', 'session', 'hours', 'page', 'until'];
+  const allowed = ['q', 'source', 'result', 'category', 'action', 'hospital', 'review', 'session', 'hours', 'page', 'until', 'from'];
   if ([...params.keys()].some(key => !allowed.includes(key)) || allowed.some(key => params.getAll(key).length > 1)) throw new Error('SECURITY_QUERY_INVALID');
   const until = params.get('until') || now.toISOString();
   const timestamp = Date.parse(until);
-  if (!Number.isFinite(timestamp) || timestamp > now.getTime() + 1000 || timestamp < now.getTime() - 7 * 86400000) throw new Error('SECURITY_QUERY_INVALID');
+  if (!Number.isFinite(timestamp) || timestamp > now.getTime() + 1000 || timestamp < now.getTime() - 366 * 86400000) throw new Error('SECURITY_QUERY_INVALID');
   const pageText = params.get('page') || '0';
   if (!/^\d{1,5}$/u.test(pageText)) throw new Error('SECURITY_QUERY_INVALID');
   const query = Object.fromEntries(allowed.map(key => [key, params.get(key) || '']));
   if (Object.values(query).some(value => value.length > 120 || /[\u0000-\u001f\u007f]/u.test(value))) throw new Error('SECURITY_QUERY_INVALID');
   if (query.source && !['APP', 'AZURE_KEYVAULT', 'WAF', 'ENTRA'].includes(query.source)) throw new Error('SECURITY_QUERY_INVALID');
   if (query.review && !['UNREVIEWED', 'REVIEWED', 'INVESTIGATING', 'ACTION_REQUIRED', 'FALSE_POSITIVE'].includes(query.review)) throw new Error('SECURITY_QUERY_INVALID');
-  const hours = query.hours ? Number(query.hours) : 24;
-  if (!['', '1', '6', '24'].includes(query.hours)) throw new Error('SECURITY_QUERY_INVALID');
-  return { ...query, hours, page: Number(pageText), until: new Date(timestamp).toISOString(), from: new Date(timestamp - hours * 3600000).toISOString() };
+  if (!['', '1', '6', '24', '168', '744'].includes(query.hours) || (query.from && query.hours)) throw new Error('SECURITY_QUERY_INVALID');
+  const start=query.from?Date.parse(query.from):timestamp-Number(query.hours||24)*3600000;
+  if(!Number.isFinite(start)||start>=timestamp||timestamp-start>31*86400000)throw new Error('SECURITY_QUERY_INVALID');
+  const hours=(timestamp-start)/3600000;
+  return { ...query, hours, page: Number(pageText), until: new Date(timestamp).toISOString(), from: new Date(start).toISOString() };
 }
 
 export function buildEventIndex(logs, azure, reviews, query, waf = {status:'not_configured',events:[]}, entra = {status:'not_configured',events:[]}) {
@@ -65,8 +68,9 @@ export function buildEventIndex(logs, azure, reviews, query, waf = {status:'not_
     && (!q || [event.action, event.result, event.reasonCode, event.hospitalId, event.category, event.eventRef, event.actorType].some(value => String(value || '').toLocaleLowerCase('ko-KR').includes(q))));
   const countBy = (items, field) => Object.entries(items.reduce((acc, event) => { const key = event[field] || '미확인'; acc[key] = (acc[key] || 0) + 1; return acc; }, {}))
     .map(([label, count]) => ({ label, count })).sort((a, b) => b.count - a.count);
-  const hours = Array.from({ length: query.hours }, (_, i) => ({ time: new Date(from + i * 3600000).toISOString(), count: 0, denied: 0 }));
-  for (const event of app) { const bucket = Math.min(query.hours - 1, Math.floor((Date.parse(event.time) - from) / 3600000)); hours[bucket].count++; if (BAD.has(event.result)) hours[bucket].denied++; }
+  const bucketHours=query.hours>48?24:1;
+  const hours = Array.from({ length: Math.max(1,Math.ceil(query.hours/bucketHours)) }, (_, i) => ({ time: new Date(from + i * bucketHours * 3600000).toISOString(), count: 0, denied: 0 }));
+  for (const event of app) { const bucket = Math.min(hours.length - 1, Math.floor((Date.parse(event.time) - from) / (bucketHours*3600000))); hours[bucket].count++; if (BAD.has(event.result)) hours[bucket].denied++; }
   const chart = { population: 'APP_STORED_RANGE', periodHours: query.hours, total: app.length, results: countBy(app, 'resultGroup'),
     reasons: countBy(app.filter(event => BAD.has(event.result)), 'reasonCode').slice(0, 6), categories: countBy(app, 'category'), hours,
     denied: app.filter(event => BAD.has(event.result)).length, unreviewed: app.filter(event => BAD.has(event.result) && !latestReviews.has(`APP:${event.eventRef}`)).length,
@@ -81,7 +85,7 @@ export function buildEventIndex(logs, azure, reviews, query, waf = {status:'not_
       waf: {status:waf.status,reason:waf.reason,count:firewall.length,observedAt:waf.observedAt,scope:waf.scope,truncatedPossible:true,
         rules:countBy(firewall,'reasonCode').slice(0,6),results:countBy(firewall,'result'),denied:firewall.filter(event=>event.result==='DENIED').length} },
     facets: { categories: [...new Set(events.map(event => event.category))], hospitals: [...new Set(events.map(event => event.hospitalId))].filter(Boolean), actions: [...new Set(events.map(event => event.action))].filter(Boolean) },
-    allEvents: events };
+    allEvents: events, filteredEvents: filtered };
 }
 
 export function createSecurityReport(index, body, actorId) {
@@ -101,5 +105,5 @@ export function createSecurityReport(index, body, actorId) {
     requestedFormat: body.format, scope: { from: index.from, until: index.until, sources: index.sources, selectedCount: events.length },
     title: '보안 사건 검토 보고서', events,
     limitations: ['선택한 이벤트의 검토 전 초안입니다. 사건 전체 또는 로그 수집 완전성을 보증하지 않습니다.', 'Key Vault·Entra는 각 최근 최대 100건입니다. Entra는 지정 앱 로그인만 포함하며 진단 설정·수집 완전성은 미검증입니다. WAF는 제한된 로그 표본의 규칙 이벤트이며 전체 요청·공격 건수 또는 차단률이 아닙니다.', '보고서 지문은 문서 내용 비교용이며 전자서명 또는 로그 원본성 인증이 아닙니다.'] };
-  return { ...report, fingerprint: createHash('sha256').update(JSON.stringify(report)).digest('hex') };
+  return rememberSecurityReport({ ...report, fingerprint: createHash('sha256').update(JSON.stringify(report)).digest('hex') });
 }

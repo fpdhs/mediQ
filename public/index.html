@@ -354,7 +354,7 @@
             </div>
             <p id="share-previous-notice" class="share-notice" role="status" hidden></p>
             <div class="share-ticket">
-              <section class="share-exam"><span class="share-ticket-icon" aria-hidden="true">▤</span><p>내가 공유할 검사</p><h2 id="share-exam-title">검사 확인 중</h2><p id="share-exam-meta"></p><p id="share-exam-count"></p><button id="share-select-exam" type="button" class="btn secondary">검사 선택 / 변경</button><p><small>합성 시연 영상 · 비진단용</small></p></section>
+              <section class="share-exam"><span class="share-ticket-icon" aria-hidden="true"><svg viewBox="0 0 32 32" focusable="false"><rect x="4" y="4" width="24" height="24" rx="5"/><circle cx="16" cy="16" r="7"/><path d="M16 12v8M12 16h8M8 8h2M22 24h2"/></svg></span><p>내가 공유할 검사</p><h2 id="share-exam-title">검사 확인 중</h2><p id="share-exam-meta"></p><p id="share-exam-count"></p><button id="share-select-exam" type="button" class="btn secondary">검사 선택 / 변경</button><p><small>합성 시연 영상 · 비진단용</small></p></section>
               <section class="share-destination"><p>이 검사를 받을 곳</p><h2 id="share-hospital"></h2><label>받는 병원<select id="target-hospital-select" class="select" aria-label="수신 병원 선택"><option value="HOSP-B" selected>B대학병원</option><option value="HOSP-C">가상 병원 C</option><option value="HOSP-A">A대학병원</option></select></label><p id="share-purpose"></p><span>승인된 범위에서만 이용할 수 있어요. 병원 변경 시 확인란을 다시 선택해야 합니다.</span></section>
             </div>
             <div id="share-health-picker"></div>
@@ -817,6 +817,7 @@
                   <span id="viewer-countdown">대기 중</span>
                 </div>
                 <span id="viewer-status" class="studio-status" role="status">대기</span>
+                <button class="mq-btn studio-renew-access" id="studio-renew-access" type="button" title="공유 동의와 승인된 검사 범위를 다시 확인합니다"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5M6 7a7 7 0 0 1 12-1l2 3M4 15l2 3a7 7 0 0 0 12-1"/></svg><span>열람 권한 갱신</span></button>
                 <button class="mq-btn studio-info-toggle" id="studio-info-toggle" type="button" aria-expanded="false" aria-controls="studio-inspector"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M15 4v16"/></svg><span>검사 정보</span></button>
               </div>
             </header>

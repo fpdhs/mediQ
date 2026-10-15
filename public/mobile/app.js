@@ -445,7 +445,7 @@ async function handleQuickAuth(method = "BIO") {
 
 async function handleLockApp() {
   if (!state.isAuthenticated) return;
-  mobileQrTicket?.clear();
+  if (typeof mobileQrTicket !== 'undefined') mobileQrTicket?.clear();
 
   state.isAuthenticated = false;
   faqAssistant?.reset();
@@ -526,7 +526,7 @@ async function handleLockApp() {
 }
 
 function handlePatientSelect(patientId) {
-  mobileQrTicket?.clear();
+  if (typeof mobileQrTicket !== 'undefined') mobileQrTicket?.clear();
   faqAssistant?.reset();
   healthHelper?.reset();
   mobileRecords?.reset();
