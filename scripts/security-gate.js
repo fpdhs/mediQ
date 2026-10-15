@@ -10,7 +10,7 @@ const commands = [
   { name: "dependency-audit", packageManagerCommand: true, args: ["audit", "--prod", "--audit-level", "critical"] },
 ];
 
-const commandTimeoutMs = positiveInteger(process.env.HIPASS_SECURITY_GATE_TIMEOUT_MS, 60_000);
+const commandTimeoutMs = positiveInteger(process.env.HIPASS_SECURITY_GATE_TIMEOUT_MS, 180_000);
 
 const results = [];
 for (const item of commands) {
@@ -30,6 +30,7 @@ for (const item of commands) {
     signal: result.signal,
     durationMs: Date.now() - startedAt,
     stderr: trim(result.stderr),
+    output: result.status !== 0 ? trim(result.stdout || result.stderr) : undefined,
     ...(item.packageManagerCommand ? { packageManager: pnpmRuntime } : {}),
   });
 }
