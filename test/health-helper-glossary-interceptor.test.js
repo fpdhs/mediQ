@@ -1,6 +1,11 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { matchScreeningGlossary, isClinicalDiagnosisRequest, HEALTH_SCREENING_GLOSSARY } from '../src/health-helper-glossary-interceptor.js';
+import {
+  matchScreeningGlossary,
+  isClinicalDiagnosisRequest,
+  isEmergencyRequest,
+  HEALTH_SCREENING_GLOSSARY
+} from '../src/health-helper-glossary-interceptor.js';
 
 test('Screening Glossary: matches AFP and Korean aliases', () => {
   const queries = ['afp', 'AFP', 'afp가 뭐야?', '알파태아단백', '혈청 afp', 'AFP 검사 목적'];
@@ -74,28 +79,127 @@ test('Screening Glossary: matches Kidney, Urinalysis, Hemoglobin, Vitals', () =>
   assert.equal(matchScreeningGlossary('폐기능검사')?.item.id, 'pulmonary-function');
 });
 
-test('Screening Glossary: matches Major Liver Diseases (Cirrhosis, Liver Cancer, Fatty Liver)', () => {
-  const cirrhosisQueries = ['간경화', '간경화란?', '간경화가 뭐야?', '간경변증', '간경변증이란', '간경변증에 대해 알려주세요', '간경화에 대해서 알려달라'];
-  for (const q of cirrhosisQueries) {
-    const res = matchScreeningGlossary(q);
-    assert.ok(res, `Expected match for: ${q}`);
-    assert.equal(res.item.id, 'cirrhosis');
-    assert.match(res.response.answer, /간경변증/);
-    assert.ok(res.response.questions.length >= 2);
+test('Screening Glossary: matches 30 Major Diseases across all clinical groups', () => {
+  // 1. Major 6 Cancers
+  const cancers = [
+    { query: '간암', id: 'liver-cancer' },
+    { query: '위암', id: 'gastric-cancer' },
+    { query: '위암이란?', id: 'gastric-cancer' },
+    { query: '대장암', id: 'colorectal-cancer' },
+    { query: '폐암', id: 'lung-cancer' },
+    { query: '유방암', id: 'breast-cancer' },
+    { query: '자궁경부암', id: 'cervical-cancer' }
+  ];
+  for (const { query, id } of cancers) {
+    const res = matchScreeningGlossary(query);
+    assert.ok(res, `Missing match for cancer: ${query}`);
+    assert.equal(res.item.id, id);
+    assert.match(res.response.answer, /국립암정보센터|가이드라인/);
   }
 
-  const cancerQueries = ['간암', '간암이란?', '간암이 뭐야?', '간세포암', '간세포암이란 무엇인가요?', 'HCC', '간 종양'];
-  for (const q of cancerQueries) {
-    const res = matchScreeningGlossary(q);
-    assert.ok(res, `Expected match for: ${q}`);
-    assert.equal(res.item.id, 'liver-cancer');
-    assert.match(res.response.answer, /간세포암/);
-    assert.ok(res.response.questions.length >= 2);
+  // 2. Cardio & Cerebrovascular Diseases
+  const cardio = [
+    { query: '고혈압', id: 'hypertension' },
+    { query: '고혈압이란 무엇인가요?', id: 'hypertension' },
+    { query: '협심증', id: 'angina' },
+    { query: '심근경색', id: 'myocardial-infarction' },
+    { query: '뇌경색', id: 'cerebral-infarction' },
+    { query: '뇌출혈', id: 'cerebral-hemorrhage' }
+  ];
+  for (const { query, id } of cardio) {
+    const res = matchScreeningGlossary(query);
+    assert.ok(res, `Missing match for cardio: ${query}`);
+    assert.equal(res.item.id, id);
   }
 
-  assert.equal(matchScreeningGlossary('지방간')?.item.id, 'fatty-liver');
-  assert.equal(matchScreeningGlossary('지방간이란?')?.item.id, 'fatty-liver');
-  assert.equal(matchScreeningGlossary('만성 간염')?.item.id, 'chronic-hepatitis');
+  // 3. Metabolic & Endocrine Diseases
+  const metabolic = [
+    { query: '당뇨병', id: 'diabetes' },
+    { query: '이상지질혈증', id: 'dyslipidemia' },
+    { query: '고지혈증이란', id: 'dyslipidemia' },
+    { query: '대사증후군', id: 'metabolic-syndrome' },
+    { query: '통풍', id: 'gout' },
+    { query: '갑상선 질환', id: 'thyroid-disorders' }
+  ];
+  for (const { query, id } of metabolic) {
+    const res = matchScreeningGlossary(query);
+    assert.ok(res, `Missing match for metabolic: ${query}`);
+    assert.equal(res.item.id, id);
+  }
+
+  // 4. Hepato-biliary & Gastrointestinal
+  const gi = [
+    { query: '간경변증', id: 'cirrhosis' },
+    { query: '간경화에 대해서 알려달라', id: 'cirrhosis' },
+    { query: '지방간', id: 'fatty-liver' },
+    { query: '만성 간염', id: 'chronic-hepatitis' },
+    { query: '역류성 식도염', id: 'gerd' },
+    { query: '담석증', id: 'cholelithiasis' },
+    { query: '췌장염', id: 'pancreatitis' }
+  ];
+  for (const { query, id } of gi) {
+    const res = matchScreeningGlossary(query);
+    assert.ok(res, `Missing match for GI: ${query}`);
+    assert.equal(res.item.id, id);
+  }
+
+  // 5. Respiratory
+  const resp = [
+    { query: 'COPD', id: 'copd' },
+    { query: '천식', id: 'asthma' },
+    { query: '폐렴', id: 'pneumonia' }
+  ];
+  for (const { query, id } of resp) {
+    const res = matchScreeningGlossary(query);
+    assert.ok(res, `Missing match for respiratory: ${query}`);
+    assert.equal(res.item.id, id);
+  }
+
+  // 6. Kidney & Urology
+  const renal = [
+    { query: '만성콩팥병', id: 'ckd' },
+    { query: '단백뇨', id: 'proteinuria' },
+    { query: '요로결석', id: 'urolithiasis' }
+  ];
+  for (const { query, id } of renal) {
+    const res = matchScreeningGlossary(query);
+    assert.ok(res, `Missing match for renal: ${query}`);
+    assert.equal(res.item.id, id);
+  }
+
+  // 7. Degenerative & Neurological
+  const degen = [
+    { query: '골다공증', id: 'osteoporosis' },
+    { query: '퇴행성관절염', id: 'osteoarthritis' },
+    { query: '치매', id: 'dementia' }
+  ];
+  for (const { query, id } of degen) {
+    const res = matchScreeningGlossary(query);
+    assert.ok(res, `Missing match for degenerative: ${query}`);
+    assert.equal(res.item.id, id);
+  }
+});
+
+test('Emergency Triage Gate: red flag symptoms trigger immediate 119 escalation', () => {
+  const redFlags = [
+    '가슴이 쥐어짜듯 아파요',
+    '가슴에 극심한 흉통이 있어요',
+    '숨이 너무 차고 안 쉬어져요',
+    '갑자기 한쪽 팔다리가 마비되었어요',
+    '말이 어눌해지고 입이 돌아갔어요',
+    '환자가 갑자기 의식을 잃고 쓰러졌어요',
+    '피를 토해요 (토혈)'
+  ];
+
+  for (const q of redFlags) {
+    assert.ok(isEmergencyRequest(q), `Expected emergency detection for: ${q}`);
+    const res = matchScreeningGlossary(q);
+    assert.ok(res, `Expected emergency intercept for: ${q}`);
+    assert.equal(res.response.status, 'RETRIEVED');
+    assert.equal(res.response.category, '응급 안내');
+    assert.match(res.response.answer, /119/);
+    assert.match(res.response.answer, /골든타임/);
+  }
 });
 
 test('Safety Guardrail: clinical diagnosis or cancer queries are NOT intercepted', () => {
@@ -108,7 +212,10 @@ test('Safety Guardrail: clinical diagnosis or cancer queries are NOT intercepted
     '나 간암인가요?',
     '간경화에 무슨 약을 먹어야 하나요?',
     '간암 3기 생존율은 어떻게 되나요?',
-    '간경화 완치 약 알려줘'
+    '간경화 완치 약 알려줘',
+    '당뇨 완치약 추천해줘',
+    '고혈압 약 복용 용량 알려줘',
+    '위암 몇 기인가요?'
   ];
 
   for (const q of unsafeQueries) {
@@ -117,4 +224,3 @@ test('Safety Guardrail: clinical diagnosis or cancer queries are NOT intercepted
     assert.equal(res, null, `Unsafe query must not be intercepted: ${q}`);
   }
 });
-

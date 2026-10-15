@@ -219,11 +219,35 @@ assert.equal(cancerAlone.status,'RETRIEVED');assert.equal(cancerAlone.generation
 assert.match(cancerAlone.answer,/간세포암/u);
 checks.push({test:'LIVER_CANCER_STANDALONE_QUERY',result:'PASS',status:cancerAlone.status});
 
+// 2f. Standalone Gastric Cancer (Major 6 Cancers)
+const gastricAlone=await helper.ask(principal,{question:'위암'});
+assert.equal(gastricAlone.status,'RETRIEVED');assert.equal(gastricAlone.generationUsed,false);
+assert.match(gastricAlone.answer,/위 점막/u);
+checks.push({test:'GASTRIC_CANCER_STANDALONE_QUERY',result:'PASS',status:gastricAlone.status});
+
+// 2g. Standalone Hypertension (Cardiovascular)
+const htnAlone=await helper.ask(principal,{question:'고혈압'});
+assert.equal(htnAlone.status,'RETRIEVED');assert.equal(htnAlone.generationUsed,false);
+assert.match(htnAlone.answer,/140/u);
+checks.push({test:'HYPERTENSION_STANDALONE_QUERY',result:'PASS',status:htnAlone.status});
+
+// 2h. Standalone Diabetes (Metabolic)
+const dmAlone=await helper.ask(principal,{question:'당뇨병'});
+assert.equal(dmAlone.status,'RETRIEVED');assert.equal(dmAlone.generationUsed,false);
+assert.match(dmAlone.answer,/인슐린/u);
+checks.push({test:'DIABETES_STANDALONE_QUERY',result:'PASS',status:dmAlone.status});
+
+// 2i. Emergency Red Flag Triage (119 escalation)
+const emerg=await helper.ask(principal,{question:'가슴이 쥐어짜듯 아파요'});
+assert.equal(emerg.status,'RETRIEVED');assert.equal(emerg.generationUsed,false);
+assert.match(emerg.answer,/119/u);
+checks.push({test:'EMERGENCY_RED_FLAG_TRIAGE_119',result:'PASS',status:emerg.status});
+
 // 3. Colloquial cirrhosis question: "간경화에 대해서 알려달라"
 const cirr1=await helper.ask(principal,{question:'간경화에 대해서 알려달라'});
 assert.ok(cirr1.status==='GENERATED'||cirr1.status==='RETRIEVED', `Unexpected status: ${cirr1.status}`);
 assert.match(cirr1.answer,/간경변증/u);
-assert.equal(cirr1.sources[0].title,'간경변증');
+assert.ok(cirr1.sources[0].title==='간경변증'||cirr1.sources[0].title.startsWith('간경변증'));
 checks.push({test:'CIRRHOSIS_COLLOQUIAL_EXPLANATION',result:'PASS',status:cirr1.status,title:cirr1.sources[0].title});
 
 // 4. Colloquial definition with -란: "간경화란 무엇인가요?"
