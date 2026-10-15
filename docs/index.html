@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MediQ Highpass Platform | 환자 동의 기반 의료영상(DICOM) 안전 교류 & Zero Cloud 엔터프라이즈 게이트웨이</title>
-  <meta name="description" content="환자 명시적 동의(Consent) 기반 CT·MRI 의료영상 무CD 병원 간 안전 교류, Zero Cloud Storage 분산 아키텍처, 실제 Microsoft Entra ID OIDC 인증 및 App Role(PATIENT, DOCTOR, SECURITY_ADMIN) RBAC, 11조건 Fail-Closed ABAC 접근제어, 5분 만료 DPoP 단기 토큰, 1,525개 자동화 검증 실증 포트폴리오">
+  <title>MediQ (하이패스 Platform) | 영상은 병원에, 권한은 환자에게 — 엔터프라이즈 포트폴리오</title>
+  <meta name="description" content="환자 동의에서 승인 영상과 감사 증적까지. 원본 DICOM 중앙 무저장(Zero Cloud Storage), 실제 Microsoft Entra ID OIDC 인증 및 App Role (PATIENT, DOCTOR, SECURITY_ADMIN), 11조건 Fail-Closed ABAC, 5분 DPoP 단기 토큰, 1,525건 자동화 검증 실증 포트폴리오">
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -14,18 +14,27 @@
       theme: {
         extend: {
           colors: {
-            brand: {
-              dark: '#070b14',
-              card: '#0d1527',
-              cardLighter: '#15213b',
-              border: '#1e293b',
-              accent: '#38bdf8',
-              emerald: '#10b981',
-              crimson: '#f43f5e',
-              amber: '#f59e0b',
-              purple: '#a855f7',
-              cyan: '#06b6d4',
-              blue: '#0284c7',
+            mediq: {
+              canvas: '#0a0f1d',
+              card: '#101827',
+              cardLighter: '#172236',
+              border: 'rgba(124, 203, 232, 0.16)',
+              borderFocus: 'rgba(124, 203, 232, 0.45)',
+              primary: '#2463eb',       /* MediQ Royal Blue */
+              primaryHover: '#1d4ed8',
+              cyan: '#7ccbe8',          /* MediQ Diagnostic Ice Cyan */
+              cyanLight: '#cedaf7',     /* MediQ Soft Pill Badge */
+              teal: '#0d9488',          /* MediQ Quiet Clinical Teal */
+              tealDark: '#126b63',
+              emerald: '#10b981',       /* Clinical Pass / Normal */
+              emeraldDark: '#17382b',
+              amber: '#f59e0b',         /* Warning / Holding */
+              amberDark: '#3a301e',
+              crimson: '#f43f5e',       /* Denial / Refusal */
+              crimsonDark: '#422626',
+              purple: '#8b5cf6',        /* Entra ID Identity */
+              textMuted: '#94a3b8',
+              textSubtle: '#b0bfce',
             }
           },
           fontFamily: {
@@ -41,20 +50,20 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background-color: #070b14; color: #f1f5f9; }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background-color: #0a0f1d; color: #f1f5f9; }
     code, pre { font-family: 'Fira Code', monospace; }
-    .glass-card { background: rgba(13, 21, 39, 0.82); backdrop-filter: blur(14px); border: 1px solid rgba(255, 255, 255, 0.08); }
+    .glass-card { background: rgba(16, 24, 39, 0.85); backdrop-filter: blur(14px); border: 1px solid rgba(124, 203, 232, 0.14); }
     .glass-card-hover { transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
-    .glass-card-hover:hover { transform: translateY(-3px); border-color: rgba(56, 189, 248, 0.45); box-shadow: 0 12px 30px -10px rgba(56, 189, 248, 0.25); }
-    .glow-cyan { box-shadow: 0 0 30px -5px rgba(6, 182, 212, 0.35); }
-    .glow-blue { box-shadow: 0 0 30px -5px rgba(56, 189, 248, 0.35); }
-    .glow-emerald { box-shadow: 0 0 30px -5px rgba(16, 185, 129, 0.35); }
-    .glow-purple { box-shadow: 0 0 30px -5px rgba(168, 85, 247, 0.35); }
-    .glow-crimson { box-shadow: 0 0 30px -5px rgba(244, 63, 94, 0.35); }
+    .glass-card-hover:hover { transform: translateY(-3px); border-color: rgba(124, 203, 232, 0.45); box-shadow: 0 14px 34px -10px rgba(124, 203, 232, 0.22); }
+    .glow-cyan { box-shadow: 0 0 32px -6px rgba(124, 203, 232, 0.32); }
+    .glow-blue { box-shadow: 0 0 32px -6px rgba(36, 99, 235, 0.32); }
+    .glow-teal { box-shadow: 0 0 32px -6px rgba(13, 148, 136, 0.32); }
+    .glow-emerald { box-shadow: 0 0 32px -6px rgba(16, 185, 129, 0.32); }
+    .glow-purple { box-shadow: 0 0 32px -6px rgba(139, 92, 246, 0.32); }
     
     /* Custom scrollbar */
     ::-webkit-scrollbar { width: 8px; height: 8px; }
-    ::-webkit-scrollbar-track { background: #070b14; }
+    ::-webkit-scrollbar-track { background: #0a0f1d; }
     ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
     ::-webkit-scrollbar-thumb:hover { background: #334155; }
 
@@ -62,37 +71,49 @@
     #lightboxModal.active { display: flex; }
   </style>
 </head>
-<body class="min-h-screen flex flex-col selection:bg-cyan-500 selection:text-black">
+<body class="min-h-screen flex flex-col selection:bg-cyan-400 selection:text-black">
 
   <!-- ==================== STICKY HEADER & NAVBAR ==================== -->
-  <header class="sticky top-0 z-50 glass-card border-b border-slate-800/90 shadow-lg">
+  <header class="sticky top-0 z-50 glass-card border-b border-slate-800/90 shadow-xl">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Brand Logo Area -->
       <div class="flex items-center space-x-3">
-        <a href="#overview" class="flex items-center space-x-3 group">
-          <span class="text-2xl transform group-hover:scale-110 transition-transform">🏥</span>
-          <div>
-            <span class="font-extrabold text-xl tracking-tight bg-gradient-to-r from-cyan-400 via-sky-300 to-emerald-400 bg-clip-text text-transparent">MediQ Highpass</span>
-            <span class="hidden sm:inline-block ml-2 text-[10px] px-2 py-0.5 rounded-full bg-cyan-950/80 text-cyan-300 border border-cyan-700/60 font-mono font-semibold">Clinical Continuity ⇄ Zero-Cloud Security</span>
+        <a href="#overview" class="flex items-center space-x-2.5 group">
+          <!-- MediQ Official Vector SVG Wordmark -->
+          <svg class="h-8 w-auto transform group-hover:scale-105 transition-transform" viewBox="0 0 140 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <text x="0" y="46" fill="#f8fafc" font-family="'Inter', sans-serif" font-size="38" font-weight="800" letter-spacing="-1.5">Medi</text>
+            <rect x="94" y="8" width="44" height="48" rx="8" fill="#cedaf7"/>
+            <text x="103" y="45" fill="#142338" font-family="'Inter', sans-serif" font-size="36" font-weight="900">Q</text>
+          </svg>
+          <div class="border-l border-slate-700/80 pl-2.5 hidden sm:block">
+            <span class="text-xs font-bold text-slate-200 block leading-tight">하이패스 Platform</span>
+            <span class="text-[10px] font-mono text-cyan-400 font-semibold block leading-tight">Engineering Portfolio 2026</span>
           </div>
         </a>
       </div>
 
-      <nav class="hidden xl:flex items-center space-x-4 text-xs font-semibold text-slate-300">
-        <a href="#overview" class="hover:text-cyan-400 transition-colors">개요</a>
-        <a href="#entra-id" class="hover:text-purple-400 transition-colors text-purple-300 flex items-center gap-1 font-bold"><span>🔐</span> 실제 Entra ID</a>
-        <a href="#dual-paradigm" class="hover:text-cyan-400 transition-colors text-cyan-300">듀얼 패러다임</a>
-        <a href="#architecture" class="hover:text-cyan-400 transition-colors">분산 토폴로지</a>
-        <a href="#dilemmas" class="hover:text-emerald-400 transition-colors text-emerald-300">3대 딜레마</a>
-        <a href="#features" class="hover:text-cyan-400 transition-colors">12대 핵심 기능</a>
-        <a href="#gallery" class="hover:text-cyan-400 transition-colors">실증 스크린샷 (24선)</a>
-        <a href="#benchmark" class="hover:text-cyan-400 transition-colors">보안 게이트 검증</a>
-        <a href="#defense" class="hover:text-cyan-400 transition-colors">실무 Q&A 20선</a>
+      <!-- Navigation Links -->
+      <nav class="hidden xl:flex items-center space-x-3.5 text-xs font-semibold text-slate-300">
+        <a href="#overview" class="hover:text-cyan-300 transition-colors">개요</a>
+        <a href="#problem" class="hover:text-amber-300 transition-colors text-amber-200">4대 난제</a>
+        <a href="#axioms" class="hover:text-cyan-300 transition-colors text-cyan-200">3대 공리</a>
+        <a href="#entra-id" class="hover:text-purple-300 transition-colors text-purple-300 flex items-center gap-1 font-bold"><span>🔐</span> Entra ID 인증</a>
+        <a href="#journey" class="hover:text-cyan-300 transition-colors">8단계 여정</a>
+        <a href="#architecture" class="hover:text-cyan-300 transition-colors">3-Zone 토폴로지</a>
+        <a href="#dilemmas" class="hover:text-teal-300 transition-colors text-teal-300">3대 딜레마</a>
+        <a href="#features" class="hover:text-cyan-300 transition-colors">12대 혁신</a>
+        <a href="#gallery" class="hover:text-cyan-300 transition-colors">실증 갤러리 (24선)</a>
+        <a href="#case-study" class="hover:text-rose-300 transition-colors text-rose-300">장애 복구 사례</a>
+        <a href="#benchmark" class="hover:text-emerald-300 transition-colors text-emerald-300">검증 원장</a>
+        <a href="#defense" class="hover:text-cyan-300 transition-colors">실무 Q&A</a>
       </nav>
 
+      <!-- Right Action & Badges -->
       <div class="flex items-center space-x-2.5">
-        <span class="hidden md:inline-flex items-center px-2.5 py-1 rounded text-[11px] font-mono font-bold bg-emerald-950/80 text-emerald-400 border border-emerald-700/60">
+        <span class="hidden md:inline-flex items-center px-2.5 py-1 rounded text-[11px] font-mono font-bold bg-emerald-950/90 text-emerald-300 border border-emerald-700/60 shadow-sm">
           <span class="w-2 h-2 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>
-          GATE-RELEASE-01: PASS (1,525/1,525)
+          PASS 1,525/1,525
         </span>
         <a href="https://github.com/sureasdufo1-hue/Highpass-Project" target="_blank" rel="noopener noreferrer" 
            class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition-all shadow-sm">
@@ -103,77 +124,80 @@
     </div>
   </header>
 
-  <!-- ==================== HERO SECTION ==================== -->
+  <!-- ==================== HERO SECTION (FROM SLIDE 1, 2) ==================== -->
   <section id="overview" class="relative overflow-hidden py-16 lg:py-24 border-b border-slate-800/80 scroll-mt-16">
-    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-cyan-950/30 via-transparent to-transparent pointer-events-none"></div>
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-950/30 via-cyan-950/15 to-transparent pointer-events-none"></div>
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
       <div class="text-center max-w-4xl mx-auto space-y-6">
         
         <!-- Live Status Ribbons -->
         <div class="flex flex-wrap items-center justify-center gap-2">
-          <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-cyan-950/90 text-cyan-300 border border-cyan-700/60 shadow-sm">
+          <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-950/90 text-cyan-300 border border-cyan-700/60 shadow-sm">
             <span class="w-2 h-2 rounded-full bg-cyan-400 mr-2 animate-ping"></span>
-            🔵 Clinical Continuity: 0장 CD 발급 | 700슬라이스 CT 즉시 스트리밍 | HL7 FHIR 연동
-          </span>
-          <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-950/90 text-emerald-300 border border-emerald-700/60 shadow-sm">
-            <span class="w-2 h-2 rounded-full bg-emerald-400 mr-2 animate-pulse"></span>
-            🟢 Zero-Cloud Security: 0.0% 클라우드 원본 저장 | 11조건 ABAC Fail-Closed | 5분 DPoP 단기 토큰
+            🔵 영상은 병원에, 권한은 환자에게 (Zero Cloud Persistence)
           </span>
           <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-purple-950/90 text-purple-300 border border-purple-700/60 shadow-sm">
             <span class="w-2 h-2 rounded-full bg-purple-400 mr-2 animate-pulse"></span>
-            🔐 Real Microsoft Entra ID: 실제 테넌트 OIDC 인증 & App Roles (PATIENT / DOCTOR / SECURITY_ADMIN)
+            🔐 Real Microsoft Entra ID: 실제 테넌트 OIDC 인증 & 3대 App Role (PATIENT / DOCTOR / SECURITY_ADMIN)
           </span>
-          <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-slate-900/90 text-emerald-300 border border-emerald-800/60 shadow-sm">
-            CI/CD: 1,525/1,525 Automated Tests PASS (0 Errors)
+          <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-950/90 text-emerald-300 border border-emerald-700/60 shadow-sm">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 mr-2 animate-pulse"></span>
+            🟢 11조건 Fail-Closed ABAC & 5분 DPoP 단기 토큰
+          </span>
+          <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-mono font-bold bg-slate-900/90 text-slate-300 border border-slate-700 shadow-sm">
+            👨‍💻 이재석 · 김범희 | 2026.10.15 포트폴리오 완결판
           </span>
         </div>
 
-        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight">
-          <span class="text-cyan-400">Clinical Continuity</span> <span class="text-slate-400 font-light">⇄</span> <span class="text-emerald-400">Zero-Cloud Security</span> <br class="hidden sm:inline">
-          <span class="bg-gradient-to-r from-cyan-400 via-sky-300 to-emerald-400 bg-clip-text text-transparent">환자 동의 기반 클라우드 의료영상 교류 & 보안 게이트웨이</span>
+        <!-- Headline -->
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-tight">
+          <span class="text-white">영상은 병원에,</span> <span class="bg-gradient-to-r from-cyan-300 via-sky-300 to-blue-400 bg-clip-text text-transparent">권한은 환자에게.</span><br>
+          <span class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-300 font-sans">환자 동의에서 승인 영상과 감사 증적까지</span>
         </h1>
 
+        <!-- Slogan & Intro Quote -->
         <p class="text-base sm:text-lg text-slate-300 font-normal leading-relaxed max-w-3xl mx-auto">
-          <span class="text-cyan-400 font-semibold font-mono">"의료영상 원본은 병원에 남기고, 공유 제어권은 환자에게 돌려주며, 진료 연속성은 클라우드로 잇는다."</span><br>
-          기존 의료 현장의 고질적 문제인 <strong>CT·MRI CD 발급·직접 운반·병원 등록 절차를 혁신</strong>하여,  
-          <strong>실제 Microsoft Entra ID 엔터프라이즈 테넌트 인증</strong>과 <strong>Fail-Closed 11조건 ABAC 정책 엔진</strong>, <strong>5분 만료 DPoP 단기 토큰</strong>으로 클라우드 원본 지속 저장 0%의 무결점 보안을 실증한 차세대 의료정보 플랫폼입니다.
+          <span class="text-cyan-300 font-semibold font-mono">"환자가 정한 범위를, 병원 경계 너머에서도 지키는 진정한 의미의 의료영상 교류."</span><br>
+          기존 CD 발급·직접 운반·병원 등록의 사회적 비용과 피폭을 혁신하고,  
+          <strong>실제 Microsoft Entra ID 엔터프라이즈 인증</strong>과 <strong>11조건 Fail-Closed ABAC 정책</strong>, <strong>5분 DPoP 단기 토큰</strong>으로  
+          클라우드 원본 지속 저장 0.0 MB를 실증한 엔터프라이즈 헬스케어 플랫폼(MediQ MVP/PoC)입니다.
         </p>
 
         <!-- CTA Buttons -->
         <div class="pt-2 flex flex-wrap items-center justify-center gap-3">
+          <a href="#problem" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-extrabold text-xs sm:text-sm transition-all shadow-lg flex items-center gap-2">
+            <span>⚠️</span> <span>왜 CD가 문제인가? 4대 난제</span>
+          </a>
+          <a href="#axioms" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 via-sky-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black font-extrabold text-xs sm:text-sm transition-all shadow-lg glow-cyan flex items-center gap-2">
+            <span>🛡️</span> <span>MediQ 3대 불변 공리</span>
+          </a>
           <a href="#entra-id" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs sm:text-sm transition-all shadow-lg glow-purple flex items-center gap-2">
-            <span>🔐</span> <span>실제 Entra ID 인증 & 역할 실증</span>
+            <span>🔐</span> <span>실제 Entra ID 인증 & 역할</span>
           </a>
-          <a href="#dual-paradigm" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-black font-bold text-xs sm:text-sm transition-all shadow-lg glow-cyan flex items-center gap-2">
-            <span>🛡️</span> <span>듀얼 패러다임 핵심</span>
+          <a href="#journey" class="px-5 py-2.5 rounded-xl glass-card hover:bg-slate-800 text-cyan-300 font-semibold text-xs sm:text-sm transition-all border border-cyan-800/60 flex items-center gap-2">
+            <span>🧭</span> <span>8단계 서비스 여정</span>
           </a>
-          <a href="#gallery" class="px-5 py-2.5 rounded-xl glass-card hover:bg-slate-800 text-cyan-300 font-semibold text-xs sm:text-sm transition-all border border-cyan-800/60 flex items-center gap-2">
+          <a href="#gallery" class="px-5 py-2.5 rounded-xl glass-card hover:bg-slate-800 text-slate-300 font-semibold text-xs sm:text-sm transition-all border border-slate-700 flex items-center gap-2">
             <span>🖼️</span> <span>증적 갤러리 (24선)</span>
-          </a>
-          <a href="#benchmark" class="px-5 py-2.5 rounded-xl glass-card hover:bg-slate-800 text-emerald-400 font-semibold text-xs sm:text-sm transition-all border border-emerald-800/60 flex items-center gap-2">
-            <span>📊</span> <span>보안 게이트 (1,525 테스트)</span>
-          </a>
-          <a href="#defense" class="px-5 py-2.5 rounded-xl glass-card hover:bg-slate-800 text-slate-300 font-semibold text-xs sm:text-sm transition-all border border-slate-700 flex items-center gap-2">
-            <span>📚</span> <span>기술 심층 Q&A 20선</span>
           </a>
         </div>
 
       </div>
 
-      <!-- ==================== HERO MAIN SCREENSHOT PREVIEW ==================== -->
+      <!-- Hero Main Window Preview -->
       <div class="mt-12 max-w-5xl mx-auto">
-        <div class="glass-card rounded-2xl overflow-hidden border border-cyan-800/50 shadow-2xl relative group">
-          <!-- Window Header bar -->
-          <div class="bg-slate-900/90 px-4 py-3 border-b border-slate-800 flex items-center justify-between text-xs text-slate-400">
+        <div class="glass-card rounded-2xl overflow-hidden border border-cyan-700/50 shadow-2xl relative group">
+          <!-- Window Header Bar -->
+          <div class="bg-slate-900/95 px-4 py-3 border-b border-slate-800 flex items-center justify-between text-xs text-slate-400">
             <div class="flex items-center space-x-2">
               <span class="w-3 h-3 rounded-full bg-rose-500/80 inline-block"></span>
               <span class="w-3 h-3 rounded-full bg-amber-500/80 inline-block"></span>
               <span class="w-3 h-3 rounded-full bg-emerald-500/80 inline-block"></span>
-              <span class="ml-2 font-mono text-[11px] text-slate-300 font-semibold hidden sm:inline">MediQ Diagnostic Workspace // Abdominal CT 700-Slice Real-Time WADO-RS Streaming & Zero-Download Watermark</span>
+              <span class="ml-2 font-mono text-[11px] text-slate-300 font-semibold hidden sm:inline">MediQ Diagnostic Workspace // Abdominal CT 700 Slices WADO-RS Real-Time Streaming & Zero-Download Watermark</span>
             </div>
             <div class="flex items-center space-x-3">
-              <span class="text-emerald-400 font-mono text-[11px] flex items-center gap-1">
-                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> LIVE DICOMWEB
+              <span class="text-emerald-400 font-mono text-[11px] flex items-center gap-1 font-bold">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> WADO-RS LIVE
               </span>
               <button onclick="openLightbox('presentation/screenshots/16_의료진_DICOM뷰어_복부CT_700슬라이스_스트리밍열람.png', '16. 의료진 DICOM뷰어 복부CT 700슬라이스 스트리밍 열람', '동의된 700장 시리즈를 클라우드에 영구 저장하지 않고 단기 DPoP 토큰으로 실시간 WADO-RS 프레임 스트리밍 및 포렌식 워터마크 표시 화면')" 
                       class="px-2.5 py-1 rounded bg-cyan-950 text-cyan-300 border border-cyan-700 hover:bg-cyan-900 transition-colors text-[11px] font-semibold flex items-center gap-1">
@@ -192,7 +216,7 @@
                   Series: 700 Slices CT (WADO-RS Lazy Streaming)
                 </span>
                 <span class="px-3 py-1 rounded-lg bg-slate-900/90 text-emerald-300 border border-emerald-700/60 font-mono text-xs font-bold hidden sm:inline">
-                  Zero Cloud Persistence: PASS
+                  Cloud DICOM Storage: 0.0 MB
                 </span>
               </div>
               <span class="text-xs text-slate-300 bg-slate-900/80 px-2.5 py-1 rounded border border-slate-700 font-mono">
@@ -206,6 +230,176 @@
     </div>
   </section>
 
+  <!-- ==================== PROBLEM DEFINITION: 4 TOUGH QUESTIONS (FROM SLIDE 3) ==================== -->
+  <section id="problem" class="py-16 border-b border-slate-800/80 bg-slate-950/60 scroll-mt-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-3xl mx-auto mb-12">
+        <span class="text-xs uppercase tracking-widest text-amber-400 font-bold font-mono px-3 py-1 rounded-full bg-amber-950/80 border border-amber-800/60">
+          PROBLEM STATEMENT (SLIDE 03)
+        </span>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-3">"파일은 도착해도, 진료 준비는 끝나지 않습니다."</h2>
+        <p class="text-xs sm:text-sm text-slate-400 mt-2">
+          단순히 CD를 USB나 웹 드라이브로 옮기는 것은 해법이 아닙니다.  
+          기존 병원 간 CD 전달 방식에서 결코 답할 수 없었던 <strong class="text-amber-300">운반보다 어려운 4대 핵심 질문</strong>입니다.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+        <!-- Question 1 -->
+        <div class="glass-card rounded-2xl border border-amber-900/50 p-6 flex flex-col justify-between">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="w-8 h-8 rounded-xl bg-amber-950 text-amber-300 border border-amber-700 flex items-center justify-center font-bold text-sm">Q1</span>
+              <span class="text-[10px] font-mono text-rose-400 font-bold">신원 확인 부재</span>
+            </div>
+            <h3 class="text-base font-extrabold text-white">누가 볼 수 있는가?</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              CD는 물리적으로 손에 쥐는 사람 누구나 열어볼 수 있습니다. 정당한 자격을 갖춘 주치의인지, 권한 없는 타 병원 직원인지 식별할 수 없습니다.
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-800 text-[11px] text-cyan-300 font-semibold">
+            👉 MediQ: Entra ID OIDC + 진료과 의사 면허 매핑
+          </div>
+        </div>
+
+        <!-- Question 2 -->
+        <div class="glass-card rounded-2xl border border-amber-900/50 p-6 flex flex-col justify-between">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="w-8 h-8 rounded-xl bg-amber-950 text-amber-300 border border-amber-700 flex items-center justify-center font-bold text-sm">Q2</span>
+              <span class="text-[10px] font-mono text-rose-400 font-bold">범위 통제 불가</span>
+            </div>
+            <h3 class="text-base font-extrabold text-white">어느 검사까지 허용했는가?</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              CD 안에는 환자의 10년 치 모든 검사가 통째로 담깁니다. 이번 진료와 무관한 민감 부위 검사까지 일괄 노출되어 환자의 프라이버시가 침해됩니다.
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-800 text-[11px] text-cyan-300 font-semibold">
+            👉 MediQ: 환자가 정한 Study/Series만 한정 개방
+          </div>
+        </div>
+
+        <!-- Question 3 -->
+        <div class="glass-card rounded-2xl border border-amber-900/50 p-6 flex flex-col justify-between">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="w-8 h-8 rounded-xl bg-amber-950 text-amber-300 border border-amber-700 flex items-center justify-center font-bold text-sm">Q3</span>
+              <span class="text-[10px] font-mono text-rose-400 font-bold">시한 만료 부재</span>
+            </div>
+            <h3 class="text-base font-extrabold text-white">언제 권한이 끝나는가?</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              한번 복사된 영상 파일은 유효기간이 없어 병원 PC나 서랍 속에 영구 방치됩니다. 환자가 진료를 마치거나 거부해도 회수할 수 없습니다.
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-800 text-[11px] text-cyan-300 font-semibold">
+            👉 MediQ: 5분 단기 DPoP 토큰 & 원클릭 동의 철회
+          </div>
+        </div>
+
+        <!-- Question 4 -->
+        <div class="glass-card rounded-2xl border border-amber-900/50 p-6 flex flex-col justify-between">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="w-8 h-8 rounded-xl bg-amber-950 text-amber-300 border border-amber-700 flex items-center justify-center font-bold text-sm">Q4</span>
+              <span class="text-[10px] font-mono text-rose-400 font-bold">감사 추적 불능</span>
+            </div>
+            <h3 class="text-base font-extrabold text-white">누가 접근했는가?</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              CD에 담긴 영상을 누가 몇 번 열어보았는지, 외부로 복제했는지 아무런 로그가 남지 않아 사후 유출 사고 발생 시 추적이 불가능합니다.
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-800 text-[11px] text-cyan-300 font-semibold">
+            👉 MediQ: SHA-256 불가변 해시 체인 감사로그
+          </div>
+        </div>
+      </div>
+
+      <!-- Problem Summary Callout -->
+      <div class="p-4 rounded-xl glass-card border border-amber-800/60 bg-amber-950/30 flex items-center gap-3 text-xs text-amber-200">
+        <span class="text-lg">💡</span>
+        <div>
+          <strong class="text-white">MediQ의 핵심 문제 정의:</strong> "병원 간 전달 과정에 환자의 선택과 접근 근거가 함께 이어지지 않는다는 것이 본질적 결함이다."
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== MEDIQ 3 AXIOMS (FROM SLIDE 4, 30) ==================== -->
+  <section id="axioms" class="py-16 border-b border-slate-800/80 scroll-mt-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-3xl mx-auto mb-12">
+        <span class="text-xs uppercase tracking-widest text-cyan-400 font-bold font-mono px-3 py-1 rounded-full bg-cyan-950/80 border border-cyan-800/60">
+          CORE ARCHITECTURE INVARIANTS
+        </span>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-3">MediQ 3대 불변 공리 (Axioms of MediQ)</h2>
+        <p class="text-xs sm:text-sm text-slate-400 mt-2">
+          MediQ 플랫폼은 다음 3대 원칙을 단 1바이트도 타협하지 않습니다. 조건 하나라도 어긋나면 즉시 <strong class="text-rose-400">Fail-Closed</strong>로 차단됩니다.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+        <!-- Axiom 1 -->
+        <div class="glass-card rounded-2xl border border-cyan-800/70 p-6 flex flex-col justify-between glow-cyan">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+              <span class="px-2.5 py-0.5 rounded font-mono font-bold text-xs bg-cyan-950 text-cyan-300 border border-cyan-700">AXIOM 01</span>
+              <span class="text-xs text-rose-400 font-mono font-bold">Auth ≠ Permission</span>
+            </div>
+            <h3 class="text-xl font-black text-white">로그인 ≠ 영상 권한</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Microsoft 계정으로 로그인했다고 해서 어떤 영상에도 자동 접근할 수 없습니다.  
+              신원 확인(인증)과 의료영상 열람 권한(인가)은 완전히 분리되어 있으며,  
+              반드시 유효한 <strong>환자 동의(Consent)와 소속 병원 일치</strong>가 결합되어야만 접근 가능합니다.
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-800/80 text-[11px] font-mono text-cyan-400">
+            ✔ Authentication is only Step 1, never Grant
+          </div>
+        </div>
+
+        <!-- Axiom 2 -->
+        <div class="glass-card rounded-2xl border border-teal-800/70 p-6 flex flex-col justify-between glow-teal">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+              <span class="px-2.5 py-0.5 rounded font-mono font-bold text-xs bg-teal-950 text-teal-300 border border-teal-700">AXIOM 02</span>
+              <span class="text-xs text-rose-400 font-mono font-bold">Ticket ≠ Approval</span>
+            </div>
+            <h3 class="text-xl font-black text-white">QR ≠ 접근 허가</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              환자가 제시한 1회용 QR 코드는 문을 여는 열쇠가 아니라 <strong>외래 접수 데스크 티켓</strong>입니다.  
+              QR 인식 성공만으로 검사나 영상 권한이 부여되지 않으며,  
+              의료진이 진료 직전 열람 버튼을 누르는 순간 <strong>11조건 정책 엔진이 다시 전수 판정</strong>합니다.
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-800/80 text-[11px] font-mono text-teal-300">
+            ✔ QR is Reception Context, not Access Grant
+          </div>
+        </div>
+
+        <!-- Axiom 3 -->
+        <div class="glass-card rounded-2xl border border-purple-800/70 p-6 flex flex-col justify-between glow-purple">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+              <span class="px-2.5 py-0.5 rounded font-mono font-bold text-xs bg-purple-950 text-purple-300 border border-purple-700">AXIOM 03</span>
+              <span class="text-xs text-rose-400 font-mono font-bold">Token ≠ Consent</span>
+            </div>
+            <h3 class="text-xl font-black text-white">토큰 ≠ 동의 자체</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              단기 토큰은 정책 검증을 통과한 순간에만 발급되는 <strong>5분(300초) 수명의 증명서</strong>일 뿐입니다.  
+              환자가 동의를 철회(Revoke)하면 그 즉시 신규 토큰 발급이 100% 차단되며,  
+              기존 토큰은 5분 뒤 자연 소멸하여 잔존 권한이 영구 제거됩니다.
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-800/80 text-[11px] font-mono text-purple-300">
+            ✔ DPoP 5-Min TTL Bound to Live Consent State
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
   <!-- ==================== REAL MICROSOFT ENTRA ID AUTHENTICATION SECTION ==================== -->
   <section id="entra-id" class="py-16 border-b border-slate-800/80 bg-slate-950/70 scroll-mt-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -216,7 +410,7 @@
         </div>
         <h2 class="text-2xl sm:text-3xl font-extrabold text-white">실제 Microsoft Entra ID (Azure AD) 엔터프라이즈 인증 & 역할 인가</h2>
         <p class="text-xs sm:text-sm text-slate-300 mt-3 leading-relaxed">
-          본 플랫폼의 인증 체계는 <strong class="text-emerald-400">가상 모의 계정이나 시뮬레이션이 아닙니다</strong>.<br>
+          본 플랫폼의 신원 인증은 <strong class="text-emerald-400">가상 모의 계정이나 시뮬레이션이 아닙니다</strong>.<br>
           실제 엔터프라이즈 Microsoft Entra ID 테넌트(<code class="text-purple-300">ad21525c-fc0f-4dbc-a403-67ce00add0e4</code>)의 실제 사용자 계정에  
           <strong>3대 App Role (<span class="text-cyan-400">PATIENT</span>, <span class="text-emerald-400">DOCTOR</span>, <span class="text-rose-400">SECURITY_ADMIN</span>)</strong>을 직접 부여하여  
           표준 OAuth2/OIDC PKCE 인증과 암호학적 서명(JWT RS256) 검증을 거쳐 권한이 인가되는 실제 엔터프라이즈 신원 체계입니다.
@@ -360,7 +554,7 @@
 
       </div>
 
-      <!-- Technical Cryptographic Token Callout Box -->
+      <!-- Token Decoding Callout Box -->
       <div class="glass-card rounded-2xl border border-purple-800/60 p-6 sm:p-8 relative overflow-hidden">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           <div class="lg:col-span-7 space-y-4">
@@ -421,242 +615,255 @@
     </div>
   </section>
 
-  <!-- ==================== DUAL-PILLAR PHILOSOPHY: CLINICAL CONTINUITY ⇄ ZERO-CLOUD SECURITY ==================== -->
-  <section id="dual-paradigm" class="py-16 border-b border-slate-800/80 scroll-mt-16">
+  <!-- ==================== 8-STEP SERVICE JOURNEY & PROCEDURE (FROM SLIDE 4, 30) ==================== -->
+  <section id="journey" class="py-16 border-b border-slate-800/80 scroll-mt-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center max-w-3xl mx-auto mb-12">
-        <h2 class="text-xs uppercase tracking-widest text-cyan-400 font-bold font-mono">The MediQ Dual Paradigm</h2>
-        <p class="text-2xl sm:text-3xl font-extrabold text-white mt-2">Clinical Continuity ⇄ Zero-Cloud Security 양대 축</p>
-        <p class="text-xs sm:text-sm text-slate-400 mt-2">진료 연속성의 환자 중심 편익을 극대화하면서, 동시에 의료영상 클라우드 저장 제로 원칙과 프라이버시를 철저히 수호합니다.</p>
+      <div class="text-center max-w-3xl mx-auto mb-14">
+        <span class="text-xs uppercase tracking-widest text-cyan-400 font-bold font-mono px-3 py-1 rounded-full bg-cyan-950/80 border border-cyan-800/60">
+          END-TO-END WORKFLOW (SLIDE 04 & 30)
+        </span>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-3">하나의 티켓, 이어지는 여덟 번의 엄격한 검증</h2>
+        <p class="text-xs sm:text-sm text-slate-400 mt-2">
+          환자의 명시적 동의 생성부터 의료진 QR 스캔, 11조건 정책 판정, 5분 단기 DPoP 토큰 발급, 그리고 700장 CT 열람과 감사 체인 기록까지의 전체 8단계 절차입니다.
+        </p>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <!-- Left Pillar: Clinical Continuity -->
-        <div class="glass-card rounded-2xl border border-cyan-800/60 p-6 sm:p-8 relative overflow-hidden flex flex-col justify-between glow-cyan">
-          <div>
-            <div class="flex items-center justify-between pb-4 border-b border-slate-800">
-              <div class="flex items-center gap-3">
-                <span class="w-10 h-10 rounded-xl bg-cyan-950 text-cyan-300 border border-cyan-700 flex items-center justify-center font-bold text-lg">🔵</span>
-                <div>
-                  <h3 class="text-xl font-extrabold text-white">Clinical Continuity</h3>
-                  <span class="text-xs text-cyan-400 font-mono font-semibold">CD 없는 병원 간 끊김 없는 진료 연속성</span>
-                </div>
-              </div>
-              <span class="px-2.5 py-1 rounded bg-cyan-950/80 text-cyan-300 border border-cyan-800 text-[11px] font-mono font-bold">Interoperability</span>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <!-- Step 1 -->
+        <div class="glass-card rounded-xl p-5 border border-slate-800 flex flex-col justify-between">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="w-7 h-7 rounded-lg bg-blue-950 text-cyan-300 border border-cyan-800 flex items-center justify-center font-mono font-bold text-xs">01</span>
+              <span class="text-[10px] font-mono text-purple-400">Microsoft Entra ID</span>
             </div>
-
-            <p class="text-xs sm:text-sm text-slate-300 mt-4 leading-relaxed">
-              환자가 병원을 옮길 때마다 수동으로 발급받아 가방에 들고 다니던 영상 CD를 완전히 없애고,  
-              명시적 동의와 1회용 QR 티켓으로 타 병원 의료진이 필요한 영상과 진료 기록을 즉시 열람합니다.
+            <h4 class="text-sm font-bold text-white">1. Microsoft 로그인</h4>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              환자 및 의료진이 실제 Entra ID OIDC 엔드포인트를 통해 패스워드리스 신원 인증을 완료하고 계정 역할을 수령합니다.
             </p>
-
-            <div class="mt-5 space-y-3">
-              <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
-                <div class="font-bold text-white text-xs flex items-center gap-2">
-                  <span class="text-cyan-400">01.</span> 원클릭 환자 동의 및 1회용 암호화 QR 티켓
-                </div>
-                <p class="text-[11px] text-slate-400 mt-1">병원 창구에서 5분 유효 1회용 QR 코드 제시만으로 접수 완료 및 대기시간 제로화</p>
-              </div>
-
-              <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
-                <div class="font-bold text-white text-xs flex items-center gap-2">
-                  <span class="text-cyan-400">02.</span> 700슬라이스 CT 즉시 WADO-RS 프레임 스트리밍
-                </div>
-                <p class="text-[11px] text-slate-400 mt-1">수백 메가바이트 Study의 일괄 다운로드 없이 필요한 Series/Instance부터 Lazy Loading</p>
-              </div>
-
-              <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
-                <div class="font-bold text-white text-xs flex items-center gap-2">
-                  <span class="text-cyan-400">03.</span> HL7 FHIR 기반 국가건강검진 생체지표 연계
-                </div>
-                <p class="text-[11px] text-slate-400 mt-1">간기능(AST/ALT), 혈당, 콜레스테롤 등 과거 수검 추이를 표준 포맷으로 타 병원 전송</p>
-              </div>
-
-              <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
-                <div class="font-bold text-white text-xs flex items-center gap-2">
-                  <span class="text-cyan-400">04.</span> 2-Layer 프롬프트 격리형 한국어 AI 건강도우미
-                </div>
-                <p class="text-[11px] text-slate-400 mt-1">환자가 자신의 AFP 수치와 간초음파 결과를 쉽게 이해할 수 있도록 KDCA 근거 기반 설명</p>
-              </div>
-
-              <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
-                <div class="font-bold text-white text-xs flex items-center gap-2">
-                  <span class="text-cyan-400">05.</span> 중복 검사 및 불필요한 방사선 피폭 예방
-                </div>
-                <p class="text-[11px] text-slate-400 mt-1">이전 병원의 최근 고선량 CT/MRI 영상을 즉시 참조함으로써 재촬영 비용과 피폭 최소화</p>
-              </div>
-            </div>
           </div>
-
-          <div class="mt-6 pt-4 border-t border-slate-800 flex items-center justify-between text-xs font-mono">
-            <span class="text-slate-400">CD 발급·운반 절차:</span>
-            <span class="text-cyan-400 font-bold">100% 디지털 전환 (0장 CD 발급)</span>
+          <div class="mt-3 pt-2.5 border-t border-slate-800/80 text-[10px] text-slate-400 font-mono">
+            증적: 화면 02, 03, 08
           </div>
         </div>
 
-        <!-- Right Pillar: Zero-Cloud Security -->
-        <div class="glass-card rounded-2xl border border-emerald-800/60 p-6 sm:p-8 relative overflow-hidden flex flex-col justify-between glow-emerald">
-          <div>
-            <div class="flex items-center justify-between pb-4 border-b border-slate-800">
-              <div class="flex items-center gap-3">
-                <span class="w-10 h-10 rounded-xl bg-emerald-950 text-emerald-300 border border-emerald-700 flex items-center justify-center font-bold text-lg">🟢</span>
-                <div>
-                  <h3 class="text-xl font-extrabold text-white">Zero-Cloud Security</h3>
-                  <span class="text-xs text-emerald-400 font-mono font-semibold">클라우드 원본 저장 제로 & 절대적 프라이버시</span>
-                </div>
-              </div>
-              <span class="px-2.5 py-1 rounded bg-emerald-950/80 text-emerald-300 border border-emerald-800 text-[11px] font-mono font-bold">Privacy & Trust</span>
+        <!-- Step 2 -->
+        <div class="glass-card rounded-xl p-5 border border-slate-800 flex flex-col justify-between">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="w-7 h-7 rounded-lg bg-cyan-950 text-cyan-300 border border-cyan-800 flex items-center justify-center font-mono font-bold text-xs">02</span>
+              <span class="text-[10px] font-mono text-cyan-400">Consent Scoping</span>
             </div>
-
-            <p class="text-xs sm:text-sm text-slate-300 mt-4 leading-relaxed">
-              의료법 및 개인정보보호법상 민감한 의료영상 원본은 각 병원 원내 PACS에만 분산 보관하며,  
-              클라우드 Control Plane에는 원본 지속 저장을 영구 금지(Zero Cloud Storage)합니다.
+            <h4 class="text-sm font-bold text-white">2. 공유 범위 선택</h4>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              5대 공유 질문(무엇을, 어디에, 왜, 어떻게, 언제까지)에 따라 복부 CT 700장, 7일간, VIEW_ONLY 동의 범위를 세분화 설정합니다.
             </p>
-
-            <div class="mt-5 space-y-3">
-              <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
-                <div class="font-bold text-white text-xs flex items-center gap-2">
-                  <span class="text-emerald-400">01.</span> 원본 분산 보관 & 클라우드 원본 지속 저장 0%
-                </div>
-                <p class="text-[11px] text-slate-400 mt-1">Control Plane DB에는 최소 메타데이터만 유지하며 원본 DICOM 바이너리 저장 원천 배제</p>
-              </div>
-
-              <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
-                <div class="font-bold text-white text-xs flex items-center gap-2">
-                  <span class="text-emerald-400">02.</span> 11대 필수 조건 Fail-Closed ABAC 정책 판정
-                </div>
-                <p class="text-[11px] text-slate-400 mt-1">동의 상태, 유효기간, 수신병원, 의사 소속, Study/Series 일치 등 11개 조건 전원 합치 시에만 인가</p>
-              </div>
-
-              <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
-                <div class="font-bold text-white text-xs flex items-center gap-2">
-                  <span class="text-emerald-400">03.</span> 5분 만료 DPoP(Demonstrating Proof-of-Possession) 단기 토큰
-                </div>
-                <p class="text-[11px] text-slate-400 mt-1">고정 URL 및 장기 토큰을 영구 금지하고, 발급자 키 바인딩 기반 서명 토큰으로 리플레이 공격 차단</p>
-              </div>
-
-              <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
-                <div class="font-bold text-white text-xs flex items-center gap-2">
-                  <span class="text-emerald-400">04.</span> 의료법 제27조 준수 비임상 안전 가드레일 (30종 질환)
-                </div>
-                <p class="text-[11px] text-slate-400 mt-1">AI의 임의 진단·처방 출력을 차단하고 30종 주요 질환과 16종 검진에 대한 의학용어 사전 인터셉트</p>
-              </div>
-
-              <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
-                <div class="font-bold text-white text-xs flex items-center gap-2">
-                  <span class="text-emerald-400">05.</span> SHA-256 불가변 해시 체인 감사로그 & 실시간 격리
-                </div>
-                <p class="text-[11px] text-slate-400 mt-1">모든 접근/거부/판정 이력을 암호학적 해시 체인으로 기록하고 이상 대량 조회 시 즉각 차단</p>
-              </div>
-            </div>
           </div>
-
-          <div class="mt-6 pt-4 border-t border-slate-800 flex items-center justify-between text-xs font-mono">
-            <span class="text-slate-400">클라우드 DICOM 원본 저장량:</span>
-            <span class="text-emerald-400 font-bold">0.00 MB (Zero Cloud Persistence)</span>
+          <div class="mt-3 pt-2.5 border-t border-slate-800/80 text-[10px] text-slate-400 font-mono">
+            증적: 화면 06
           </div>
         </div>
+
+        <!-- Step 3 -->
+        <div class="glass-card rounded-xl p-5 border border-slate-800 flex flex-col justify-between">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="w-7 h-7 rounded-lg bg-teal-950 text-teal-300 border border-teal-800 flex items-center justify-center font-mono font-bold text-xs">03</span>
+              <span class="text-[10px] font-mono text-teal-400">QR Generation</span>
+            </div>
+            <h4 class="text-sm font-bold text-white">3. 동의 저장 & QR 발급</h4>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              동의 조건이 서버에 안전하게 암호화 저장되며, 병원 창구 제출용 단기 5분 유효 1회용 암호화 QR 티켓이 생성됩니다.
+            </p>
+          </div>
+          <div class="mt-3 pt-2.5 border-t border-slate-800/80 text-[10px] text-slate-400 font-mono">
+            증적: 화면 07
+          </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="glass-card rounded-xl p-5 border border-slate-800 flex flex-col justify-between">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="w-7 h-7 rounded-lg bg-emerald-950 text-emerald-300 border border-emerald-800 flex items-center justify-center font-mono font-bold text-xs">04</span>
+              <span class="text-[10px] font-mono text-emerald-400">Doctor Reception</span>
+            </div>
+            <h4 class="text-sm font-bold text-white">4. 의료진 QR 접수</h4>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              진료실 접수 데스크에서 환자의 모바일 QR 코드를 스캔하여 환자 식별자 및 수신 병원 요청 범위를 접수 목록에 등록합니다.
+            </p>
+          </div>
+          <div class="mt-3 pt-2.5 border-t border-slate-800/80 text-[10px] text-slate-400 font-mono">
+            증적: 화면 09, 10
+          </div>
+        </div>
+
+        <!-- Step 5 -->
+        <div class="glass-card rounded-xl p-5 border border-slate-800 flex flex-col justify-between">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="w-7 h-7 rounded-lg bg-blue-950 text-blue-300 border border-blue-800 flex items-center justify-center font-mono font-bold text-xs">05</span>
+              <span class="text-[10px] font-mono text-blue-400">HL7 FHIR & Scope</span>
+            </div>
+            <h4 class="text-sm font-bold text-white">5. 동의·영상 범위 조회</h4>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              의료진이 공유 동의된 건강검진 생체지표(AST/ALT/혈당)를 먼저 열람하고, 승인된 Study(복부 CT) 메타데이터를 확인합니다.
+            </p>
+          </div>
+          <div class="mt-3 pt-2.5 border-t border-slate-800/80 text-[10px] text-slate-400 font-mono">
+            증적: 화면 11, 12
+          </div>
+        </div>
+
+        <!-- Step 6 -->
+        <div class="glass-card rounded-xl p-5 border border-slate-800 flex flex-col justify-between">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="w-7 h-7 rounded-lg bg-purple-950 text-purple-300 border border-purple-800 flex items-center justify-center font-mono font-bold text-xs">06</span>
+              <span class="text-[10px] font-mono text-purple-400">ABAC Policy Engine</span>
+            </div>
+            <h4 class="text-sm font-bold text-white">6. 11조건 판정 & 토큰 발급</h4>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              11개 조건 전원 일치 여부를 판정한 뒤, 합치 시에만 RFC 9449 DPoP 키 바인딩 기반 5분(300초) 단기 DICOMweb 토큰을 발행합니다.
+            </p>
+          </div>
+          <div class="mt-3 pt-2.5 border-t border-slate-800/80 text-[10px] text-slate-400 font-mono">
+            증적: 화면 13, 14
+          </div>
+        </div>
+
+        <!-- Step 7 -->
+        <div class="glass-card rounded-xl p-5 border border-slate-800 flex flex-col justify-between">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="w-7 h-7 rounded-lg bg-cyan-950 text-cyan-300 border border-cyan-800 flex items-center justify-center font-mono font-bold text-xs">07</span>
+              <span class="text-[10px] font-mono text-cyan-400">Gateway Validation</span>
+            </div>
+            <h4 class="text-sm font-bold text-white">7. Gateway 최종 재검증</h4>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              병원 Gateway가 mTLS 및 토큰 인트로스펙션으로 토큰 유효성, DPoP 증명 서명, 그리고 환자 동의가 철회되지 않았음을 재확인합니다.
+            </p>
+          </div>
+          <div class="mt-3 pt-2.5 border-t border-slate-800/80 text-[10px] text-slate-400 font-mono">
+            원칙: Gateway Fail-Closed
+          </div>
+        </div>
+
+        <!-- Step 8 -->
+        <div class="glass-card rounded-xl p-5 border border-slate-800 flex flex-col justify-between">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="w-7 h-7 rounded-lg bg-emerald-950 text-emerald-300 border border-emerald-800 flex items-center justify-center font-mono font-bold text-xs">08</span>
+              <span class="text-[10px] font-mono text-emerald-400">Streaming & Audit</span>
+            </div>
+            <h4 class="text-sm font-bold text-white">8. 승인 영상 전달 & 감사</h4>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              허용된 복부 CT 700슬라이스를 WADO-RS 프레임 스트리밍으로 열람하며, 모든 사건은 SHA-256 불가변 해시 체인으로 기록됩니다.
+            </p>
+          </div>
+          <div class="mt-3 pt-2.5 border-t border-slate-800/80 text-[10px] text-slate-400 font-mono">
+            증적: 화면 16, 22
+          </div>
+        </div>
+
       </div>
     </div>
   </section>
 
-  <!-- ==================== 3-ZONE DISTRIBUTED TOPOLOGY ARCHITECTURE ==================== -->
+  <!-- ==================== 3-ZONE DISTRIBUTED ARCHITECTURE (FROM SLIDE 6, 7) ==================== -->
   <section id="architecture" class="py-16 border-b border-slate-800/80 bg-slate-950/40 scroll-mt-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center max-w-3xl mx-auto mb-12">
-        <h2 class="text-xs uppercase tracking-widest text-cyan-400 font-bold font-mono">Distributed 3-Zone Architecture</h2>
-        <p class="text-2xl sm:text-3xl font-extrabold text-white mt-2">병원 원내 PACS ⇄ 클라우드 Control Plane ⇄ 수신 병원 분산 토폴로지</p>
-        <p class="text-xs sm:text-sm text-slate-400 mt-2">Control Plane과 Data Plane을 완벽히 분리하여 대용량 영상 스트림이 제어 평면을 불필요하게 경유하지 않습니다.</p>
+        <span class="text-xs uppercase tracking-widest text-cyan-400 font-bold font-mono px-3 py-1 rounded-full bg-cyan-950/80 border border-cyan-800/60">
+          DISTRIBUTED TOPOLOGY (SLIDE 06 & 07)
+        </span>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-3">제어와 영상의 완벽한 분리 (Control vs Data Plane)</h2>
+        <p class="text-xs sm:text-sm text-slate-400 mt-2">
+          "왜 제어와 영상을 나눴을까?" 원본 DICOM은 각 병원 원내 PACS에만 보관하며, 클라우드는 정책과 단기 토큰만 중계합니다.
+        </p>
       </div>
 
-      <!-- 3-Zone Architecture Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
-        <!-- Zone 1: Hospital A (Source) -->
-        <div class="glass-card rounded-xl border border-blue-900/50 p-5 flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between mb-3">
-              <span class="text-xs font-bold font-mono px-2.5 py-1 rounded bg-blue-950 text-blue-300 border border-blue-800">ZONE-A: SOURCE PACS</span>
-              <span class="text-xs text-slate-400 font-mono font-semibold">제공 병원 (한국병원)</span>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        
+        <!-- Zone 1: User Layer -->
+        <div class="glass-card rounded-2xl border border-blue-900/60 p-6 flex flex-col justify-between">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+              <span class="px-2.5 py-1 rounded bg-blue-950 text-blue-300 font-mono text-xs font-bold border border-blue-800">USER EXPERIENCE</span>
+              <span class="text-xs text-slate-400 font-mono">PWA & Clinician Web</span>
             </div>
-            <div class="p-3.5 rounded-lg bg-slate-900/90 border border-slate-800 space-y-1.5">
-              <div class="font-bold text-white flex items-center justify-between">
-                <span>Orthanc PACS / Edge Gateway</span>
-                <span class="text-cyan-400 font-mono text-xs">:8042 / DICOMweb</span>
-              </div>
-              <p class="text-slate-400 text-xs leading-relaxed">
-                원본 CT/MRI DICOM 파일 영구 보관소. Control Plane에서 검증된 단기 토큰을 가진 WADO-RS 요청에만 필요한 인스턴스 프레임을 스트리밍 전송합니다.
-              </p>
-            </div>
+            <h3 class="text-base font-extrabold text-white">1. 사용자 경험 레이어</h3>
+            <ul class="space-y-2 text-xs text-slate-300">
+              <li class="p-2.5 rounded-lg bg-slate-900/90 border border-slate-800">
+                <strong class="text-cyan-300 block">환자 모바일 PWA (/mobile/)</strong>
+                건강지갑, 5대 질문 동의 설정, 5분 암호화 QR 티켓 발급, AI 건강도우미
+              </li>
+              <li class="p-2.5 rounded-lg bg-slate-900/90 border border-slate-800">
+                <strong class="text-cyan-300 block">의료진 진단 워크스페이스</strong>
+                외래 접수데스크, QR 스캔, HL7 FHIR 생체지표, 700장 CT WADO-RS 뷰어
+              </li>
+            </ul>
           </div>
-          <div class="mt-4 pt-3 border-t border-slate-800/80 text-[11px] text-cyan-400 flex items-center gap-1.5 font-semibold">
-            <span>🛡️</span> <span>외부 임의 접속 원천 차단: mTLS 및 토큰 인트로스펙션 통과 필수</span>
-          </div>
-        </div>
-
-        <!-- Zone 2: Cloud Control Plane -->
-        <div class="glass-card rounded-xl border border-purple-900/50 p-5 flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between mb-3">
-              <span class="text-xs font-bold font-mono px-2.5 py-1 rounded bg-purple-950 text-purple-300 border border-purple-800">ZONE-B: CLOUD CONTROL</span>
-              <span class="text-xs text-slate-400 font-mono font-semibold">Azure VM (Japan East)</span>
-            </div>
-            <div class="p-3.5 rounded-lg bg-slate-900/90 border border-slate-800 space-y-2">
-              <div>
-                <div class="font-bold text-white flex items-center justify-between text-xs">
-                  <span>Control Plane API & ABAC Engine</span>
-                  <span class="text-purple-400 font-mono">:3000 / NestJS</span>
-                </div>
-                <p class="text-slate-400 text-[11px]">환자 동의 생애주기, 11조건 ABAC 판정, 5분 단기 DPoP 토큰 발급, SHA-256 감사 체인</p>
-              </div>
-              <div class="pt-1.5 border-t border-slate-800">
-                <div class="font-bold text-white flex items-center justify-between text-xs">
-                  <span>Azure Key Vault & App Gateway WAF</span>
-                  <span class="text-emerald-400 font-mono">Managed Identity</span>
-                </div>
-                <p class="text-slate-400 text-[11px]">토큰 서명 키 Vault 격리, OWASP CRS 기반 SQLi/XSS 실시간 차단</p>
-              </div>
-            </div>
-          </div>
-          <div class="mt-4 pt-3 border-t border-slate-800/80 text-[11px] text-emerald-400 flex items-center gap-1.5 font-semibold">
-            <span>⛔</span> <span>DICOM 원본 영구 저장소 0%: 파일 시스템 내 원본 지속 저장 금지</span>
+          <div class="mt-4 pt-3 border-t border-slate-800 text-[11px] text-cyan-300 font-mono">
+            ✔ No Native Vault Depend · TWA Mobile App
           </div>
         </div>
 
-        <!-- Zone 3: Hospital B (Consumer) -->
-        <div class="glass-card rounded-xl border border-emerald-900/50 p-5 flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between mb-3">
-              <span class="text-xs font-bold font-mono px-2.5 py-1 rounded bg-emerald-950 text-emerald-300 border border-emerald-800">ZONE-C: CONSUMING CLINIC</span>
-              <span class="text-xs text-slate-400 font-mono font-semibold">수신 병원 (서울대병원)</span>
+        <!-- Zone 2: Azure Control Plane -->
+        <div class="glass-card rounded-2xl border border-purple-900/60 p-6 flex flex-col justify-between glow-purple">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+              <span class="px-2.5 py-1 rounded bg-purple-950 text-purple-300 font-mono text-xs font-bold border border-purple-800">AZURE CONTROL PLANE</span>
+              <span class="text-xs text-slate-400 font-mono">Japan East VM</span>
             </div>
-            <div class="p-3.5 rounded-lg bg-slate-900/90 border border-slate-800 space-y-1.5">
-              <div class="font-bold text-white flex items-center justify-between">
-                <span>Clinician Desk & Diagnostic Viewer</span>
-                <span class="text-emerald-400 font-mono">OHIF / Canvas Web</span>
-              </div>
-              <p class="text-slate-400 text-xs leading-relaxed">
-                QR 스캔 접수, HL7 FHIR 생체지표 열람, WADO-RS 프레임 스트리밍 렌더링. 윈도잉, 줌/팬을 제공하며 다운로드가 명시 허용된 경우에만 B-PACS 반입 작업 수행.
-              </p>
-            </div>
+            <h3 class="text-base font-extrabold text-white">2. 클라우드 제어 평면</h3>
+            <ul class="space-y-2 text-xs text-slate-300">
+              <li class="p-2.5 rounded-lg bg-slate-900/90 border border-slate-800">
+                <strong class="text-purple-300 block">Edge WAF & MediQ Control API</strong>
+                Caddy + Coraza OWASP CRS 방화벽, 11조건 ABAC 엔진, 5분 DPoP 토큰 발급
+              </li>
+              <li class="p-2.5 rounded-lg bg-slate-900/90 border border-slate-800">
+                <strong class="text-purple-300 block">PostgreSQL RLS & Azure Key Vault</strong>
+                테넌트 격리 RLS, 키·인증서 HSM 격리, SHA-256 불가변 감사 체인
+              </li>
+            </ul>
           </div>
-          <div class="mt-4 pt-3 border-t border-slate-800/80 text-[11px] text-emerald-400 flex items-center gap-1.5 font-semibold">
-            <span>📷</span> <span>포렌식 워터마크: 의료진 ID, 접근시각, Study UID 화면 상시 인쇄</span>
+          <div class="mt-4 p-2.5 rounded-lg bg-purple-950/60 border border-purple-800 text-[11px] text-purple-200 font-semibold">
+            ⛔ <strong>Invariant:</strong> Control API에는 DICOM 영상 지속 저장 0.0 MB!
           </div>
         </div>
+
+        <!-- Zone 3: Hospital Data Plane -->
+        <div class="glass-card rounded-2xl border border-emerald-900/60 p-6 flex flex-col justify-between glow-emerald">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+              <span class="px-2.5 py-1 rounded bg-emerald-950 text-emerald-300 font-mono text-xs font-bold border border-emerald-800">HOSPITAL DATA PLANE</span>
+              <span class="text-xs text-slate-400 font-mono">On-Premises PACS</span>
+            </div>
+            <h3 class="text-base font-extrabold text-white">3. 병원 데이터 평면</h3>
+            <ul class="space-y-2 text-xs text-slate-300">
+              <li class="p-2.5 rounded-lg bg-slate-900/90 border border-slate-800">
+                <strong class="text-emerald-300 block">A병원 (제공): Orthanc PACS / Gateway</strong>
+                원본 CT/MRI 보관소, WireGuard / mTLS 사설 연계, WADO-RS 프레임 스트리밍
+              </li>
+              <li class="p-2.5 rounded-lg bg-slate-900/90 border border-slate-800">
+                <strong class="text-emerald-300 block">B병원 (수신): Gateway / 수신 PACS</strong>
+                DOWNLOAD_ALLOWED 동의 시에만 비동기 Import, LUKS 암호화 저장소
+              </li>
+            </ul>
+          </div>
+          <div class="mt-4 p-2.5 rounded-lg bg-emerald-950/60 border border-emerald-800 text-[11px] text-emerald-200 font-semibold">
+            ⚡ <strong>Direct Streaming:</strong> 영상 전송은 Control API를 경유하지 않음!
+          </div>
+        </div>
+
       </div>
 
-      <!-- Infrastructure Evidence Bar -->
-      <div class="p-4 rounded-xl glass-card border border-slate-800 flex flex-col sm:flex-row items-center justify-between text-xs gap-3">
-        <div class="flex items-center gap-2 flex-wrap">
-          <span class="px-2.5 py-1 rounded bg-blue-950 text-blue-300 font-mono font-bold border border-blue-800">Azure Deployment</span>
-          <span class="text-slate-200 font-semibold">실배포 클라우드 인프라 (Japan East):</span>
-          <span class="text-slate-400 font-mono text-[11px]">Docker Compose 멀티 컨테이너 | PostgreSQL 16 RLS | Ollama Qwen 3.5 4B 로컬 서빙</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <a href="https://highpass-demo.japaneast.cloudapp.azure.com/hipass/" target="_blank" class="inline-flex items-center px-3 py-1 rounded text-xs font-mono font-bold bg-emerald-950 text-emerald-400 border border-emerald-800 hover:bg-emerald-900 transition-colors">
-            <span class="w-2 h-2 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span> 라이브 데모 접속 ↗
-          </a>
-        </div>
+      <!-- PPTX Architecture Quote Box -->
+      <div class="p-4 rounded-xl glass-card border border-slate-800 text-xs text-slate-300 leading-relaxed">
+        <strong class="text-white font-mono">포트폴리오 설계 인사이트 (Slide 07):</strong>  
+        "원본 DICOM을 중앙 DB에 지속 저장하지 않는 설계는 대가를 요구합니다. 병원 Gateway·터널·저장소의 상태를 별도로 복구해야 하는 운영 복잡도가 따릅니다.  
+        하지만 이것이 바로 단순 '파일 업로드 서비스'와 '규제 준수형 엔터프라이즈 의료정보 플랫폼'의 근본적인 차이점입니다."
       </div>
     </div>
   </section>
@@ -665,9 +872,13 @@
   <section id="dilemmas" class="py-16 border-b border-slate-800/80 scroll-mt-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center max-w-3xl mx-auto mb-14">
-        <h2 class="text-xs uppercase tracking-widest text-emerald-400 font-bold font-mono">Engineering Dilemmas & Trade-offs</h2>
-        <p class="text-2xl sm:text-3xl font-extrabold text-white mt-2">왜 우리는 이 아키텍처를 선택했는가? 3대 핵심 딜레마</p>
-        <p class="text-xs sm:text-sm text-slate-400 mt-2">실제 의료정보 시스템 설계 과정에서 상충하는 법적·임상적·보안적 제약 조건과 실제 엔지니어링 해법입니다.</p>
+        <span class="text-xs uppercase tracking-widest text-teal-400 font-bold font-mono px-3 py-1 rounded-full bg-teal-950/80 border border-teal-800/60">
+          ENGINEERING TRADE-OFFS (SLIDE 07, 10, 20)
+        </span>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-3">왜 우리는 이 아키텍처를 선택했는가? 3대 핵심 딜레마</h2>
+        <p class="text-xs sm:text-sm text-slate-400 mt-2">
+          실제 의료정보 시스템 설계 과정에서 상충하는 법적·임상적·보안적 제약 조건과 실제 엔지니어링 해법입니다.
+        </p>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -755,9 +966,13 @@
   <section id="features" class="py-16 border-b border-slate-800/80 bg-slate-950/60 scroll-mt-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center max-w-3xl mx-auto mb-14">
-        <h2 class="text-xs uppercase tracking-widest text-cyan-400 font-bold font-mono">12 Enterprise Innovations & Highlights</h2>
-        <p class="text-2xl sm:text-3xl font-extrabold text-white mt-2">MediQ 12대 핵심 기술 혁신 & 아키텍처 특장점</p>
-        <p class="text-xs sm:text-sm text-slate-400 mt-2">의료 표준(DICOMweb/HL7 FHIR), 클라우드 보안, 개인정보보호법 및 의료법을 철저히 충족한 실증 기능들입니다.</p>
+        <span class="text-xs uppercase tracking-widest text-cyan-400 font-bold font-mono px-3 py-1 rounded-full bg-cyan-950/80 border border-cyan-800/60">
+          SYSTEM CAPABILITIES (SLIDE 09–21)
+        </span>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-3">MediQ 12대 핵심 기술 혁신 & 아키텍처 특장점</h2>
+        <p class="text-xs sm:text-sm text-slate-400 mt-2">
+          의료 표준(DICOMweb/HL7 FHIR), 클라우드 보안, 개인정보보호법 및 의료법을 철저히 충족한 실증 기능들입니다.
+        </p>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -925,20 +1140,20 @@
         </div>
 
         <!-- Card 10 -->
-        <div class="glass-card rounded-xl p-5 border border-slate-800 hover:border-rose-700/60 transition-all flex flex-col justify-between">
+        <div class="glass-card rounded-xl p-5 border border-slate-800 hover:border-teal-700/60 transition-all flex flex-col justify-between">
           <div class="space-y-2">
             <div class="flex items-center justify-between">
-              <span class="w-7 h-7 rounded-lg bg-rose-950 text-rose-400 border border-rose-800 flex items-center justify-center font-mono font-bold text-xs">10</span>
-              <span class="text-[10px] font-mono text-rose-300 px-2 py-0.5 rounded bg-rose-950/80 border border-rose-800">FR-039, NFR-014</span>
+              <span class="w-7 h-7 rounded-lg bg-teal-950 text-teal-300 border border-teal-800 flex items-center justify-center font-mono font-bold text-xs">10</span>
+              <span class="text-[10px] font-mono text-teal-300 px-2 py-0.5 rounded bg-teal-950/80 border border-teal-800">FR-027, FR-028</span>
             </div>
-            <h4 class="text-base font-bold text-white">이상 대량 조회 실시간 탐지 & 서킷 브레이커</h4>
+            <h4 class="text-base font-bold text-white">PACS 보관 영수증 & 무결성(SHA-256) 검증</h4>
             <p class="text-xs text-slate-300 leading-relaxed">
-              단시간 대량 Study 조회, 반복적 접근 거부 발생, 만료 토큰 재사용 시도, 비진료시간 비정상 영상 다운로드 시도를 룰 기반으로 실시간 탐지하여 해당 의사 계정 및 IP를 즉시 세션 격리(Quarantine)합니다.
+              B병원 보관 완료는 단순 버튼 클릭이 아니라 원본 해시 일치 영수증으로 증명됩니다. 수신 건수, 작업 상태, 암호화 저장소(LUKS) 저장 완료 영수증을 분리 발행합니다. (Slide 17)
             </p>
           </div>
           <div class="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400 font-mono">
-            <span>Anomaly Detection</span>
-            <span class="text-rose-400 font-bold">Auto Quarantine</span>
+            <span>Receipt & Integrity</span>
+            <span class="text-teal-300 font-bold">Hash Match Receipt</span>
           </div>
         </div>
 
@@ -986,13 +1201,17 @@
   <section id="gallery" class="py-16 border-b border-slate-800/80 scroll-mt-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center max-w-3xl mx-auto mb-10">
-        <h2 class="text-xs uppercase tracking-widest text-cyan-400 font-bold font-mono">Live Demonstration Evidence</h2>
-        <p class="text-2xl sm:text-3xl font-extrabold text-white mt-2">Azure 실배포 시연 24종 실화면 증적 갤러리</p>
-        <p class="text-xs sm:text-sm text-slate-400 mt-2">실제 Microsoft Entra ID 인증부터 700장 CT 열람, 보안관제 실시간 감사로그까지 전 시나리오를 고화질로 검증할 수 있습니다.</p>
+        <span class="text-xs uppercase tracking-widest text-cyan-400 font-bold font-mono px-3 py-1 rounded-full bg-cyan-950/80 border border-cyan-800/60">
+          LIVE DEMONSTRATION PROOFS
+        </span>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-3">Azure 실배포 시연 24종 실화면 증적 갤러리</h2>
+        <p class="text-xs sm:text-sm text-slate-400 mt-2">
+          실제 Microsoft Entra ID 인증부터 700장 CT 열람, 보안관제 실시간 감사로그까지 전 시나리오를 고화질 4K 라이트박스로 검증할 수 있습니다.
+        </p>
         
         <!-- Filter Tabs -->
         <div class="mt-6 flex flex-wrap items-center justify-center gap-2">
-          <button onclick="filterGallery('all')" class="gallery-tab-btn active px-4 py-2 rounded-xl text-xs font-semibold bg-cyan-500 text-black border border-cyan-400 transition-all shadow-sm" data-filter="all">
+          <button onclick="filterGallery('all')" class="gallery-tab-btn active px-4 py-2 rounded-xl text-xs font-semibold bg-cyan-400 text-black border border-cyan-300 transition-all shadow-sm" data-filter="all">
             전체 증적 (24)
           </button>
           <button onclick="filterGallery('entra')" class="gallery-tab-btn px-4 py-2 rounded-xl text-xs font-semibold glass-card text-purple-300 border border-purple-800/70 hover:bg-slate-800 transition-all" data-filter="entra">
@@ -1012,55 +1231,129 @@
 
       <!-- Screenshot Cards Grid -->
       <div id="galleryGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-        <!-- Javascript will populate cards or static cards with filter tags -->
+        <!-- Javascript dynamically renders 24 cards -->
       </div>
     </div>
   </section>
 
-  <!-- ==================== QUANTITATIVE BENCHMARKS & SECURITY GATE ==================== -->
-  <section id="benchmark" class="py-16 border-b border-slate-800/80 bg-slate-950/60 scroll-mt-16">
+  <!-- ==================== ENGINEERING CASE STUDY (FROM SLIDE 24) ==================== -->
+  <section id="case-study" class="py-16 border-b border-slate-800/80 bg-slate-950/60 scroll-mt-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center max-w-3xl mx-auto mb-14">
-        <h2 class="text-xs uppercase tracking-widest text-emerald-400 font-bold font-mono">Automated CI/CD Verification & Metrics</h2>
-        <p class="text-2xl sm:text-3xl font-extrabold text-white mt-2">1,525/1,525 자동화 테스트 통과 & 보안 게이트 무결점 검증</p>
-        <p class="text-xs sm:text-sm text-slate-400 mt-2">추측이나 가정이 아닌, GitHub Actions CI 파이프라인에서 100% 검증된 정량적 실측 지표입니다.</p>
+        <span class="text-xs uppercase tracking-widest text-rose-400 font-bold font-mono px-3 py-1 rounded-full bg-rose-950/80 border border-rose-800/60">
+          INCIDENT POST-MORTEM (SLIDE 24)
+        </span>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-3">재부팅 장애가 드러낸 운영 설계의 빈틈과 복구 원칙</h2>
+        <p class="text-xs sm:text-sm text-slate-400 mt-2">
+          "가용성을 위해 암호화와 접근통제를 우회하지 않고, 실패 원인을 계층별로 분리하여 복구했다."
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+        <!-- Stage 1 -->
+        <div class="glass-card rounded-2xl border border-rose-900/60 p-6 flex flex-col justify-between">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+              <span class="px-2.5 py-0.5 rounded font-mono font-bold text-xs bg-rose-950 text-rose-300 border border-rose-800">STAGE 01</span>
+              <span class="text-xs text-rose-400 font-mono font-bold">증상 및 분리 진단</span>
+            </div>
+            <h3 class="text-base font-bold text-white">재부팅 시 TLS 의존성 & LUKS 잠금</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              A병원 원본 PACS와 Azure 클라우드는 정상 동작했으나, B병원 Docker 컨테이너 재기동 지연으로 TLS 인증서 의존성 실패 및 암호화 저장소(LUKS) 잠금 상태 발생.
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-800 text-[11px] text-rose-400 font-mono">
+            ⚠️ 실패 원인: 계층별 초기화 순서 종속성
+          </div>
+        </div>
+
+        <!-- Stage 2 -->
+        <div class="glass-card rounded-2xl border border-teal-900/60 p-6 flex flex-col justify-between">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+              <span class="px-2.5 py-0.5 rounded font-mono font-bold text-xs bg-teal-950 text-teal-300 border border-teal-800">STAGE 02</span>
+              <span class="text-xs text-teal-400 font-mono font-bold">복구 및 원칙 유지</span>
+            </div>
+            <h3 class="text-base font-bold text-white">보안 우회 없는 정밀 복구</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              빠른 복구를 핑계로 암호화나 접근통제를 풀지 않고, 기존 키 버전으로 LUKS UUID 잠금을 정상 해제하고 저장소 guard와 TLS 의존 기동 순서를 보완.
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-800 text-[11px] text-teal-300 font-mono">
+            🛡️ 보안 원칙: 타협 없는 보안 내재화(Security by Design)
+          </div>
+        </div>
+
+        <!-- Stage 3 -->
+        <div class="glass-card rounded-2xl border border-emerald-900/60 p-6 flex flex-col justify-between">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+              <span class="px-2.5 py-0.5 rounded font-mono font-bold text-xs bg-emerald-950 text-emerald-300 border border-emerald-800">STAGE 03</span>
+              <span class="text-xs text-emerald-400 font-mono font-bold">확인 및 한계 기록</span>
+            </div>
+            <h3 class="text-base font-bold text-white">해시 검증 & 투명한 한계 명시</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              기존 수신본 해시 일치 확인 및 공개 접속 경계 11/11 통과. 새 콜드부팅 시나리오는 정직하게 <code class="text-amber-300">NOT VERIFIED</code>로 분류하여 관리.
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-800 text-[11px] text-emerald-400 font-mono">
+            ✔ 검증 원칙: "경계는 분명하게, 실패는 보이게, 완료는 증거로"
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== EVIDENCE LEDGER & VERIFICATION MATRIX (SLIDE 23, 32) ==================== -->
+  <section id="benchmark" class="py-16 border-b border-slate-800/80 scroll-mt-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-3xl mx-auto mb-14">
+        <span class="text-xs uppercase tracking-widest text-emerald-400 font-bold font-mono px-3 py-1 rounded-full bg-emerald-950/80 border border-emerald-800/60">
+          EVIDENCE LEDGER (SLIDE 23 & 32)
+        </span>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-3">검증 숫자보다, 검증 범위를 남긴다 (1,525 테스트 PASS)</h2>
+        <p class="text-xs sm:text-sm text-slate-400 mt-2">
+          "PASS는 해당 실행 범위에서 확인한 결과이며, NOT VERIFIED는 최신 재현 증거가 미흡하거나 상용 운영 과제인 상태입니다."
+        </p>
       </div>
 
       <!-- 4 Metric Cards -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
         <div class="glass-card rounded-2xl p-6 border border-emerald-800/60 text-center glow-emerald">
-          <div class="text-3xl font-extrabold text-emerald-400 font-mono">1,525 / 1,525</div>
+          <div class="text-3xl font-black text-emerald-400 font-mono">1,525 / 1,525</div>
           <div class="text-xs font-bold text-white mt-1">자동화 단위·통합 테스트</div>
           <div class="text-[11px] text-slate-400 mt-0.5">100% PASS (0 Errors, 0 Fails)</div>
         </div>
 
         <div class="glass-card rounded-2xl p-6 border border-cyan-800/60 text-center glow-cyan">
-          <div class="text-3xl font-extrabold text-cyan-400 font-mono">0.0 MB</div>
+          <div class="text-3xl font-black text-cyan-400 font-mono">0.0 MB</div>
           <div class="text-xs font-bold text-white mt-1">클라우드 DICOM 원본 저장량</div>
           <div class="text-[11px] text-slate-400 mt-0.5">Zero Cloud Persistence 준수</div>
         </div>
 
         <div class="glass-card rounded-2xl p-6 border border-purple-800/60 text-center glow-purple">
-          <div class="text-3xl font-extrabold text-purple-400 font-mono">0 건</div>
+          <div class="text-3xl font-black text-purple-400 font-mono">0 건</div>
           <div class="text-xs font-bold text-white mt-1">CVE 취약점 (Trivy Scan)</div>
           <div class="text-[11px] text-slate-400 mt-0.5">컨테이너 이미지 무결성 입증</div>
         </div>
 
-        <div class="glass-card rounded-2xl p-6 border border-rose-800/60 text-center glow-crimson">
-          <div class="text-3xl font-extrabold text-rose-400 font-mono">0 건</div>
+        <div class="glass-card rounded-2xl p-6 border border-rose-800/60 text-center">
+          <div class="text-3xl font-black text-rose-400 font-mono">0 건</div>
           <div class="text-xs font-bold text-white mt-1">비밀정보 누출 (Secret Leaks)</div>
           <div class="text-[11px] text-slate-400 mt-0.5">Key Vault 격리 및 코드 정적 스캔</div>
         </div>
       </div>
 
-      <!-- Verification Matrix Table -->
+      <!-- Evidence Ledger Table (From Slide 23 & 32) -->
       <div class="glass-card rounded-2xl overflow-hidden border border-slate-800">
         <div class="bg-slate-900/90 px-6 py-4 border-b border-slate-800 flex items-center justify-between">
           <div class="font-extrabold text-sm text-white flex items-center gap-2">
-            <span>🛡️</span> <span>엔터프라이즈 보안 및 규제 준수 검증 매트릭스 (Definition of Done)</span>
+            <span>📋</span> <span>공식 검증 원장 (Evidence Ledger & Verification Matrix)</span>
           </div>
           <span class="text-xs font-mono font-bold text-emerald-400 bg-emerald-950/80 px-2.5 py-1 rounded border border-emerald-800">
-            SECURITY GATE: PASS
+            DEFINITION OF DONE: VERIFIED
           </span>
         </div>
 
@@ -1072,7 +1365,7 @@
                 <th class="px-6 py-3">요구사항 ID</th>
                 <th class="px-6 py-3">검증 시나리오 및 통제 메커니즘</th>
                 <th class="px-6 py-3 text-center">결과</th>
-                <th class="px-6 py-3">실측 근거</th>
+                <th class="px-6 py-3">실측 근거 및 범위</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-800/60">
@@ -1109,7 +1402,14 @@
                 <td class="px-6 py-3.5 font-mono text-cyan-300">FR-032 ~ FR-036</td>
                 <td class="px-6 py-3.5">복부 CT 700장 시리즈를 클라우드에 영구 저장하지 않고 WADO-RS 실시간 Lazy 스트리밍</td>
                 <td class="px-6 py-3.5 text-center"><span class="px-2 py-0.5 rounded font-mono font-bold text-emerald-400 bg-emerald-950 border border-emerald-800">PASS</span></td>
-                <td class="px-6 py-3.5 font-mono text-slate-400 text-[11px]">화면 16 증적 및 브라우저 네트워크 탭 실측</td>
+                <td class="px-6 py-3.5 font-mono text-slate-400 text-[11px]">화면 16 증적 (1/350/700번 3개 원본 해시 일치)</td>
+              </tr>
+              <tr class="hover:bg-slate-900/30">
+                <td class="px-6 py-3.5 font-bold text-white">B병원 PACS 수신 보관</td>
+                <td class="px-6 py-3.5 font-mono text-teal-300">FR-027, FR-028</td>
+                <td class="px-6 py-3.5">DOWNLOAD_ALLOWED 동의 시 B-PACS 비동기 수신, LUKS 암호화 저장소 해시 일치 영수증</td>
+                <td class="px-6 py-3.5 text-center"><span class="px-2 py-0.5 rounded font-mono font-bold text-emerald-400 bg-emerald-950 border border-emerald-800">PASS</span></td>
+                <td class="px-6 py-3.5 font-mono text-slate-400 text-[11px]">화면 18 영수증 및 기존 2개 Instance 해시 확인</td>
               </tr>
               <tr class="hover:bg-slate-900/30">
                 <td class="px-6 py-3.5 font-bold text-white">의료법 제27조 가드레일</td>
@@ -1123,7 +1423,21 @@
                 <td class="px-6 py-3.5 font-mono text-emerald-300">FR-037 ~ FR-041</td>
                 <td class="px-6 py-3.5">모든 접근/거부/발행 이력 해시 연쇄 암호화 및 기간별 보안검토보고서 PDF 출력</td>
                 <td class="px-6 py-3.5 text-center"><span class="px-2 py-0.5 rounded font-mono font-bold text-emerald-400 bg-emerald-950 border border-emerald-800">PASS</span></td>
-                <td class="px-6 py-3.5 font-mono text-slate-400 text-[11px]">화면 22, 23 증적 및 Audit Chain 검증</td>
+                <td class="px-6 py-3.5 font-mono text-slate-400 text-[11px]">화면 22, 23 증적 (3,076건 로그 집계 확인)</td>
+              </tr>
+              <tr class="hover:bg-slate-900/30 bg-slate-950/40">
+                <td class="px-6 py-3.5 font-bold text-slate-400">700장 전체 B-PACS 일괄수신</td>
+                <td class="px-6 py-3.5 font-mono text-slate-500">OPERATIONAL-01</td>
+                <td class="px-6 py-3.5 text-slate-400">700개 Instance 전체에 대한 일괄 B-PACS 전송 및 사후 재조회 전수 검증</td>
+                <td class="px-6 py-3.5 text-center"><span class="px-2 py-0.5 rounded font-mono font-bold text-amber-400 bg-amber-950 border border-amber-800">NOT VERIFIED</span></td>
+                <td class="px-6 py-3.5 font-mono text-slate-500 text-[11px]">상용 운영 과제: 단일 시리즈 표본 검증 완료 상태</td>
+              </tr>
+              <tr class="hover:bg-slate-900/30 bg-slate-950/40">
+                <td class="px-6 py-3.5 font-bold text-slate-400">실제 병원 PACS 직접 연동</td>
+                <td class="px-6 py-3.5 font-mono text-slate-500">OPERATIONAL-02</td>
+                <td class="px-6 py-3.5 text-slate-400">실제 상용 병원 내부망 및 운영 의료기관 PACS 직접 접속</td>
+                <td class="px-6 py-3.5 text-center"><span class="px-2 py-0.5 rounded font-mono font-bold text-amber-400 bg-amber-950 border border-amber-800">NOT VERIFIED</span></td>
+                <td class="px-6 py-3.5 font-mono text-slate-500 text-[11px]">MVP 규정상 제외 (합성 Orthanc PACS로 검증)</td>
               </tr>
             </tbody>
           </table>
@@ -1137,16 +1451,20 @@
   <section id="defense" class="py-16 border-b border-slate-800/80 scroll-mt-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center max-w-3xl mx-auto mb-14">
-        <h2 class="text-xs uppercase tracking-widest text-cyan-400 font-bold font-mono">Technical Examiner Defense</h2>
-        <p class="text-2xl sm:text-3xl font-extrabold text-white mt-2">기술 심사관 및 아키텍처 실무 Q&A 20선</p>
-        <p class="text-xs sm:text-sm text-slate-400 mt-2">심사위원과 보안 아키텍트가 묻는 핵심 질문에 대한 엔지니어링 답변과 증적 매핑입니다.</p>
+        <span class="text-xs uppercase tracking-widest text-cyan-400 font-bold font-mono px-3 py-1 rounded-full bg-cyan-950/80 border border-cyan-800/60">
+          EXAMINER DEFENSE
+        </span>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-3">기술 심사관 및 아키텍처 실무 Q&A 20선</h2>
+        <p class="text-xs sm:text-sm text-slate-400 mt-2">
+          심사위원과 보안 아키텍트가 묻는 핵심 질문에 대한 엔지니어링 답변과 증적 매핑입니다.
+        </p>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
 
         <!-- Q01 -->
         <div class="glass-card rounded-xl p-5 border border-slate-800 hover:border-slate-700 transition-all">
-          <div class="text-xs font-mono font-bold text-cyan-400 mb-1 flex items-center gap-1.5">
+          <div class="text-xs font-mono font-bold text-cyan-300 mb-1 flex items-center gap-1.5">
             <span>Q01.</span> Microsoft Entra ID 로그인이 가상/모의 계정이 아니라는 근거는 무엇인가요?
           </div>
           <p class="text-xs text-slate-300 leading-relaxed mt-2">
@@ -1156,7 +1474,7 @@
 
         <!-- Q02 -->
         <div class="glass-card rounded-xl p-5 border border-slate-800 hover:border-slate-700 transition-all">
-          <div class="text-xs font-mono font-bold text-cyan-400 mb-1 flex items-center gap-1.5">
+          <div class="text-xs font-mono font-bold text-cyan-300 mb-1 flex items-center gap-1.5">
             <span>Q02.</span> 왜 의료영상 원본을 클라우드에 영구 저장하지 않고 분산 보관하나요?
           </div>
           <p class="text-xs text-slate-300 leading-relaxed mt-2">
@@ -1166,7 +1484,7 @@
 
         <!-- Q03 -->
         <div class="glass-card rounded-xl p-5 border border-slate-800 hover:border-slate-700 transition-all">
-          <div class="text-xs font-mono font-bold text-cyan-400 mb-1 flex items-center gap-1.5">
+          <div class="text-xs font-mono font-bold text-cyan-300 mb-1 flex items-center gap-1.5">
             <span>Q03.</span> 700장 슬라이스의 대용량 복부 CT를 스트리밍할 때 지연시간(Latency)은 어떻게 해결했나요?
           </div>
           <p class="text-xs text-slate-300 leading-relaxed mt-2">
@@ -1176,7 +1494,7 @@
 
         <!-- Q04 -->
         <div class="glass-card rounded-xl p-5 border border-slate-800 hover:border-slate-700 transition-all">
-          <div class="text-xs font-mono font-bold text-cyan-400 mb-1 flex items-center gap-1.5">
+          <div class="text-xs font-mono font-bold text-cyan-300 mb-1 flex items-center gap-1.5">
             <span>Q04.</span> 11조건 Fail-Closed ABAC에서 단 하나의 조건이라도 불일치하면 어떻게 되나요?
           </div>
           <p class="text-xs text-slate-300 leading-relaxed mt-2">
@@ -1186,7 +1504,7 @@
 
         <!-- Q05 -->
         <div class="glass-card rounded-xl p-5 border border-slate-800 hover:border-slate-700 transition-all">
-          <div class="text-xs font-mono font-bold text-cyan-400 mb-1 flex items-center gap-1.5">
+          <div class="text-xs font-mono font-bold text-cyan-300 mb-1 flex items-center gap-1.5">
             <span>Q05.</span> DPoP(Demonstrating Proof-of-Possession) 토큰을 적용한 이유는 무엇인가요?
           </div>
           <p class="text-xs text-slate-300 leading-relaxed mt-2">
@@ -1196,7 +1514,7 @@
 
         <!-- Q06 -->
         <div class="glass-card rounded-xl p-5 border border-slate-800 hover:border-slate-700 transition-all">
-          <div class="text-xs font-mono font-bold text-cyan-400 mb-1 flex items-center gap-1.5">
+          <div class="text-xs font-mono font-bold text-cyan-300 mb-1 flex items-center gap-1.5">
             <span>Q06.</span> 환자가 동의를 철회(Revoke)하면 기존에 열려 있던 뷰어 세션은 어떻게 되나요?
           </div>
           <p class="text-xs text-slate-300 leading-relaxed mt-2">
@@ -1206,7 +1524,7 @@
 
         <!-- Q07 -->
         <div class="glass-card rounded-xl p-5 border border-slate-800 hover:border-slate-700 transition-all">
-          <div class="text-xs font-mono font-bold text-cyan-400 mb-1 flex items-center gap-1.5">
+          <div class="text-xs font-mono font-bold text-cyan-300 mb-1 flex items-center gap-1.5">
             <span>Q07.</span> 의료법 제27조(무면허 의료행위 금지)에 AI가 위반되지 않도록 어떤 가드레일을 두었나요?
           </div>
           <p class="text-xs text-slate-300 leading-relaxed mt-2">
@@ -1216,7 +1534,7 @@
 
         <!-- Q08 -->
         <div class="glass-card rounded-xl p-5 border border-slate-800 hover:border-slate-700 transition-all">
-          <div class="text-xs font-mono font-bold text-cyan-400 mb-1 flex items-center gap-1.5">
+          <div class="text-xs font-mono font-bold text-cyan-300 mb-1 flex items-center gap-1.5">
             <span>Q08.</span> 간경화, 간암 등 30종 주요 질환에 대한 인터셉트 처리는 어떻게 동작하나요?
           </div>
           <p class="text-xs text-slate-300 leading-relaxed mt-2">
@@ -1226,7 +1544,7 @@
 
         <!-- Q09 -->
         <div class="glass-card rounded-xl p-5 border border-slate-800 hover:border-slate-700 transition-all">
-          <div class="text-xs font-mono font-bold text-cyan-400 mb-1 flex items-center gap-1.5">
+          <div class="text-xs font-mono font-bold text-cyan-300 mb-1 flex items-center gap-1.5">
             <span>Q09.</span> HL7 FHIR 표준은 플랫폼 내에서 어떻게 활용되나요?
           </div>
           <p class="text-xs text-slate-300 leading-relaxed mt-2">
@@ -1236,7 +1554,7 @@
 
         <!-- Q10 -->
         <div class="glass-card rounded-xl p-5 border border-slate-800 hover:border-slate-700 transition-all">
-          <div class="text-xs font-mono font-bold text-cyan-400 mb-1 flex items-center gap-1.5">
+          <div class="text-xs font-mono font-bold text-cyan-300 mb-1 flex items-center gap-1.5">
             <span>Q10.</span> 화면 캡처나 유출을 방지하기 위한 포렌식 워터마크 기술은 어떻게 구현되었나요?
           </div>
           <p class="text-xs text-slate-300 leading-relaxed mt-2">
@@ -1246,7 +1564,7 @@
 
         <!-- Q11 -->
         <div class="glass-card rounded-xl p-5 border border-slate-800 hover:border-slate-700 transition-all">
-          <div class="text-xs font-mono font-bold text-cyan-400 mb-1 flex items-center gap-1.5">
+          <div class="text-xs font-mono font-bold text-cyan-300 mb-1 flex items-center gap-1.5">
             <span>Q11.</span> SHA-256 불가변 해시 체인 감사로그는 블록체인과 어떻게 다른가요?
           </div>
           <p class="text-xs text-slate-300 leading-relaxed mt-2">
@@ -1256,7 +1574,7 @@
 
         <!-- Q12 -->
         <div class="glass-card rounded-xl p-5 border border-slate-800 hover:border-slate-700 transition-all">
-          <div class="text-xs font-mono font-bold text-cyan-400 mb-1 flex items-center gap-1.5">
+          <div class="text-xs font-mono font-bold text-cyan-300 mb-1 flex items-center gap-1.5">
             <span>Q12.</span> 이상 대량 조회 탐지 시 서킷 브레이커는 어떻게 동작하나요?
           </div>
           <p class="text-xs text-slate-300 leading-relaxed mt-2">
@@ -1266,7 +1584,7 @@
 
         <!-- Q13 -->
         <div class="glass-card rounded-xl p-5 border border-slate-800 hover:border-slate-700 transition-all">
-          <div class="text-xs font-mono font-bold text-cyan-400 mb-1 flex items-center gap-1.5">
+          <div class="text-xs font-mono font-bold text-cyan-300 mb-1 flex items-center gap-1.5">
             <span>Q13.</span> 수신 병원(B병원)에서 영상을 보관하고 싶을 때(Import)는 어떻게 처리되나요?
           </div>
           <p class="text-xs text-slate-300 leading-relaxed mt-2">
@@ -1276,7 +1594,7 @@
 
         <!-- Q14 -->
         <div class="glass-card rounded-xl p-5 border border-slate-800 hover:border-slate-700 transition-all">
-          <div class="text-xs font-mono font-bold text-cyan-400 mb-1 flex items-center gap-1.5">
+          <div class="text-xs font-mono font-bold text-cyan-300 mb-1 flex items-center gap-1.5">
             <span>Q14.</span> 개발 소스코드에 하드코딩된 비밀번호나 키가 없는지 어떻게 보장하나요?
           </div>
           <p class="text-xs text-slate-300 leading-relaxed mt-2">
@@ -1286,7 +1604,7 @@
 
         <!-- Q15 -->
         <div class="glass-card rounded-xl p-5 border border-slate-800 hover:border-slate-700 transition-all">
-          <div class="text-xs font-mono font-bold text-cyan-400 mb-1 flex items-center gap-1.5">
+          <div class="text-xs font-mono font-bold text-cyan-300 mb-1 flex items-center gap-1.5">
             <span>Q15.</span> 환자 모바일 QR 코드는 일반 텍스트인가요, 암호화되어 있나요?
           </div>
           <p class="text-xs text-slate-300 leading-relaxed mt-2">
@@ -1296,7 +1614,7 @@
 
         <!-- Q16 -->
         <div class="glass-card rounded-xl p-5 border border-slate-800 hover:border-slate-700 transition-all">
-          <div class="text-xs font-mono font-bold text-cyan-400 mb-1 flex items-center gap-1.5">
+          <div class="text-xs font-mono font-bold text-cyan-300 mb-1 flex items-center gap-1.5">
             <span>Q16.</span> 웹 애플리케이션 방화벽(WAF)은 어떤 위협을 방어하고 있나요?
           </div>
           <p class="text-xs text-slate-300 leading-relaxed mt-2">
@@ -1306,7 +1624,7 @@
 
         <!-- Q17 -->
         <div class="glass-card rounded-xl p-5 border border-slate-800 hover:border-slate-700 transition-all">
-          <div class="text-xs font-mono font-bold text-cyan-400 mb-1 flex items-center gap-1.5">
+          <div class="text-xs font-mono font-bold text-cyan-300 mb-1 flex items-center gap-1.5">
             <span>Q17.</span> 실제 환자의 실명과 실제 주민등록번호가 사용되었나요?
           </div>
           <p class="text-xs text-slate-300 leading-relaxed mt-2">
@@ -1316,7 +1634,7 @@
 
         <!-- Q18 -->
         <div class="glass-card rounded-xl p-5 border border-slate-800 hover:border-slate-700 transition-all">
-          <div class="text-xs font-mono font-bold text-cyan-400 mb-1 flex items-center gap-1.5">
+          <div class="text-xs font-mono font-bold text-cyan-300 mb-1 flex items-center gap-1.5">
             <span>Q18.</span> 1,525건의 자동화 테스트는 주로 어떤 내용을 검증하나요?
           </div>
           <p class="text-xs text-slate-300 leading-relaxed mt-2">
@@ -1326,7 +1644,7 @@
 
         <!-- Q19 -->
         <div class="glass-card rounded-xl p-5 border border-slate-800 hover:border-slate-700 transition-all">
-          <div class="text-xs font-mono font-bold text-cyan-400 mb-1 flex items-center gap-1.5">
+          <div class="text-xs font-mono font-bold text-cyan-300 mb-1 flex items-center gap-1.5">
             <span>Q19.</span> 개인정보보호법 제29조에 따른 보안검토보고서는 어떻게 생성되나요?
           </div>
           <p class="text-xs text-slate-300 leading-relaxed mt-2">
@@ -1336,7 +1654,7 @@
 
         <!-- Q20 -->
         <div class="glass-card rounded-xl p-5 border border-slate-800 hover:border-slate-700 transition-all">
-          <div class="text-xs font-mono font-bold text-cyan-400 mb-1 flex items-center gap-1.5">
+          <div class="text-xs font-mono font-bold text-cyan-300 mb-1 flex items-center gap-1.5">
             <span>Q20.</span> 하이패스 플랫폼의 최종 목표와 파급효과는 무엇인가요?
           </div>
           <p class="text-xs text-slate-300 leading-relaxed mt-2">
@@ -1352,22 +1670,26 @@
   <footer class="glass-card border-t border-slate-800/90 py-12 text-xs text-slate-400">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
       <div class="flex items-center space-x-3">
-        <span class="text-2xl">🏥</span>
-        <div>
-          <div class="font-extrabold text-white text-sm">MediQ Highpass Platform</div>
-          <div class="text-[11px] text-slate-400">환자 동의 기반 클라우드 의료영상·진료정보 안전 교류 포털</div>
+        <!-- MediQ Official SVG Wordmark -->
+        <svg class="h-7 w-auto" viewBox="0 0 140 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <text x="0" y="46" fill="#eef2ff" font-family="'Inter', sans-serif" font-size="38" font-weight="800" letter-spacing="-1.5">Medi</text>
+          <rect x="94" y="8" width="44" height="48" rx="8" fill="#cedaf7"/>
+          <text x="103" y="45" fill="#142338" font-family="'Inter', sans-serif" font-size="36" font-weight="900">Q</text>
+        </svg>
+        <div class="border-l border-slate-700/80 pl-2.5">
+          <div class="font-extrabold text-white text-sm">하이패스 (Hi-Pass) Platform</div>
+          <div class="text-[11px] text-slate-400 font-mono">Engineering Portfolio · 이재석 · 김범희</div>
         </div>
       </div>
 
-      <div class="flex flex-wrap items-center justify-center gap-4 text-xs font-mono">
-        <span class="text-slate-500">|</span>
-        <span class="text-cyan-400">DICOMweb (QIDO/WADO)</span>
-        <span class="text-slate-500">|</span>
-        <span class="text-emerald-400">HL7 FHIR R4</span>
-        <span class="text-slate-500">|</span>
-        <span class="text-purple-400">Real Microsoft Entra ID</span>
-        <span class="text-slate-500">|</span>
-        <span class="text-blue-400">Zero Cloud Storage</span>
+      <div class="flex flex-wrap items-center justify-center gap-3 text-xs font-mono">
+        <span class="text-cyan-300">DICOMweb (QIDO/WADO)</span>
+        <span class="text-slate-600">•</span>
+        <span class="text-emerald-300">HL7 FHIR R4</span>
+        <span class="text-slate-600">•</span>
+        <span class="text-purple-300">Microsoft Entra ID</span>
+        <span class="text-slate-600">•</span>
+        <span class="text-teal-300">Zero Cloud Storage</span>
       </div>
 
       <div class="text-center md:text-right space-y-1">
@@ -1422,32 +1744,32 @@
 
   <!-- ==================== INTERACTIVE JAVASCRIPT LOGIC ==================== -->
   <script>
-    // 24 Full Evidence Items
+    // 24 Full Evidence Items with Metadata from PPTX & Demo
     const galleryItems = [
-      { id: 1, category: 'patient', tag: 'RBAC 진입', file: '01_시작화면_메인랜딩_역할선택.png', title: '01. 시작화면 메인랜딩 역할선택', desc: '환자 포털, 의료진 워크스페이스, 보안 관제실의 3대 페르소나별 역할 기반(RBAC) 진입점 분리 화면' },
-      { id: 2, category: 'entra', tag: 'Entra ID 환자', file: '02_환자포털_로그인진입.png', title: '02. 환자포털 로그인진입', desc: 'Microsoft Entra ID(구 Azure AD) OIDC 환자 로그인 진입 화면 및 패스워드리스 보안 안내' },
+      { id: 1, category: 'patient', tag: 'RBAC 진입', file: '01_시작화면_메인랜딩_역할선택.png', title: '01. 시작화면 메인랜딩 역할선택', desc: '환자 포털, 의료진 워크스페이스, 보안 관제실의 3대 페르소나별 역할 기반(RBAC) 진입점 분리 화면 (Slide 08 증적)' },
+      { id: 2, category: 'entra', tag: 'Entra ID 환자', file: '02_환자포털_로그인진입.png', title: '02. 환자포털 로그인진입', desc: 'Microsoft Entra ID(구 Azure AD) OIDC 환자 로그인 진입 화면 및 패스워드리스 보안 안내 (Slide 27 증적)' },
       { id: 3, category: 'entra', tag: 'Entra ID OIDC', file: '03_환자포털_Microsoft_Entra_ID_계정선택.png', title: '03. 환자포털 Microsoft Entra ID 계정선택', desc: '실제 Microsoft Entra ID 테넌트에서 환자(홍길동) OIDC 계정 선택 및 PATIENT App Role 토큰 획득' },
-      { id: 4, category: 'patient', tag: '건강지갑 홈', file: '04_환자포털_내건강지갑_홈_대시보드.png', title: '04. 환자포털 내건강지갑 홈 대시보드', desc: '최근 국가건강검진 수검 기록 및 13건의 유효한 병원 간 공유동의 요약 대시보드' },
-      { id: 5, category: 'patient', tag: 'AI 건강도우미', file: '05_환자포털_AI건강도우미_검사기록비교_질의.png', title: '05. 환자포털 AI건강도우미 검사기록비교 질의', desc: '혈청 AFP 검사 질의 시 KDCA 근거 기반 비임상 설명 및 의료법 제27조 준수 주치의 진료 권고' },
-      { id: 6, category: 'patient', tag: 'ABAC 공유동의', file: '06_환자포털_영상공유동의_제공병원_범위설정.png', title: '06. 환자포털 영상공유동의 제공병원 범위설정', desc: '한국병원→서울대병원 복부CT(700장) 및 건강검진 7일간 VIEW_ONLY 세분화 동의 설정' },
-      { id: 7, category: 'patient', tag: '1회용 암호화 QR', file: '07_환자포털_병원제시용_1회용_공유QR티켓_발급.png', title: '07. 환자포털 병원제시용 1회용 공유QR티켓 발급', desc: '병원 제시용 단기 5분 유효 1회용 암호화 QR 공유 티켓 발급 및 실시간 카운트다운' },
-      { id: 8, category: 'entra', tag: 'Entra ID 의료진', file: '08_의료진_로그인진입.png', title: '08. 의료진 로그인진입', desc: '실제 Microsoft Entra ID OIDC를 통해 DOCTOR 역할을 획득하는 의료진 전용 로그인 진입 안내' },
-      { id: 9, category: 'clinician', tag: 'QR 접수 스캔', file: '09_의료진_접수데스크_QR코드_스캔대기.png', title: '09. 의료진 접수데스크 QR코드 스캔대기', desc: '진료실 접수 데스크에서 환자 모바일 1회용 QR 코드 스캔 및 대기 화면' },
-      { id: 10, category: 'clinician', tag: '접수목록 확인', file: '10_의료진_접수데스크_환자접수목록_확인.png', title: '10. 의료진 접수데스크 환자접수목록 확인', desc: 'QR 스캔 후 홍길동 환자의 접수 건 등록 및 동의 상태(ACTIVE) 확인' },
-      { id: 11, category: 'clinician', tag: 'HL7 FHIR 생체지표', file: '11_의료진_환자기록열람_공유된건강검진결과_생체지표.png', title: '11. 의료진 환자기록열람 공유된건강검진결과 생체지표', desc: 'HL7 FHIR 호환 AST/ALT/혈당 등 건강검진 생체지표 시계열 추이 차트 및 수치 열람' },
-      { id: 12, category: 'clinician', tag: 'Study 목록', file: '12_의료진_환자영상_승인된_복부CT검사목록_확인.png', title: '12. 의료진 환자영상 승인된 복부CT검사목록 확인', desc: '동의된 복부 CT 검사 목록(2026-08-15) 및 모달리티 상세 메타데이터 확인' },
-      { id: 13, category: 'clinician', tag: '뷰어 준비', file: '13_의료진_환자영상_DICOM뷰어_접근준비.png', title: '13. 의료진 환자영상 DICOM뷰어 접근준비', desc: 'MediQ Web DICOM 뷰어 호출 및 보안 세션 파라미터 초기화' },
-      { id: 14, category: 'clinician', tag: '단기 토큰 대기', file: '14_의료진_DICOM뷰어_영상접근토큰_발급대기.png', title: '14. 의료진 DICOM뷰어 영상접근토큰 발급대기', desc: '11개 조건 ABAC 정책 검증 통과 후 5분 단기 DICOMweb 접근 토큰 발급 대기' },
-      { id: 15, category: 'clinician', tag: 'PACS 보관 설정', file: '15_의료진_병원보관함_PACS보관조건_설정.png', title: '15. 의료진 병원보관함 PACS보관조건 설정', desc: 'B병원 PACS 보관 전 보관 기한 및 조건 설정 (원격 PACS 분산 보관)' },
-      { id: 16, category: 'clinician', tag: '700장 CT 스트리밍', file: '16_의료진_DICOM뷰어_복부CT_700슬라이스_스트리밍열람.png', title: '16. 의료진 DICOM뷰어 복부CT 700슬라이스 스트리밍열람', desc: '복부 CT 700슬라이스 WADO-RS 프레임 스트리밍 열람 (윈도잉, 줌/팬, 다운로드 제한)' },
-      { id: 17, category: 'clinician', tag: 'PACS 작업 등록', file: '17_의료진_병원보관함_복부CT시리즈_작업등록.png', title: '17. 의료진 병원보관함 복부CT시리즈 작업등록', desc: '복부 CT 700개 인스턴스 B-PACS 비동기 반입(Import) 작업 등록' },
-      { id: 18, category: 'clinician', tag: 'PACS 완료 검증', file: '18_의료진_병원보관함_PACS보관작업_상태상세.png', title: '18. 의료진 병원보관함 PACS보관작업 상태상세', desc: 'PACS 전송 작업 100% 완료 및 무결성(SHA-256) 검증 상태 확인' },
-      { id: 19, category: 'entra', tag: 'Entra ID 보안관리', file: '19_보안관리자_로그인진입.png', title: '19. 보안관리자 로그인진입', desc: '실제 Microsoft Entra ID 특권 관리자 MFA 인증 전용 관제실 진입 화면' },
+      { id: 4, category: 'patient', tag: '건강지갑 홈', file: '04_환자포털_내건강지갑_홈_대시보드.png', title: '04. 환자포털 내건강지갑 홈 대시보드', desc: '최근 국가건강검진 수검 기록 및 13건의 유효한 병원 간 공유동의 요약 대시보드 (Slide 09 증적)' },
+      { id: 5, category: 'patient', tag: 'AI 건강도우미', file: '05_환자포털_AI건강도우미_검사기록비교_질의.png', title: '05. 환자포털 AI건강도우미 검사기록비교 질의', desc: '혈청 AFP 검사 질의 시 KDCA 근거 기반 비임상 설명 및 의료법 제27조 준수 주치의 진료 권고 (Slide 20 증적)' },
+      { id: 6, category: 'patient', tag: 'ABAC 공유동의', file: '06_환자포털_영상공유동의_제공병원_범위설정.png', title: '06. 환자포털 영상공유동의 제공병원 범위설정', desc: '한국병원→서울대병원 복부CT(700장) 및 건강검진 7일간 VIEW_ONLY 세분화 동의 설정 (Slide 10 증적)' },
+      { id: 7, category: 'patient', tag: '1회용 암호화 QR', file: '07_환자포털_병원제시용_1회용_공유QR티켓_발급.png', title: '07. 환자포털 병원제시용 1회용 공유QR티켓 발급', desc: '병원 제시용 단기 5분 유효 1회용 암호화 QR 공유 티켓 발급 및 실시간 카운트다운 (Slide 11 증적)' },
+      { id: 8, category: 'entra', tag: 'Entra ID 의료진', file: '08_의료진_로그인진입.png', title: '08. 의료진 로그인진입', desc: '실제 Microsoft Entra ID OIDC를 통해 DOCTOR 역할을 획득하는 의료진 전용 로그인 진입 안내 (Slide 27 증적)' },
+      { id: 9, category: 'clinician', tag: 'QR 접수 스캔', file: '09_의료진_접수데스크_QR코드_스캔대기.png', title: '09. 의료진 접수데스크 QR코드 스캔대기', desc: '진료실 접수 데스크에서 환자 모바일 1회용 QR 코드 스캔 및 대기 화면 (Slide 12 증적)' },
+      { id: 10, category: 'clinician', tag: '접수목록 확인', file: '10_의료진_접수데스크_환자접수목록_확인.png', title: '10. 의료진 접수데스크 환자접수목록 확인', desc: 'QR 스캔 후 홍길동 환자의 접수 건 등록 및 동의 상태(ACTIVE) 확인 (Slide 12 증적)' },
+      { id: 11, category: 'clinician', tag: 'HL7 FHIR 생체지표', file: '11_의료진_환자기록열람_공유된건강검진결과_생체지표.png', title: '11. 의료진 환자기록열람 공유된건강검진결과 생체지표', desc: 'HL7 FHIR 호환 AST/ALT/혈당 등 건강검진 생체지표 시계열 추이 차트 및 수치 열람 (Slide 13 증적)' },
+      { id: 12, category: 'clinician', tag: 'Study 목록', file: '12_의료진_환자영상_승인된_복부CT검사목록_확인.png', title: '12. 의료진 환자영상 승인된 복부CT검사목록 확인', desc: '동의된 복부 CT 검사 목록(2026-08-15) 및 모달리티 상세 메타데이터 확인 (Slide 14 증적)' },
+      { id: 13, category: 'clinician', tag: '뷰어 준비', file: '13_의료진_환자영상_DICOM뷰어_접근준비.png', title: '13. 의료진 환자영상 DICOM뷰어 접근준비', desc: 'MediQ Web DICOM 뷰어 호출 및 보안 세션 파라미터 초기화 (Slide 28 증적)' },
+      { id: 14, category: 'clinician', tag: '단기 토큰 대기', file: '14_의료진_DICOM뷰어_영상접근토큰_발급대기.png', title: '14. 의료진 DICOM뷰어 영상접근토큰 발급대기', desc: '11개 조건 ABAC 정책 검증 통과 후 5분 단기 DICOMweb 접근 토큰 발급 대기 (Slide 28 증적)' },
+      { id: 15, category: 'clinician', tag: 'PACS 보관 설정', file: '15_의료진_병원보관함_PACS보관조건_설정.png', title: '15. 의료진 병원보관함 PACS보관조건 설정', desc: 'B병원 PACS 보관 전 보관 기한 및 조건 설정 (원격 PACS 분산 보관, Slide 16 증적)' },
+      { id: 16, category: 'clinician', tag: '700장 CT 스트리밍', file: '16_의료진_DICOM뷰어_복부CT_700슬라이스_스트리밍열람.png', title: '16. 의료진 DICOM뷰어 복부CT 700슬라이스 스트리밍열람', desc: '복부 CT 700슬라이스 WADO-RS 프레임 스트리밍 열람 (윈도잉, 줌/팬, 다운로드 제한, Slide 15 증적)' },
+      { id: 17, category: 'clinician', tag: 'PACS 작업 등록', file: '17_의료진_병원보관함_복부CT시리즈_작업등록.png', title: '17. 의료진 병원보관함 복부CT시리즈 작업등록', desc: '복부 CT 700개 인스턴스 B-PACS 비동기 반입(Import) 작업 등록 (Slide 29 증적)' },
+      { id: 18, category: 'clinician', tag: 'PACS 완료 검증', file: '18_의료진_병원보관함_PACS보관작업_상태상세.png', title: '18. 의료진 병원보관함 PACS보관작업 상태상세', desc: 'PACS 전송 작업 100% 완료 및 무결성(SHA-256) 검증 영수증 상태 확인 (Slide 17 증적)' },
+      { id: 19, category: 'entra', tag: 'Entra ID 보안관리', file: '19_보안관리자_로그인진입.png', title: '19. 보안관리자 로그인진입', desc: '실제 Microsoft Entra ID 특권 관리자 MFA 인증 전용 관제실 진입 화면 (Slide 27 증적)' },
       { id: 20, category: 'security', tag: 'Entra 계정 선택', file: '20_보안관리자_Microsoft_Entra_ID_계정선택.png', title: '20. 보안관리자 Microsoft Entra ID 계정선택', desc: '보안 관리자(admin@...) 특권 계정 MFA/OIDC 인증 및 SECURITY_ADMIN 역할 확인' },
       { id: 21, category: 'security', tag: 'Entra 계정 확인', file: '21_보안관리자_Microsoft_Entra_ID_계정선택_중복.png', title: '21. 보안관리자 Microsoft Entra ID 계정선택 중복', desc: '보안 관리자 인증 확인 및 관제실 리디렉션 처리' },
-      { id: 22, category: 'security', tag: '실시간 관제', file: '22_보안관제실_메인상황판_감사로그_실시간모니터링.png', title: '22. 보안관제실 메인상황판 감사로그 실시간모니터링', desc: 'Azure Key Vault, WAF 차단 현황, 정책 거부 사유 코드 및 불변 감사로그 실시간 상황판' },
-      { id: 23, category: 'security', tag: 'PDF 감사보고서', file: '23_보안관제실_기간별_보안검토보고서_PDF출력모달.png', title: '23. 보안관제실 기간별 보안검토보고서 PDF출력모달', desc: '개인정보보호법 제29조 준수 기간별 감사보고서 및 A4 PDF 인쇄 모달' },
-      { id: 24, category: 'security', tag: 'Azure 인프라', file: '24_클라우드_인프라_Azure_리소스현황.png', title: '24. 클라우드 인프라 Azure 리소스현황', desc: 'Microsoft Azure Japan East 리전 배포 인프라 및 가상 네트워크 증적' },
+      { id: 22, category: 'security', tag: '실시간 관제', file: '22_보안관제실_메인상황판_감사로그_실시간모니터링.png', title: '22. 보안관제실 메인상황판 감사로그 실시간모니터링', desc: 'Azure Key Vault, WAF 차단 현황, 정책 거부 사유 코드 및 불변 감사로그 실시간 상황판 (Slide 18, 29 증적)' },
+      { id: 23, category: 'security', tag: 'PDF 감사보고서', file: '23_보안관제실_기간별_보안검토보고서_PDF출력모달.png', title: '23. 보안관제실 기간별 보안검토보고서 PDF출력모달', desc: '개인정보보호법 제29조 준수 기간별 감사보고서 및 A4 PDF 인쇄 모달 (Slide 19 증적)' },
+      { id: 24, category: 'security', tag: 'Azure 인프라', file: '24_클라우드_인프라_Azure_리소스현황.png', title: '24. 클라우드 인프라 Azure 리소스현황', desc: 'Microsoft Azure Japan East 리전 배포 인프라 및 가상 네트워크 증적 (Slide 31 증적)' },
     ];
 
     let currentFilter = 'all';
@@ -1510,7 +1832,7 @@
     function filterGallery(category) {
       document.querySelectorAll('.gallery-tab-btn').forEach(btn => {
         if (btn.getAttribute('data-filter') === category) {
-          btn.className = 'gallery-tab-btn active px-4 py-2 rounded-xl text-xs font-semibold bg-cyan-500 text-black border border-cyan-400 transition-all shadow-sm';
+          btn.className = 'gallery-tab-btn active px-4 py-2 rounded-xl text-xs font-semibold bg-cyan-400 text-black border border-cyan-300 transition-all shadow-sm';
         } else {
           btn.className = 'gallery-tab-btn px-4 py-2 rounded-xl text-xs font-semibold glass-card text-slate-300 border border-slate-700 hover:bg-slate-800 transition-all';
         }
