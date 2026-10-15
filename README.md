@@ -34,63 +34,151 @@
 
 ---
 
-## 🖼️ Service Preview & Detailed Screenshot Evidence
+## 🖼️ Service Preview & Live Demonstration Evidence (24종 실화면)
 
-### 1. 메인 진입점 및 역할별 로그인 화면 (Authentication & Access Gates)
+> **시연 상세 바로가기**:  
+> 📖 [24개 전 과정 상세 워크스루 문서 (DEMO-SCREENSHOTS-WALKTHROUGH.md)](docs/presentation/DEMO-SCREENSHOTS-WALKTHROUGH.md)  
+> 🖥️ [반응형 풀스크린 슬라이드 갤러리 열기 (gallery.html)](docs/presentation/gallery.html)
+
+### 1. 환자 포털 시나리오 (Patient Portal & AI Health Helper)
 <table width="100%">
   <tr>
     <td width="50%" align="center">
-      <b>1. 서비스 메인 랜딩 화면</b><br/>
-      <img src="docs/assets/images/01_main_landing.png" alt="서비스 메인 랜딩 화면" width="100%"/><br/>
-      <sub>A대학병원에서 B대학병원까지 환자 주도 공유 진입점</sub>
+      <b>1. 서비스 메인 랜딩 & 역할(RBAC) 선택</b><br/>
+      <a href="docs/presentation/screenshots/01_시작화면_메인랜딩_역할선택.png" target="_blank">
+        <img src="docs/presentation/screenshots/01_시작화면_메인랜딩_역할선택.png" alt="서비스 메인 랜딩 화면" width="100%"/>
+      </a><br/>
+      <sub>A병원에서 B병원까지 환자 주도 공유 진입점 및 3대 페르소나 분리</sub>
     </td>
     <td width="50%" align="center">
-      <b>2. 환자 전용 로그인 화면</b><br/>
-      <img src="docs/assets/images/02_patient_login.png" alt="환자 로그인 화면" width="100%"/><br/>
-      <sub>내 의료지갑 열람 및 Microsoft Entra ID 계정 연동</sub>
+      <b>2. 내 건강지갑 홈 대시보드</b><br/>
+      <a href="docs/presentation/screenshots/04_환자포털_내건강지갑_홈_대시보드.png" target="_blank">
+        <img src="docs/presentation/screenshots/04_환자포털_내건강지갑_홈_대시보드.png" alt="내 건강지갑 홈 대시보드" width="100%"/>
+      </a><br/>
+      <sub>최근 수검한 국가건강검진 기록 및 유효 공유동의 13건 요약 대시보드</sub>
     </td>
   </tr>
   <tr>
     <td width="50%" align="center">
-      <b>3. 의료진 전용 로그인 화면</b><br/>
-      <img src="docs/assets/images/03_clinician_login.png" alt="의료진 로그인 화면" width="100%"/><br/>
-      <sub>환자 동의 기반 타 병원 영상 열람 권한 획득 입구</sub>
+      <b>3. AI 건강도우미 검사 비교 & RAG 질의</b><br/>
+      <a href="docs/presentation/screenshots/05_환자포털_AI건강도우미_검사기록비교_질의.png" target="_blank">
+        <img src="docs/presentation/screenshots/05_환자포털_AI건강도우미_검사기록비교_질의.png" alt="AI 건강도우미 검사 비교 및 질의" width="100%"/>
+      </a><br/>
+      <sub>혈청 AFP 등 이전 수치 추이 비교 및 질병관리청 근거 기반 비임상 의학 설명</sub>
     </td>
     <td width="50%" align="center">
-      <b>4. 보안 운영자 전용 로그인 화면</b><br/>
-      <img src="docs/assets/images/04_security_admin_login.png" alt="보안 운영자 로그인 화면" width="100%"/><br/>
-      <sub>3단계 인증 절차(인증 → 권한 확인 → 관제) 기반 보안 게이트</sub>
+      <b>4. 영상공유동의 범위 설정 & 1회용 QR 발급</b><br/>
+      <a href="docs/presentation/screenshots/06_환자포털_영상공유동의_제공병원_범위설정.png" target="_blank">
+        <img src="docs/presentation/screenshots/06_환자포털_영상공유동의_제공병원_범위설정.png" alt="영상공유동의 범위설정" width="100%"/>
+      </a><br/>
+      <sub>한국병원→서울대병원 복부 CT(700장) 및 건강검진 7일간 VIEW_ONLY 공유동의 설정</sub>
     </td>
   </tr>
 </table>
 
-### 2. 핵심 워크플로우 및 서비스 검증 증적 (Core Service Workflows)
+### 2. 의료진 워크스페이스 & DICOM 뷰어 시나리오 (Clinician Workspace & Streaming)
 <table width="100%">
   <tr>
     <td width="50%" align="center">
-      <b>5. 환자 동의 생성 & 공유 지갑</b><br/>
-      <img src="docs/assets/images/06_patient_consent_wallet.png" alt="환자 동의 생성 지갑" width="100%"/><br/>
-      <sub>수신 병원, 열람 목적, 유효기간, 허용 Study/Series 범위 지정</sub>
+      <b>5. 접수 데스크 QR 스캔 & 환자 접수 확인</b><br/>
+      <a href="docs/presentation/screenshots/10_의료진_접수데스크_환자접수목록_확인.png" target="_blank">
+        <img src="docs/presentation/screenshots/10_의료진_접수데스크_환자접수목록_확인.png" alt="접수데스크 환자접수 확인" width="100%"/>
+      </a><br/>
+      <sub>모바일 1회용 QR 스캔 즉시 환자 식별 매핑 및 동의 상태(ACTIVE) 서버 검증</sub>
     </td>
     <td width="50%" align="center">
-      <b>6. AI 건강도우미 진료 준비</b><br/>
-      <img src="docs/assets/images/05_health_helper_rag.png" alt="AI 건강도우미 진료 준비" width="100%"/><br/>
-      <sub>혈청 AFP 검사 주제 연동, 질문 카드 스튜디오 및 진료 질문 준비</sub>
+      <b>6. 공유된 건강검진 생체지표 열람 (HL7 FHIR)</b><br/>
+      <a href="docs/presentation/screenshots/11_의료진_환자기록열람_공유된건강검진결과_생체지표.png" target="_blank">
+        <img src="docs/presentation/screenshots/11_의료진_환자기록열람_공유된건강검진결과_생체지표.png" alt="공유된 건강검진 생체지표 열람" width="100%"/>
+      </a><br/>
+      <sub>환자가 동의한 AST/ALT 간기능, 혈당, 콜레스테롤 표준 지표 추이 및 수치 열람</sub>
     </td>
   </tr>
   <tr>
     <td width="50%" align="center">
-      <b>7. 의료진 복부 CT DICOM 뷰어</b><br/>
-      <img src="docs/assets/images/07_clinician_dicom_viewer.png" alt="의료진 DICOM CT 뷰어" width="100%"/><br/>
-      <sub>5분 유효 단기 토큰 기반 700 Slices 다중 단면 Lazy Loading 스트리밍</sub>
+      <b>7. DICOM 뷰어 복부 CT 700장 실시간 스트리밍</b><br/>
+      <a href="docs/presentation/screenshots/16_의료진_DICOM뷰어_복부CT_700슬라이스_스트리밍열람.png" target="_blank">
+        <img src="docs/presentation/screenshots/16_의료진_DICOM뷰어_복부CT_700슬라이스_스트리밍열람.png" alt="복부 CT 700슬라이스 스트리밍 열람" width="100%"/>
+      </a><br/>
+      <sub>5분 단기 토큰 기반 WADO-RS 프레임 스트리밍 (축상면 스크롤, WW/WL, 다운로드 차단)</sub>
     </td>
     <td width="50%" align="center">
-      <b>8. 보안 관제 콘솔 & 불변 감사로그</b><br/>
-      <img src="docs/assets/images/08_security_audit_console.png" alt="보안 관제 및 감사로그 콘솔" width="100%"/><br/>
-      <sub>토큰 발급, 접근 허용/거부, 이상행위 실시간 감사 추적 대시보드</sub>
+      <b>8. B병원 PACS 보관함 작업 등록 & 완료</b><br/>
+      <a href="docs/presentation/screenshots/18_의료진_병원보관함_PACS보관작업_상태상세.png" target="_blank">
+        <img src="docs/presentation/screenshots/18_의료진_병원보관함_PACS보관작업_상태상세.png" alt="PACS 보관작업 상태 상세" width="100%"/>
+      </a><br/>
+      <sub>비동기 mTLS 전송 파이프라인을 거쳐 700장 영상 전송 및 SHA-256 무결성 검증 100% 완료</sub>
     </td>
   </tr>
 </table>
+
+### 3. 보안 관제실 & 클라우드 인프라 시나리오 (Security Observatory & Cloud Proof)
+<table width="100%">
+  <tr>
+    <td width="50%" align="center">
+      <b>9. 보안 관제실 실시간 상황판 (WAF & Key Vault)</b><br/>
+      <a href="docs/presentation/screenshots/22_보안관제실_메인상황판_감사로그_실시간모니터링.png" target="_blank">
+        <img src="docs/presentation/screenshots/22_보안관제실_메인상황판_감사로그_실시간모니터링.png" alt="보안관제실 실시간 모니터링" width="100%"/>
+      </a><br/>
+      <sub>Azure WAF 차단 현황, Key Vault 암호키 무결성, 불가변 감사로그 실시간 스트림</sub>
+    </td>
+    <td width="50%" align="center">
+      <b>10. 개인정보보호법 제29조 A4 보안보고서 모달</b><br/>
+      <a href="docs/presentation/screenshots/23_보안관제실_기간별_보안검토보고서_PDF출력모달.png" target="_blank">
+        <img src="docs/presentation/screenshots/23_보안관제실_기간별_보안검토보고서_PDF출력모달.png" alt="기간별 보안검토보고서 PDF 출력" width="100%"/>
+      </a><br/>
+      <sub>기간별 접속기록 점검 요건 충족 및 원클릭 A4 인쇄 / PDF 저장 지원</sub>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" align="center">
+      <b>11. ABAC 11개 조건 검증 & 단기 토큰 발급</b><br/>
+      <a href="docs/presentation/screenshots/14_의료진_DICOM뷰어_영상접근토큰_발급대기.png" target="_blank">
+        <img src="docs/presentation/screenshots/14_의료진_DICOM뷰어_영상접근토큰_발급대기.png" alt="영상접근토큰 발급 대기" width="100%"/>
+      </a><br/>
+      <sub>Fail-Closed 원칙 기반 권한·병원·동의·유효기간 종합 판정 및 5분 토큰 서명</sub>
+    </td>
+    <td width="50%" align="center">
+      <b>12. Microsoft Azure 클라우드 배포 인프라 증적</b><br/>
+      <a href="docs/presentation/screenshots/24_클라우드_인프라_Azure_리소스현황.png" target="_blank">
+        <img src="docs/presentation/screenshots/24_클라우드_인프라_Azure_리소스현황.png" alt="Azure 클라우드 리소스 현황" width="100%"/>
+      </a><br/>
+      <sub>Japan East 리전 VM, Key Vault, Virtual Network, NSG 등 클라우드 프로비저닝 현황</sub>
+    </td>
+  </tr>
+</table>
+
+<details>
+<summary><b>🔍 전체 24개 시연 단계별 스크린샷 증적 목록 펼쳐보기 (클릭)</b></summary>
+
+| 번호 | 화면 명칭 | 시나리오 역할 | 주요 기능 및 보안 포인트 | 고화질 스크린샷 링크 |
+|:---:|---|:---:|---|:---:|
+| 01 | `01_시작화면_메인랜딩_역할선택` | 공통 진입 | 환자/의료진/보안 3대 페르소나 RBAC 진입점 분리 | [열기](docs/presentation/screenshots/01_시작화면_메인랜딩_역할선택.png) |
+| 02 | `02_환자포털_로그인진입` | 환자 포털 | Microsoft Entra ID OIDC 환자 로그인 안내 | [열기](docs/presentation/screenshots/02_환자포털_로그인진입.png) |
+| 03 | `03_환자포털_Microsoft_Entra_ID_계정선택` | 환자 포털 | 환자(홍길동) OIDC ID 토큰 획득 | [열기](docs/presentation/screenshots/03_환자포털_Microsoft_Entra_ID_계정선택.png) |
+| 04 | `04_환자포털_내건강지갑_홈_대시보드` | 환자 포털 | 최근 검진 기록 및 유효 공유동의 13건 요약 | [열기](docs/presentation/screenshots/04_환자포털_내건강지갑_홈_대시보드.png) |
+| 05 | `05_환자포털_AI건강도우미_검사기록비교_질의` | 환자 포털 | 혈청 AFP 추이 비교 및 질병청 근거 RAG 질의 | [열기](docs/presentation/screenshots/05_환자포털_AI건강도우미_검사기록비교_질의.png) |
+| 06 | `06_환자포털_영상공유동의_제공병원_범위설정` | 환자 포털 | 한국병원→서울대병원 복부 CT/검진 공유동의(ABAC) | [열기](docs/presentation/screenshots/06_환자포털_영상공유동의_제공병원_범위설정.png) |
+| 07 | `07_환자포털_병원제시용_1회용_공유QR티켓_발급` | 환자 포털 | 병원 제시용 1회용 QR 공유 티켓 발급 (5분 유효) | [열기](docs/presentation/screenshots/07_환자포털_병원제시용_1회용_공유QR티켓_발급.png) |
+| 08 | `08_의료진_로그인진입` | 의료진 | 의료진 전용 워크스페이스 로그인 진입 | [열기](docs/presentation/screenshots/08_의료진_로그인진입.png) |
+| 09 | `09_의료진_접수데스크_QR코드_스캔대기` | 의료진 | 접수처 환자 모바일 QR 코드 스캔 대기 | [열기](docs/presentation/screenshots/09_의료진_접수데스크_QR코드_스캔대기.png) |
+| 10 | `10_의료진_접수데스크_환자접수목록_확인` | 의료진 | 수신된 홍길동 환자 접수 건 및 동의 확인 | [열기](docs/presentation/screenshots/10_의료진_접수데스크_환자접수목록_확인.png) |
+| 11 | `11_의료진_환자기록열람_공유된건강검진결과_생체지표` | 의료진 | 공유 동의된 건강검진 지표(AST/ALT/혈당) 열람 | [열기](docs/presentation/screenshots/11_의료진_환자기록열람_공유된건강검진결과_생체지표.png) |
+| 12 | `12_의료진_환자영상_승인된_복부CT검사목록_확인` | 의료진 | 동의된 Study(복부 CT 2026-08-15) 목록 확인 | [열기](docs/presentation/screenshots/12_의료진_환자영상_승인된_복부CT검사목록_확인.png) |
+| 13 | `13_의료진_환자영상_DICOM뷰어_접근준비` | 의료진 | MediQ Web DICOM Viewer 세션 호출 준비 | [열기](docs/presentation/screenshots/13_의료진_환자영상_DICOM뷰어_접근준비.png) |
+| 14 | `14_의료진_DICOM뷰어_영상접근토큰_발급대기` | 의료진 | 단기 DICOMweb 접근 토큰 발급 및 정책 검증 | [열기](docs/presentation/screenshots/14_의료진_DICOM뷰어_영상접근토큰_발급대기.png) |
+| 15 | `15_의료진_병원보관함_PACS보관조건_설정` | 의료진 | B병원 PACS 보관 전 조건 및 기한 설정 | [열기](docs/presentation/screenshots/15_의료진_병원보관함_PACS보관조건_설정.png) |
+| 16 | `16_의료진_DICOM뷰어_복부CT_700슬라이스_스트리밍열람` | 의료진 | 복부 CT 700장 WADO-RS 실시간 스트리밍 열람 | [열기](docs/presentation/screenshots/16_의료진_DICOM뷰어_복부CT_700슬라이스_스트리밍열람.png) |
+| 17 | `17_의료진_병원보관함_복부CT시리즈_작업등록` | 의료진 | 복부 CT 시리즈(700 인스턴스) 보관 작업 등록 | [열기](docs/presentation/screenshots/17_의료진_병원보관함_복부CT시리즈_작업등록.png) |
+| 18 | `18_의료진_병원보관함_PACS보관작업_상태상세` | 의료진 | PACS 보관 작업 100% 완료 및 무결성 확인 | [열기](docs/presentation/screenshots/18_의료진_병원보관함_PACS보관작업_상태상세.png) |
+| 19 | `19_보안관리자_로그인진입` | 보안 관제 | 보안 관제 전용 포털 진입 안내 | [열기](docs/presentation/screenshots/19_보안관리자_로그인진입.png) |
+| 20 | `20_보안관리자_Microsoft_Entra_ID_계정선택` | 보안 관제 | 보안 관리자 Microsoft 계정 인증 | [열기](docs/presentation/screenshots/20_보안관리자_Microsoft_Entra_ID_계정선택.png) |
+| 21 | `21_보안관리자_Microsoft_Entra_ID_계정선택_중복` | 보안 관제 | 보안 관리자 인증 확인 (보조) | [열기](docs/presentation/screenshots/21_보안관리자_Microsoft_Entra_ID_계정선택_중복.png) |
+| 22 | `22_보안관제실_메인상황판_감사로그_실시간모니터링` | 보안 관제 | WAF/Key Vault/감사로그 실시간 관제 대시보드 | [열기](docs/presentation/screenshots/22_보안관제실_메인상황판_감사로그_실시간모니터링.png) |
+| 23 | `23_보안관제실_기간별_보안검토보고서_PDF출력모달` | 보안 관제 | 기간별 감사로그 통계 및 A4 PDF 보고서 출력 | [열기](docs/presentation/screenshots/23_보안관제실_기간별_보안검토보고서_PDF출력모달.png) |
+| 24 | `24_클라우드_인프라_Azure_리소스현황` | 클라우드 | Microsoft Azure 배포 인프라 및 보안 리소스 현황 | [열기](docs/presentation/screenshots/24_클라우드_인프라_Azure_리소스현황.png) |
+
+</details>
 
 ---
 
