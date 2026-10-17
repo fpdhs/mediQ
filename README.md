@@ -4,6 +4,8 @@
 
 **[프로젝트 둘러보기](https://sureasdufo1-hue.github.io/Highpass-Project/)** · **[Azure 웹 시연](https://highpass-demo.japaneast.cloudapp.azure.com/hipass/)** · **[모바일 시연](https://highpass-demo.japaneast.cloudapp.azure.com/mobile/)**
 
+**[프로젝트 발표자료 PDF 보기 · 63페이지](https://sureasdufo1-hue.github.io/Highpass-Project/presentation/project.html)** · [PDF 바로 열기](https://sureasdufo1-hue.github.io/Highpass-Project/assets/documents/mediq-project-20261017.pdf)
+
 시연 서비스는 승인된 Microsoft 계정이 필요합니다. GitHub Pages는 로그인 없이 화면과 구성을 볼 수 있는 소개 페이지입니다. 이재석·김범희 공동 프로젝트. 소개 자료 갱신: **2026.10.17**.
 
 ![Medi Q 환자 건강지갑](docs/assets/portfolio-20261017/patient-wallet.png)
