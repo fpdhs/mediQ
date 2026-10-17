@@ -1,0 +1,9 @@
+# Separate B patient release credential; no A credential, DEK or new key identity.
+services:
+  portal:
+    environment:
+      CAPSTONE_PATIENT_SELF_VIEW_GATEWAY: '1'
+      CAPSTONE_PATIENT_IMAGE_ENCRYPTION_REQUIRED: '1'
+      CAPSTONE_B_PATIENT_KEY_RELEASE_TOKEN_FILE: /run/secrets/patient-b-service-secret
+    volumes:
+      - ${HIPASS_B_PORTAL_SECRET_DIR:?root-protected B-local directory required}/patient-b-service-secret:/run/secrets/patient-b-service-secret:ro

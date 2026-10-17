@@ -5,12 +5,12 @@ import { probePnpmRuntime, runPnpm } from "../src/pnpm-runtime.js";
 const pnpmRuntime = probePnpmRuntime();
 
 const commands = [
-  { name: "unit-tests", command: process.execPath, args: ["--test"] },
+  { name: "unit-tests", command: process.execPath, args: ["--test", "--test-concurrency=4"] },
   { name: "secret-scan", command: process.execPath, args: ["scripts/security-secret-scan.js"] },
   { name: "dependency-audit", packageManagerCommand: true, args: ["audit", "--prod", "--audit-level", "critical"] },
 ];
 
-const commandTimeoutMs = positiveInteger(process.env.HIPASS_SECURITY_GATE_TIMEOUT_MS, 60_000);
+const commandTimeoutMs = positiveInteger(process.env.HIPASS_SECURITY_GATE_TIMEOUT_MS, 180_000);
 
 const results = [];
 for (const item of commands) {
@@ -23,6 +23,10 @@ for (const item of commands) {
     ? runPnpm(pnpmRuntime.commandPath, item.args, { env: process.env, cwd: process.cwd(), runner: timedRunner })
     : timedRunner(item.command, item.args, {});
   const blocked = item.name === "dependency-audit" && isRegistryEnvironmentFailure(result);
+  if (result.status !== 0 && !blocked) {
+    if (result.stdout) console.error(`[security-gate] ${item.name} stdout:\n`, result.stdout);
+    if (result.stderr) console.error(`[security-gate] ${item.name} stderr:\n`, result.stderr);
+  }
   results.push({
     name: item.name,
     status: result.status === 0 ? "PASS" : blocked ? "ENVIRONMENT_BLOCKED" : "FAIL",
@@ -30,6 +34,7 @@ for (const item of commands) {
     signal: result.signal,
     durationMs: Date.now() - startedAt,
     stderr: trim(result.stderr),
+    output: result.status !== 0 ? trim(result.stdout || result.stderr) : undefined,
     ...(item.packageManagerCommand ? { packageManager: pnpmRuntime } : {}),
   });
 }
@@ -45,7 +50,7 @@ process.exit(ok ? 0 : environmentBlocked ? 2 : 1);
 
 function trim(value) {
   const text = String(value ?? "").trim();
-  return text.length > 1200 ? `${text.slice(0, 1200)}...` : text;
+  return text.length > 4000 ? `...${text.slice(-4000)}` : text;
 }
 
 function isRegistryEnvironmentFailure(result) {

@@ -1,0 +1,21 @@
+# Overlay for the existing B portal AFTER receiver network + encrypted storage
+# approval. Raw Orthanc remains unreachable from this network.
+services:
+  portal:
+    environment:
+      CAPSTONE_B_PACS_IMPORT_ENABLED: '1'
+      CAPSTONE_B_PACS_CA_FILE: /run/b-pacs/ca.crt
+      CAPSTONE_B_PACS_CLIENT_CERT_FILE: /run/b-pacs/b-pacs-client.crt
+      CAPSTONE_B_PACS_CLIENT_KEY_FILE: /run/b-pacs/b-pacs-client.key
+      CAPSTONE_B_PACS_MANIFEST_FILE: /run/b-pacs/manifest.json
+    volumes:
+      - ${HIPASS_B_PACS_SECRETS_DIR:?B root-protected directory required}/ca.crt:/run/b-pacs/ca.crt:ro
+      - ${HIPASS_B_PACS_SECRETS_DIR}/b-pacs-client.crt:/run/b-pacs/b-pacs-client.crt:ro
+      - ${HIPASS_B_PACS_SECRETS_DIR}/b-pacs-client.key:/run/b-pacs/b-pacs-client.key:ro
+      - ${HIPASS_B_PACS_SECRETS_DIR}/manifest.json:/run/b-pacs/manifest.json:ro
+    networks:
+      - b_pacs_receiver
+networks:
+  b_pacs_receiver:
+    external: true
+    name: highpass_b_pacs_receiver

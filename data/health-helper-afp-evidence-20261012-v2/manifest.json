@@ -1,0 +1,37 @@
+{
+  "status": "DRAFT / UNASSIGNED",
+  "medicalReview": "UNASSIGNED",
+  "clinicalUse": false,
+  "serviceDeployment": false,
+  "notesSha256": "sha256:3926f0a82b8ec49d970d5fcc267f4e1ce215723671980280df0ea445551a09a8",
+  "sources": [
+    {
+      "url": "https://medlineplus.gov/about/using/usingcontent/",
+      "file": "sources/692ef3b996a3cc4851308ebf0cea72e7edd5e993a83b05e88f8febd0c49112d8.html",
+      "sha256": "sha256:395448c1bd29d61919a77a0481aa4ae7775a22bd42fb921d3d5303c332befb85",
+      "fetchedAt": "2026-10-12T09:34:50.897Z",
+      "scope": "Provenance only; linked references/images not indexed"
+    },
+    {
+      "url": "https://medlineplus.gov/lab-tests/alpha-fetoprotein-afp-tumor-marker-test/",
+      "file": "sources/a275b3d75e691a25e2568d9539b42abec13c6f37bae13026ee8528d702f221c6.html",
+      "sha256": "sha256:c2345ee2f32648c658a4c54f6ba23eb8e4c1cfc404e927e46b1302705d2b6712",
+      "fetchedAt": "2026-10-12T09:34:51.084Z",
+      "scope": "Provenance only; linked references/images not indexed"
+    },
+    {
+      "url": "https://medlineplus.gov/lab-tests/how-to-understand-your-lab-results/",
+      "file": "sources/31a04a666cb72072d141e8f1db30cb2f3ae6251a93630b2c34a8df4a1805970b.html",
+      "sha256": "sha256:bbd32652d12df4060de7c4a5b81841a21414dd9dfaaaafc32125d1831c486ca9",
+      "fetchedAt": "2026-10-12T09:34:51.266Z",
+      "scope": "Provenance only; linked references/images not indexed"
+    }
+  ],
+  "sourceCode": "src/health-helper-afp-evidence.js",
+  "supportedIntents": [
+    "PURPOSE",
+    "LIMITS",
+    "PREPARATION",
+    "COMPARISON"
+  ]
+}

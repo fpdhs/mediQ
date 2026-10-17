@@ -1,0 +1,12 @@
+{
+  "mode": "built-in image_gen",
+  "purpose": "Fictional capstone A/B university hospital VM desktop wallpapers",
+  "prompts": {
+    "A": "Use case: photorealistic-natural. Asset type: Ubuntu virtual hospital desktop wallpaper, wide 16:9 landscape. Create a beautiful original fictional Korean university hospital campus, modern glass and white stone medical towers, landscaped entrance, clear daylight, calm blue architectural atmosphere. Professional architectural photograph. Desktop composition with unobtrusive left edge for Ubuntu dock and generous safe margins; hospital visible across lower two thirds. Prominent perfectly readable Korean title \"A대학병원\" in refined large white sans-serif on a subtle dark blue translucent area in upper middle, inset from every edge. Smaller exact text \"가상 병원 · 캡스톤 시연환경\" below title. No real hospital brands or logos, no patients, no faces, no additional text, no watermark. This is a fictional capstone simulation, not a real hospital.",
+    "B": "Use case: photorealistic-natural. Asset type: Ubuntu virtual hospital desktop wallpaper, wide 16:9 landscape. Create a beautiful original fictional Korean university hospital campus distinct from hospital A: modern curved glass medical building and white stone wings, landscaped entrance, calm teal architectural accents, bright soft daylight. Professional architectural photograph. Desktop composition with unobtrusive left edge for Ubuntu dock and generous safe margins; hospital visible across lower two thirds. Prominent perfectly readable Korean title \"B대학병원\" in refined large white sans-serif on a subtle dark teal translucent area in upper middle, inset from every edge. Smaller exact text \"가상 병원 · 캡스톤 시연환경\" below title. No real hospital brands or logos, no patients, no faces, no additional text, no watermark. This is a fictional capstone simulation, not a real hospital."
+  },
+  "files": {
+    "A": "hospital-a-20261009.png",
+    "B": "hospital-b-20261009.png"
+  }
+}

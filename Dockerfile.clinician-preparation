@@ -1,0 +1,5 @@
+# Overlay one clinician screen on the observed running B image, not the dirty source tree.
+ARG CAPSTONE_BASE_IMAGE
+FROM ${CAPSTONE_BASE_IMAGE}
+COPY artifacts/workstation/clinician-preparation-20261012T155609Z/index.html /app/public/index.html
+COPY public/ui/clinician-preparation.css /app/public/ui/clinician-preparation.css

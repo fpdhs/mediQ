@@ -1,0 +1,66 @@
+{
+  "packageId": "com.highpass.mediq.patient",
+  "host": "highpass-demo.japaneast.cloudapp.azure.com",
+  "name": "Medi Q (메디큐)",
+  "launcherName": "Medi Q",
+  "display": "standalone",
+  "themeColor": "#0284C7",
+  "themeColorDark": "#000000",
+  "navigationColor": "#000000",
+  "navigationColorDark": "#000000",
+  "navigationDividerColor": "#000000",
+  "navigationDividerColorDark": "#000000",
+  "backgroundColor": "#F8FAFC",
+  "enableNotifications": false,
+  "startUrl": "/mobile/",
+  "iconUrl": "https://highpass-demo.japaneast.cloudapp.azure.com/mobile/icon-512.png",
+  "maskableIconUrl": "https://highpass-demo.japaneast.cloudapp.azure.com/mobile/icon-512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "android-keystore/mediq-patient-upload.jks",
+    "alias": "mediqpatient"
+  },
+  "appVersionName": "1",
+  "appVersionCode": 1,
+  "shortcuts": [
+    {
+      "name": "1초 QR 공유",
+      "shortName": "QR 공유",
+      "url": "https://highpass-demo.japaneast.cloudapp.azure.com/mobile/#share",
+      "chosenIconUrl": "https://highpass-demo.japaneast.cloudapp.azure.com/mobile/icon-192.png"
+    },
+    {
+      "name": "의료영상 열람",
+      "shortName": "영상 열람",
+      "url": "https://highpass-demo.japaneast.cloudapp.azure.com/mobile/#imaging",
+      "chosenIconUrl": "https://highpass-demo.japaneast.cloudapp.azure.com/mobile/icon-192.png"
+    },
+    {
+      "name": "마이데이터 진료기록",
+      "shortName": "진료기록",
+      "url": "https://highpass-demo.japaneast.cloudapp.azure.com/mobile/#records",
+      "chosenIconUrl": "https://highpass-demo.japaneast.cloudapp.azure.com/mobile/icon-192.png"
+    }
+  ],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://highpass-demo.japaneast.cloudapp.azure.com/mobile/manifest.json",
+  "fallbackType": "customtabs",
+  "features": {},
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://highpass-demo.japaneast.cloudapp.azure.com/mobile/",
+  "minSdkVersion": 24,
+  "orientation": "portrait",
+  "fingerprints": [],
+  "additionalTrustedOrigins": [],
+  "retainedBundles": [],
+  "protocolHandlers": [],
+  "fileHandlers": [],
+  "launchHandlerClientMode": "",
+  "displayOverride": [],
+  "appVersion": "1"
+}

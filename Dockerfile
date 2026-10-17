@@ -1,10 +1,19 @@
+FROM node:22-alpine AS entra-client
+
+WORKDIR /app
+COPY package.json pnpm-lock.yaml ./
+RUN corepack enable && pnpm install --frozen-lockfile --ignore-scripts
+COPY scripts/build-entra-client.js ./scripts/
+COPY src/entra-browser-client-entry.js src/entra-redirect-entry.js ./src/
+RUN pnpm run build:entra-client
+
 FROM node:22-alpine AS deps
 
 WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
 RUN corepack enable && pnpm install --prod --frozen-lockfile
 
-FROM gcr.io/distroless/nodejs24-debian12:nonroot
+FROM gcr.io/distroless/nodejs24-debian13:nonroot@sha256:9eeb7f5887d0e239e78264b06f7f11d2e14be534050481803a9e4728fcdd278e
 
 WORKDIR /app
 ENV NODE_ENV=production
@@ -17,6 +26,7 @@ COPY scripts ./scripts
 COPY src ./src
 COPY test/fixtures/phr ./test/fixtures/phr
 COPY public ./public
+COPY --from=entra-client /app/public/vendor ./public/vendor
 COPY db ./db
 COPY config ./config
 COPY services/privacy-inference ./services/privacy-inference

@@ -1,0 +1,56 @@
+{
+  "status": "DRAFT / UNASSIGNED",
+  "medicalReview": "UNASSIGNED",
+  "clinicalUse": false,
+  "serviceDeployment": false,
+  "notesSha256": "sha256:60a9cf9bb4c03d9ee15f986cb5324ce0cd341ca4d2dc434532a0cfaf0f18587e",
+  "sources": [
+    {
+      "url": "https://medlineplus.gov/lab-tests/sonogram/",
+      "file": "sources/126bec1185510970b42e45a669cb182158af165e7d17d49a842bf7a74b4c12eb.html",
+      "sha256": "sha256:23ec380db581ff6bb22928f002f66374bb4db3a1d7a7a64ab657d0f91fc07279",
+      "fetchedAt": "2026-10-12T11:05:52.547Z",
+      "scope": "MedlinePlus public-domain Medical Test or use-policy page; snapshot for provenance and hash only; linked third-party material excluded"
+    },
+    {
+      "url": "https://medlineplus.gov/about/using/usingcontent/",
+      "file": "sources/692ef3b996a3cc4851308ebf0cea72e7edd5e993a83b05e88f8febd0c49112d8.html",
+      "sha256": "sha256:395448c1bd29d61919a77a0481aa4ae7775a22bd42fb921d3d5303c332befb85",
+      "fetchedAt": "2026-10-12T11:05:52.700Z",
+      "scope": "MedlinePlus public-domain Medical Test or use-policy page; snapshot for provenance and hash only; linked third-party material excluded"
+    },
+    {
+      "url": "https://www.fda.gov/radiation-emitting-products/initiative-reduce-unnecessary-radiation-exposure-medical-imaging/education-and-communication",
+      "file": "sources/a74a93e060c3423c1b4cc0128625eef73a5645c185a10d7b356cc5b062b22148.html",
+      "sha256": "sha256:00fc9d8fbd8b350b2107789ee447beb21c02aefbdb6abb605c378d67624b60c3",
+      "fetchedAt": "2026-10-12T11:05:53.058Z",
+      "scope": "FDA.gov public-domain page; snapshot for provenance and hash only; FDA attribution retained"
+    },
+    {
+      "url": "https://www.fda.gov/about-fda/about-website/website-policies",
+      "file": "sources/5b0fcb291c82fd762fa50bf21284e192f371ebf2ede86cccbee778f73d3e2deb.html",
+      "sha256": "sha256:eda9f8f4c5374f49fabbc0ab920678dabc40b4f3601001188e5c573d9b5dfc03",
+      "fetchedAt": "2026-10-12T11:05:53.308Z",
+      "scope": "FDA.gov public-domain page; snapshot for provenance and hash only; FDA attribution retained"
+    },
+    {
+      "url": "https://medlineplus.gov/ctscans.html",
+      "file": "sources/d3654245e58b409360c9523c6c40ce4c09625b92347ea69b6aded33cc8d0707d.html",
+      "sha256": "sha256:f0e22a9b9736921b15f7687877d198e7c601375a79980b2abb3683d1580f88a3",
+      "fetchedAt": "2026-10-12T11:05:53.477Z",
+      "scope": "MedlinePlus public-domain Medical Test or use-policy page; snapshot for provenance and hash only; linked third-party material excluded"
+    }
+  ],
+  "sourceCode": "src/health-helper-imaging-evidence.js",
+  "entryCount": 8,
+  "supportedModalities": [
+    "ULTRASOUND",
+    "CT"
+  ],
+  "supportedIntents": [
+    "PURPOSE",
+    "LIMITS",
+    "PREPARATION",
+    "COMPARISON"
+  ]
+}

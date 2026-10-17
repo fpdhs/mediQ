@@ -3,12 +3,37 @@ import { mkdtemp, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { randomBytes } from "node:crypto";
 import { JsonStore } from "../src/store.js";
 import { HipassService, ServiceValidationError } from "../src/services.js";
 
 const STUDY_001 = "1.2.410.100.1.20260620.001";
 const SERIES_001_1 = "1.2.410.100.1.20260620.001.1";
 const STUDY_002 = "1.2.410.100.1.20260518.002";
+
+test('patient ticket status is ownership-bound, minimal, audited and clock-effective', async () => {
+  const { dir, service, clock, store } = await createService();
+  try {
+    const { approval } = await issueTicket(service);
+    const id = approval.consentId, ticketId = approval.ticketId;
+    assert.equal(await service.viewPatientTicketStatus(id, ticketId, 'P-1002'), null);
+    assert.equal(await service.viewPatientTicketStatus('wrong-consent', ticketId, 'P-1001'), null);
+    const issued = await service.viewPatientTicketStatus(id, ticketId, 'P-1001');
+    assert.equal(issued.status, 'ISSUED');
+    assert.deepEqual(Object.keys(issued).sort(), ['consentId', 'expiresAt', 'status', 'ticketId']);
+    assert.ok(store.get('auditLogs').some(log => log.action === 'TICKET_STATUS_VIEWED' && log.ticketId === ticketId));
+    const stored = store.get('transferTickets').find(row => row.ticketId === ticketId);
+    stored.status = 'USED';
+    assert.equal((await service.viewPatientTicketStatus(id, ticketId, 'P-1001')).status, 'USED');
+    clock.advance(11);
+    assert.equal((await service.viewPatientTicketStatus(id, ticketId, 'P-1001')).status, 'EXPIRED');
+    assert.equal(stored.status, 'USED', 'GET does not mutate stored lifecycle');
+    await service.revokeConsent(id, 'P-1001');
+    assert.equal((await service.viewPatientTicketStatus(id, ticketId, 'P-1001')).status, 'REVOKED');
+    stored.status = 'UNKNOWN';
+    await assert.rejects(service.viewPatientTicketStatus(id, ticketId, 'P-1001'), /unavailable/);
+  } finally { await rm(dir, { recursive: true, force: true }); }
+});
 
 function clockAt(startMs) {
   const state = { now: startMs };
@@ -18,6 +43,72 @@ function clockAt(startMs) {
   };
   return clock;
 }
+
+test('explicit replacement preserves consent, rejects old nonce and records replacement audit',async()=>{
+ const {dir,service,store}=await createService();
+ try{
+  const {approval,nonce}=await issueTicket(service);const id=approval.consentId;
+  const before=JSON.stringify(service.getConsent(id));
+  await assert.rejects(service.issueConsentHandoffTicket(id,'P-1002',{}, {replaceExisting:true}),e=>e.code==='PATIENT_IDENTITY_MISMATCH');
+  const issued=await service.issueConsentHandoffTicket(id,'P-1001',{}, {replaceExisting:true});
+  assert.equal(JSON.stringify(service.getConsent(id)),before);
+  assert.equal((await service.redeemTransferTicket(nonce,redeemInput())).decision,'DENIED');
+  assert.equal(store.get('transferTickets').filter(t=>t.consentId===id&&t.status==='ISSUED').length,1);
+  assert.ok(store.get('auditLogs').some(l=>l.action==='TICKET_REVOKED'&&l.ticketId===approval.ticketId));
+  assert.equal((await service.redeemTransferTicket(issued.qr.payload.split('/').at(-1),redeemInput())).decision,'ALLOWED');
+  await service.revokeConsent(id,'P-1001');
+  await assert.rejects(service.issueConsentHandoffTicket(id,'P-1001',{}, {replaceExisting:true}),e=>e.code==='CONSENT_REVOKED');
+ }finally{await rm(dir,{recursive:true,force:true});}
+});
+
+test('ticket redemption and status agree at the exact expiry boundary without issuing a token', async () => {
+  for (const offset of [-1, 0, 1]) {
+    let now = Date.parse('2026-06-25T10:00:00.000Z');
+    const { dir, service, store } = await createService({ clock: () => new Date(now).toISOString() });
+    try {
+      const { approval, nonce } = await issueTicket(service);
+      now = Date.parse(approval.ticket.expiresAt) + offset;
+      const status = await service.viewPatientTicketStatus(approval.consentId, approval.ticketId, 'P-1001');
+      const before = store.get('dicomAccessTokenLogs').length;
+      const result = await service.redeemTransferTicket(nonce, redeemInput());
+      if (offset < 0) {
+        assert.equal(status.status, 'ISSUED');
+        assert.equal(result.decision, 'ALLOWED');
+      } else {
+        assert.equal(status.status, 'EXPIRED');
+        assert.equal(result.decision, 'DENIED');
+        assert.equal(result.reasonCode, 'TICKET_EXPIRED');
+        assert.equal(result.accessToken, undefined);
+        assert.equal(store.get('dicomAccessTokenLogs').length, before);
+        const ticket = store.get('transferTickets').find(row => row.ticketId === approval.ticketId);
+        assert.equal(ticket.status, 'EXPIRED');
+        assert.equal(ticket.usedAt, null);
+        assert.ok(store.get('auditLogs').some(row => row.ticketId === approval.ticketId && row.action === 'TICKET_DENIED' && row.reason === 'TICKET_EXPIRED'));
+      }
+    } finally { await rm(dir, { recursive: true, force: true }); }
+  }
+});
+
+test('expiry reached during proof verification cannot consume a ticket or issue a token', async () => {
+  let now = Date.parse('2026-06-25T10:00:00.000Z');
+  const { dir, service, store } = await createService({ clock: () => new Date(now).toISOString() });
+  try {
+    const { approval, nonce } = await issueTicket(service);
+    const deadline = Date.parse(approval.ticket.expiresAt);
+    now = deadline - 1;
+    service.verifyIssuanceProof = async () => { now = deadline; return { valid: true }; };
+    const before = store.get('dicomAccessTokenLogs').length;
+    const result = await service.redeemTransferTicket(nonce, redeemInput(), { dpopProof: 'test-proof-marker' });
+    assert.equal(result.decision, 'DENIED');
+    assert.equal(result.reasonCode, 'TICKET_EXPIRED');
+    assert.equal(result.accessToken, undefined);
+    assert.equal(store.get('dicomAccessTokenLogs').length, before);
+    const ticket = store.get('transferTickets').find(row => row.ticketId === approval.ticketId);
+    assert.equal(ticket.usedAt, null);
+    assert.notEqual(ticket.status, 'USED');
+    assert.ok(store.get('auditLogs').some(row => row.ticketId === approval.ticketId && row.action === 'TICKET_DENIED' && row.reason === 'TICKET_EXPIRED'));
+  } finally { await rm(dir, { recursive: true, force: true }); }
+});
 
 async function createService(options = {}) {
   const dir = await mkdtemp(path.join(os.tmpdir(), "hipass-ticket-"));
@@ -413,6 +504,88 @@ test("Viewer handoff derives scope from the ticket, returns context, and rejects
       hospitalId: "HOSP-B",
     });
     assert.equal(missing.reasonCode, "ACCESS_DENIED_NO_TICKET");
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("executePacsImport requires active patient consent and records SHA-256 integrity and audit", async () => {
+  const { dir, service, store } = await createService({ hospitalArchiveKek: randomBytes(32), allowSyntheticArchive: true });
+  try {
+    const consent = await service.createConsent({
+      patientId: "P-1001",
+      sourceHospitalId: "HOSP-A",
+      targetHospitalId: "HOSP-B",
+      purpose: "TREATMENT",
+      permission: "DOWNLOAD_ALLOWED",
+      validUntil: "2026-06-26T10:00:00.000Z",
+      scopes: [{ studyInstanceUid: STUDY_001 }],
+    });
+
+    const result = await service.executePacsImport({
+      consentId: consent.consentId,
+      doctorId: "DOC-B-01",
+      targetHospitalId: "HOSP-B",
+      studyInstanceUid: STUDY_001,
+      destDir: path.join(dir, "archive"),
+    });
+
+    assert.equal(result.status, "COMPLETED");
+    assert.equal(result.studyInstanceUid, STUDY_001);
+    assert.equal(result.sourceHospitalId, "HOSP-A");
+    assert.equal(result.targetHospitalId, "HOSP-B");
+    assert.equal(result.destinationVerification, false);
+    assert.equal(result.transferMethod, "LOCAL_ENCRYPTED_ARCHIVE_SIMULATOR");
+    assert.match(result.sha256, /^[a-f0-9]{64}$/);
+    assert.ok(result.auditSessionId);
+
+    const auditLog = store.get("auditLogs").find((log) => log.auditSessionId === result.auditSessionId);
+    assert.ok(auditLog);
+    assert.equal(auditLog.action, "IMAGE_TRANSFER");
+    assert.equal(auditLog.result, "SUCCESS");
+
+    // Fail closed: VIEW_ONLY consent blocks PACS Import (SEC-DL-01)
+    const viewOnlyConsent = await service.createConsent({
+      patientId: "P-1001",
+      sourceHospitalId: "HOSP-A",
+      targetHospitalId: "HOSP-B",
+      purpose: "TREATMENT",
+      permission: "VIEW_ONLY",
+      validUntil: "2026-06-26T10:00:00.000Z",
+      scopes: [{ studyInstanceUid: STUDY_001 }],
+    });
+    await assert.rejects(
+      async () => service.executePacsImport({
+        consentId: viewOnlyConsent.consentId,
+        doctorId: "DOC-B-01",
+        targetHospitalId: "HOSP-B",
+        studyInstanceUid: STUDY_001,
+      }),
+      (err) => err instanceof ServiceValidationError && err.code === "PERMISSION_DENIED_VIEW_ONLY"
+    );
+
+    // Fail closed when consent is revoked
+    await service.revokeConsent(consent.consentId, "P-1001");
+    await assert.rejects(
+      async () => service.executePacsImport({
+        consentId: consent.consentId,
+        doctorId: "DOC-B-01",
+        targetHospitalId: "HOSP-B",
+        studyInstanceUid: STUDY_001,
+      }),
+      (err) => err instanceof ServiceValidationError && err.code === "CONSENT_REQUIRED"
+    );
+
+    // Fail closed for unknown study
+    await assert.rejects(
+      async () => service.executePacsImport({
+        consentId: consent.consentId,
+        doctorId: "DOC-B-01",
+        targetHospitalId: "HOSP-B",
+        studyInstanceUid: "unknown-study-uid",
+      }),
+      (err) => err instanceof ServiceValidationError && err.code === "STUDY_NOT_FOUND"
+    );
   } finally {
     await rm(dir, { recursive: true, force: true });
   }

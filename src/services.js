@@ -1,8 +1,13 @@
-import { createHash, createHmac, randomBytes, timingSafeEqual } from "node:crypto";
+import { createHash, createHmac, createPublicKey, randomBytes, timingSafeEqual, verify } from "node:crypto";
 import { createKeyProvider } from "./key-provider.js";
+import {validateHealthRecordSelection,healthRecordScope} from './shared-health-records.js';
+import { orderStoredAuditChain } from "./audit-chain-order.js";
+import { MemoryDPoPReplayStore } from "./dpop-replay-store.js";
 import { OrthancClient } from "./orthanc-client.js";
 import { LocalDevelopmentPseudonymKeyProvider } from "./pseudonym-protection.js";
 import { buildRetentionPolicies, executeRetentionPurge, planRetentionPurge } from "./retention.js";
+import { importStudyToHospitalBPacs, listHospitalBArchivedStudies } from "./pacs-import-engine.js";
+import { archiveRetentionDecision, purgeExpiredArchive } from './archive-retention.js';
 import {
   AccessDecision,
   AccessDenyReason,
@@ -13,11 +18,14 @@ import {
   ConsentStatus,
   DatePolicy,
   Permission,
+  QuarantineScope,
+  QuarantineStatus,
   ReleaseDecision,
   ResearchExportStatus,
   ResearchRiskLevel,
   RequestedAction,
   Role,
+  SecurityDegradedMode,
   TransferMode,
   TransferRequestStatus,
   TransferTicketStatus,
@@ -31,12 +39,12 @@ import {
 } from "./domain.js";
 
 export class ServiceValidationError extends Error {
-  constructor(code, message, details = []) {
+  constructor(code, message, details = [], statusCode = 400) {
     super(message);
     this.name = "ServiceValidationError";
     this.code = code;
     this.details = details;
-    this.statusCode = 400;
+    this.statusCode = statusCode;
   }
 }
 
@@ -54,7 +62,14 @@ export class HipassService {
     this.anomalyRules = normalizeAnomalyRules(options.anomalyRules);
     this.deIdentificationPolicy = normalizeDeIdentificationPolicy(options.deIdentificationPolicy);
     this.orthanc = options.orthancClient ?? new OrthancClient();
+    this.hospitalArchiveKek = options.hospitalArchiveKek ?? null;
+    this.allowSyntheticArchive = options.allowSyntheticArchive === true;
+    this.hospitalArchiveRoot = options.hospitalArchiveRoot ?? process.env.HIPASS_ARCHIVE_RETENTION_ROOT;
+    this.archiveRetentionBusy = false;
     this.pseudonymKeyProvider = options.pseudonymKeyProvider ?? new LocalDevelopmentPseudonymKeyProvider(this.tokenSecret, this.dicomTokenKeyProvider);
+    this.dpopReplayStore = options.dpopReplayStore ?? store.dpopReplayStore ?? new MemoryDPoPReplayStore();
+    if (process.env.NODE_ENV === "production" && process.env.HIPASS_DPOP_REQUIRED === "1" && !this.dpopReplayStore.persistent) throw new Error("Strict production DPoP requires persistent replay storage");
+    this.dpopIssuanceBindings = new WeakMap();
     this.normalizeAuditLogChain();
   }
 
@@ -63,6 +78,53 @@ export class HipassService {
       .get("imagingStudies")
       .filter((study) => !patientId || study.patientId === patientId)
       .map(({ series, ...metadata }) => (options.includeSeries ? { ...metadata, series } : metadata));
+  }
+
+  async recordPatientSelfView(patientId, studyInstanceUid, requestMeta = {}) {
+    const study = this.store
+      .get("imagingStudies")
+      .find((s) => s.studyInstanceUid === studyInstanceUid && (!patientId || s.patientId === patientId));
+    if (!study) {
+      throw new ServiceValidationError("STUDY_NOT_FOUND", "Imaging study not found for this patient");
+    }
+
+    const auditSessionId = makeId("audit-session");
+    await this.writeAudit({
+      auditSessionId,
+      actorType: ActorType.PATIENT,
+      actorId: patientId,
+      patientId,
+      sourceHospitalId: study.sourceHospitalId,
+      targetHospitalId: null,
+      action: AuditAction.STUDY_VIEW,
+      studyInstanceUid,
+      result: "SUCCESS",
+      reason: "PATIENT_SELF_VIEW",
+      ipAddress: requestMeta.ipAddress,
+      userAgent: requestMeta.userAgent,
+      ja3Fingerprint: requestMeta.ja3Fingerprint,
+    });
+    await this.store.save();
+
+    return {
+      status: "ALLOWED",
+      auditSessionId,
+      study: {
+        studyInstanceUid: study.studyInstanceUid,
+        description: study.description,
+        modality: study.modality,
+        studyDate: study.studyDate,
+        sourceHospitalId: study.sourceHospitalId,
+        patientId: study.patientId,
+        seriesCount: study.series?.length || 1,
+        totalSlices: study.modality === "CR" ? 1 : (study.series?.[0]?.instances?.length || 50),
+      },
+      viewerPolicy: {
+        permission: Permission.VIEW_ONLY,
+        watermark: `환자 본인 열람 · ${patientId} · VIEW_ONLY · 진단 판정은 담당의사와 상의하세요`,
+        timestamp: this.clock(),
+      },
+    };
   }
 
   listRetentionPolicies() {
@@ -310,6 +372,8 @@ export class HipassService {
   }
 
   async createConsent(input) {
+    const healthScopeError=validateHealthRecordSelection(input);
+    if(healthScopeError){await this.writeAudit({actorType:'PATIENT',actorId:input.patientId??'UNKNOWN',action:'CONSENT_CREATE_FAILED',result:'FAIL',reason:healthScopeError});await this.store.save();throw new ServiceValidationError(healthScopeError,'Health record scope invalid');}
     const validation = await this.validateConsentInput(input);
     if (!validation.ok) {
       await this.writeAudit({
@@ -341,6 +405,7 @@ export class HipassService {
       createdAt: now,
       updatedAt: now,
       revokedAt: null,
+      healthRecordScope: healthRecordScope(input.healthRecordIds),
     };
 
     const scopes = validation.scopes.map((scope) => ({
@@ -354,6 +419,7 @@ export class HipassService {
 
     this.store.get("consents").push(consent);
     this.store.get("consentScopes").push(...scopes);
+    try {
     await this.writeAudit({
       actorType: ActorType.PATIENT,
       actorId: input.patientId,
@@ -367,6 +433,16 @@ export class HipassService {
       result: "SUCCESS",
     });
     await this.store.save();
+    } catch (error) {
+      // Never let an unconfirmed creation become an in-memory health grant.
+      // Remove only this request's objects, preserving concurrent user changes.
+      const pendingConsents=this.store.get('consents');
+      const index=pendingConsents.findIndex(row=>row.consentId===consentId);
+      if(index>=0)pendingConsents.splice(index,1);
+      const pendingScopes=this.store.get('consentScopes');
+      for(let i=pendingScopes.length-1;i>=0;i--)if(pendingScopes[i].consentId===consentId)pendingScopes.splice(i,1);
+      throw error;
+    }
     return this.decorateConsent({ ...consent, scopes });
   }
 
@@ -466,6 +542,8 @@ export class HipassService {
       result: "SUCCESS",
     });
     await this.store.save();
+    // Revocation is durable first. Cleanup failure must never undo access denial.
+    await this.reconcileHospitalArchiveRetention().catch(() => {});
     return this.getConsent(consentId);
   }
 
@@ -634,7 +712,25 @@ export class HipassService {
     };
   }
 
-  async issueConsentHandoffTicket(consentId, patientId, requestMeta = {}) {
+  async viewPatientTicketStatus(consentId, ticketId, patientId, requestMeta = {}) {
+    const consent = this.getConsent(consentId);
+    const ticket = this.store.get("transferTickets").find(item => item.ticketId === ticketId && item.consentId === consentId && item.patientId === patientId);
+    // Missing, mismatched and non-owned identifiers are indistinguishable.
+    if (!patientId || !consent || consent.patientId !== patientId || !ticket) return null;
+    if (!Object.values(TransferTicketStatus).includes(ticket.status)) throw new ServiceValidationError("TICKET_STATUS_INVALID", "Ticket status unavailable", [], 409);
+    const now = Date.parse(this.clock());
+    const expires = Date.parse(ticket.expiresAt);
+    if (!Number.isFinite(now) || !Number.isFinite(expires)) throw new ServiceValidationError("TICKET_STATUS_INVALID", "Ticket status unavailable", [], 409);
+    const status = consent.effectiveStatus === ConsentStatus.REVOKED ? TransferTicketStatus.REVOKED
+      : consent.effectiveStatus !== ConsentStatus.ACTIVE || now >= expires ? TransferTicketStatus.EXPIRED : ticket.status;
+    await this.writeAudit({ actorType: ActorType.PATIENT, actorId: patientId, patientId,
+      consentId, ticketId, action: AuditAction.TICKET_STATUS_VIEWED, result: "SUCCESS",
+      ipAddress: requestMeta.ipAddress, userAgent: requestMeta.userAgent });
+    await this.store.save();
+    return { consentId, ticketId, status, expiresAt: ticket.expiresAt };
+  }
+
+  async issueConsentHandoffTicket(consentId, patientId, requestMeta = {}, {replaceExisting=false} = {}) {
     const consent = this.getConsent(consentId);
     if (!consent) return null;
     if (!patientId || consent.patientId !== patientId) {
@@ -652,7 +748,7 @@ export class HipassService {
     const existing = this.store.get("transferTickets").find((ticket) => (
       ticket.consentId === consentId && ticket.status === TransferTicketStatus.ISSUED
     ));
-    if (existing) {
+    if (existing && !replaceExisting) {
       throw new ServiceValidationError("HANDOFF_TICKET_ALREADY_ISSUED", "An active handoff ticket already exists for this consent");
     }
 
@@ -687,7 +783,11 @@ export class HipassService {
       redeemedDoctorId: null,
       redeemedHospitalId: null,
     };
+    // No await between invalidating old capabilities and installing the new one.
+    const replaced = replaceExisting ? this.store.get("transferTickets").filter(t=>t.consentId===consentId&&t.status===TransferTicketStatus.ISSUED) : [];
+    for(const old of replaced){old.status=TransferTicketStatus.REVOKED;old.revokedAt=now;}
     this.store.get("transferTickets").push(ticket);
+    for(const old of replaced)await this.writeAudit({actorType:ActorType.PATIENT,actorId:patientId,patientId,consentId,ticketId:old.ticketId,auditSessionId:old.auditSessionId,sourceHospitalId:consent.sourceHospitalId,targetHospitalId:consent.targetHospitalId,action:AuditAction.TICKET_REVOKED,result:'SUCCESS',reason:'TICKET_REPLACED',ipAddress:requestMeta.ipAddress,userAgent:requestMeta.userAgent});
     await this.writeAudit({
       auditSessionId: ticket.auditSessionId,
       actorType: ActorType.PATIENT,
@@ -747,7 +847,11 @@ export class HipassService {
     const redeemAuditSessionId = makeId("audit-session");
     const ticket = findTicketByNonce(this.store.get("transferTickets"), nonce);
 
-    const denied = async (reasonCode) => {
+    const denied = async (reasonCode, statusCode = 403) => {
+      if (statusCode === 503) {
+        const auditStatus = await this.recordProofStoreFailure({ actorType: ActorType.DOCTOR, actorId: input?.doctorId ?? "UNKNOWN", ipAddress: requestMeta.ipAddress }, reasonCode);
+        return { decision: AccessDecision.DENIED, reasonCode, statusCode, auditStatus };
+      }
       await this.writeAudit({
         auditSessionId: ticket?.auditSessionId ?? redeemAuditSessionId,
         actorType: ActorType.DOCTOR,
@@ -773,6 +877,10 @@ export class HipassService {
     if (!nonce || typeof nonce !== "string" || requiredFields.some((field) => !input?.[field])) {
       return denied(nonce ? AccessDenyReason.INVALID_REQUEST : "ACCESS_DENIED_NO_TICKET");
     }
+    const quarantineCheck = this.isActorQuarantined(input.doctorId, requestMeta.ipAddress, requestMeta.userAgent, requestMeta.ja3Fingerprint);
+    if (quarantineCheck.quarantined) {
+      return denied(AccessDenyReason.ACTOR_QUARANTINED);
+    }
     if (!Object.values(RequestedAction).includes(input.requestedAction) || !Object.values(ConsentPurpose).includes(normalizePurpose(input.purpose))) {
       return denied(AccessDenyReason.INVALID_REQUEST);
     }
@@ -788,7 +896,7 @@ export class HipassService {
     if (ticket.status !== TransferTicketStatus.ISSUED) {
       return denied("TICKET_INVALID");
     }
-    if (new Date(ticket.expiresAt).getTime() < new Date(this.clock()).getTime()) {
+    if (new Date(ticket.expiresAt).getTime() <= new Date(this.clock()).getTime()) {
       ticket.status = TransferTicketStatus.EXPIRED;
       return denied("TICKET_EXPIRED");
     }
@@ -812,6 +920,16 @@ export class HipassService {
       return denied(AccessDenyReason.DOWNLOAD_NOT_ALLOWED);
     }
 
+    // Failed proof must not consume a patient's one-time handoff. The verified
+    // binding is passed internally once, never accepted from request JSON.
+    if (requestMeta.dpopProof || process.env.HIPASS_DPOP_REQUIRED === "1") {
+      const proof = await this.verifyIssuanceProof(requestMeta);
+      if (!proof.valid) return denied(proof.reason, proof.statusCode);
+      // Awaiting proof verification must not create a second redemption window.
+      if (ticket.status !== TransferTicketStatus.ISSUED) return denied(ticket.status === TransferTicketStatus.USED ? "TICKET_ALREADY_USED" : "TICKET_INVALID");
+      if (new Date(ticket.expiresAt).getTime() <= new Date(this.clock()).getTime()) return denied("TICKET_EXPIRED");
+      this.dpopIssuanceBindings.set(requestMeta, proof);
+    }
     ticket.status = TransferTicketStatus.USED;
     ticket.usedAt = this.clock();
     ticket.redeemedDoctorId = input.doctorId;
@@ -887,6 +1005,10 @@ export class HipassService {
   }
 
   checkAccess(input) {
+    const quarantineCheck = this.isActorQuarantined(input.doctorId || input.actorId, input.ipAddress, input.userAgent, input.ja3Fingerprint);
+    if (quarantineCheck.quarantined) {
+      return { allowed: false, reason: AccessDenyReason.ACTOR_QUARANTINED };
+    }
     const now = this.clock();
     const consent = this.findMatchingConsent(input);
     if (!consent) return { allowed: false, reason: "ACCESS_DENIED_NO_CONSENT" };
@@ -922,6 +1044,7 @@ export class HipassService {
         reason: reasonCode,
         ipAddress: requestMeta.ipAddress,
         userAgent: requestMeta.userAgent,
+        ja3Fingerprint: requestMeta.ja3Fingerprint,
       });
       await this.store.save();
       return { decision: AccessDecision.DENIED, reasonCode, auditSessionId };
@@ -930,6 +1053,11 @@ export class HipassService {
     const requiredFields = ["consentId", "doctorId", "requestingHospitalId", "studyInstanceUid", "purpose", "requestedAction"];
     if (requiredFields.some((field) => input[field] === undefined || input[field] === null || input[field] === "")) {
       return denied(AccessDenyReason.INVALID_REQUEST);
+    }
+
+    const quarantineCheck = this.isActorQuarantined(input.doctorId, requestMeta.ipAddress, requestMeta.userAgent, requestMeta.ja3Fingerprint);
+    if (quarantineCheck.quarantined) {
+      return denied(AccessDenyReason.ACTOR_QUARANTINED);
     }
 
     const requestedAction = input.requestedAction;
@@ -1033,6 +1161,21 @@ export class HipassService {
   }
 
   async requestDicomAccessToken(input, requestMeta = {}) {
+    let proofBinding = null;
+    if (requestMeta.dpopProof || process.env.HIPASS_DPOP_REQUIRED === "1") {
+      const proof = this.dpopIssuanceBindings.get(requestMeta) ?? await this.verifyIssuanceProof(requestMeta);
+      this.dpopIssuanceBindings.delete(requestMeta);
+      if (!proof.valid) {
+        if (proof.statusCode === 503) {
+          const auditStatus = await this.recordProofStoreFailure({ actorType: ActorType.DOCTOR, actorId: input.doctorId ?? "UNKNOWN", ipAddress: requestMeta.ipAddress }, proof.reason);
+          return { decision: AccessDecision.DENIED, reasonCode: proof.reason, statusCode: 503, auditStatus };
+        }
+        await this.writeAudit({ actorType: ActorType.DOCTOR, actorId: input.doctorId ?? "UNKNOWN", action: AuditAction.TOKEN_DENIED, result: "FAIL", reason: proof.reason, ipAddress: requestMeta.ipAddress });
+        await this.store.save();
+        return { decision: AccessDecision.DENIED, reasonCode: proof.reason };
+      }
+      proofBinding = { jkt: proof.publicKeyThumbprint };
+    }
     const policy = await this.evaluateDicomAccessRequest(input, requestMeta);
     if (policy.decision !== AccessDecision.ALLOWED) {
       await this.writeAudit({
@@ -1074,6 +1217,7 @@ export class HipassService {
       expiresAt,
       auditSessionId: policy.auditSessionId,
     };
+    if (proofBinding) claims.cnf = proofBinding;
     const accessToken = this.signAccessToken(claims);
     this.store.get("dicomAccessTokenLogs").push({
       tokenId,
@@ -1114,6 +1258,7 @@ export class HipassService {
     return {
       decision: AccessDecision.ALLOWED,
       accessToken,
+      tokenType: proofBinding ? "DPoP" : "Bearer",
       expiresAt,
       allowedStudyUid: input.studyInstanceUid,
       allowedSeriesUids,
@@ -1123,7 +1268,11 @@ export class HipassService {
   }
 
   async verifyDicomAccessToken(rawToken, input = {}, requestMeta = {}) {
-    const invalid = async (reason, auditSessionId = makeId("audit-session"), claims = {}) => {
+    const invalid = async (reason, auditSessionId = makeId("audit-session"), claims = {}, statusCode = 403) => {
+      if (statusCode === 503) {
+        const auditStatus = await this.recordProofStoreFailure({ auditSessionId, actorType: ActorType.GATEWAY, actorId: "gateway", consentId: claims.consentId, ipAddress: requestMeta.ipAddress }, reason);
+        return { active: false, reason, auditSessionId, statusCode, auditStatus };
+      }
       await this.writeAudit({
         auditSessionId,
         actorType: ActorType.GATEWAY,
@@ -1146,6 +1295,10 @@ export class HipassService {
     if (!parsed.ok) return invalid("TOKEN_INVALID");
     const claims = parsed.claims;
     const auditSessionId = claims.auditSessionId ?? makeId("audit-session");
+    const quarantineCheck = this.isActorQuarantined(claims.doctorId, requestMeta.ipAddress, requestMeta.userAgent, requestMeta.ja3Fingerprint);
+    if (quarantineCheck.quarantined) {
+      return invalid(AccessDenyReason.ACTOR_QUARANTINED, auditSessionId, claims);
+    }
     const tokenLog = this.store.get("dicomAccessTokenLogs").find((token) => token.tokenId === claims.jti);
     if (!tokenLog || !safeEqual(tokenLog.tokenHash ?? "", digestToken(rawToken))) {
       return invalid("TOKEN_INVALID", auditSessionId, claims);
@@ -1183,6 +1336,17 @@ export class HipassService {
     const consent = this.store.get("consents").find((item) => item.consentId === claims.consentId);
     if (!consent || this.effectiveConsentStatus(consent) !== ConsentStatus.ACTIVE) {
       return invalid("TOKEN_CONSENT_INACTIVE", auditSessionId, claims);
+    }
+    if (!claims.cnf && requestMeta.authorizationScheme?.toLowerCase() === "dpop") return invalid("DPOP_BOUND_TOKEN_REQUIRED", auditSessionId, claims);
+    if (claims.cnf || process.env.HIPASS_DPOP_REQUIRED === "1") {
+      if (!claims.cnf?.jkt) return invalid("DPOP_BOUND_TOKEN_REQUIRED", auditSessionId, claims);
+      if (!requestMeta.ingressTrusted) return invalid("TRUSTED_INGRESS_REQUIRED", auditSessionId, claims);
+      if (requestMeta.authorizationScheme?.toLowerCase() !== "dpop") return invalid("DPOP_AUTH_SCHEME_REQUIRED", auditSessionId, claims);
+      const proof = await this.verifyDPoPProof(requestMeta.dpopProof, {
+        method: requestMeta.method, url: requestMeta.externalUrl, expectedPublicKeyThumbprint: claims.cnf.jkt,
+        accessToken: rawToken, requireAbsoluteUrl: true, requestMeta,
+      });
+      if (!proof.valid) return invalid(proof.reason, auditSessionId, claims, proof.statusCode);
     }
     return { active: true, claims };
   }
@@ -1244,6 +1408,10 @@ export class HipassService {
     const token = this.store.get("dicomAccessTokenLogs").find((item) => safeEqual(item.tokenHash ?? "", presentedHash));
     if (!token) return { active: false, reason: "TOKEN_NOT_FOUND" };
     if (token.status !== "ACTIVE") return { active: false, reason: `TOKEN_${token.status}` };
+    const quarantineCheck = this.isActorQuarantined(token.doctorId);
+    if (quarantineCheck.quarantined) {
+      return { active: false, reason: AccessDenyReason.ACTOR_QUARANTINED };
+    }
     if (new Date(token.expiresAt).getTime() < new Date(this.clock()).getTime()) {
       token.status = "EXPIRED";
       return { active: false, reason: "TOKEN_EXPIRED" };
@@ -1298,13 +1466,137 @@ export class HipassService {
     }
   }
 
+  async executePacsImport(input, requestMeta = {}) {
+    const doctorId = input.doctorId || "DOC-B-01";
+    this.assertActorNotQuarantined(doctorId, requestMeta.ipAddress, requestMeta.userAgent, requestMeta.ja3Fingerprint);
+
+    const study = this.store.get("imagingStudies").find((item) => item.studyInstanceUid === input.studyInstanceUid);
+    if (!study) {
+      throw new ServiceValidationError("STUDY_NOT_FOUND", "Study not found for PACS import");
+    }
+
+    const targetHospitalId = input.targetHospitalId || input.requestingHospitalId || "HOSP-B";
+    let consent = null;
+    if (input.consentId) {
+      consent = this.store.get("consents").find((item) => item.consentId === input.consentId);
+    } else {
+      consent = this.store.get("consents").find((item) => (
+        item.patientId === study.patientId &&
+        item.targetHospitalId === targetHospitalId &&
+        this.effectiveConsentStatus(item) === ConsentStatus.ACTIVE
+      ));
+    }
+
+    if (!consent || this.effectiveConsentStatus(consent) !== ConsentStatus.ACTIVE) {
+      throw new ServiceValidationError("CONSENT_REQUIRED", "Active patient consent is required for PACS Import");
+    }
+
+    if (consent.patientId !== study.patientId || consent.targetHospitalId !== targetHospitalId) {
+      throw new ServiceValidationError("CONSENT_MISMATCH", "Consent does not match patient or destination hospital");
+    }
+
+    if (!this.isScopeAllowed(consent.consentId, study.studyInstanceUid)) {
+      throw new ServiceValidationError("SCOPE_MISMATCH", "Study is outside consent scope");
+    }
+
+    if (consent.permission !== Permission.DOWNLOAD_ALLOWED) {
+      throw new ServiceValidationError("PERMISSION_DENIED_VIEW_ONLY", "PACS Import requires DOWNLOAD_ALLOWED permission; VIEW_ONLY consents cannot be imported into remote PACS");
+    }
+
+    // Local encrypted archive simulator; no destination PACS registration claim.
+    let importReceipt;
+    try {
+      importReceipt = await importStudyToHospitalBPacs({
+        orthancClient: this.orthanc,
+        studyInstanceUid: study.studyInstanceUid,
+        studyData: study,
+        patientId: study.patientId,
+        targetHospitalId,
+        kek: this.hospitalArchiveKek,
+        allowSynthetic: this.allowSyntheticArchive,
+        consent: { ...consent },
+        clock: this.clock,
+        ...(this.hospitalArchiveRoot ? { baseDestDir:this.hospitalArchiveRoot } : {}),
+        ...(input.destDir || input.baseDestDir ? { baseDestDir: input.destDir || input.baseDestDir } : {}),
+      });
+    } catch (err) {
+      await this.writeAudit({
+        auditSessionId: makeId("audit-session"), actorType: ActorType.DOCTOR,
+        actorId: input.doctorId, patientId: study.patientId, consentId: consent.consentId,
+        sourceHospitalId: study.sourceHospitalId, targetHospitalId,
+        action: "IMAGE_TRANSFER", studyInstanceUid: study.studyInstanceUid,
+        result: "FAIL", reason: "PACS_IMPORT_FAILED",
+        ipAddress: requestMeta.ipAddress, userAgent: requestMeta.userAgent,
+      });
+      throw new ServiceValidationError("PACS_IMPORT_FAILED", "Hospital archive operation failed", [], 503);
+    }
+
+    const auditSessionId = makeId("audit-session");
+
+    await this.writeAudit({
+      auditSessionId,
+      actorType: ActorType.DOCTOR,
+      actorId: input.doctorId || "DOC-B-01",
+      patientId: study.patientId,
+      consentId: consent.consentId,
+      sourceHospitalId: study.sourceHospitalId,
+      targetHospitalId,
+      action: "IMAGE_TRANSFER",
+      studyInstanceUid: study.studyInstanceUid,
+      result: "SUCCESS",
+      ipAddress: requestMeta.ipAddress,
+      userAgent: requestMeta.userAgent,
+    });
+
+    this.writeTransferUsage(targetHospitalId, importReceipt.transferredBytes || 1024 * 1024);
+    await this.store.save();
+
+    return {
+      status: "COMPLETED",
+      transferMethod: importReceipt.transferMethod,
+      studyInstanceUid: study.studyInstanceUid,
+      sourceHospitalId: study.sourceHospitalId,
+      targetHospitalId,
+      instancesTransferred: importReceipt.instancesTransferred,
+      transferredBytes: importReceipt.transferredBytes,
+      sha256: importReceipt.sha256,
+      encryptedAtRest: importReceipt.encryptedAtRest ?? true,
+      cipherSuite: importReceipt.cipherSuite ?? "AES-256-GCM",
+      destinationVerification: false,
+      simulation: true,
+      retention: importReceipt.retention,
+      auditSessionId,
+      timestamp: this.clock(),
+    };
+  }
+
+  listHospitalBPacsArchive() {
+    return listHospitalBArchivedStudies(this.hospitalArchiveRoot).map(archive => ({...archive,
+      access: archiveRetentionDecision(archive, this.store.get('consents').find(c=>c.consentId===archive.retention?.consentId), this.clock())}));
+  }
+
+  async reconcileHospitalArchiveRetention() {
+    if (!this.hospitalArchiveRoot || this.archiveRetentionBusy) return [];
+    this.archiveRetentionBusy = true;
+    try {
+      const results = [];
+      for (const archive of listHospitalBArchivedStudies(this.hospitalArchiveRoot)) {
+        try { results.push(await purgeExpiredArchive({root:this.hospitalArchiveRoot,studyUid:archive.studyInstanceUid,
+          getConsent:id=>this.store.get('consents').find(c=>c.consentId===id),now:this.clock(),
+          audit:async event=>{await this.writeAudit({...event,actorType:'GATEWAY',actorId:'hospital-b-retention',targetHospitalId:'HOSP-B'});await this.store.save();}})); }
+        catch { results.push({allowed:false,state:'REVIEW_REQUIRED'}); }
+      }
+      return results;
+    } finally { this.archiveRetentionBusy = false; }
+  }
+
   listDicomStudies(patientId) {
     return this.store.get("imagingStudies").filter((study) => !patientId || study.patientId === patientId);
   }
 
   async gatewayListStudies(rawToken, requestMeta = {}) {
     const tokenStatus = await this.verifyDicomAccessToken(rawToken, {}, requestMeta);
-    if (!tokenStatus.active) return { status: 403, body: { error: tokenStatus.reason } };
+    if (!tokenStatus.active) return { status: tokenStatus.statusCode ?? 403, body: { error: tokenStatus.reason } };
     const { claims } = tokenStatus;
     let result;
     try {
@@ -1329,7 +1621,7 @@ export class HipassService {
       studyInstanceUid,
       requestedAction: RequestedAction.VIEW,
     }, requestMeta);
-    if (!tokenStatus.active) return { status: 403, body: { error: tokenStatus.reason } };
+    if (!tokenStatus.active) return { status: tokenStatus.statusCode ?? 403, body: { error: tokenStatus.reason } };
     const { claims } = tokenStatus;
     let result;
     try {
@@ -1358,7 +1650,7 @@ export class HipassService {
       seriesInstanceUid,
       requestedAction: RequestedAction.VIEW,
     }, requestMeta);
-    if (!tokenStatus.active) return { status: 403, body: { error: tokenStatus.reason } };
+    if (!tokenStatus.active) return { status: tokenStatus.statusCode ?? 403, body: { error: tokenStatus.reason } };
     const { claims } = tokenStatus;
     let result;
     try {
@@ -1385,7 +1677,7 @@ export class HipassService {
       seriesInstanceUid,
       requestedAction: RequestedAction.VIEW,
     }, requestMeta);
-    if (!tokenStatus.active) return { status: 403, body: { error: tokenStatus.reason }, contentType: "application/json" };
+    if (!tokenStatus.active) return { status: tokenStatus.statusCode ?? 403, body: { error: tokenStatus.reason }, contentType: "application/json" };
     const { claims } = tokenStatus;
     let result;
     try {
@@ -1409,6 +1701,39 @@ export class HipassService {
     return result;
   }
 
+  async gatewayRetrieveRenderedInstance(rawToken, studyInstanceUid, seriesInstanceUid, sopInstanceUid, requestMeta = {}) {
+    const tokenStatus = await this.verifyDicomAccessToken(rawToken, {
+      targetHospitalId: this.targetHospitalFromToken(rawToken),
+      studyInstanceUid,
+      seriesInstanceUid,
+      requestedAction: RequestedAction.VIEW,
+    }, requestMeta);
+    if (!tokenStatus.active) return { status: tokenStatus.statusCode ?? 403, body: { error: tokenStatus.reason }, contentType: "application/json" };
+    const { claims } = tokenStatus;
+    let result;
+    try {
+      result = await this.orthanc.wadoRenderedInstance(studyInstanceUid, seriesInstanceUid, sopInstanceUid);
+    } catch {
+      return {
+        ...(await this.recordGatewayUnavailable({ claims, studyInstanceUid, seriesInstanceUid, sopInstanceUid, requestMeta })),
+        contentType: "application/json",
+      };
+    }
+    if (result.status < 400 && result.body) {
+      await this.recordGatewayTransfer({
+        claims,
+        studyInstanceUid,
+        seriesInstanceUid,
+        sopInstanceUid,
+        result: "SUCCESS",
+        reason: null,
+        bytesTransferred: result.body.length,
+        requestMeta,
+      });
+    }
+    return result;
+  }
+
   async gatewayDownloadInstance(rawToken, studyInstanceUid, seriesInstanceUid, sopInstanceUid, requestMeta = {}) {
     const tokenStatus = await this.verifyDicomAccessToken(rawToken, {
       targetHospitalId: this.targetHospitalFromToken(rawToken),
@@ -1416,7 +1741,7 @@ export class HipassService {
       seriesInstanceUid,
       requestedAction: RequestedAction.DOWNLOAD,
     }, requestMeta);
-    if (!tokenStatus.active) return { status: 403, body: { error: tokenStatus.reason }, contentType: "application/json" };
+    if (!tokenStatus.active) return { status: tokenStatus.statusCode ?? 403, body: { error: tokenStatus.reason }, contentType: "application/json" };
     const { claims } = tokenStatus;
     let result;
     try {
@@ -1493,7 +1818,7 @@ export class HipassService {
 
   async listSeries(rawToken, studyInstanceUid, auditSessionId, requestMeta = {}) {
     const tokenStatus = this.introspectToken(rawToken, studyInstanceUid);
-    if (!tokenStatus.active) return { status: 403, body: { error: tokenStatus.reason } };
+    if (!tokenStatus.active) return { status: tokenStatus.statusCode ?? 403, body: { error: tokenStatus.reason } };
     const study = this.store.get("imagingStudies").find((item) => item.studyInstanceUid === studyInstanceUid);
     if (!study) return { status: 404, body: { error: "STUDY_NOT_FOUND" } };
 
@@ -1523,7 +1848,7 @@ export class HipassService {
 
   async retrieveStudy(rawToken, studyInstanceUid, auditSessionId, requestMeta = {}) {
     const tokenStatus = this.introspectToken(rawToken, studyInstanceUid);
-    if (!tokenStatus.active) return { status: 403, body: { error: tokenStatus.reason } };
+    if (!tokenStatus.active) return { status: tokenStatus.statusCode ?? 403, body: { error: tokenStatus.reason } };
     const study = this.store.get("imagingStudies").find((item) => item.studyInstanceUid === studyInstanceUid);
     if (!study) return { status: 404, body: { error: "STUDY_NOT_FOUND" } };
 
@@ -1559,7 +1884,7 @@ export class HipassService {
 
   async retrieveSeries(rawToken, studyInstanceUid, seriesInstanceUid, auditSessionId, requestMeta = {}) {
     const tokenStatus = this.introspectToken(rawToken, studyInstanceUid, seriesInstanceUid);
-    if (!tokenStatus.active) return { status: 403, body: { error: tokenStatus.reason } };
+    if (!tokenStatus.active) return { status: tokenStatus.statusCode ?? 403, body: { error: tokenStatus.reason } };
     const study = this.store.get("imagingStudies").find((item) => item.studyInstanceUid === studyInstanceUid);
     const series = study?.series.find((item) => item.seriesInstanceUid === seriesInstanceUid);
     if (!study) return { status: 404, body: { error: "STUDY_NOT_FOUND" } };
@@ -1600,7 +1925,7 @@ export class HipassService {
 
   listInstances(rawToken, studyInstanceUid, seriesInstanceUid) {
     const tokenStatus = this.introspectToken(rawToken, studyInstanceUid, seriesInstanceUid);
-    if (!tokenStatus.active) return { status: 403, body: { error: tokenStatus.reason } };
+    if (!tokenStatus.active) return { status: tokenStatus.statusCode ?? 403, body: { error: tokenStatus.reason } };
     const study = this.store.get("imagingStudies").find((item) => item.studyInstanceUid === studyInstanceUid);
     const series = study?.series.find((item) => item.seriesInstanceUid === seriesInstanceUid);
     if (!series) return { status: 404, body: { error: "SERIES_NOT_FOUND" } };
@@ -1615,39 +1940,14 @@ export class HipassService {
   }
 
   async writeAudit(input) {
-    const auditLogs = this.store.get("auditLogs");
-    const previousHash = auditLogs.at(-1)?.recordHash ?? null;
-    const createdAt = input.createdAt ?? this.clock();
-    const reasonCode = input.reasonCode ?? input.reason ?? null;
-    const log = {
-      auditId: makeId("audit"),
-      auditSessionId: input.auditSessionId ?? makeId("session"),
-      actorType: input.actorType,
-      actorId: input.actorId,
-      hospitalId: input.hospitalId ?? input.targetHospitalId ?? input.sourceHospitalId ?? null,
-      patientId: input.patientId ?? null,
-      consentId: input.consentId ?? null,
-      ticketId: input.ticketId ?? null,
-      sourceHospitalId: input.sourceHospitalId ?? null,
-      targetHospitalId: input.targetHospitalId ?? null,
-      action: input.action,
-      studyInstanceUid: input.studyInstanceUid ?? null,
-      seriesInstanceUid: input.seriesInstanceUid ?? null,
-      sopInstanceUid: input.sopInstanceUid ?? null,
-      ipAddress: input.ipAddress ?? null,
-      userAgent: input.userAgent ?? null,
-      createdAt,
-      result: input.result,
-      reason: reasonCode,
-      reasonCode,
-      previousHash,
-      recordHash: null,
+    const append = () => {
+      const auditLogs = this.store.get("auditLogs");
+      const log = buildAuditLog(input, auditLogs.at(-1)?.recordHash ?? null, input.createdAt ?? this.clock());
+      auditLogs.push(log);
+      return log;
     };
-    log.recordHash = auditRecordHash(log);
-    auditLogs.push(log);
-    if (!input.skipAnomalyDetection) {
-      await this.detectAnomaliesFor(log);
-    }
+    const log = typeof this.store.runAuditMutation === 'function' ? await this.store.runAuditMutation(append) : append();
+    if (!input.skipAnomalyDetection) await this.detectAnomaliesFor(log);
   }
 
   async recordAuditMutationDenied(input = {}) {
@@ -1666,14 +1966,10 @@ export class HipassService {
 
   normalizeAuditLogChain() {
     const auditLogs = this.store.get("auditLogs");
-    let previousHash = null;
-    for (const log of auditLogs) {
-      log.hospitalId ??= log.targetHospitalId ?? log.sourceHospitalId ?? null;
-      log.reasonCode ??= log.reason ?? null;
-      log.previousHash = previousHash;
-      log.recordHash = auditRecordHash({ ...log, recordHash: null });
-      previousHash = log.recordHash;
-    }
+    const ordered = orderStoredAuditChain(auditLogs);
+    // Existing method name retained; no normalization/re-signing of records.
+    for (let index = 0; index < ordered.length; index++) auditLogs[index] = ordered[index];
+    if (!this.verifyAuditIntegrity().ok) throw new Error("AUDIT_CHAIN_INTEGRITY_REQUIRED");
   }
 
   listAuditLogs(filters = {}) {
@@ -1754,6 +2050,59 @@ export class HipassService {
         predicate: (candidate) => candidate.actorId === log.actorId && candidate.action === AuditAction.IMAGE_DOWNLOADED && candidate.result === "SUCCESS" && isUnusualDownloadHour(candidate.createdAt, rules),
       });
     }
+
+    if (log.ipAddress && log.userAgent) {
+      const effectiveRules = this.getEffectiveAnomalyRules({ ja3Fingerprint: log.ja3Fingerprint });
+      const churnWindowMinutes = effectiveRules.headerChurnWindowMinutes ?? 1;
+      const churnThreshold = effectiveRules.headerChurnThreshold;
+      const since = new Date(new Date(log.createdAt).getTime() - churnWindowMinutes * 60_000).getTime();
+
+      const candidateLogs = this.store.get("auditLogs").filter((candidate) => (
+        candidate.ipAddress === log.ipAddress &&
+        candidate.userAgent &&
+        !isAnomalyAction(candidate.action) &&
+        new Date(candidate.createdAt).getTime() >= since
+      ));
+
+      const uniqueUserAgents = new Set(candidateLogs.map((c) => c.userAgent));
+      if (uniqueUserAgents.size >= churnThreshold) {
+        const duplicate = this.store.get("auditLogs").some((candidate) => (
+          candidate.action === AuditAction.HEADER_CHURN_DETECTED &&
+          candidate.ipAddress === log.ipAddress &&
+          new Date(candidate.createdAt).getTime() >= since
+        ));
+
+        if (!duplicate) {
+          await this.writeAudit({
+            auditSessionId: log.auditSessionId,
+            actorType: ActorType.GATEWAY,
+            actorId: log.actorId && !["gateway", "system"].includes(log.actorId) ? log.actorId : "evasion-detector",
+            hospitalId: log.hospitalId,
+            action: AuditAction.HEADER_CHURN_DETECTED,
+            result: "ALERT",
+            reason: "HEADER_CHURN_EVASION_ATTEMPT",
+            ipAddress: log.ipAddress,
+            userAgent: log.userAgent,
+            ja3Fingerprint: log.ja3Fingerprint ?? null,
+            skipAnomalyDetection: true,
+          });
+
+          await this.quarantineActor({
+            actorId: log.actorId && !["gateway", "system"].includes(log.actorId) ? log.actorId : `EVASION:${log.ipAddress}`,
+            actorType: log.actorType || ActorType.DOCTOR,
+            reason: "HEADER_CHURN_EVASION_ATTEMPT",
+            sourceAction: AuditAction.HEADER_CHURN_DETECTED,
+            durationMinutes: rules.quarantineDurationMinutes ?? 15,
+            ipAddress: log.ipAddress,
+            userAgent: log.userAgent,
+            ja3Fingerprint: log.ja3Fingerprint ?? null,
+            scope: QuarantineScope.COMPOSITE_DEVICE,
+            auditSessionId: log.auditSessionId,
+            hospitalId: log.hospitalId,
+          });
+        }
+      }
+    }
   }
 
   async detectThreshold({ action, reason, sourceLog, windowMinutes, threshold, predicate }) {
@@ -1791,6 +2140,568 @@ export class HipassService {
       userAgent: sourceLog.userAgent,
       skipAnomalyDetection: true,
     });
+
+    const targetActorId = (sourceLog.actorId && !["gateway", "system"].includes(sourceLog.actorId)) ? sourceLog.actorId : null;
+    const targetIp = sourceLog.ipAddress || null;
+    if (targetActorId || targetIp) {
+      await this.quarantineActor({
+        actorId: targetActorId || `IP:${targetIp}`,
+        actorType: sourceLog.actorType || ActorType.DOCTOR,
+        reason,
+        sourceAction: action,
+        durationMinutes: this.anomalyRules.quarantineDurationMinutes ?? 15,
+        ipAddress: targetIp,
+        userAgent: sourceLog.userAgent,
+        auditSessionId: sourceLog.auditSessionId,
+        hospitalId: sourceLog.hospitalId,
+      });
+    }
+  }
+
+  findMatchingHospitalByEgressIp(ip) {
+    if (!ip) return null;
+    const hospitals = this.store.get("hospitals") || [];
+    for (const hosp of hospitals) {
+      const cidrs = hosp.trustedEgressCidrs || [];
+      for (const cidr of cidrs) {
+        if (isIpInCidr(ip, cidr)) {
+          return hosp;
+        }
+      }
+    }
+    return null;
+  }
+
+  isActorQuarantined(actorId, ipAddress, userAgent = null, ja3Fingerprint = null) {
+    const records = this.store.get("quarantineRecords");
+    if (!Array.isArray(records) || records.length === 0) {
+      return { quarantined: false };
+    }
+    const nowMs = new Date(this.clock()).getTime();
+    const currentFingerprint = (ipAddress || userAgent || ja3Fingerprint)
+      ? createCompositeFingerprint(ipAddress, userAgent, ja3Fingerprint)
+      : null;
+
+    for (const record of records) {
+      if (record.status === QuarantineStatus.QUARANTINED) {
+        if (new Date(record.expiresAt).getTime() <= nowMs) {
+          record.status = QuarantineStatus.EXPIRED;
+          continue;
+        }
+
+        // Check active Break-Glass override grace period
+        if (record.gracePeriodExpiresAt && new Date(record.gracePeriodExpiresAt).getTime() > nowMs) {
+          if (actorId && record.actorId === actorId) {
+            return { quarantined: false, breakGlassActive: true, record };
+          }
+        }
+
+        const scope = record.scope ?? QuarantineScope.ACTOR_ONLY;
+
+        if (scope === QuarantineScope.ACTOR_ONLY) {
+          if (actorId && record.actorId === actorId) {
+            return { quarantined: true, record };
+          }
+        } else if (scope === QuarantineScope.COMPOSITE_DEVICE) {
+          if (currentFingerprint && record.compositeFingerprint === currentFingerprint) {
+            return { quarantined: true, record };
+          }
+          if (ja3Fingerprint && record.ja3Fingerprint && record.ja3Fingerprint === ja3Fingerprint) {
+            if (!record.ipAddress || record.ipAddress === ipAddress) {
+              return { quarantined: true, record };
+            }
+          }
+        } else if (scope === QuarantineScope.EXTERNAL_IP) {
+          if (ipAddress && record.ipAddress && record.ipAddress === ipAddress) {
+            return { quarantined: true, record };
+          }
+          if (actorId && record.actorId === actorId) {
+            return { quarantined: true, record };
+          }
+        }
+      }
+    }
+    return { quarantined: false };
+  }
+
+  assertActorNotQuarantined(actorId, ipAddress, userAgent = null, ja3Fingerprint = null) {
+    const check = this.isActorQuarantined(actorId, ipAddress, userAgent, ja3Fingerprint);
+    if (check.quarantined) {
+      throw new ServiceValidationError(
+        AccessDenyReason.ACTOR_QUARANTINED,
+        `Actor '${actorId || ipAddress}' is quarantined until ${check.record.expiresAt} due to ${check.record.reason}`,
+        [],
+        403
+      );
+    }
+  }
+
+  getEffectiveAnomalyRules({ ja3Fingerprint } = {}) {
+    const rules = this.anomalyRules;
+    const hasJa3 = Boolean(ja3Fingerprint);
+    if (hasJa3) {
+      return {
+        ...rules,
+        mode: SecurityDegradedMode.FULL_PROTECTION,
+        headerChurnThreshold: rules.headerChurnThreshold ?? 5,
+        tarpitThreshold: rules.tarpitThreshold ?? 3,
+        tarpitBaseDelayMs: rules.tarpitBaseDelayMs ?? 1000,
+        quarantineDurationMinutes: rules.quarantineDurationMinutes ?? 15,
+      };
+    }
+    return {
+      ...rules,
+      mode: SecurityDegradedMode.STRICT_HEURISTIC,
+      headerChurnThreshold: Math.min(3, rules.headerChurnThreshold ?? 5),
+      tarpitThreshold: Math.min(2, rules.tarpitThreshold ?? 3),
+      tarpitBaseDelayMs: Math.max(2000, rules.tarpitBaseDelayMs ?? 1000),
+      quarantineDurationMinutes: Math.max(30, rules.quarantineDurationMinutes ?? 15),
+    };
+  }
+
+  calculateTarpitDelay({ ipAddress, actorId, ja3Fingerprint }) {
+    if (!ipAddress && !actorId && !ja3Fingerprint) {
+      return { delayMs: 0, failures: 0, throttled: false, mode: SecurityDegradedMode.FULL_PROTECTION };
+    }
+
+    const effectiveRules = this.getEffectiveAnomalyRules({ ja3Fingerprint });
+    const windowMinutes = effectiveRules.tarpitWindowMinutes ?? 5;
+    const threshold = effectiveRules.tarpitThreshold;
+    const baseDelayMs = effectiveRules.tarpitBaseDelayMs;
+    const maxDelayMs = effectiveRules.tarpitMaxDelayMs ?? 5000;
+
+    const since = new Date(new Date(this.clock()).getTime() - windowMinutes * 60_000).getTime();
+    const auditLogs = this.store.get("auditLogs") || [];
+
+    const failureCount = auditLogs.filter((log) => {
+      if (new Date(log.createdAt).getTime() < since) return false;
+      if (log.result !== "FAIL") return false;
+      if (isAnomalyAction(log.action)) return false;
+
+      const ipMatch = ipAddress && log.ipAddress === ipAddress;
+      const actorMatch = actorId && log.actorId === actorId;
+      const ja3Match = ja3Fingerprint && log.ja3Fingerprint === ja3Fingerprint;
+
+      return ipMatch || actorMatch || ja3Match;
+    }).length;
+
+    if (failureCount < threshold) {
+      return { delayMs: 0, failures: failureCount, throttled: false, mode: effectiveRules.mode };
+    }
+
+    const delayMs = Math.min(maxDelayMs, (failureCount - threshold + 1) * baseDelayMs);
+    return {
+      delayMs,
+      failures: failureCount,
+      throttled: true,
+      windowMinutes,
+      mode: effectiveRules.mode,
+    };
+  }
+
+  issueClientAttestationToken({ clientSessionId = makeId("client"), clientPublicKeyJwk = null, userAgent = null, ipAddress = null, ttlMinutes = 15 } = {}) {
+    const issuedAt = this.clock();
+    const expiresAt = addMinutesIso(ttlMinutes, new Date(issuedAt));
+    const thumbprint = clientPublicKeyJwk ? calculateJwkThumbprint(clientPublicKeyJwk) : null;
+    const rawPayload = `${clientSessionId}:${issuedAt}:${expiresAt}:${userAgent || ""}:${ipAddress || ""}:${thumbprint || ""}`;
+    const signature = createHmac("sha256", this.tokenSecret).update(rawPayload).digest("base64url");
+    const attestationToken = `${clientSessionId}.${new Date(issuedAt).getTime()}.${new Date(expiresAt).getTime()}.${thumbprint || "none"}.${signature}`;
+
+    return {
+      clientSessionId,
+      attestationToken,
+      issuedAt,
+      expiresAt,
+      ttlMinutes,
+      publicKeyThumbprint: thumbprint,
+    };
+  }
+
+  verifyClientAttestationToken(token, { userAgent = null, ipAddress = null, clientPublicKeyJwk = null } = {}) {
+    if (!token || typeof token !== "string") {
+      return { valid: false, reason: AccessDenyReason.CLIENT_ATTESTATION_REQUIRED };
+    }
+
+    const parts = token.split(".");
+    let clientSessionId, issuedAtMsStr, expiresAtMsStr, tokenThumbprint, presentedSig;
+    if (parts.length === 5) {
+      [clientSessionId, issuedAtMsStr, expiresAtMsStr, tokenThumbprint, presentedSig] = parts;
+    } else if (parts.length === 4) {
+      [clientSessionId, issuedAtMsStr, expiresAtMsStr, presentedSig] = parts;
+      tokenThumbprint = "none";
+    } else {
+      return { valid: false, reason: AccessDenyReason.CLIENT_ATTESTATION_INVALID };
+    }
+
+    const expiresAtMs = Number(expiresAtMsStr);
+    const issuedAtMs = Number(issuedAtMsStr);
+
+    if (Number.isNaN(expiresAtMs) || Number.isNaN(issuedAtMs)) {
+      return { valid: false, reason: AccessDenyReason.CLIENT_ATTESTATION_INVALID };
+    }
+
+    const nowMs = new Date(this.clock()).getTime();
+    if (nowMs > expiresAtMs) {
+      return { valid: false, reason: AccessDenyReason.CLIENT_ATTESTATION_EXPIRED };
+    }
+
+    const thumbprintToCheck = tokenThumbprint === "none" ? "" : tokenThumbprint;
+    const issuedAt = new Date(issuedAtMs).toISOString();
+    const expiresAt = new Date(expiresAtMs).toISOString();
+
+    const expectedPayload = parts.length === 5
+      ? `${clientSessionId}:${issuedAt}:${expiresAt}:${userAgent || ""}:${ipAddress || ""}:${thumbprintToCheck}`
+      : `${clientSessionId}:${issuedAt}:${expiresAt}:${userAgent || ""}:${ipAddress || ""}`;
+    const expectedSig = createHmac("sha256", this.tokenSecret).update(expectedPayload).digest("base64url");
+
+    if (!safeEqual(presentedSig, expectedSig)) {
+      return { valid: false, reason: AccessDenyReason.CLIENT_ATTESTATION_INVALID };
+    }
+
+    if (clientPublicKeyJwk && tokenThumbprint !== "none") {
+      const calculatedThumbprint = calculateJwkThumbprint(clientPublicKeyJwk);
+      if (calculatedThumbprint !== tokenThumbprint) {
+        return { valid: false, reason: AccessDenyReason.DPOP_KEY_MISMATCH };
+      }
+    }
+
+    return {
+      valid: true,
+      clientSessionId,
+      expiresAt,
+      publicKeyThumbprint: tokenThumbprint !== "none" ? tokenThumbprint : null,
+    };
+  }
+
+  async verifyIssuanceProof(requestMeta) {
+    return requestMeta.ingressTrusted ? this.verifyDPoPProof(requestMeta.dpopProof, {
+      method: requestMeta.method, url: requestMeta.externalUrl, requireAbsoluteUrl: true, requestMeta,
+    }) : { valid: false, reason: "TRUSTED_INGRESS_REQUIRED" };
+  }
+
+  async recordProofStoreFailure(meta, reason) {
+    try {
+      await this.writeAudit({ ...meta, action: AuditAction.TOKEN_INVALID, result: "FAIL", reason, skipAnomalyDetection: true });
+      await this.store.save();
+      return "RECORDED";
+    } catch {
+      // DB outages cannot be turned into token validity or an invented audit PASS.
+      console.warn("DPOP_STORE_FAILURE_AUDIT_NOT_RECORDED");
+      return "NOT_RECORDED";
+    }
+  }
+
+  async verifyDPoPProof(dpopJwt, { method = "GET", url = "/", expectedPublicKeyThumbprint = null, accessToken = null, requireAbsoluteUrl = false, requestMeta = {} } = {}) {
+    if (!dpopJwt || typeof dpopJwt !== "string") {
+      return { valid: false, reason: AccessDenyReason.DPOP_PROOF_REQUIRED };
+    }
+
+    const parts = dpopJwt.split(".");
+    if (dpopJwt.length > 8192 || parts.length !== 3 || parts.some((part) => !/^[A-Za-z0-9_-]+$/.test(part))) {
+      return { valid: false, reason: AccessDenyReason.DPOP_SIGNATURE_INVALID };
+    }
+
+    const [headerB64, payloadB64, signatureB64] = parts;
+    let header, payload;
+    try {
+      header = JSON.parse(base64UrlDecode(headerB64));
+      payload = JSON.parse(base64UrlDecode(payloadB64));
+    } catch {
+      return { valid: false, reason: AccessDenyReason.DPOP_SIGNATURE_INVALID };
+    }
+
+    if (!header || !payload || header.typ !== "dpop+jwt" || header.alg !== "ES256" || !header.jwk || header.crit) {
+      return { valid: false, reason: AccessDenyReason.DPOP_SIGNATURE_INVALID };
+    }
+
+    const jwk = header.jwk;
+    if (jwk.kty !== "EC" || jwk.crv !== "P-256" || !jwk.x || !jwk.y || Object.hasOwn(jwk, "d")) {
+      return { valid: false, reason: AccessDenyReason.DPOP_SIGNATURE_INVALID };
+    }
+
+    const calculatedThumbprint = calculateJwkThumbprint(jwk);
+    if (expectedPublicKeyThumbprint && expectedPublicKeyThumbprint !== calculatedThumbprint) {
+      return { valid: false, reason: AccessDenyReason.DPOP_KEY_MISMATCH };
+    }
+
+    if (!payload.htm || !payload.htu || !payload.jti || payload.iat === undefined) {
+      return { valid: false, reason: AccessDenyReason.DPOP_SIGNATURE_INVALID };
+    }
+
+    if (typeof payload.htm !== "string" || payload.htm !== method) {
+      return { valid: false, reason: AccessDenyReason.DPOP_METHOD_MISMATCH };
+    }
+
+    let matchingUri = false;
+    try {
+      if (requireAbsoluteUrl) {
+        const requested = new URL(url);
+        const proofUrl = new URL(payload.htu);
+        matchingUri = requested.protocol === "https:" && proofUrl.protocol === "https:" && !proofUrl.username && !proofUrl.password && !proofUrl.search && !proofUrl.hash && requested.origin === proofUrl.origin && requested.pathname === proofUrl.pathname;
+      } else {
+        matchingUri = typeof payload.htu === "string" && url.split("?")[0] === payload.htu.split("?")[0];
+      }
+    } catch {}
+    if (!matchingUri) {
+      return { valid: false, reason: AccessDenyReason.DPOP_URI_MISMATCH };
+    }
+
+    const nowEpochSeconds = Math.floor(new Date(this.clock()).getTime() / 1000);
+    const iatSeconds = Number(payload.iat);
+    if (typeof payload.iat !== "number" || !Number.isSafeInteger(iatSeconds) || Math.abs(nowEpochSeconds - iatSeconds) > 60) {
+      return { valid: false, reason: AccessDenyReason.DPOP_PROOF_EXPIRED };
+    }
+
+    if (typeof payload.jti !== "string" || !payload.jti.length || payload.jti.length > 128) return { valid: false, reason: AccessDenyReason.DPOP_SIGNATURE_INVALID };
+    if (accessToken && payload.ath !== createHash("sha256").update(accessToken).digest("base64url")) return { valid: false, reason: "DPOP_ATH_MISMATCH" };
+    try {
+      const pubKey = createPublicKey({ key: jwk, format: "jwk" });
+      const signature = Buffer.from(signatureB64, "base64url");
+      if (signature.length !== 64 || !verify("SHA256", Buffer.from(`${headerB64}.${payloadB64}`), { key: pubKey, dsaEncoding: "ieee-p1363" }, signature)) return { valid: false, reason: AccessDenyReason.DPOP_SIGNATURE_INVALID };
+    } catch { return { valid: false, reason: AccessDenyReason.DPOP_SIGNATURE_INVALID }; }
+
+    // Signature first; an attacker cannot poison the replay cache with a forgery.
+    const proofHash = createHash("sha256").update(JSON.stringify([this.dicomTokenIssuer, calculatedThumbprint, payload.jti])).digest("hex");
+    let isFreshNonce;
+    try {
+      isFreshNonce = await this.dpopReplayStore.consume(proofHash, new Date(this.clock()).getTime());
+      if (typeof isFreshNonce !== "boolean") throw new Error("Invalid replay store result");
+    } catch (error) {
+      return { valid: false, reason: ["DPOP_REPLAY_CLOCK_SKEW", "DPOP_REPLAY_STORE_FULL"].includes(error.code) ? error.code : "DPOP_REPLAY_STORE_UNAVAILABLE", statusCode: 503 };
+    }
+    if (!isFreshNonce) {
+      await this.writeAudit({
+        auditSessionId: requestMeta.auditSessionId ?? makeId("session"),
+        actorType: requestMeta.actorType ?? ActorType.DOCTOR,
+        actorId: requestMeta.actorId ?? "unknown-replay-attacker",
+        hospitalId: requestMeta.hospitalId ?? null,
+        action: AuditAction.DPOP_REPLAY_ATTACK_DETECTED,
+        result: "ALERT",
+        reason: "REPLAY_ATTACK_DETECTED_FOR_DPOP_NONCE",
+        ipAddress: requestMeta.ipAddress ?? null,
+        userAgent: requestMeta.userAgent ?? null,
+        ja3Fingerprint: requestMeta.ja3Fingerprint ?? null,
+        skipAnomalyDetection: true,
+      });
+
+      return { valid: false, reason: AccessDenyReason.DPOP_NONCE_REPLAYED };
+    }
+
+    return {
+      valid: true,
+      jti: payload.jti,
+      publicKeyThumbprint: calculatedThumbprint,
+    };
+  }
+
+  async quarantineActor(input) {
+    const durationMinutes = input.durationMinutes ?? this.anomalyRules.quarantineDurationMinutes ?? 15;
+    const now = this.clock();
+    const expiresAt = addMinutesIso(durationMinutes, new Date(now));
+    const records = this.store.get("quarantineRecords");
+
+    const matchedHospital = this.findMatchingHospitalByEgressIp(input.ipAddress);
+    const isProtectedHospitalNetwork = Boolean(matchedHospital);
+
+    let scope = input.scope;
+    let targetKey = null;
+    let compositeFingerprint = null;
+    const ja3Fingerprint = input.ja3Fingerprint || null;
+
+    if (!scope) {
+      if (input.actorId && !input.actorId.startsWith("IP:") && !input.actorId.startsWith("EVASION:") && !["gateway", "system"].includes(input.actorId)) {
+        scope = QuarantineScope.ACTOR_ONLY;
+        targetKey = `ACTOR:${input.actorId}`;
+      } else if (isProtectedHospitalNetwork) {
+        scope = QuarantineScope.COMPOSITE_DEVICE;
+        compositeFingerprint = createCompositeFingerprint(input.ipAddress, input.userAgent, ja3Fingerprint);
+        targetKey = `DEVICE:${compositeFingerprint}`;
+      } else {
+        scope = QuarantineScope.EXTERNAL_IP;
+        targetKey = `IP:${input.ipAddress || "UNKNOWN"}`;
+      }
+    } else {
+      if (scope === QuarantineScope.COMPOSITE_DEVICE) {
+        compositeFingerprint = createCompositeFingerprint(input.ipAddress, input.userAgent, ja3Fingerprint);
+        targetKey = `DEVICE:${compositeFingerprint}`;
+      } else if (scope === QuarantineScope.EXTERNAL_IP) {
+        targetKey = `IP:${input.ipAddress || "UNKNOWN"}`;
+      } else {
+        targetKey = `ACTOR:${input.actorId}`;
+      }
+    }
+
+    const existing = records.find((r) =>
+      r.status === QuarantineStatus.QUARANTINED &&
+      (r.targetKey ? r.targetKey === targetKey : r.actorId === input.actorId) &&
+      new Date(r.expiresAt).getTime() > new Date(now).getTime()
+    );
+
+    if (existing) {
+      if (new Date(expiresAt).getTime() > new Date(existing.expiresAt).getTime()) {
+        existing.expiresAt = expiresAt;
+        existing.reason = input.reason || existing.reason;
+        await this.store.save();
+      }
+      return existing;
+    }
+
+    const record = {
+      quarantineId: makeId("quar"),
+      actorId: input.actorId || targetKey,
+      actorType: input.actorType ?? ActorType.DOCTOR,
+      status: QuarantineStatus.QUARANTINED,
+      scope,
+      targetKey,
+      compositeFingerprint,
+      ja3Fingerprint,
+      isProtectedHospitalNetwork,
+      hospitalId: matchedHospital?.hospitalId ?? input.hospitalId ?? null,
+      reason: input.reason || "SECURITY_POLICY_VIOLATION",
+      sourceAction: input.sourceAction ?? null,
+      ipAddress: input.ipAddress ?? null,
+      userAgent: input.userAgent ?? null,
+      quarantinedAt: now,
+      expiresAt,
+      durationMinutes,
+      releasedAt: null,
+      releasedBy: null,
+      releaseReason: null,
+      breakGlassEvents: [],
+      gracePeriodExpiresAt: null,
+    };
+    records.push(record);
+
+    await this.writeAudit({
+      auditSessionId: input.auditSessionId ?? makeId("session"),
+      actorType: ActorType.SYSTEM,
+      actorId: "security-quarantine-engine",
+      hospitalId: record.hospitalId,
+      action: AuditAction.ACTOR_QUARANTINED,
+      result: "SUCCESS",
+      reason: input.reason,
+      ipAddress: input.ipAddress ?? null,
+      userAgent: input.userAgent ?? null,
+      ja3Fingerprint: input.ja3Fingerprint ?? null,
+      skipAnomalyDetection: true,
+    });
+
+    await this.store.save();
+    return record;
+  }
+
+  async executeBreakGlassOverride(input, requestMeta = {}) {
+    const doctorId = input.doctorId;
+    if (!doctorId) {
+      throw new ServiceValidationError("DOCTOR_ID_REQUIRED", "Doctor ID is required for Break-Glass override");
+    }
+    if (!input.doctorLicenseNumber) {
+      throw new ServiceValidationError("LICENSE_REQUIRED", "Doctor license number is required for Emergency Break-Glass override");
+    }
+    if (!input.clinicalReason) {
+      throw new ServiceValidationError("CLINICAL_REASON_REQUIRED", "Clinical emergency reason is required for Break-Glass override");
+    }
+
+    const records = this.store.get("quarantineRecords") || [];
+    const now = this.clock();
+    const nowMs = new Date(now).getTime();
+
+    const record = records.find((r) =>
+      r.status === QuarantineStatus.QUARANTINED &&
+      r.actorId === doctorId &&
+      new Date(r.expiresAt).getTime() > nowMs
+    );
+
+    if (!record) {
+      throw new ServiceValidationError("NO_ACTIVE_QUARANTINE", `No active quarantine found for doctor ${doctorId}`);
+    }
+
+    const gracePeriodMinutes = 15;
+    const gracePeriodExpiresAt = addMinutesIso(gracePeriodMinutes, new Date(now));
+    const breakGlassId = makeId("bg");
+
+    record.breakGlassEvents ??= [];
+    record.breakGlassEvents.push({
+      breakGlassId,
+      authorizedDoctorId: doctorId,
+      licenseNumber: input.doctorLicenseNumber,
+      clinicalReason: input.clinicalReason,
+      patientId: input.patientId || null,
+      studyInstanceUid: input.studyInstanceUid || null,
+      usedAt: now,
+      gracePeriodExpiresAt,
+      ipAddress: requestMeta.ipAddress || record.ipAddress,
+      userAgent: requestMeta.userAgent || record.userAgent,
+    });
+    record.gracePeriodExpiresAt = gracePeriodExpiresAt;
+
+    await this.writeAudit({
+      auditSessionId: makeId("session"),
+      actorType: ActorType.DOCTOR,
+      actorId: doctorId,
+      patientId: input.patientId || null,
+      studyInstanceUid: input.studyInstanceUid || null,
+      hospitalId: record.hospitalId,
+      action: AuditAction.BREAK_GLASS_OVERRIDE,
+      result: "SUCCESS",
+      reason: input.clinicalReason,
+      ipAddress: requestMeta.ipAddress || record.ipAddress,
+      userAgent: requestMeta.userAgent || record.userAgent,
+      skipAnomalyDetection: true,
+    });
+
+    await this.store.save();
+
+    return {
+      overrideSuccess: true,
+      breakGlassId,
+      quarantineId: record.quarantineId,
+      doctorId,
+      gracePeriodMinutes,
+      gracePeriodExpiresAt,
+      warning: "비상 열람 행위는 원내 보안감사팀 및 플랫폼 관리자에게 실시간 보고되며 영구 감사체인에 보관됩니다.",
+    };
+  }
+
+  async releaseQuarantine(quarantineId, adminActorId = "SEC-ADMIN", releaseReason = "MANUAL_ADMIN_RELEASE") {
+    const records = this.store.get("quarantineRecords");
+    const record = records.find((r) => r.quarantineId === quarantineId);
+    if (!record) {
+      throw new ServiceValidationError("QUARANTINE_NOT_FOUND", `Quarantine record ${quarantineId} not found`);
+    }
+    if (record.status !== QuarantineStatus.QUARANTINED) {
+      return record;
+    }
+    record.status = QuarantineStatus.RELEASED;
+    record.releasedAt = this.clock();
+    record.releasedBy = adminActorId;
+    record.releaseReason = releaseReason;
+
+    await this.writeAudit({
+      actorType: ActorType.SYSTEM,
+      actorId: adminActorId,
+      action: AuditAction.ACTOR_UNQUARANTINED,
+      result: "SUCCESS",
+      reason: releaseReason,
+      skipAnomalyDetection: true,
+    });
+
+    await this.store.save();
+    return record;
+  }
+
+  listQuarantines(includeInactive = false) {
+    const nowMs = new Date(this.clock()).getTime();
+    const records = this.store.get("quarantineRecords") || [];
+    for (const r of records) {
+      if (r.status === QuarantineStatus.QUARANTINED && new Date(r.expiresAt).getTime() <= nowMs) {
+        r.status = QuarantineStatus.EXPIRED;
+      }
+    }
+    if (includeInactive) {
+      return [...records].reverse();
+    }
+    return records.filter((r) => r.status === QuarantineStatus.QUARANTINED).reverse();
   }
 
   async writeTransferUsage(input) {
@@ -1997,6 +2908,13 @@ function normalizeAnomalyRules(overrides = {}) {
     unusualDownloadThreshold: numberFromEnv("HIPASS_UNUSUAL_DOWNLOAD_THRESHOLD", overrides.unusualDownloadThreshold, 5),
     unusualDownloadStartHour: numberFromEnv("HIPASS_UNUSUAL_DOWNLOAD_START_HOUR", overrides.unusualDownloadStartHour, 0),
     unusualDownloadEndHour: numberFromEnv("HIPASS_UNUSUAL_DOWNLOAD_END_HOUR", overrides.unusualDownloadEndHour, 6),
+    quarantineDurationMinutes: numberFromEnv("HIPASS_QUARANTINE_DURATION_MINUTES", overrides.quarantineDurationMinutes, 15),
+    headerChurnWindowMinutes: numberFromEnv("HIPASS_HEADER_CHURN_WINDOW_MINUTES", overrides.headerChurnWindowMinutes, 1),
+    headerChurnThreshold: numberFromEnv("HIPASS_HEADER_CHURN_THRESHOLD", overrides.headerChurnThreshold, 5),
+    tarpitWindowMinutes: numberFromEnv("HIPASS_TARPIT_WINDOW_MINUTES", overrides.tarpitWindowMinutes, 5),
+    tarpitThreshold: numberFromEnv("HIPASS_TARPIT_THRESHOLD", overrides.tarpitThreshold, 3),
+    tarpitBaseDelayMs: numberFromEnv("HIPASS_TARPIT_BASE_DELAY_MS", overrides.tarpitBaseDelayMs, 1000),
+    tarpitMaxDelayMs: numberFromEnv("HIPASS_TARPIT_MAX_DELAY_MS", overrides.tarpitMaxDelayMs, 5000),
   };
 }
 
@@ -2147,6 +3065,12 @@ function isAnomalyAction(action) {
     AuditAction.REPEATED_ACCESS_FAILURE,
     AuditAction.EXPIRED_TOKEN_ABUSE,
     AuditAction.UNUSUAL_DOWNLOAD_PATTERN,
+    AuditAction.ACTOR_QUARANTINED,
+    AuditAction.ACTOR_UNQUARANTINED,
+    AuditAction.BREAK_GLASS_OVERRIDE,
+    AuditAction.HEADER_CHURN_DETECTED,
+    AuditAction.TARPIT_THROTTLED,
+    AuditAction.DPOP_REPLAY_ATTACK_DETECTED,
   ].includes(action);
 }
 
@@ -2155,6 +3079,21 @@ function isUnusualDownloadHour(iso, rules) {
   const start = rules.unusualDownloadStartHour;
   const end = rules.unusualDownloadEndHour;
   return start <= end ? hour >= start && hour < end : hour >= start || hour < end;
+}
+
+export function buildAuditLog(input, previousHash, createdAt, auditId = makeId('audit')) {
+  const reasonCode = input.reasonCode ?? input.reason ?? null;
+  const log = { auditId, auditSessionId: input.auditSessionId ?? makeId('session'),
+    actorType: input.actorType, actorId: input.actorId,
+    hospitalId: input.hospitalId ?? input.targetHospitalId ?? input.sourceHospitalId ?? null,
+    patientId: input.patientId ?? null, consentId: input.consentId ?? null, ticketId: input.ticketId ?? null,
+    sourceHospitalId: input.sourceHospitalId ?? null, targetHospitalId: input.targetHospitalId ?? null,
+    action: input.action, studyInstanceUid: input.studyInstanceUid ?? null, seriesInstanceUid: input.seriesInstanceUid ?? null,
+    sopInstanceUid: input.sopInstanceUid ?? null, ipAddress: input.ipAddress ?? null, userAgent: input.userAgent ?? null,
+    ja3Fingerprint: input.ja3Fingerprint ?? null, createdAt, result: input.result, reason: reasonCode, reasonCode,
+    previousHash, recordHash: null };
+  log.recordHash = auditRecordHash(log);
+  return log;
 }
 
 function auditRecordHash(log) {
@@ -2175,6 +3114,7 @@ function auditRecordHash(log) {
     sopInstanceUid: log.sopInstanceUid ?? null,
     ipAddress: log.ipAddress ?? null,
     userAgent: log.userAgent ?? null,
+    ja3Fingerprint: log.ja3Fingerprint ?? null,
     createdAt: log.createdAt,
     result: log.result,
     reasonCode: log.reasonCode ?? log.reason ?? null,
@@ -2216,4 +3156,55 @@ function buildDicomTokenScope(studyInstanceUid, allowedSeriesUids, permission) {
 function dicomValue(row, tag) {
   const value = row?.[tag]?.Value;
   return Array.isArray(value) ? value[0] : undefined;
+}
+
+function ipToInt(ip) {
+  if (!ip || typeof ip !== "string") return null;
+  const parts = ip.split(".").map(Number);
+  if (parts.length !== 4 || parts.some((p) => Number.isNaN(p) || p < 0 || p > 255)) return null;
+  return ((parts[0] << 24) | (parts[1] << 16) | (parts[2] << 8) | parts[3]) >>> 0;
+}
+
+function isIpInCidr(ip, cidr) {
+  if (!ip || !cidr || typeof ip !== "string" || typeof cidr !== "string") return false;
+  const cleanIp = ip.startsWith("::ffff:") ? ip.slice(7) : ip;
+  if (cidr === cleanIp || cidr === ip) return true;
+  if (!cidr.includes("/")) {
+    return cleanIp === cidr;
+  }
+  const [cidrIp, prefixStr] = cidr.split("/");
+  const prefix = parseInt(prefixStr, 10);
+  if (Number.isNaN(prefix)) return false;
+
+  const cleanCidrIp = cidrIp.startsWith("::ffff:") ? cidrIp.slice(7) : cidrIp;
+  const ipInt = ipToInt(cleanIp);
+  const cidrInt = ipToInt(cleanCidrIp);
+  if (ipInt === null || cidrInt === null) {
+    return cleanIp === cleanCidrIp;
+  }
+  if (prefix === 0) return true;
+  const mask = prefix === 32 ? 0xffffffff : ((0xffffffff << (32 - prefix)) >>> 0);
+  return (ipInt & mask) === (cidrInt & mask);
+}
+
+function createCompositeFingerprint(ip, userAgent, ja3Fingerprint = null) {
+  const identity = ja3Fingerprint
+    ? `JA3:${ja3Fingerprint}`
+    : `UA:${userAgent || "NO_UA"}`;
+  return createHash("sha256")
+    .update(`${ip || "NO_IP"}:${identity}`)
+    .digest("hex")
+    .slice(0, 16);
+}
+
+export function calculateJwkThumbprint(jwk) {
+  if (!jwk || typeof jwk !== "object") return null;
+  const canonical = {
+    crv: jwk.crv,
+    kty: jwk.kty,
+    x: jwk.x,
+    y: jwk.y,
+  };
+  const jsonStr = JSON.stringify(canonical);
+  return createHash("sha256").update(jsonStr).digest("base64url");
 }

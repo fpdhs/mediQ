@@ -1,0 +1,53 @@
+{
+  "status": "DRAFT / UNASSIGNED",
+  "medicalReview": "UNASSIGNED",
+  "clinicalUse": false,
+  "serviceDeployment": false,
+  "notesSha256": "sha256:8274121bfa3e11b069afd24d54fd242eafaaeda80b16136493d696813c64a695",
+  "sources": [
+    {
+      "url": "https://medlineplus.gov/about/using/usingcontent/",
+      "file": "sources/692ef3b996a3cc4851308ebf0cea72e7edd5e993a83b05e88f8febd0c49112d8.html",
+      "sha256": "sha256:395448c1bd29d61919a77a0481aa4ae7775a22bd42fb921d3d5303c332befb85",
+      "fetchedAt": "2026-10-13T01:45:18.592Z",
+      "scope": "MedlinePlus Medical Test information or use policy only; linked third-party content is not included"
+    },
+    {
+      "url": "https://medlineplus.gov/lab-tests/liver-function-tests/",
+      "file": "sources/cff34ee8cbeaaa3f1f249586ab93a9280815fc8fd1d6fe603fde7181f2908dc6.html",
+      "sha256": "sha256:8072d73e875e1b5267fcca0f981543b45ca2a8d7ce77f813d00f9a68e9b59e7c",
+      "fetchedAt": "2026-10-13T01:45:18.764Z",
+      "scope": "MedlinePlus Medical Test information or use policy only; linked third-party content is not included"
+    },
+    {
+      "url": "https://medlineplus.gov/lab-tests/ast-test/",
+      "file": "sources/4399642c96ac06edc173984477546b3fc49f1ab3023793946cf3b75abb5637c1.html",
+      "sha256": "sha256:385100e6d2c26f7af9cf9c3880283d32ff3e22bbd66a1dfb0d8ece0bfe51d1c8",
+      "fetchedAt": "2026-10-13T01:45:19.001Z",
+      "scope": "MedlinePlus Medical Test information or use policy only; linked third-party content is not included"
+    },
+    {
+      "url": "https://medlineplus.gov/lab-tests/alt-blood-test/",
+      "file": "sources/45c7afb27db4c48940a2b50b1301f68c48c76b9a3ad101ade926792c9a64b505.html",
+      "sha256": "sha256:82bb7e3e7bf10e57a1731f2335bc47f27ffc86dc0ee137246570c17b0c89d8a9",
+      "fetchedAt": "2026-10-13T01:45:19.171Z",
+      "scope": "MedlinePlus Medical Test information or use policy only; linked third-party content is not included"
+    },
+    {
+      "url": "https://medlineplus.gov/lab-tests/gamma-glutamyl-transferase-ggt-test/",
+      "file": "sources/247de67aae811d1d9849a1eb812cb0e9efdd68efdbf0a42c4b0784778323b362.html",
+      "sha256": "sha256:5e969291f9a495768111dbe1ab6bb84f7a59a34bcf9ade5b9931bb7af3b4ca75",
+      "fetchedAt": "2026-10-13T01:45:19.338Z",
+      "scope": "MedlinePlus Medical Test information or use policy only; linked third-party content is not included"
+    },
+    {
+      "url": "https://medlineplus.gov/lab-tests/how-to-understand-your-lab-results/",
+      "file": "sources/31a04a666cb72072d141e8f1db30cb2f3ae6251a93630b2c34a8df4a1805970b.html",
+      "sha256": "sha256:bbd32652d12df4060de7c4a5b81841a21414dd9dfaaaafc32125d1831c486ca9",
+      "fetchedAt": "2026-10-13T01:45:19.513Z",
+      "scope": "MedlinePlus Medical Test information or use policy only; linked third-party content is not included"
+    }
+  ],
+  "sourceCode": "src/health-helper-liver-evidence.js",
+  "entryCount": 13
+}

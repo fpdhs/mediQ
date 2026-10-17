@@ -1,0 +1,141 @@
+{
+ admin off
+ auto_https disable_redirects
+ https_port 9444
+ log default {
+  level ERROR
+ }
+ servers {
+  protocols h1 h2
+  max_header_size 16KB
+  timeouts {
+   read_header 5s
+   read_body 5s
+   write 65s
+   idle 15s
+  }
+ }
+}
+highpass-images-b.japaneast.cloudapp.azure.com {
+ bind 10.90.88.3
+ tls {
+  protocols tls1.2 tls1.3
+  issuer acme {
+   dir https://acme-v02.api.letsencrypt.org/directory
+   disable_http_challenge
+  }
+ }
+ header {
+  -Server
+  Cache-Control "no-store"
+  X-Content-Type-Options "nosniff"
+  Referrer-Policy "no-referrer"
+  Vary "Origin"
+ }
+ route {
+  @query expression `{http.request.uri.query} != ""`
+  respond @query `{"error":"PATIENT_ROUTE_NOT_ALLOWED"}` 403
+  @clinician_get_preflight {
+   method OPTIONS
+   path_regexp clinician_get_preflight ^/dicomweb/studies($|/[0-9.]{1,64}/series($|/[0-9.]{1,64}/instances($|/[0-9.]{1,64}/rendered$)))$
+   header Origin https://highpass-demo.japaneast.cloudapp.azure.com
+   header Access-Control-Request-Method GET
+  }
+  handle @clinician_get_preflight {
+   header Access-Control-Allow-Origin "https://highpass-demo.japaneast.cloudapp.azure.com"
+   header Access-Control-Allow-Methods "GET"
+   header Access-Control-Allow-Headers "authorization, dpop"
+   header Access-Control-Max-Age "60"
+   respond "" 204
+  }
+  @clinician_get {
+   method GET
+   path_regexp clinician_get ^/dicomweb/studies($|/[0-9.]{1,64}/series($|/[0-9.]{1,64}/instances($|/[0-9.]{1,64}/rendered$)))$
+   header Origin https://highpass-demo.japaneast.cloudapp.azure.com
+  }
+  handle @clinician_get {
+   header Access-Control-Allow-Origin "https://highpass-demo.japaneast.cloudapp.azure.com"
+   reverse_proxy https://192.168.111.149:9443 {
+    header_up -Cookie
+    header_up -X-Hipass-Service-Token
+    header_up -X-Hipass-Ingress-Signature
+    header_up -X-Hipass-Ingress-Time
+    header_down -Set-Cookie
+    transport http {
+     tls_trust_pool file /etc/caddy/b-ca.crt
+     dial_timeout 5s
+     response_header_timeout 35s
+    }
+   }
+  }
+  @clinician_import_preflight {
+   method OPTIONS
+   path_regexp clinician_import_preflight ^/dicomweb/studies/[0-9.]{1,64}/series/[0-9.]{1,64}/instances/[0-9.]{1,64}/import$
+   header Origin https://highpass-demo.japaneast.cloudapp.azure.com
+   header Access-Control-Request-Method POST
+   header_regexp Access-Control-Request-Headers ^(?i:authorization,\s*dpop|dpop,\s*authorization|authorization,\s*dpop,\s*x-hipass-transfer-item-id,\s*x-hipass-transfer-job-id,\s*x-hipass-transfer-lease-id)$
+  }
+  handle @clinician_import_preflight {
+   header Access-Control-Allow-Origin "https://highpass-demo.japaneast.cloudapp.azure.com"
+   header Access-Control-Allow-Methods "POST"
+   header Access-Control-Allow-Headers "authorization, dpop, x-hipass-transfer-item-id, x-hipass-transfer-job-id, x-hipass-transfer-lease-id"
+   header Access-Control-Max-Age "60"
+   respond "" 204
+  }
+  @clinician_import {
+   method POST
+   path_regexp clinician_import ^/dicomweb/studies/[0-9.]{1,64}/series/[0-9.]{1,64}/instances/[0-9.]{1,64}/import$
+   header Origin https://highpass-demo.japaneast.cloudapp.azure.com
+  }
+  handle @clinician_import {
+   header Access-Control-Allow-Origin "https://highpass-demo.japaneast.cloudapp.azure.com"
+   reverse_proxy https://192.168.111.149:9443 {
+    header_up -Cookie
+    header_up -X-Hipass-Service-Token
+    header_up -X-Hipass-Ingress-Signature
+    header_up -X-Hipass-Ingress-Time
+    header_down -Set-Cookie
+    header_down -Access-Control-Allow-Origin
+    transport http {
+     tls_trust_pool file /etc/caddy/b-ca.crt
+     dial_timeout 5s
+     response_header_timeout 60s
+    }
+   }
+  }
+  @preflight {
+   method OPTIONS
+   path_regexp preflight ^/patient-dicomweb/studies/[0-9.]{1,64}/series/[0-9.]{1,64}/instances(/[0-9.]{1,64}/rendered)?$
+   header Origin https://highpass-demo.japaneast.cloudapp.azure.com
+   header Access-Control-Request-Method GET
+  }
+  handle @preflight {
+   header Access-Control-Allow-Origin "https://highpass-demo.japaneast.cloudapp.azure.com"
+   header Access-Control-Allow-Methods "GET"
+   header Access-Control-Allow-Headers "authorization, dpop"
+   header Access-Control-Max-Age "60"
+   respond "" 204
+  }
+  @image {
+   method GET
+   path_regexp image ^/patient-dicomweb/studies/[0-9.]{1,64}/series/[0-9.]{1,64}/instances(/[0-9.]{1,64}/rendered)?$
+   header Origin https://highpass-demo.japaneast.cloudapp.azure.com
+  }
+  handle @image {
+   header Access-Control-Allow-Origin "https://highpass-demo.japaneast.cloudapp.azure.com"
+   reverse_proxy https://192.168.111.149:9443 {
+    header_up -Cookie
+    header_up -X-Hipass-Service-Token
+    header_up -X-Hipass-Ingress-Signature
+    header_up -X-Hipass-Ingress-Time
+    header_down -Set-Cookie
+    transport http {
+     tls_trust_pool file /etc/caddy/b-ca.crt
+     dial_timeout 5s
+     response_header_timeout 35s
+    }
+   }
+  }
+  respond `{"error":"PATIENT_ROUTE_NOT_ALLOWED"}` 403
+ }
+}

@@ -1,0 +1,59 @@
+/* Teaching surfaces are expressive; simulation and authorization stay distinct. */
+#hospital-saas-app .image-journey{--journey-blue:#255bdd;color:#182c32}
+#hospital-saas-app .journey-heading .journey-notice{background:#f9fbff;border:1px solid #c4d5ef;border-left:4px solid #326be7;border-radius:4px;padding:14px 18px}
+#hospital-saas-app .journey-overview>h3{font-size:24px;margin-top:24px}
+#hospital-saas-app .journey-gallery{grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
+#hospital-saas-app .image-journey .journey-gallery-card{border:1px solid #cbdadd;background:#fff;border-radius:8px;padding-bottom:20px;transition:border-color 140ms,box-shadow 140ms;box-shadow:0 3px 12px #183a4408}
+#hospital-saas-app .journey-gallery-card:hover{transform:none;border-color:#376cdd;box-shadow:0 8px 24px #214c6914}
+#hospital-saas-app .journey-gallery-card strong{font-size:19px;line-height:1.45;padding:0 16px}
+#hospital-saas-app .journey-gallery-card .journey-card-copy{padding:0 16px;color:#49666d}
+#hospital-saas-app .journey-card-number{width:38px;height:38px;border:1px solid #d2dfed;background:#fffffff0;color:#2754a4;box-shadow:0 3px 10px #183c5012}
+#hospital-saas-app .journey-controls{padding:12px;border:1px solid #d0dfe0;border-radius:6px;background:#ffffffed}
+#hospital-saas-app .image-journey button{border-radius:6px;font-size:13px;min-height:44px}
+#hospital-saas-app .image-journey .journey-layout{grid-template-columns:minmax(0,1.45fr) minmax(280px,1fr);gap:28px}
+#hospital-saas-app .journey-stage{padding:0;border:0;border-radius:0;background:transparent}
+#hospital-saas-app .journey-image-frame{position:relative;isolation:isolate;aspect-ratio:3/2;border:1px solid #c7d9df;border-radius:8px;overflow:hidden;background:#f5f9fd}
+#hospital-saas-app .journey-illustration img{border-radius:0;width:100%;height:auto;object-fit:contain;display:block}
+#hospital-saas-app .journey-illustration figcaption{color:#536b72;font-size:12px;padding:10px 0}
+#hospital-saas-app .journey-pin{position:absolute;transform:translate(-50%,-50%);width:44px;height:44px;min-height:44px!important;padding:0!important;display:grid;place-items:center;border-radius:50%!important;border:2px solid #fff!important;background:#ffffffed!important;color:#1b448f!important;box-shadow:0 2px 12px #102d4a35;font-weight:800;font-size:16px!important}
+#hospital-saas-app .journey-pin[aria-pressed=true]{background:#214eb8!important;color:#fff!important;outline:3px solid #ffffffa3;outline-offset:2px}
+#hospital-saas-app .journey-pin:focus-visible{outline:3px solid #101e33;outline-offset:3px}
+#hospital-saas-app .journey-insight{padding:18px 0 18px 18px;border-left:3px solid #336ade;margin-top:12px;min-height:136px}
+#hospital-saas-app .journey-insight h3{font-size:18px;color:#1e448c;margin:0 0 8px}
+#hospital-saas-app .journey-insight p{font-size:14px;line-height:1.75;margin:0;color:#395961;max-width:66ch}
+#hospital-saas-app .journey-explanation{padding:22px 24px;border:0;border-top:4px solid #326be7;background:#fff;border-radius:0}
+#hospital-saas-app .journey-explanation h3{font-size:14px;color:#526a70}
+#hospital-saas-app .journey-explanation h4{font-size:24px;line-height:1.4;letter-spacing:0;margin:16px 0}
+#hospital-saas-app .journey-current{font-size:12px;border-radius:4px;background:#eaf0ff;color:#244d9a;padding:6px 9px}
+#hospital-saas-app .journey-gate-facts{margin-top:20px;padding-top:0}
+#hospital-saas-app .journey-gate-facts dt{font-size:12px;color:#567078;margin-top:18px}
+#hospital-saas-app .journey-gate-facts dd{font-size:14px;color:#243e47}
+#hospital-saas-app .journey-explanation>p{font-size:12px}
+#hospital-saas-app .journey-steps{grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;padding-top:22px}
+#hospital-saas-app .journey-steps li{min-width:0}
+#hospital-saas-app .journey-steps span{width:26px;height:26px;margin-bottom:7px;font-size:12px}
+#hospital-saas-app .journey-steps button{white-space:normal;word-break:keep-all;line-height:1.4;background:#fff}
+#hospital-saas-app .journey-comparison{margin:30px 0 0;padding:24px 0;border-block:1px solid #c4d7d8}
+#hospital-saas-app .journey-comparison-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+#hospital-saas-app .journey-comparison-heading h3{font-size:22px;margin:0}
+#hospital-saas-app .journey-example-label{font-size:12px;font-weight:650;padding:5px 9px;color:#6b531b;background:#fff1ce;border-radius:4px}
+#hospital-saas-app .journey-compare-choices{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:22px}
+#hospital-saas-app .journey-compare-route{list-style:none;display:grid;grid-template-columns:1fr 1.2fr 1fr;padding:0;margin:0;border-block:1px solid #cddddd}
+#hospital-saas-app .journey-compare-route li{position:relative;min-width:0;padding:20px 24px;background:#fff;display:grid;gap:10px;align-content:start}
+#hospital-saas-app .journey-compare-route li+li{border-left:1px solid #d8e3e3}
+#hospital-saas-app .journey-compare-route li+li::before{content:'\2192';position:absolute;left:-10px;top:24px;z-index:1;color:#527078;background:#fff;font-size:18px}
+#hospital-saas-app .journey-compare-route small{font-size:12px;color:#536d74}
+#hospital-saas-app .journey-compare-route strong{font-size:17px;line-height:1.55;color:#243f49;overflow-wrap:anywhere}
+#hospital-saas-app .journey-compare-route li:last-child{border-bottom:4px solid #2d70aa;background:#eef5fd}
+#hospital-saas-app [data-tone=denied] .journey-compare-route li:last-child{background:#fff0ed;border-bottom-color:#b34834}
+#hospital-saas-app [data-tone=unavailable] .journey-compare-route li:last-child{background:#fff5dc;border-bottom-color:#a27718}
+#hospital-saas-app .journey-compare-reason{font-size:15px;font-weight:650;margin:18px 0 8px}
+#hospital-saas-app .journey-compare-boundary{display:block;font-size:12px;color:#536c73;line-height:1.6}
+#hospital-saas-app .journey-audit-rail{border-left:3px solid #376982;background:#f7fafb;padding:22px 24px}
+#hospital-saas-app .journey-lifecycle{padding:24px 0}
+@supports(backdrop-filter:blur(12px)){#hospital-saas-app :is(.journey-controls,.journey-card-number){backdrop-filter:blur(12px)}}
+@media(max-width:1100px){#hospital-saas-app .journey-gallery{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:900px){#hospital-saas-app .image-journey .journey-layout{grid-template-columns:1fr}#hospital-saas-app .journey-explanation{padding:22px 20px}}
+@media(max-width:520px){#hospital-saas-app .journey-gallery{gap:12px}#hospital-saas-app .journey-gallery-card strong{font-size:17px;padding:0 12px}#hospital-saas-app .journey-gallery-card .journey-card-copy{padding:0 12px}#hospital-saas-app .journey-controls{padding:10px;gap:10px}#hospital-saas-app .journey-controls button{padding:10px 12px}#hospital-saas-app .journey-card-number{width:30px;height:30px}#hospital-saas-app .journey-insight{min-height:164px}#hospital-saas-app .journey-compare-route{grid-template-columns:1fr}#hospital-saas-app .journey-compare-route li+li{border-left:0;border-top:1px solid #d8e3e3}#hospital-saas-app .journey-compare-route li+li::before{content:'\2193';left:24px;top:-15px}#hospital-saas-app .journey-steps{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(prefers-reduced-motion:reduce){#hospital-saas-app .journey-gallery-card{transition:none}}
+@media(prefers-reduced-transparency:reduce){#hospital-saas-app :is(.journey-controls,.journey-card-number,.journey-pin){backdrop-filter:none;background:#fff}}

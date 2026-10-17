@@ -1,0 +1,24 @@
+#hospital-saas-app .transfer-primary-action{background:#087d72!important;border:1px solid #38b8a5!important;color:#fff!important;border-radius:6px!important;min-height:44px!important;font-size:13px!important;padding:10px 14px!important;white-space:normal!important}
+#hospital-saas-app #viewer-screen .studio-top-actions{flex-wrap:wrap;gap:8px}
+#hospital-saas-app #viewer-screen #download-instance{margin:0;width:auto;min-height:44px;padding:10px 12px;white-space:normal;color:#edf3f3}
+#hospital-saas-app .transfer-history-board{margin-top:28px;padding-top:24px;border-top:1px solid #cbded9;color:#193d39}
+.transfer-history-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.transfer-history-heading h3{font-size:22px;margin:0;line-height:1.4;letter-spacing:0}
+.transfer-history-heading p,.transfer-history-status{font-size:13px;line-height:1.7;color:#526d67}
+.transfer-history-list{display:grid;gap:0}
+.transfer-history-row{display:grid;grid-template-columns:minmax(160px,1fr) minmax(150px,1fr) 110px;align-items:center;gap:12px 20px;padding:20px 16px;border-bottom:1px solid #cbded9;border-left:4px solid #b4c9c1;background:#f4f9f7;min-width:0;letter-spacing:0}
+.transfer-history-success{border-left-color:#087d72;background:#eaf6ef}
+.transfer-history-fail{border-left-color:#b95149;background:#fff3f0}
+.transfer-history-warning{border-left-color:#b38330}
+.transfer-history-route{font-size:15px;font-weight:700;overflow-wrap:anywhere}
+.transfer-history-label{font-size:13px;font-weight:700}
+.transfer-history-count{font-size:28px;text-align:right;line-height:1.3;font-variant-numeric:tabular-nums}
+.transfer-history-row p{font-size:13px;margin:0;line-height:1.7;overflow-wrap:anywhere}
+.transfer-history-row small{font-size:12px;color:#526d67}
+#hospital-saas-app .transfer-history-row .mq-btn{border-radius:6px;min-height:44px;font-size:13px;padding:10px}
+.transfer-history-note{font-size:12px;line-height:1.8;color:#526d67;margin-top:18px}
+.transfer-history-receipt{border-top:1px solid #cbded9;margin-top:16px;padding-top:16px;font-size:13px;line-height:1.7;overflow-wrap:anywhere}
+.transfer-history-receipt:empty{display:none}
+.transfer-history-receipt h4{font-size:17px;margin:0}
+#hospital-saas-app .transfer-history-board :focus-visible{outline:3px solid #13877a;outline-offset:3px}
+@media(max-width:700px){.transfer-history-row{grid-template-columns:minmax(0,1fr) 100px;gap:10px}.transfer-history-route,.transfer-history-row p{grid-column:1/-1}.transfer-history-label{grid-column:1}.transfer-history-count{grid-column:2;grid-row:2}.transfer-history-row small{grid-column:1}.transfer-history-row button{grid-column:2}#hospital-saas-app #viewer-screen .studio-topbar{gap:8px}#hospital-saas-app #viewer-screen .studio-top-actions{justify-content:flex-end}#hospital-saas-app #viewer-screen .transfer-primary-action,#hospital-saas-app #viewer-screen #download-instance{font-size:12px!important;padding:8px!important}}

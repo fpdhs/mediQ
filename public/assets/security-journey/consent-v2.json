@@ -1,0 +1,10 @@
+{
+  "tool": "built-in image_gen",
+  "asset": "consent-v2.png",
+  "replaces": "consent-v1.webp",
+  "width": 1536,
+  "height": 1024,
+  "sha256": "91f5817003c629772ed9f9960639a79e2b66493ee4b4f633a0105bbdeeaab30b",
+  "prompt": "Use case: stylized-concept. Create a replacement production medical security journey illustration, landscape exactly 1536x1024 (3:2), full bleed. Input image 1 consent-v1 is the edit target: replace its entire people-based composition. Input images 2 identity-v1 and 3 policy-v1 are STYLE references only, match their polished tactile 3D object rendering, cool mist-white studio, cobalt blue, translucent blue glass and brushed silver, subtle teal accents and soft lighting. NO PEOPLE, NO HUMAN FACES, NO HANDS, NO PHOTOREALISTIC PATIENTS, NO STAFF anywhere. Main subject: a beautiful cobalt-blue personal medical wallet with visible card pockets and a small snap strap, containing two abstract medical exam cards. One chosen card with a simple schematic lungs pictogram is lifted clearly just above the wallet and separated into a small transparent open selection frame next to it. Two understated supplementary pictogram tiles for recipient hospital and duration (clock), integrated into the frame base. Only the chosen exam is selected, the remaining exam card stays in the wallet. This is patient consent SCOPE SELECTION only, not data transmission, successful authorization, encryption, storage, or diagnostic imaging. No conduit, no file flow, no lock, no security shield, no universal success badge. Elegant still life on a pale cool tabletop, restrained simple bright background. Keep all objects fully visible and central with generous margins for gallery thumbnails and mobile. No text, letters, numerals, logos, watermarks, UI screenshot, icons grid, decorative orbs, visual clutter. Wallet and selection card are the unmistakable focal point; subtle visual delight without cartoon characters.",
+  "review": "Visual review: no people; wallet, selected exam card, hospital and duration only; no access-granted claims."
+}

@@ -1,0 +1,46 @@
+{
+  "tool": "built-in image_gen",
+  "review": "DRAFT / UNASSIGNED",
+  "assets": [
+    {
+      "key": "identity",
+      "prompt": "Use case: stylized-concept. Asset type: production website illustration ONLY, not a website screenshot. Premium friendly tactile 3D security educational scene for Medi Q, white/cool mist-blue studio background, navy and restrained cobalt surfaces, teal accents, soft natural shadows, translucent glass and brushed metal. Landscape 3:2 framing, objects centrally composed with generous margins suitable for mobile. Absolutely NO letters, NO words, NO numerals, NO logos, NO UI, NO caption, NO date, NO personal information. Use pictograms only. Full coherent scene, not icon grid. Two upright anonymous profile credential cards and a medical role card with hospital pictogram matching an affiliation slot on an identity checkpoint; an unknown gray card outside. No biometric or fingerprint.",
+      "source": "C:\\Users\\user\\.codex\\generated_images\\01a03ccd-541c-7d92-8485-9f5dd2b91220\\exec-ccb668f5-9a47-4a76-a0a7-3ef2c28bb44a.png"
+    },
+    {
+      "key": "consent",
+      "prompt": "Use case: stylized-concept. Asset type: production website illustration ONLY, not a website screenshot. Premium friendly tactile 3D security educational scene for Medi Q, white/cool mist-blue studio background, navy and restrained cobalt surfaces, teal accents, soft natural shadows, translucent glass and brushed metal. Landscape 3:2 framing, objects centrally composed with generous margins suitable for mobile. Absolutely NO letters, NO words, NO numerals, NO logos, NO UI, NO caption, NO date, NO personal information. Use pictograms only. Full coherent scene, not icon grid. A mature 56-year-old fictional male patient's hand explicitly selecting one medical exam card and placing it into bounded transparent permission frame on a consent desk. Nearby selectable hospital, purpose, action and time pictogram tokens. No files flowing through phone.",
+      "source": "C:\\Users\\user\\.codex\\generated_images\\01a03ccd-541c-7d92-8485-9f5dd2b91220\\exec-1cb08dc9-142e-408f-b1a5-7a2daeaf2062.png"
+    },
+    {
+      "key": "ticket",
+      "prompt": "Use case: stylized-concept. Asset type: production website illustration ONLY, not a website screenshot. Premium friendly tactile 3D security educational scene for Medi Q, white/cool mist-blue studio background, navy and restrained cobalt surfaces, teal accents, soft natural shadows, translucent glass and brushed metal. Landscape 3:2 framing, objects centrally composed with generous margins suitable for mobile. Absolutely NO letters, NO words, NO numerals, NO logos, NO UI, NO caption, NO date, NO personal information. Use pictograms only. Full coherent scene, not icon grid. A large cobalt single-use perforated connection ticket with abstract nonfunctional QR-like pattern and clock pictogram fitting ticket slot. A faded used ticket stopped by muted red barrier. No numerals.",
+      "source": "C:\\Users\\user\\.codex\\generated_images\\01a03ccd-541c-7d92-8485-9f5dd2b91220\\exec-af96b326-0279-4dee-a434-290f5351d27a.png"
+    },
+    {
+      "key": "policy",
+      "prompt": "Use case: stylized-concept. Asset type: production website illustration ONLY, not a website screenshot. Premium friendly tactile 3D security educational scene for Medi Q, white/cool mist-blue studio background, navy and restrained cobalt surfaces, teal accents, soft natural shadows, translucent glass and brushed metal. Landscape 3:2 framing, objects centrally composed with generous margins suitable for mobile. Absolutely NO letters, NO words, NO numerals, NO logos, NO UI, NO caption, NO date, NO personal information. Use pictograms only. Full coherent scene, not icon grid. Six elegant translucent interlocking condition plates with hospital, profile, purpose briefcase, exam stack, clock and consent pictograms. One matching request passes aligned slots, a mismatched request stopped. No text.",
+      "source": "C:\\Users\\user\\.codex\\generated_images\\01a03ccd-541c-7d92-8485-9f5dd2b91220\\exec-790900d1-7353-42d1-b4d5-16e3b620b5d7.png"
+    },
+    {
+      "key": "token",
+      "prompt": "Use case: stylized-concept. Asset type: production website illustration ONLY, not a website screenshot. Premium friendly tactile 3D security educational scene for Medi Q, white/cool mist-blue studio background, navy and restrained cobalt surfaces, teal accents, soft natural shadows, translucent glass and brushed metal. Landscape 3:2 framing, objects centrally composed with generous margins suitable for mobile. Absolutely NO letters, NO words, NO numerals, NO logos, NO UI, NO caption, NO date, NO personal information. Use pictograms only. Full coherent scene, not icon grid. A short-lived blue pass geometrically bound by matching connector to owner's tablet, hourglass alongside. A copied gray pass cannot match connector and remains outside. No biometrics.",
+      "source": "C:\\Users\\user\\.codex\\generated_images\\01a03ccd-541c-7d92-8485-9f5dd2b91220\\exec-a3fcc1df-118d-4b1c-8d86-54c5afe273e6.png"
+    },
+    {
+      "key": "encryption",
+      "prompt": "Use case: stylized-concept. Asset type: production website illustration ONLY, not a website screenshot. Premium friendly tactile 3D security educational scene for Medi Q, white/cool mist-blue studio background, navy and restrained cobalt surfaces, teal accents, soft natural shadows, translucent glass and brushed metal. Landscape 3:2 framing, objects centrally composed with generous margins suitable for mobile. Absolutely NO letters, NO words, NO numerals, NO logos, NO UI, NO caption, NO date, NO personal information. Use pictograms only. Full coherent scene, not icon grid. Encrypted image parcel inside lower protected transparent conduit to endpoint, elevated separate key vault safe with a thin dotted key authorization connection to endpoint only. Image never enters vault. Two distinct visible paths, no hospital buildings.",
+      "source": "C:\\Users\\user\\.codex\\generated_images\\01a03ccd-541c-7d92-8485-9f5dd2b91220\\exec-ada1d8d2-2e1d-4f44-8f0e-8e6b6774c6d9.png"
+    },
+    {
+      "key": "view-storage",
+      "prompt": "Use case: stylized-concept. Asset type: production website illustration ONLY, not a website screenshot. Premium friendly tactile 3D security educational scene for Medi Q, white/cool mist-blue studio background, navy and restrained cobalt surfaces, teal accents, soft natural shadows, translucent glass and brushed metal. Landscape 3:2 framing, objects centrally composed with generous margins suitable for mobile. Absolutely NO letters, NO words, NO numerals, NO logos, NO UI, NO caption, NO date, NO personal information. Use pictograms only. Full coherent scene, not icon grid. Exam cards branch into upper viewing monitor with abstract nonclinical grayscale medical image and lower locked storage drawer with separate permission checkpoint. Eye and save pictograms distinguish two branches. No diagnostic text.",
+      "source": "C:\\Users\\user\\.codex\\generated_images\\01a03ccd-541c-7d92-8485-9f5dd2b91220\\exec-d8bab51e-76bb-4f86-a65d-6ceadb53fcde.png"
+    },
+    {
+      "key": "expiry",
+      "prompt": "Use case: stylized-concept. Asset type: production website illustration ONLY, not a website screenshot. Premium friendly tactile 3D security educational scene for Medi Q, white/cool mist-blue studio background, navy and restrained cobalt surfaces, teal accents, soft natural shadows, translucent glass and brushed metal. Landscape 3:2 framing, objects centrally composed with generous margins suitable for mobile. Absolutely NO letters, NO words, NO numerals, NO logos, NO UI, NO caption, NO date, NO personal information. Use pictograms only. Full coherent scene, not icon grid. Expired muted pass by a closed softly red access barrier, clock and revoke toggle, separate deletion receipt tray with distinct waiting clock, retry arrow and delete pictograms. No simultaneous complete badges.",
+      "source": "C:\\Users\\user\\.codex\\generated_images\\01a03ccd-541c-7d92-8485-9f5dd2b91220\\exec-e044ba67-d26b-4674-b6f9-10bc7819852b.png"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "status": "PASS",
+  "review": "DRAFT / UNASSIGNED",
+  "checks": [
+    "NODE_TLS_CHAIN_AND_HOSTNAME_VERIFIED",
+    "TRUSTED_HTTPS_NO_CERTIFICATE_BYPASS",
+    "DECODED_SYNTHETIC_FIXTURE_TWO_DIFFERENT_PIXELS_AND_NEXT_SLICE",
+    "DARK_VIEWER_390_NO_HORIZONTAL_OVERFLOW_TOUCH_TARGET",
+    "DARK_VIEWER_1440_NO_HORIZONTAL_OVERFLOW_TOUCH_TARGET",
+    "CLOSE_REVOKES_OBJECT_URL_AND_RESTORES_FOCUS",
+    "ESCAPE_CLEARS_PIXELS",
+    "DENY_NO_VISIBLE_PIXELS_OR_FALLBACK",
+    "WRONG_SCOPE_NO_VISIBLE_PIXELS_OR_FALLBACK",
+    "CORRUPT_NO_VISIBLE_PIXELS_OR_FALLBACK",
+    "EXPIRED_NO_VISIBLE_PIXELS_OR_FALLBACK",
+    "CLOSED_VIEWER_NEVER_DISPLAYS_LATE_RESPONSE",
+    "NO_BROWSER_STORAGE_TOKENS"
+  ],
+  "cleanup": true,
+  "networkErrors": [
+    "net::ERR_ABORTED"
+  ],
+  "scriptErrors": [],
+  "pageRequests": 2,
+  "moduleRequests": 1,
+  "grantRequests": 7,
+  "imageReads": 6,
+  "browserExitCode": 1,
+  "browserStopConfirmed": true,
+  "elapsedMs": 10748,
+  "scope": "actual Chrome with trusted local HTTPS and 2x2 PNG protocol fixture; not actual PACS, Azure, SQL authority, web/mobile full application or deployment"
+}

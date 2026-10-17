@@ -1,0 +1,2635 @@
+/* Clinician briefing desk: editorial hierarchy, visible access state, no wallet metaphor. */
+#hospital-saas-app #clinical-desk {
+  --prep-ink: #172b43;
+  --prep-muted: #5b6f86;
+  --prep-line: #d7e1ec;
+  --prep-blue: #3566b8;
+  --prep-pale: #edf3fb;
+  color: var(--prep-ink);
+}
+
+#hospital-saas-app #clinical-desk .mq-toolbar {
+  align-items: end;
+  gap: 22px;
+  margin-bottom: 22px;
+}
+
+#hospital-saas-app #clinical-desk .desk-greeting {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 10px;
+  border-left: 3px solid #3f79ca;
+  color: #476483;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+#hospital-saas-app #clinical-desk .mq-title h2 {
+  max-width: 19ch;
+  margin: 8px 0;
+  color: var(--prep-ink);
+  font-size: clamp(28px, 3vw, 42px);
+  font-weight: 680;
+  letter-spacing: -.052em;
+  line-height: 1.16;
+  text-wrap: balance;
+}
+
+#hospital-saas-app #clinical-desk .mq-title p {
+  max-width: 54ch;
+  color: var(--prep-muted);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+#hospital-saas-app #clinical-desk .mq-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+#hospital-saas-app #clinical-desk .mq-clinical-workspace {
+  display: grid;
+  grid-template-columns: minmax(220px, .72fr) minmax(0, 2.08fr) minmax(232px, .78fr);
+  gap: 16px;
+  align-items: start;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+#hospital-saas-app #clinical-desk .mq-clinical-list {
+  grid-column: 1;
+  grid-row: 1;
+  min-width: 0;
+}
+
+#hospital-saas-app #clinical-desk .mq-clinical-list > .mq-card {
+  padding: 18px;
+  border: 1px solid var(--prep-line);
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 8px 24px #1b34500a;
+}
+
+#hospital-saas-app #clinical-desk .desk-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+#hospital-saas-app #clinical-desk .desk-section-head h3 {
+  margin: 0;
+  color: var(--prep-ink);
+  font-size: 17px;
+  font-weight: 680;
+  letter-spacing: -.035em;
+}
+
+#hospital-saas-app #clinical-desk .desk-section-head > span {
+  color: var(--prep-muted);
+  font-size: 11px;
+}
+
+#hospital-saas-app #clinical-desk .mq-clinical-filters {
+  display: grid;
+  gap: 12px;
+  margin: 0 0 14px;
+}
+
+#hospital-saas-app #clinical-desk .mq-clinical-filters label {
+  display: grid;
+  min-width: 0;
+  gap: 6px;
+  color: #52677f;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+#hospital-saas-app #clinical-desk .mq-clinical-filters :is(input, select) {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 44px;
+  border-color: #cfdae7;
+  border-radius: 10px;
+  background: #fff;
+  color: var(--prep-ink);
+  font: inherit;
+  font-size: 12px;
+}
+
+#hospital-saas-app #clinical-desk #clinician-result-count {
+  min-height: 18px;
+  color: var(--prep-muted);
+  font-size: 11px;
+}
+
+#hospital-saas-app #clinical-desk #doctor-studies {
+  display: flex;
+  max-height: min(620px, 68vh);
+  flex-direction: column;
+  gap: 9px;
+  overflow: auto;
+  padding: 2px;
+  scrollbar-color: #b6c7db transparent;
+  scrollbar-width: thin;
+}
+
+#hospital-saas-app #clinical-desk .mq-study-choice {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 92px;
+  padding: 13px;
+  border: 1px solid #d8e2ed;
+  border-radius: 13px;
+  background: #fff;
+  text-align: left;
+  transition: border-color .16s ease, background-color .16s ease, transform .16s ease;
+}
+
+#hospital-saas-app #clinical-desk .mq-study-choice:hover {
+  border-color: #8daed8;
+  background: #f7faff;
+}
+
+#hospital-saas-app #clinical-desk .mq-study-choice[aria-pressed="true"] {
+  border-color: #4779be;
+  background: var(--prep-pale);
+  box-shadow: inset 3px 0 #4779be;
+}
+
+#hospital-saas-app #clinical-desk .mq-study-copy {
+  min-width: 0;
+  gap: 5px;
+  overflow-wrap: anywhere;
+}
+
+#hospital-saas-app #clinical-desk .mq-study-copy strong {
+  color: var(--prep-ink);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+#hospital-saas-app #clinical-desk .mq-study-copy small,
+#hospital-saas-app #clinical-desk .mq-study-state {
+  color: var(--prep-muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+#hospital-saas-app #clinical-desk .mq-modality {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  flex: none;
+  place-items: center;
+  border-radius: 11px;
+  background: #e4edf8;
+  color: #315d91;
+  font-size: 10px;
+  font-weight: 750;
+}
+
+#hospital-saas-app #clinical-desk .mq-clinical-canvas {
+  grid-column: 2;
+  grid-row: 1;
+  display: grid;
+  min-width: 0;
+  min-height: 470px;
+  grid-template-columns: minmax(0, 1.04fr) minmax(0, .96fr);
+  gap: 0;
+  overflow: hidden;
+  padding: 0;
+  border: 1px solid #d2deeb;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 14px 36px #18345212;
+  transform: none;
+}
+
+#hospital-saas-app #clinical-desk .mq-clinical-canvas::before,
+#hospital-saas-app #clinical-desk .mq-clinical-canvas::after {
+  display: none;
+}
+
+#hospital-saas-app #clinical-desk .desk-hero-visual {
+  grid-column: 1;
+  grid-row: 1;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  padding: 23px;
+  border-right: 1px solid #253952;
+  background: #101b2a;
+  color: #eaf1fb;
+}
+
+#hospital-saas-app #clinical-desk .desk-preview-heading {
+  display: flex;
+  min-height: 34px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+#hospital-saas-app #clinical-desk .desk-preview-heading > span {
+  color: #aabbd0;
+  font-size: 11px;
+}
+
+#hospital-saas-app #clinical-desk .desk-preview-heading h3 {
+  margin: 0;
+  color: #f6f8fc;
+  font-size: 17px;
+  font-weight: 650;
+  text-align: right;
+}
+
+#hospital-saas-app #clinical-desk #clinical-preview-host {
+  display: flex;
+  min-height: 334px;
+  flex: 1;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #34445a;
+  border-radius: 15px;
+  background: #070d15;
+  color: #dce6f4;
+}
+
+#hospital-saas-app #clinical-desk #clinical-preview-host .mq-viewer-shell {
+  min-width: 0;
+  height: 100%;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: #070d15;
+  box-shadow: none;
+}
+
+#hospital-saas-app #clinical-desk #clinical-preview-host .mq-viewport {
+  min-height: 300px;
+  height: 300px;
+  background: #070d15;
+}
+
+#hospital-saas-app #clinical-desk #clinical-preview-host #viewer-placeholder {
+  display: flex;
+  max-width: 300px;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 18px;
+  color: #bac9dc !important;
+  text-align: center;
+}
+
+#hospital-saas-app #clinical-desk #clinical-preview-host .studio-lock {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  margin: 0 0 17px;
+  border: 1px solid #3d526c;
+  border-radius: 16px;
+  background: #1a2a3f;
+  color: #a9c7f2;
+  box-shadow: none;
+}
+
+#hospital-saas-app #clinical-desk #clinical-preview-host .studio-lock svg {
+  width: 22px;
+  height: 22px;
+}
+
+#hospital-saas-app #clinical-desk #clinical-preview-host #viewer-placeholder h2 {
+  margin: 0 0 9px;
+  color: #f3f6fb;
+  font-size: 16px;
+  font-weight: 650;
+  letter-spacing: -.025em;
+}
+
+#hospital-saas-app #clinical-desk #clinical-preview-host #viewer-placeholder p {
+  margin: 0;
+  color: #adbed2;
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+#hospital-saas-app #clinical-desk #clinical-preview-host :is(#studio-open-image, #viewer-placeholder small) {
+  display: none;
+}
+
+#hospital-saas-app #clinical-desk .desk-preview-caption {
+  margin: 13px 0 0;
+  color: #afbed1;
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+#hospital-saas-app #clinical-desk .desk-hero-copy {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  padding: clamp(20px, 2vw, 30px);
+  background: #fff;
+}
+
+#hospital-saas-app #clinical-desk .desk-hero-caption {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 20px;
+  color: var(--prep-muted);
+  font-size: 11px;
+}
+
+#hospital-saas-app #clinical-desk .desk-status-tag {
+  display: inline-flex;
+  min-height: 28px;
+  align-items: center;
+  gap: 7px;
+  padding: 0 10px;
+  border: 1px solid #e5d8ad;
+  border-radius: 7px;
+  background: #fbf6e8;
+  color: #705b27;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+#hospital-saas-app #clinical-desk .desk-status-tag[data-state="ready"] {
+  border-color: #b8d8cf;
+  background: #e9f5f1;
+  color: #276554;
+}
+
+#hospital-saas-app #clinical-desk .desk-status-tag::before {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  content: "";
+}
+
+#hospital-saas-app #clinical-desk .mq-dossier-patient {
+  display: flex;
+  align-items: start;
+  gap: 12px;
+  margin-bottom: 19px;
+}
+
+#hospital-saas-app #clinical-desk .mq-dossier-avatar {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  flex: none;
+  place-items: center;
+  border-radius: 12px;
+  background: #e8eff9;
+  color: #315f9c;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+#hospital-saas-app #clinical-desk .mq-dossier-patient strong {
+  display: block;
+  max-width: 18ch;
+  color: var(--prep-ink);
+  font-size: clamp(21px, 1.8vw, 27px);
+  font-weight: 700;
+  letter-spacing: -.045em;
+  line-height: 1.35;
+  text-wrap: balance;
+}
+
+#hospital-saas-app #clinical-desk .mq-dossier-patient p {
+  margin: 7px 0 0;
+  color: var(--prep-muted);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+#hospital-saas-app #clinical-desk .mq-dossier-route {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin: 0;
+  padding: 14px 0;
+  border-top: 1px solid var(--prep-line);
+  border-bottom: 1px solid var(--prep-line);
+  border-radius: 0;
+  background: transparent;
+  font-size: 12px;
+}
+
+#hospital-saas-app #clinical-desk .desk-route-stop {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 0;
+}
+
+#hospital-saas-app #clinical-desk .desk-route-stop::after {
+  display: none;
+}
+
+#hospital-saas-app #clinical-desk .desk-route-stop small {
+  flex: none;
+  color: #6d7d91;
+  font-size: 10px;
+}
+
+#hospital-saas-app #clinical-desk .desk-route-stop strong {
+  color: #2a405b;
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.55;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+#hospital-saas-app #clinical-desk .mq-dossier-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 16px;
+  margin: 17px 0;
+}
+
+#hospital-saas-app #clinical-desk .mq-dossier-facts > div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+#hospital-saas-app #clinical-desk .mq-dossier-facts dt {
+  color: #75859a;
+  font-size: 10px;
+}
+
+#hospital-saas-app #clinical-desk .mq-dossier-facts dd {
+  margin: 0;
+  color: #2b405a;
+  font-size: 11px;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+
+#hospital-saas-app #clinical-desk .mq-canvas-actions {
+  margin-top: auto;
+  padding-top: 15px;
+  border-top: 1px solid var(--prep-line);
+}
+
+#hospital-saas-app #clinical-desk .mq-canvas-actions p {
+  margin: 0 0 12px;
+  color: var(--prep-muted);
+  font-size: 11px;
+  line-height: 1.65;
+}
+
+#hospital-saas-app #clinical-desk .desk-action-row {
+  display: grid;
+  gap: 8px;
+}
+
+#hospital-saas-app #clinical-desk .desk-action-row .mq-btn {
+  width: 100%;
+  min-height: 46px;
+  border-radius: 10px;
+  white-space: normal;
+}
+
+#hospital-saas-app #clinical-desk .desk-action-row .mq-btn-primary {
+  border-color: #315f9e;
+  background: #315f9e;
+  box-shadow: 0 5px 13px #315f9e24;
+}
+
+#hospital-saas-app #clinical-desk .prep-guide {
+  grid-column: 3;
+  grid-row: 1;
+  display: grid;
+  min-width: 0;
+  gap: 12px;
+}
+
+#hospital-saas-app #clinical-desk .prep-guide section {
+  padding: 18px;
+  border: 1px solid var(--prep-line);
+  border-radius: 16px;
+  background: #fff;
+}
+
+#hospital-saas-app #clinical-desk .prep-guide section:first-child {
+  border-color: #203854;
+  background: #172c45;
+  color: #f2f6fb;
+}
+
+#hospital-saas-app #clinical-desk .prep-guide h3 {
+  margin: 0 0 9px;
+  color: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -.03em;
+}
+
+#hospital-saas-app #clinical-desk .prep-guide p {
+  margin: 0 0 12px;
+  color: var(--prep-muted);
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+#hospital-saas-app #clinical-desk .prep-guide section:first-child p {
+  color: #c0cde0;
+}
+
+#hospital-saas-app #clinical-desk .prep-guide ol {
+  display: grid;
+  gap: 10px;
+  margin: 13px 0 16px;
+  padding: 0;
+  list-style: none;
+  counter-reset: briefing-step;
+}
+
+#hospital-saas-app #clinical-desk .prep-guide li {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  align-items: center;
+  gap: 9px;
+  margin: 0;
+  color: #eef3fa;
+  font-size: 11px;
+  line-height: 1.55;
+  counter-increment: briefing-step;
+}
+
+#hospital-saas-app #clinical-desk .prep-guide li::before {
+  display: grid;
+  width: 23px;
+  height: 23px;
+  place-items: center;
+  border: 1px solid #6b829f;
+  border-radius: 50%;
+  color: #c7d9f2;
+  content: counter(briefing-step);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+#hospital-saas-app #clinical-desk .prep-guide section:first-child button {
+  width: 100%;
+  min-height: 42px;
+  border-color: #7396c7;
+  background: #e7eef8;
+  color: #1d3e67;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+#hospital-saas-app #clinical-desk .prep-guide .prep-record-note {
+  border-color: #d3dfed;
+  background: #eaf0f8;
+}
+
+#hospital-saas-app #clinical-desk .prep-guide .prep-record-note h3 {
+  color: #1f3b5d;
+}
+
+#hospital-saas-app #clinical-desk .prep-guide .prep-record-note button,
+#hospital-saas-app #clinical-desk .prep-guide section:not(:first-child) button {
+  min-height: 40px;
+  border-radius: 9px;
+  font-size: 11px;
+  white-space: normal;
+}
+
+#hospital-saas-app #clinical-desk .desk-activity {
+  grid-column: 2 / 4;
+  grid-row: 2;
+  min-width: 0;
+  padding: 20px 4px 8px;
+  border-top: 1px solid var(--prep-line);
+}
+
+#hospital-saas-app #clinical-desk #desk-recent-activity > p {
+  margin: 10px 0;
+  color: var(--prep-muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+#hospital-saas-app #clinical-desk .desk-activity-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 0;
+  border-bottom: 1px solid #e7edf4;
+  font-size: 11px;
+}
+
+#hospital-saas-app #clinical-desk .desk-activity-row strong {
+  color: #2c4665;
+  font-weight: 650;
+}
+
+#hospital-saas-app #clinical-desk .desk-activity-row span,
+#hospital-saas-app #clinical-desk .desk-activity-row time {
+  color: var(--prep-muted);
+}
+
+#hospital-saas-app #clinical-desk .desk-activity-row time {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+}
+
+#hospital-saas-app #clinical-desk #desk-details-dialog {
+  position: fixed;
+  inset: 0 0 0 auto;
+  width: min(460px, 100%);
+  max-width: 100%;
+  height: 100dvh;
+  max-height: 100dvh;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 28px;
+  border: 0;
+  border-left: 1px solid var(--prep-line);
+  border-radius: 18px 0 0 18px;
+  background: #fff;
+  color: var(--prep-ink);
+  box-shadow: -20px 0 60px #182d4b22;
+}
+
+#hospital-saas-app #clinical-desk #desk-details-dialog::backdrop {
+  background: #182d4b66;
+  backdrop-filter: blur(3px);
+}
+
+#hospital-saas-app #clinical-desk :is(button, input, select, a):focus-visible {
+  outline: 3px solid #7da6dc;
+  outline-offset: 3px;
+}
+
+@media (max-width: 1370px) {
+  #hospital-saas-app #clinical-desk .mq-clinical-workspace {
+    grid-template-columns: minmax(210px, .72fr) minmax(0, 1.7fr);
+  }
+
+  #hospital-saas-app #clinical-desk .prep-guide {
+    grid-column: 1 / 3;
+    grid-row: 2;
+    grid-template-columns: 1.1fr 1fr 1fr;
+  }
+
+  #hospital-saas-app #clinical-desk .desk-activity {
+    grid-column: 1 / 3;
+    grid-row: 3;
+  }
+}
+
+@media (max-width: 980px) {
+  #hospital-saas-app #clinical-desk .mq-clinical-canvas {
+    grid-template-columns: 1fr;
+  }
+
+  #hospital-saas-app #clinical-desk .desk-hero-visual {
+    grid-column: 1;
+    grid-row: 1;
+    border-right: 0;
+    border-bottom: 1px solid #253952;
+  }
+
+  #hospital-saas-app #clinical-desk .desk-hero-copy {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  #hospital-saas-app #clinical-desk #clinical-preview-host {
+    min-height: 280px;
+  }
+}
+
+@media (max-width: 700px) {
+  #hospital-saas-app #clinical-desk .mq-toolbar {
+    align-items: start;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+
+  #hospital-saas-app #clinical-desk .mq-title h2 {
+    max-width: 17ch;
+    font-size: 29px;
+  }
+
+  #hospital-saas-app #clinical-desk .mq-actions {
+    width: 100%;
+  }
+
+  #hospital-saas-app #clinical-desk .mq-actions .mq-btn {
+    flex: 1 1 auto;
+    min-height: 44px;
+  }
+
+  #hospital-saas-app #clinical-desk .mq-clinical-workspace {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  #hospital-saas-app #clinical-desk .mq-clinical-list {
+    order: 0;
+    width: 100%;
+  }
+
+  #hospital-saas-app #clinical-desk .mq-clinical-list > .mq-card {
+    padding: 15px;
+  }
+
+  #hospital-saas-app #clinical-desk #doctor-studies {
+    max-height: none;
+    flex-direction: row;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    scroll-snap-type: x proximity;
+  }
+
+  #hospital-saas-app #clinical-desk .mq-study-choice {
+    min-width: 235px;
+    flex: 0 0 235px;
+    scroll-snap-align: start;
+  }
+
+  #hospital-saas-app #clinical-desk .mq-clinical-canvas {
+    order: 1;
+    width: 100%;
+    min-height: 0;
+    border-radius: 17px;
+  }
+
+  #hospital-saas-app #clinical-desk .desk-hero-visual {
+    padding: 17px;
+  }
+
+  #hospital-saas-app #clinical-desk #clinical-preview-host .mq-viewport {
+    min-height: 250px;
+    height: 250px;
+  }
+
+  #hospital-saas-app #clinical-desk .desk-hero-copy {
+    padding: 20px;
+  }
+
+  #hospital-saas-app #clinical-desk .mq-dossier-facts {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  #hospital-saas-app #clinical-desk .prep-guide {
+    order: 2;
+    width: 100%;
+    grid-template-columns: 1fr;
+  }
+
+  #hospital-saas-app #clinical-desk .desk-activity {
+    order: 3;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  #hospital-saas-app #clinical-desk .desk-activity-row {
+    flex-wrap: wrap;
+    gap: 7px 10px;
+  }
+
+  #hospital-saas-app #clinical-desk .desk-activity-row time {
+    width: 100%;
+    margin: 0;
+  }
+
+  #hospital-saas-app #clinical-desk #desk-details-dialog {
+    inset: auto 0 0;
+    width: 100%;
+    height: min(88dvh, 760px);
+    max-height: 88dvh;
+    border: 0;
+    border-top: 1px solid var(--prep-line);
+    border-radius: 18px 18px 0 0;
+    padding: 22px 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #hospital-saas-app #clinical-desk * {
+    scroll-behavior: auto !important;
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* Clinician home: an action-first clinical command desk, intentionally distinct from the patient wallet. */
+body:has(#hospital-saas-app:not([hidden])) > .mq-demo-tools {
+  display: none;
+}
+
+#hospital-saas-app #clinical-home {
+  --home-ink: #162941;
+  --home-muted: #60738a;
+  --home-line: #d9e2ec;
+  --home-blue: #3566b8;
+  --home-lime: #c9ef78;
+  display: grid;
+  gap: 28px;
+  color: var(--home-ink);
+}
+
+#hospital-saas-app #clinical-home .clinical-home-hero {
+  position: relative;
+  display: grid;
+  min-height: 328px;
+  grid-template-columns: minmax(0, 1.4fr) minmax(265px, .6fr);
+  gap: 22px;
+  overflow: hidden;
+  padding: clamp(28px, 4vw, 52px);
+  border-radius: 28px;
+  background: #11253e;
+  color: #f8fbff;
+  box-shadow: 0 24px 54px #172b441c;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-hero::before {
+  position: absolute;
+  top: -146px;
+  right: 25%;
+  width: 420px;
+  height: 420px;
+  border: 1px solid #ffffff17;
+  border-radius: 50%;
+  content: "";
+  pointer-events: none;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-hero::after {
+  position: absolute;
+  top: -86px;
+  right: 29%;
+  width: 300px;
+  height: 300px;
+  border: 1px solid #c9ef7822;
+  border-radius: 50%;
+  content: "";
+  pointer-events: none;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-intro,
+#hospital-saas-app #clinical-home .clinical-home-first-step {
+  position: relative;
+  z-index: 1;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: #c0d0e3;
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: .045em;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-kicker-mark {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--home-lime);
+  box-shadow: 0 0 0 5px #c9ef781f;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-intro h2 {
+  max-width: 18ch;
+  margin: 24px 0 12px;
+  color: #fff;
+  font-size: clamp(34px, 4.2vw, 56px);
+  font-weight: 690;
+  letter-spacing: -.062em;
+  line-height: 1.11;
+  text-wrap: balance;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-intro h2 em {
+  color: var(--home-lime);
+  font-style: normal;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-intro h2 em span {
+  display: inline;
+  margin-left: .18em;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-intro > p {
+  max-width: 53ch;
+  margin: 0;
+  color: #c2d0e1;
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-actions .mq-btn {
+  min-height: 48px;
+  padding: 12px 19px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-actions .mq-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  border-color: var(--home-lime);
+  background: var(--home-lime);
+  color: #152941;
+  box-shadow: 0 7px 20px #c9ef782b;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-actions .mq-btn:not(.mq-btn-primary) {
+  border-color: #ffffff4a;
+  background: #ffffff0a;
+  color: #f5f8fc;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-trust {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 22px;
+  color: #a8bad0;
+  font-size: 11px;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-trust span {
+  display: grid;
+  width: 22px;
+  height: 22px;
+  place-items: center;
+  border: 1px solid #c9ef7866;
+  border-radius: 7px;
+  color: var(--home-lime);
+  font-size: 10px;
+  font-weight: 750;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-first-step {
+  display: flex;
+  min-height: 248px;
+  flex-direction: column;
+  align-self: stretch;
+  padding: 22px;
+  border: 1px solid #ffffff23;
+  border-radius: 20px;
+  background: #ffffff0b;
+  backdrop-filter: blur(8px);
+}
+
+#hospital-saas-app #clinical-home .clinical-home-step-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #b6c7db;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-step-number {
+  color: var(--home-lime);
+  font-size: 13px;
+  font-weight: 750;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-scope-mark {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 5px;
+  margin-top: 23px;
+  transform: rotate(-8deg);
+}
+
+#hospital-saas-app #clinical-home .clinical-home-scope-mark span {
+  border: 1px solid #c9ef7880;
+  border-radius: 6px;
+  background: #c9ef7816;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-scope-mark span:nth-child(2),
+#hospital-saas-app #clinical-home .clinical-home-scope-mark span:nth-child(3) {
+  background: var(--home-lime);
+}
+
+#hospital-saas-app #clinical-home .clinical-home-first-step h3 {
+  margin: 18px 0 7px;
+  color: #fff;
+  font-size: 20px;
+  font-weight: 680;
+  letter-spacing: -.045em;
+  line-height: 1.35;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-first-step p {
+  margin: 0;
+  color: #bdcadd;
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-first-step button {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding: 10px 0 0;
+  border: 0;
+  background: transparent;
+  color: var(--home-lime);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-flow,
+#hospital-saas-app #clinical-home .clinical-home-status,
+#hospital-saas-app #clinical-home .clinical-home-latest-card,
+#hospital-saas-app #clinical-home .clinical-home-quick-links {
+  min-width: 0;
+  padding: 23px;
+  border: 1px solid var(--home-line);
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 8px 26px #1a30470a;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-section-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 17px;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-section-heading > div > span {
+  color: #6c7d92;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: .11em;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-section-heading h3 {
+  margin: 6px 0 0;
+  color: var(--home-ink);
+  font-size: 19px;
+  font-weight: 690;
+  letter-spacing: -.04em;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-section-heading > p {
+  margin: 0;
+  color: var(--home-muted);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-flow-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-flow-step {
+  display: flex;
+  min-height: 82px;
+  align-items: center;
+  gap: 13px;
+  padding: 13px 14px;
+  border: 1px solid #e0e7ef;
+  border-radius: 14px;
+  background: #f8fafc;
+  color: var(--home-ink);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .18s ease, background-color .18s ease, transform .18s ease;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-flow-step:hover {
+  transform: translateY(-2px);
+  border-color: #a8bfdc;
+  background: #f1f6fc;
+}
+
+#hospital-saas-app #clinical-home .clinical-flow-number {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  flex: none;
+  place-items: center;
+  border-radius: 11px;
+  background: #e8eff8;
+  color: #2f5f9b;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-flow-step:nth-child(2) .clinical-flow-number {
+  background: #edf3df;
+  color: #405b1d;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-flow-step:nth-child(3) .clinical-flow-number {
+  background: #e6eef0;
+  color: #355967;
+}
+
+#hospital-saas-app #clinical-home .clinical-flow-copy {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+}
+
+#hospital-saas-app #clinical-home .clinical-flow-copy strong {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+#hospital-saas-app #clinical-home .clinical-flow-copy small {
+  color: var(--home-muted);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+#hospital-saas-app #clinical-home .clinical-flow-arrow {
+  margin-left: auto;
+  color: #7a8ba0;
+  font-size: 15px;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-demo-tag {
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: #edf3fb;
+  color: #365c91;
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-metrics article {
+  display: grid;
+  min-height: 108px;
+  align-content: start;
+  gap: 7px;
+  padding: 15px;
+  border: 1px solid #e6ebf1;
+  border-radius: 14px;
+  background: #fbfcfe;
+}
+
+#hospital-saas-app #clinical-home .clinical-metric-label {
+  color: var(--home-muted);
+  font-size: 11px;
+  font-weight: 650;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-metrics strong {
+  overflow-wrap: anywhere;
+  color: var(--home-ink);
+  font-size: 24px;
+  font-weight: 740;
+  letter-spacing: -.045em;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-metrics article:nth-child(2) strong {
+  font-size: 16px;
+  letter-spacing: -.025em;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-metrics small {
+  color: #708198;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-status-note {
+  display: flex;
+  align-items: start;
+  gap: 9px;
+  margin: 14px 0 0;
+  color: var(--home-muted);
+  font-size: 11px;
+  line-height: 1.65;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-status-note > span {
+  display: grid;
+  width: 18px;
+  height: 18px;
+  flex: none;
+  place-items: center;
+  border: 1px solid #c5d3e2;
+  border-radius: 50%;
+  color: #395d8b;
+  font-size: 10px;
+  font-weight: 750;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-latest {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(230px, .7fr);
+  gap: 16px;
+  align-items: stretch;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-latest-card,
+#hospital-saas-app #clinical-home .clinical-home-quick-links {
+  padding: 20px;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-latest-card .clinical-home-section-heading {
+  align-items: center;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-latest-card .mq-link {
+  min-height: 44px;
+  padding: 8px 0 8px 8px;
+  color: var(--home-blue);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+#hospital-saas-app #clinical-home .mq-table-wrap {
+  overflow-x: auto;
+  border: 1px solid #e7ecf2;
+  border-radius: 12px;
+  scrollbar-color: #bfccda transparent;
+  scrollbar-width: thin;
+}
+
+#hospital-saas-app #clinical-home .mq-table-wrap table {
+  width: 100%;
+  min-width: 690px;
+  border-collapse: collapse;
+  color: var(--home-ink);
+  font-size: 11px;
+}
+
+#hospital-saas-app #clinical-home .mq-table-wrap th,
+#hospital-saas-app #clinical-home .mq-table-wrap td {
+  padding: 11px 10px;
+  border-bottom: 1px solid #e7ecf2;
+  text-align: left;
+  white-space: nowrap;
+}
+
+#hospital-saas-app #clinical-home .mq-table-wrap th {
+  background: #f7f9fc;
+  color: #65778d;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+#hospital-saas-app #clinical-home .mq-table-wrap tr:last-child td {
+  border-bottom: 0;
+}
+
+#hospital-saas-app #clinical-home .mq-table-wrap .mq-btn {
+  min-height: 38px;
+  padding: 7px 10px;
+  font-size: 10px;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-quick-links {
+  display: grid;
+  align-content: start;
+  gap: 7px;
+  background: #f0f4f9;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-quick-links > span {
+  margin-bottom: 3px;
+  color: #667b94;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-quick-links button {
+  display: grid;
+  min-height: 64px;
+  grid-template-columns: 30px minmax(0, 1fr) 18px;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 0;
+  border: 0;
+  border-top: 1px solid #d9e2ec;
+  background: transparent;
+  color: var(--home-ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+#hospital-saas-app #clinical-home .clinical-quick-index {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border-radius: 9px;
+  background: #dce7f5;
+  color: #2f5d97;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-quick-links button > span:nth-child(2) {
+  display: grid;
+  gap: 4px;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-quick-links strong {
+  font-size: 12px;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-quick-links small {
+  color: var(--home-muted);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-quick-links button > b {
+  color: #597492;
+  font-size: 14px;
+}
+
+#hospital-saas-app #clinical-home :is(button, a):focus-visible {
+  outline: 3px solid #70a6e8;
+  outline-offset: 3px;
+}
+
+@media (max-width: 1120px) {
+  #hospital-saas-app #clinical-home .clinical-home-hero {
+    grid-template-columns: minmax(0, 1.1fr) minmax(240px, .8fr);
+  }
+
+  #hospital-saas-app #clinical-home .clinical-home-latest {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  #hospital-saas-app #clinical-home .clinical-home-quick-links {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  #hospital-saas-app #clinical-home .clinical-home-quick-links > span {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 760px) {
+  #hospital-saas-app #clinical-home {
+    gap: 18px;
+  }
+
+  #hospital-saas-app #clinical-home .clinical-home-hero {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+    padding: 25px 20px 20px;
+    border-radius: 21px;
+  }
+
+  #hospital-saas-app #clinical-home .clinical-home-intro h2 {
+    margin-top: 19px;
+    font-size: clamp(32px, 8.5vw, 42px);
+  }
+
+  #hospital-saas-app #clinical-home .clinical-home-intro h2 em span {
+    display: block;
+    margin-left: 0;
+  }
+
+  #hospital-saas-app #clinical-home .clinical-home-intro > p {
+    font-size: 13px;
+  }
+
+  #hospital-saas-app #clinical-home .clinical-home-first-step {
+    min-height: 0;
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  #hospital-saas-app #clinical-home .clinical-home-scope-mark {
+    width: 40px;
+    height: 40px;
+    margin-top: 15px;
+  }
+
+  #hospital-saas-app #clinical-home .clinical-home-first-step h3 {
+    margin-top: 13px;
+    font-size: 18px;
+  }
+
+  #hospital-saas-app #clinical-home .clinical-home-first-step button {
+    margin-top: 8px;
+  }
+
+  #hospital-saas-app #clinical-home .clinical-home-flow,
+  #hospital-saas-app #clinical-home .clinical-home-status {
+    padding: 17px;
+    border-radius: 16px;
+  }
+
+  #hospital-saas-app #clinical-home .clinical-home-section-heading {
+    align-items: start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  #hospital-saas-app #clinical-home .clinical-home-section-heading h3 {
+    font-size: 17px;
+  }
+
+  #hospital-saas-app #clinical-home .clinical-home-flow-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  #hospital-saas-app #clinical-home .clinical-home-flow-step {
+    min-height: 68px;
+  }
+
+  #hospital-saas-app #clinical-home .clinical-home-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  #hospital-saas-app #clinical-home .clinical-home-metrics article {
+    min-height: 99px;
+    padding: 12px;
+  }
+
+  #hospital-saas-app #clinical-home .clinical-home-demo-tag {
+    white-space: normal;
+  }
+
+  #hospital-saas-app #clinical-home .clinical-home-latest-card,
+  #hospital-saas-app #clinical-home .clinical-home-quick-links {
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  #hospital-saas-app #clinical-home .clinical-home-latest-card .clinical-home-section-heading {
+    align-items: start;
+  }
+
+  #hospital-saas-app #clinical-home .clinical-home-latest-card .mq-link {
+    min-height: 44px;
+    padding-left: 0;
+  }
+
+  #hospital-saas-app #clinical-home .clinical-home-quick-links {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Clinician home polish: clear case-work hierarchy, readable labels, no patient-wallet styling. */
+#hospital-saas-app #clinical-home {
+  --home-ink: #142b40;
+  --home-muted: #52677d;
+  --home-line: #d5e0e8;
+  --home-blue: #3566b8;
+  --home-mint: #8bd6c4;
+  gap: 24px;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-hero {
+  min-height: 332px;
+  grid-template-columns: minmax(0, 1.35fr) minmax(300px, .75fr);
+  align-items: stretch;
+  gap: clamp(26px, 3.2vw, 48px);
+  border-radius: 22px 30px 22px 22px;
+  border-bottom-width: 5px;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-intro > p {
+  max-width: 58rem;
+  font-size: 15px;
+  line-height: 1.8;
+  text-wrap: pretty;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-trust {
+  font-size: 12px;
+  color: #dce8ee;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-first-step {
+  padding: 22px 24px 20px;
+  border-radius: 8px 19px 19px 8px;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-first-step h3 {
+  font-size: 22px;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-checklist li {
+  min-height: 46px;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-checklist strong {
+  font-size: 13px;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-checklist small {
+  font-size: 11px;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-latest-card {
+  padding: 22px;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-latest-card .clinical-home-section-heading h3 {
+  font-size: 22px;
+}
+
+#hospital-saas-app #clinical-home .mq-table-wrap {
+  border-color: #d8e2eb;
+  border-radius: 14px;
+  background: #fff;
+}
+
+#hospital-saas-app #clinical-home .mq-table-wrap table {
+  font-size: 13px;
+}
+
+#hospital-saas-app #clinical-home .mq-table-wrap th,
+#hospital-saas-app #clinical-home .mq-table-wrap td {
+  padding: 13px 12px;
+}
+
+#hospital-saas-app #clinical-home .mq-table-wrap th {
+  color: #435970;
+  font-size: 12px;
+}
+
+#hospital-saas-app #clinical-home .mq-table-wrap td {
+  line-height: 1.55;
+}
+
+#hospital-saas-app #clinical-home .clinical-status-hint {
+  display: block;
+  margin-top: 5px;
+  color: #425e70;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-flow {
+  padding: 23px;
+  border: 1px solid var(--home-line);
+  border-radius: 20px;
+  background: #edf3f5;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-flow-grid {
+  gap: 12px;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-flow-step,
+#hospital-saas-app #clinical-home .clinical-home-flow-step:nth-child(2),
+#hospital-saas-app #clinical-home .clinical-home-flow-step:last-child {
+  min-height: 88px;
+  padding: 15px 16px;
+  border: 1px solid #d9e4e8;
+  border-radius: 14px;
+  background: #fff;
+  transition: border-color .16s ease, background-color .16s ease, transform .16s ease;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-flow-step:hover {
+  transform: translateY(-2px);
+  border-color: #9bb9ca;
+  background: #f8fbfc;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-flow-step:focus-visible,
+#hospital-saas-app #clinical-home .clinical-home-actions :is(button, a):focus-visible,
+#hospital-saas-app #clinical-home .clinical-home-first-step button:focus-visible,
+#hospital-saas-app #clinical-home .clinical-home-quick-links button:focus-visible {
+  outline: 3px solid #72b6a7;
+  outline-offset: 3px;
+}
+
+#hospital-saas-app #clinical-home .clinical-flow-number {
+  width: 34px;
+  height: 34px;
+  background: #d8eee8;
+  color: #245b52;
+  font-size: 12px;
+}
+
+#hospital-saas-app #clinical-home .clinical-flow-copy strong {
+  font-size: 14px;
+}
+
+#hospital-saas-app #clinical-home .clinical-flow-copy small {
+  color: #526a7e;
+  font-size: 12px;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-status {
+  border-radius: 18px;
+}
+
+@media (max-width: 1160px) and (min-width: 761px) {
+  #hospital-saas-app .mq-sidebar {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+  }
+
+  #hospital-saas-app .mq-nav-group {
+    flex-wrap: nowrap;
+    flex: 0 0 auto;
+  }
+
+  #hospital-saas-app .mq-nav {
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 760px) {
+  #hospital-saas-app #clinical-home .clinical-home-hero {
+    grid-template-columns: minmax(0, 1fr);
+    border-radius: 17px 23px 17px 17px;
+  }
+
+  #hospital-saas-app #clinical-home .clinical-home-intro > p {
+    font-size: 15px;
+  }
+
+  #hospital-saas-app #clinical-home .clinical-home-flow {
+    padding: 17px 14px;
+  }
+
+  #hospital-saas-app #clinical-home .clinical-home-flow-step,
+  #hospital-saas-app #clinical-home .clinical-home-flow-step:nth-child(2),
+  #hospital-saas-app #clinical-home .clinical-home-flow-step:last-child {
+    min-height: 76px;
+    padding: 12px;
+    border-bottom: 1px solid #d9e4e8;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #hospital-saas-app #clinical-home .clinical-home-flow-step {
+    transition: none;
+  }
+}
+
+/* Authorized imaging workspace: the existing viewport is the primary surface. */
+#hospital-saas-app:has(#clinical-desk.imaging-focus:not([hidden])){--focus-base:#171d20;--focus-panel:#222b2f;--focus-line:#3c494e;--focus-text:#edf3f3;--focus-muted:#bac7cb;--focus-teal:#58d4c5;background:var(--focus-base)}
+#hospital-saas-app:has(#clinical-desk.imaging-focus:not([hidden])) .mq-header{background:#202a2edb;border-color:var(--focus-line);color:var(--focus-text);backdrop-filter:blur(14px)}
+#hospital-saas-app:has(#clinical-desk.imaging-focus:not([hidden])) .mq-header :is(#mq-header-title,.mq-context){color:var(--focus-text)}
+#hospital-saas-app:has(#clinical-desk.imaging-focus:not([hidden])) .mq-main{background:var(--focus-base);padding:20px 24px 28px}
+#hospital-saas-app:has(#clinical-desk.imaging-focus:not([hidden])) .clinical-flow{background:var(--focus-base);border-color:var(--focus-line);box-shadow:none}
+#hospital-saas-app:has(#clinical-desk.imaging-focus:not([hidden])) .clinical-flow button{background:transparent;color:var(--focus-muted);border-color:var(--focus-line)}
+#hospital-saas-app:has(#clinical-desk.imaging-focus:not([hidden])) .clinical-flow button[aria-current="step"]{color:var(--focus-teal);border-bottom-color:var(--focus-teal)}
+#hospital-saas-app:has(#clinical-desk.imaging-focus:not([hidden])) .mq-footer{color:var(--focus-muted);background:var(--focus-base)}
+#hospital-saas-app #clinical-desk.imaging-focus{--prep-ink:#edf3f3;--prep-muted:#bac7cb;--prep-line:#3c494e;--prep-blue:#58d4c5;--prep-pale:#263737;color:var(--prep-ink);background:transparent;padding:0}
+#hospital-saas-app #clinical-desk.imaging-focus *{letter-spacing:0;box-sizing:border-box}
+#hospital-saas-app #clinical-desk.imaging-focus .mq-toolbar{padding:14px 18px;margin:0 0 18px;align-items:center;background:#253034d9;border:1px solid var(--prep-line);border-radius:6px;backdrop-filter:blur(12px)}
+#hospital-saas-app #clinical-desk.imaging-focus .mq-title h2{font-size:22px;line-height:1.4;margin:0;max-width:none;color:var(--prep-ink)}
+#hospital-saas-app #clinical-desk.imaging-focus .mq-title :is(p,.desk-greeting){display:none}
+#hospital-saas-app #clinical-desk.imaging-focus .mq-clinical-workspace{display:grid;grid-template-columns:minmax(180px,.65fr) minmax(0,2.3fr) minmax(220px,.85fr);gap:16px;align-items:start}
+#hospital-saas-app #clinical-desk.imaging-focus .mq-clinical-list{grid-column:1;grid-row:1}
+#hospital-saas-app #clinical-desk.imaging-focus .mq-clinical-list>.mq-card{padding:16px 12px;background:var(--focus-panel);border:0;border-radius:6px;box-shadow:none}
+#hospital-saas-app #clinical-desk.imaging-focus :is(h3,h4,.desk-section-head h3){color:var(--prep-ink);font-size:16px;line-height:1.5}
+#hospital-saas-app #clinical-desk.imaging-focus :is(.desk-section-head>span,.mq-clinical-filters label,#clinician-result-count){color:var(--prep-muted)}
+#hospital-saas-app #clinical-desk.imaging-focus :is(input,select){background:#192226;color:var(--prep-ink);border:1px solid var(--prep-line);border-radius:6px;min-height:44px;font-size:13px;max-width:100%}
+#hospital-saas-app #clinical-desk.imaging-focus #doctor-studies{max-height:480px;overflow-y:auto;overflow-x:hidden;display:grid;grid-template-columns:minmax(0,1fr);grid-auto-flow:row;grid-auto-columns:auto;gap:8px;white-space:normal;overflow-wrap:anywhere;min-width:0;width:100%}
+#hospital-saas-app #clinical-desk.imaging-focus .mq-study-choice{background:#1a2327;border:1px solid var(--prep-line);border-left:3px solid transparent;border-radius:5px;box-shadow:none;padding:12px;color:var(--prep-ink);width:100%;min-width:0;gap:8px}
+#hospital-saas-app #clinical-desk.imaging-focus .mq-study-copy{min-width:0;overflow-wrap:anywhere;white-space:normal}
+#hospital-saas-app #clinical-desk.imaging-focus .mq-study-copy strong{max-width:none;white-space:normal;text-wrap:wrap;font-size:13px}
+#hospital-saas-app #clinical-desk.imaging-focus .mq-study-choice .mq-modality{width:32px;height:28px;border-radius:5px;background:#463b62;color:#e4d9fa;font-size:12px}
+#hospital-saas-app #clinical-desk.imaging-focus .mq-study-choice:is(.selected,[aria-pressed="true"]){border-left-color:var(--focus-teal);background:#263b3b;border-color:#598b82}
+#hospital-saas-app #clinical-desk.imaging-focus .mq-study-choice :is(strong,span){color:var(--prep-ink)}
+#hospital-saas-app #clinical-desk.imaging-focus .mq-study-choice :is(small,.mq-study-sub){color:var(--prep-muted)}
+#hospital-saas-app #clinical-desk.imaging-focus .mq-clinical-canvas{grid-column:2;grid-row:1;display:block;background:transparent;border:0;border-radius:0;box-shadow:none;padding:0;overflow:visible}
+#hospital-saas-app #clinical-desk.imaging-focus .desk-hero-visual{padding:0;background:transparent;border:0;display:flex;flex-direction:column;min-width:0}
+#hospital-saas-app #clinical-desk.imaging-focus .desk-preview-heading{margin:0;padding:12px 16px;background:#222b2f;border-bottom:1px solid var(--prep-line);gap:8px}
+#hospital-saas-app #clinical-desk.imaging-focus .desk-preview-heading span{display:none}
+#hospital-saas-app #clinical-desk.imaging-focus .desk-preview-heading h3{font-size:14px;text-align:left;color:var(--prep-ink);margin:0;overflow-wrap:anywhere}
+#hospital-saas-app #clinical-desk.imaging-focus #clinical-preview-host{min-height:540px;margin:0}
+#hospital-saas-app #clinical-desk.imaging-focus #clinical-preview-host .mq-viewer-shell{border:0;border-radius:0;box-shadow:none;background:#050708}
+#hospital-saas-app #clinical-desk.imaging-focus #clinical-preview-host :is(.mq-viewer-grid,.mq-viewport-center){border-radius:0;border:0}
+#hospital-saas-app #clinical-desk.imaging-focus #clinical-preview-host .studio-lock{color:#8cdece;background:#233e38;border-radius:8px;box-shadow:none}
+#hospital-saas-app #clinical-desk.imaging-focus #clinical-preview-host .studio-lock svg{fill:none;stroke:currentColor;stroke-width:1.7;width:24px;height:24px}
+#hospital-saas-app #clinical-desk.imaging-focus #clinical-preview-host .mq-viewport{background:#050708;min-height:480px;border-radius:0}
+#hospital-saas-app #clinical-desk.imaging-focus #clinical-preview-host #viewer-placeholder{background:transparent!important;max-width:360px;padding:24px;color:var(--prep-muted)!important}
+#hospital-saas-app #clinical-desk.imaging-focus #clinical-preview-host #viewer-placeholder::before{display:none}
+#hospital-saas-app #clinical-desk.imaging-focus #clinical-preview-host #viewer-placeholder h2{font-size:20px;line-height:1.5;color:var(--prep-ink);margin:0 0 12px}
+#hospital-saas-app #clinical-desk.imaging-focus #clinical-preview-host #viewer-placeholder p{font-size:14px;color:var(--prep-muted);line-height:1.8}
+#hospital-saas-app #clinical-desk.imaging-focus .desk-preview-caption{font-size:12px;color:var(--prep-muted);margin:12px 0;line-height:1.7}
+#hospital-saas-app #clinical-desk.imaging-focus .prep-guide{grid-column:3;grid-row:1;display:block;background:var(--focus-panel);border:0;border-radius:6px;padding:16px;min-width:0}
+#hospital-saas-app #clinical-desk.imaging-focus .desk-hero-copy{padding:0;background:transparent;border:0}
+#hospital-saas-app #clinical-desk.imaging-focus .desk-hero-caption{margin:0 0 16px}
+#hospital-saas-app #clinical-desk.imaging-focus .desk-hero-caption>span:last-child{display:none}
+#hospital-saas-app #clinical-desk.imaging-focus .desk-status-tag{background:#30383b;color:#d2dbdd;border:1px solid #536368;border-radius:5px;font-size:12px}
+#hospital-saas-app #clinical-desk.imaging-focus .desk-status-tag[data-state="ready"]{background:#244b43;color:#9eebd1}
+#hospital-saas-app #clinical-desk.imaging-focus .mq-dossier-avatar{display:none}
+#hospital-saas-app #clinical-desk.imaging-focus .mq-dossier-patient{margin:0 0 16px;padding:0;display:block}
+#hospital-saas-app #clinical-desk.imaging-focus .mq-dossier-patient strong{font-size:19px;line-height:1.5;color:var(--prep-ink);margin:0;max-width:none}
+#hospital-saas-app #clinical-desk.imaging-focus .mq-dossier-patient p{font-size:12px;color:var(--prep-muted);line-height:1.7}
+#hospital-saas-app #clinical-desk.imaging-focus .mq-dossier-route{display:grid;grid-template-columns:1fr;gap:12px;border-color:var(--prep-line);background:transparent;padding:14px 0;margin:0}
+#hospital-saas-app #clinical-desk.imaging-focus .desk-route-stop{padding:0}
+#hospital-saas-app #clinical-desk.imaging-focus .desk-route-stop::after{display:none}
+#hospital-saas-app #clinical-desk.imaging-focus .desk-route-stop small{color:var(--prep-muted);font-size:12px}
+#hospital-saas-app #clinical-desk.imaging-focus .desk-route-stop strong{color:var(--prep-ink);font-size:13px;overflow-wrap:anywhere}
+#hospital-saas-app #clinical-desk.imaging-focus .mq-dossier-facts{display:grid;grid-template-columns:1fr;gap:14px;margin:16px 0}
+#hospital-saas-app #clinical-desk.imaging-focus .mq-dossier-facts dt{color:var(--prep-muted);font-size:12px}
+#hospital-saas-app #clinical-desk.imaging-focus .mq-dossier-facts dd{color:var(--prep-ink);font-size:14px;overflow-wrap:anywhere}
+#hospital-saas-app #clinical-desk.imaging-focus .mq-canvas-actions{padding:0;border:0;margin:16px 0}
+#hospital-saas-app #clinical-desk.imaging-focus .mq-canvas-actions p{color:var(--prep-muted);font-size:12px}
+#hospital-saas-app #clinical-desk.imaging-focus .desk-action-row{display:grid;gap:8px}
+#hospital-saas-app #clinical-desk.imaging-focus .mq-btn{color:var(--prep-ink);background:#28363b;border:1px solid #52656c;border-radius:6px;font-size:13px;min-height:44px;white-space:normal;padding:10px 12px;box-shadow:none}
+#hospital-saas-app #clinical-desk.imaging-focus .mq-btn-primary{background:#087d72;border-color:#38b8a5;color:#fff;width:100%}
+#hospital-saas-app #clinical-desk.imaging-focus .prep-guide>section{display:block;padding:0;border:0;background:transparent}
+#hospital-saas-app #clinical-desk.imaging-focus .prep-guide details{border-top:1px solid var(--prep-line);padding:16px 0;min-width:0}
+#hospital-saas-app #clinical-desk.imaging-focus summary{color:var(--prep-ink);font-size:14px;font-weight:650;cursor:pointer;min-height:28px}
+#hospital-saas-app #clinical-desk.imaging-focus details :is(p,li){color:var(--prep-muted);font-size:13px;line-height:1.8}
+#hospital-saas-app #clinical-desk.imaging-focus .desk-activity{display:block;background:none;border:0;padding:16px 0 0;margin:0;box-shadow:none}
+#hospital-saas-app #clinical-desk.imaging-focus #desk-recent-activity>p{color:var(--prep-muted);font-size:13px}
+#hospital-saas-app #clinical-desk.imaging-focus :is(button,input,select,summary):focus-visible{outline:3px solid #76dacc;outline-offset:3px}
+#hospital-saas-app:has(#clinical-desk.imaging-focus:not([hidden])) .clinical-flow button span{color:inherit}
+@media(max-width:1250px){#hospital-saas-app #clinical-desk.imaging-focus .mq-clinical-workspace{grid-template-columns:180px minmax(0,1fr)}#hospital-saas-app #clinical-desk.imaging-focus .prep-guide{grid-column:1/-1;grid-row:2}#hospital-saas-app #clinical-desk.imaging-focus .mq-dossier-facts{grid-template-columns:repeat(4,minmax(0,1fr))}#hospital-saas-app #clinical-desk.imaging-focus .mq-dossier-route{grid-template-columns:repeat(3,minmax(0,1fr))}#hospital-saas-app #clinical-desk.imaging-focus .desk-action-row{grid-template-columns:1fr 1fr}}
+@media(max-width:700px){#hospital-saas-app:has(#clinical-desk.imaging-focus:not([hidden])) .mq-main{padding:16px 12px}#hospital-saas-app #clinical-desk.imaging-focus .mq-toolbar{align-items:start;flex-wrap:wrap;padding:12px}#hospital-saas-app #clinical-desk.imaging-focus .mq-clinical-workspace{grid-template-columns:minmax(0,1fr)}#hospital-saas-app #clinical-desk.imaging-focus .mq-clinical-list{grid-row:1;grid-column:1}#hospital-saas-app #clinical-desk.imaging-focus #doctor-studies{max-height:180px}#hospital-saas-app #clinical-desk.imaging-focus .mq-clinical-canvas{grid-row:2;grid-column:1}#hospital-saas-app #clinical-desk.imaging-focus .prep-guide{grid-row:3;grid-column:1}#hospital-saas-app #clinical-desk.imaging-focus #clinical-preview-host{min-height:360px}#hospital-saas-app #clinical-desk.imaging-focus #clinical-preview-host .mq-viewport{min-height:320px}#hospital-saas-app #clinical-desk.imaging-focus :is(.mq-dossier-facts,.mq-dossier-route){grid-template-columns:1fr 1fr}}
+
+@media (max-width: 760px) {
+  #hospital-saas-app #clinical-home .mq-table-wrap {
+    overflow: visible;
+    border: 0;
+    background: transparent;
+  }
+
+  #hospital-saas-app #clinical-home .mq-table-wrap table,
+  #hospital-saas-app #clinical-home .mq-table-wrap tbody {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+
+  #hospital-saas-app #clinical-home .mq-table-wrap thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  #hospital-saas-app #clinical-home .mq-table-wrap tbody tr {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 12px;
+    margin-bottom: 10px;
+    padding: 9px 12px;
+    border: 1px solid #d8e2eb;
+    border-radius: 14px;
+    background: #fff;
+  }
+
+  #hospital-saas-app #clinical-home .mq-table-wrap td {
+    display: grid;
+    min-width: 0;
+    align-content: start;
+    gap: 4px;
+    padding: 10px 2px;
+    border: 0;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  #hospital-saas-app #clinical-home .mq-table-wrap td::before {
+    content: attr(data-label);
+    color: #52677d;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.4;
+  }
+
+  #hospital-saas-app #clinical-home .mq-table-wrap td[data-label="환자 번호"],
+  #hospital-saas-app #clinical-home .mq-table-wrap td[data-label="동의 상태"],
+  #hospital-saas-app #clinical-home .mq-table-wrap td[data-label="다음 행동"],
+  #hospital-saas-app #clinical-home .mq-table-wrap td[colspan] {
+    grid-column: 1 / -1;
+  }
+
+  #hospital-saas-app #clinical-home .mq-table-wrap td[data-label="다음 행동"] .mq-btn {
+    width: 100%;
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 380px) {
+  #hospital-saas-app #clinical-home .clinical-home-actions {
+    display: grid;
+  }
+
+  #hospital-saas-app #clinical-home .clinical-home-actions .mq-btn {
+    width: 100%;
+  }
+
+  #hospital-saas-app #clinical-home .clinical-home-metrics strong {
+    font-size: 21px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #hospital-saas-app #clinical-home * {
+    scroll-behavior: auto !important;
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* Home refresh: a clinician's case-routing desk, not a patient-wallet metaphor. */
+#hospital-saas-app #clinical-home {
+  --home-ink: #142b40;
+  --home-muted: #60748a;
+  --home-line: #d7e1e8;
+  --home-blue: #3566b8;
+  --home-lime: #8bd6c4;
+  gap: 24px;
+  color: var(--home-ink);
+}
+
+#hospital-saas-app #clinical-home .clinical-home-hero {
+  min-height: 344px;
+  grid-template-columns: minmax(0, 1.22fr) minmax(290px, .78fr);
+  gap: clamp(22px, 3vw, 42px);
+  padding: clamp(28px, 3.5vw, 46px);
+  border: 1px solid #263e55;
+  border-radius: 24px;
+  background: #11263d;
+  box-shadow: 0 22px 46px #17304a1a;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-hero::before {
+  top: auto;
+  right: 31%;
+  bottom: -252px;
+  width: 460px;
+  height: 460px;
+  border-color: #91dccc24;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-hero::after {
+  top: auto;
+  right: 34%;
+  bottom: -175px;
+  width: 305px;
+  height: 305px;
+  border-color: #ffffff1b;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-kicker {
+  color: #c4d4e2;
+  letter-spacing: .01em;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-kicker-mark {
+  background: var(--home-lime);
+  box-shadow: 0 0 0 5px #8bd6c41f;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-intro h2 {
+  max-width: 20ch;
+  margin-top: 25px;
+  font-size: clamp(34px, 4vw, 53px);
+  letter-spacing: -.058em;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-intro h2 em {
+  color: var(--home-lime);
+}
+
+#hospital-saas-app #clinical-home .clinical-home-intro > p {
+  max-width: 46ch;
+  color: #c2d0de;
+  line-height: 1.85;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-actions .mq-btn-primary {
+  border-color: var(--home-lime);
+  background: var(--home-lime);
+  color: #123043;
+  box-shadow: 0 8px 22px #8bd6c426;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-actions .mq-btn:not(.mq-btn-primary) {
+  border-color: #ffffff50;
+  background: #ffffff0c;
+  color: #f5f8fc;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-trust {
+  max-width: 46ch;
+  align-items: start;
+  line-height: 1.65;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-trust span {
+  border-color: #8bd6c46b;
+  border-radius: 50%;
+  color: var(--home-lime);
+}
+
+#hospital-saas-app #clinical-home .clinical-home-first-step {
+  min-height: 0;
+  align-self: center;
+  padding: 22px 24px 18px;
+  border: 1px solid #b7d2c8;
+  border-radius: 18px;
+  background: #e7f0eb;
+  color: var(--home-ink);
+  backdrop-filter: none;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-step-top {
+  color: #49695f;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-lock-label {
+  padding: 5px 8px;
+  border: 1px solid #b3ccc1;
+  border-radius: 6px;
+  background: #f4faf6;
+  color: #315a50;
+  font-size: 10px;
+  font-weight: 750;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-first-step h3 {
+  margin: 17px 0 10px;
+  color: #183c43;
+  font-size: 21px;
+  letter-spacing: -.045em;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-checklist {
+  display: grid;
+  gap: 0;
+  margin: 5px 0 12px;
+  padding: 0;
+  list-style: none;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-checklist li {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  min-height: 43px;
+  border-top: 1px solid #cdded6;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-checklist li > span:first-child {
+  color: #4f7b6f;
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 750;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-checklist li > span:last-child {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-checklist strong {
+  color: #23464a;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-checklist small {
+  color: #58776e;
+  font-size: 10px;
+  text-align: right;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-first-step > button {
+  min-height: 43px;
+  margin-top: 3px;
+  padding: 0 12px;
+  border: 1px solid #315f60;
+  border-radius: 9px;
+  background: #315f60;
+  color: #fff;
+  transition: background-color .16s ease, transform .16s ease;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-first-step > button:hover {
+  transform: translateY(-1px);
+  background: #244c4e;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-flow {
+  padding: 22px 0 24px;
+  border: 0;
+  border-top: 1px solid var(--home-line);
+  border-bottom: 1px solid var(--home-line);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-section-heading > div > span {
+  color: #687d8e;
+  letter-spacing: .03em;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-flow-grid {
+  gap: 0;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-flow-step {
+  min-height: 74px;
+  padding: 10px 18px 10px 0;
+  border: 0;
+  border-right: 1px solid var(--home-line);
+  border-radius: 0;
+  background: transparent;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-flow-step:last-child {
+  border-right: 0;
+  padding-left: 18px;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-flow-step:nth-child(2) {
+  padding-left: 18px;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-flow-step:hover {
+  transform: none;
+  background: #eaf1f3;
+}
+
+#hospital-saas-app #clinical-home .clinical-flow-number {
+  border-radius: 50%;
+  background: #dce8ef;
+  color: #305c74;
+  font-variant-numeric: tabular-nums;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-flow-step:nth-child(2) .clinical-flow-number {
+  background: #deece7;
+  color: #376c5d;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-flow-step:nth-child(3) .clinical-flow-number {
+  background: #e5e9f0;
+  color: #405774;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-status {
+  padding: 22px 24px 18px;
+  border-color: var(--home-line);
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 8px 22px #17304a08;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-metrics {
+  gap: 0;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-metrics article {
+  min-height: 82px;
+  gap: 5px;
+  padding: 7px 16px;
+  border: 0;
+  border-right: 1px solid var(--home-line);
+  border-radius: 0;
+  background: transparent;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-metrics article:first-child {
+  padding-left: 0;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-metrics article:last-child {
+  border-right: 0;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-metrics strong {
+  font-variant-numeric: tabular-nums;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-demo-tag {
+  border: 1px solid #d2dfe7;
+  border-radius: 6px;
+  background: #f2f6f8;
+  color: #4a667d;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-latest-card,
+#hospital-saas-app #clinical-home .clinical-home-quick-links {
+  border-color: var(--home-line);
+  border-radius: 18px;
+  box-shadow: 0 8px 22px #17304a08;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-quick-links {
+  background: #e9f0f2;
+}
+
+#hospital-saas-app #clinical-home .clinical-quick-index {
+  border-radius: 7px;
+  background: #d7e5e9;
+  color: #315c6a;
+  font-variant-numeric: tabular-nums;
+}
+
+#hospital-saas-app #clinical-home :is(button, a):focus-visible {
+  outline: 3px solid #62aa9c;
+  outline-offset: 3px;
+}
+
+@media (max-width: 760px) {
+  #hospital-saas-app #clinical-home .clinical-home-hero {
+    gap: 22px;
+    padding: 24px 19px 19px;
+    border-radius: 20px;
+  }
+
+  #hospital-saas-app #clinical-home .clinical-home-first-step {
+    padding: 17px 16px 14px;
+  }
+
+  #hospital-saas-app #clinical-home .clinical-home-checklist li > span:last-child {
+    align-items: start;
+    flex-direction: column;
+    gap: 2px;
+    padding: 7px 0;
+  }
+
+  #hospital-saas-app #clinical-home .clinical-home-checklist small {
+    text-align: left;
+  }
+
+  #hospital-saas-app #clinical-home .clinical-home-flow {
+    padding: 18px 0;
+  }
+
+  #hospital-saas-app #clinical-home .clinical-home-flow-grid {
+    gap: 4px;
+  }
+
+  #hospital-saas-app #clinical-home .clinical-home-flow-step,
+  #hospital-saas-app #clinical-home .clinical-home-flow-step:nth-child(2),
+  #hospital-saas-app #clinical-home .clinical-home-flow-step:last-child {
+    min-height: 64px;
+    padding: 8px 4px;
+    border-right: 0;
+    border-bottom: 1px solid var(--home-line);
+  }
+
+  #hospital-saas-app #clinical-home .clinical-home-flow-step:last-child {
+    border-bottom: 0;
+  }
+
+  #hospital-saas-app #clinical-home .clinical-home-status {
+    padding: 18px 16px 15px;
+  }
+
+  #hospital-saas-app #clinical-home .clinical-home-metrics article {
+    padding: 10px 8px;
+    border-right: 0;
+    border-bottom: 1px solid var(--home-line);
+  }
+
+  #hospital-saas-app #clinical-home .clinical-home-metrics article:nth-child(odd) {
+    padding-left: 0;
+    border-right: 1px solid var(--home-line);
+  }
+
+  #hospital-saas-app #clinical-home .clinical-home-metrics article:nth-last-child(-n + 2) {
+    border-bottom: 0;
+  }
+}
+
+/* Clinician home: an editorial case desk, with the live handoff ahead of system telemetry. */
+#hospital-saas-app #clinical-home {
+  --home-ink: #142b40;
+  --home-muted: #5c7285;
+  --home-line: #d5e0e4;
+  --home-blue: #3566b8;
+  --home-lime: #92dfc9;
+  gap: 20px;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-hero {
+  min-height: 316px;
+  grid-template-columns: minmax(0, 1.3fr) minmax(286px, .7fr);
+  gap: clamp(22px, 3vw, 38px);
+  padding: clamp(28px, 3.2vw, 40px);
+  border: 1px solid #1a354b;
+  border-bottom: 4px solid #69c4ad;
+  border-radius: 18px 28px 18px 18px;
+  background: linear-gradient(112deg, #10273d 0%, #153a54 100%);
+  box-shadow: 0 18px 38px #17304a1b;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-hero::before,
+#hospital-saas-app #clinical-home .clinical-home-hero::after {
+  display: none;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-intro h2 {
+  max-width: 18ch;
+  margin: 20px 0 12px;
+  font-size: clamp(36px, 4.3vw, 56px);
+  line-height: 1.14;
+  letter-spacing: -.06em;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-intro > p {
+  max-width: 48ch;
+  font-size: 14px;
+  line-height: 1.75;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-actions {
+  gap: 9px;
+  margin-top: 22px;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-actions .mq-btn-primary {
+  min-height: 48px;
+  padding-inline: 17px;
+  border-color: #92dfc9;
+  background: #92dfc9;
+  color: #143548;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-first-step {
+  align-self: stretch;
+  padding: 20px 21px 17px;
+  border: 1px solid #b9d1c9;
+  border-left: 4px solid #579783;
+  border-radius: 5px 17px 17px 5px;
+  background: #e8f1ed;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-first-step h3 {
+  margin: 13px 0 9px;
+  font-size: 20px;
+  line-height: 1.3;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-checklist li {
+  min-height: 40px;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-checklist li > span:first-child {
+  color: #3e7768;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-latest {
+  grid-template-columns: minmax(0, 1.9fr) minmax(224px, .62fr);
+  gap: 13px;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-latest-card {
+  padding: 20px 21px;
+  border-top: 3px solid #3a6e9c;
+  border-radius: 7px 16px 16px 16px;
+  box-shadow: 0 9px 26px #17304a0b;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-latest-card .clinical-home-section-heading {
+  margin-bottom: 13px;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-latest-card .clinical-home-section-heading > div > span {
+  color: #3b668a;
+  letter-spacing: .035em;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-latest-card .clinical-home-section-heading h3 {
+  font-size: 21px;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-quick-links {
+  align-content: center;
+  padding: 18px;
+  border: 1px solid #bed5cf;
+  border-left: 4px solid #63aa98;
+  border-radius: 5px 16px 16px 5px;
+  background: #eaf2ef;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-quick-links > span {
+  color: #466b61;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-quick-links button {
+  border-color: #cbded7;
+}
+
+#hospital-saas-app #clinical-home .clinical-quick-index {
+  background: #d4e7df;
+  color: #285e50;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-status {
+  padding: 18px 23px 15px;
+  border-radius: 7px 16px 16px 16px;
+  box-shadow: none;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-metrics article {
+  min-height: 74px;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-flow {
+  padding: 17px 2px 12px;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-flow-step {
+  min-height: 70px;
+}
+
+@media (max-width: 900px) {
+  #hospital-saas-app #clinical-home .clinical-home-latest {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  #hospital-saas-app #clinical-home .clinical-home-quick-links {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  #hospital-saas-app #clinical-home .clinical-home-quick-links > span {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 760px) {
+  #hospital-saas-app #clinical-home .clinical-home-hero {
+    min-height: 0;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+    padding: 24px 19px 19px;
+    border-radius: 15px 21px 15px 15px;
+  }
+
+  #hospital-saas-app #clinical-home .clinical-home-intro h2 {
+    margin-top: 17px;
+    font-size: clamp(34px, 8.7vw, 45px);
+  }
+
+  #hospital-saas-app #clinical-home .clinical-home-first-step {
+    padding: 16px 15px 13px;
+  }
+
+  #hospital-saas-app #clinical-home .clinical-home-latest-card,
+  #hospital-saas-app #clinical-home .clinical-home-quick-links {
+    padding: 16px;
+    border-radius: 5px 14px 14px 5px;
+  }
+
+  #hospital-saas-app #clinical-home .clinical-home-latest-card .clinical-home-section-heading h3 {
+    font-size: 18px;
+  }
+
+  #hospital-saas-app #clinical-home .clinical-home-quick-links {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  #hospital-saas-app #clinical-home .clinical-home-quick-links > span {
+    grid-column: auto;
+  }
+}
+
+/* Final overrides for the clinician start page. */
+#hospital-saas-app #clinical-home {
+  gap: 24px;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-hero {
+  min-height: 332px;
+  grid-template-columns: minmax(0, 1.35fr) minmax(300px, .75fr);
+  gap: clamp(26px, 3.2vw, 48px);
+  border-radius: 22px 30px 22px 22px;
+  border-bottom-width: 5px;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-intro > p {
+  max-width: 58rem;
+  font-size: 15px;
+  line-height: 1.8;
+  text-wrap: pretty;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-trust {
+  color: #dce8ee;
+  font-size: 12px;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-first-step {
+  padding: 22px 24px 20px;
+  border-radius: 8px 19px 19px 8px;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-first-step h3 {
+  font-size: 22px;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-checklist li {
+  min-height: 46px;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-checklist strong {
+  font-size: 13px;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-checklist small {
+  font-size: 11px;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-latest-card {
+  padding: 22px;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-latest-card .clinical-home-section-heading h3 {
+  font-size: 22px;
+}
+
+#hospital-saas-app #clinical-home .mq-table-wrap {
+  border-color: #d8e2eb;
+  border-radius: 14px;
+  background: #fff;
+}
+
+#hospital-saas-app #clinical-home .mq-table-wrap table {
+  font-size: 13px;
+}
+
+#hospital-saas-app #clinical-home .mq-table-wrap th,
+#hospital-saas-app #clinical-home .mq-table-wrap td {
+  padding: 13px 12px;
+  line-height: 1.55;
+}
+
+#hospital-saas-app #clinical-home .mq-table-wrap th {
+  color: #435970;
+  font-size: 12px;
+}
+
+#hospital-saas-app #clinical-home .clinical-status-hint {
+  display: block;
+  margin-top: 5px;
+  color: #425e70;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-flow {
+  padding: 23px;
+  border: 1px solid var(--home-line);
+  border-radius: 20px;
+  background: #edf3f5;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-flow-grid {
+  gap: 12px;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-flow-step,
+#hospital-saas-app #clinical-home .clinical-home-flow-step:nth-child(2),
+#hospital-saas-app #clinical-home .clinical-home-flow-step:last-child {
+  min-height: 88px;
+  padding: 15px 16px;
+  border: 1px solid #d9e4e8;
+  border-radius: 14px;
+  background: #fff;
+  transition: border-color .16s ease, background-color .16s ease, transform .16s ease;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-flow-step:hover {
+  transform: translateY(-2px);
+  border-color: #9bb9ca;
+  background: #f8fbfc;
+}
+
+#hospital-saas-app #clinical-home .clinical-flow-number {
+  width: 34px;
+  height: 34px;
+  background: #d8eee8;
+  color: #245b52;
+  font-size: 12px;
+}
+
+#hospital-saas-app #clinical-home .clinical-flow-copy strong {
+  font-size: 14px;
+}
+
+#hospital-saas-app #clinical-home .clinical-flow-copy small {
+  color: #526a7e;
+  font-size: 12px;
+}
+
+#hospital-saas-app #clinical-home .clinical-home-status {
+  border-radius: 18px;
+}
+
+#hospital-saas-app #clinical-home :is(button, a):focus-visible {
+  outline: 3px solid #72b6a7;
+  outline-offset: 3px;
+}
+
+@media (max-width: 1160px) and (min-width: 761px) {
+  #hospital-saas-app .mq-sidebar {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+  }
+
+  #hospital-saas-app .mq-nav-group {
+    flex-wrap: nowrap;
+    flex: 0 0 auto;
+  }
+
+  #hospital-saas-app .mq-nav {
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 760px) {
+  #hospital-saas-app #clinical-home .clinical-home-hero {
+    min-height: 0;
+    grid-template-columns: minmax(0, 1fr);
+    border-radius: 17px 23px 17px 17px;
+  }
+
+  #hospital-saas-app #clinical-home .clinical-home-intro > p {
+    font-size: 15px;
+  }
+
+  #hospital-saas-app #clinical-home .clinical-home-flow {
+    padding: 17px 14px;
+  }
+
+  #hospital-saas-app #clinical-home .clinical-home-flow-step,
+  #hospital-saas-app #clinical-home .clinical-home-flow-step:nth-child(2),
+  #hospital-saas-app #clinical-home .clinical-home-flow-step:last-child {
+    min-height: 76px;
+    padding: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #hospital-saas-app #clinical-home .clinical-home-flow-step {
+    transition: none;
+  }
+}

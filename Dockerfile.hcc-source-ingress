@@ -1,0 +1,3 @@
+ARG CAPSTONE_BASE_IMAGE
+FROM ${CAPSTONE_BASE_IMAGE}
+COPY src/capstone-control-ingress.js src/hcc-source-contract.js /app/src/

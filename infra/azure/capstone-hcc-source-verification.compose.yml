@@ -1,0 +1,12 @@
+# Prepared only: preserve all active overlays; do NOT activate the main profile.
+services:
+  control:
+    environment:
+      HIPASS_CAPSTONE_HCC_CATALOG: '1'
+      HIPASS_HCC_SOURCE_GATEWAY_TOKEN_FILE: /run/secrets/hcc-source-secret
+    volumes:
+      - type: bind
+        source: ${HIPASS_CLOUD_SECRET_DIR:?external cloud secret directory required}/hcc-source-secret
+        target: /run/secrets/hcc-source-secret
+        read_only: true
+        bind: {create_host_path: false}

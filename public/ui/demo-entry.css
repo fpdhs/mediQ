@@ -1,0 +1,50 @@
+#capstone-login.mediq-entry-active{display:block;padding:0;background:#f8fbff;overflow-y:auto}
+#capstone-login [hidden]{display:none!important}
+.mediq-entry{position:relative;isolation:isolate;min-height:100svh;overflow:hidden;color:#102139;font-family:"Medi Q Login",sans-serif;background:#f8fbff}
+.mediq-entry-scene{position:absolute;inset:0;z-index:-2;background:url('/images/mediq-hong-gildong-landing.png') center right/cover no-repeat}
+.mediq-entry::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,#ffffffed 0%,#ffffffd9 37%,#ffffff00 72%)}
+.mediq-entry-header{display:flex;align-items:center;gap:24px;padding:24px 4.5vw;position:relative;z-index:2}
+.mediq-entry-brand{display:inline-flex;text-decoration:none}.mediq-entry-brand .mediq-login-logo{background-color:transparent}
+.mediq-entry-test{margin-left:auto;color:#53657d;font-size:12px}
+#capstone-login .mediq-entry-motion,#capstone-login .mediq-login-back{width:auto;min-height:44px;border:1px solid #d1dae7;border-radius:24px;padding:10px 16px;background:#ffffffc9;color:#304a70;font:inherit;font-size:12px;cursor:pointer}
+.mediq-entry-copy{position:relative;margin:7vh 0 0 4.7vw;width:51%;z-index:1}
+#capstone-login .mediq-entry h1{font-size:clamp(42px,5.8vw,88px);line-height:1.16;font-weight:760;letter-spacing:-.055em;margin:0 0 28px;color:#0d1b32}
+.mediq-entry h1 span{color:#3566b8}.mediq-entry-copy>p{font-size:clamp(18px,1.8vw,27px);line-height:1.65;letter-spacing:-.03em;color:#445874;margin:0 0 30px}
+.mediq-entry-actions{display:flex;gap:14px;flex-wrap:wrap}
+#capstone-login .mediq-entry-actions button{display:flex;align-items:center;justify-content:space-between;gap:28px;min-height:60px;padding:18px 26px;border-radius:32px;border:1px solid #3566b8;background:#3566b8;color:white;font:inherit;font-size:17px;font-weight:600;cursor:pointer;box-shadow:0 8px 24px #3566b81a}
+#capstone-login .mediq-entry-actions button+button{background:#ffffffd9;color:#3566b8;border-color:#b7c9e6;box-shadow:none}
+.mediq-entry-actions button:hover{filter:brightness(.96)}
+.mediq-entry-copy .mediq-entry-caption{font-size:13px;margin-top:22px;color:#63748a}
+#capstone-login .mediq-entry-security{display:inline-flex;align-items:center;gap:9px;margin-top:9px;padding:7px 0;border:0;background:transparent;color:#526887;font:inherit;font-size:13px;cursor:pointer;text-decoration:none;text-underline-offset:4px}
+#capstone-login .mediq-entry-security span{display:grid;place-items:center;width:22px;height:22px;border:1px solid #b8c9e1;border-radius:50%;color:#3566b8;font-size:12px}
+#capstone-login .mediq-entry-security:hover{text-decoration:underline;color:#244f91}
+.mediq-entry-journey{position:absolute;top:55%;right:4.5%;width:42%;max-width:650px;padding:24px 26px 18px;border-radius:30px;border:1px solid #fff;background:#ffffffec;box-shadow:0 20px 70px #31538214;z-index:1}
+.mediq-entry-person{font-size:14px;font-weight:650;margin:0 0 22px}.mediq-entry-person span{font-size:11px;color:#738397;font-weight:400;margin-left:10px}
+.mediq-entry-stops{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;position:relative}
+.mediq-entry-stops::before{content:"";position:absolute;height:2px;top:58px;left:15%;right:15%;background:#b9d1f3;z-index:-1}
+.mediq-entry-stops>div{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px}
+.mediq-entry-stops img{height:112px;width:112px;object-fit:cover;border-radius:18px;box-shadow:0 0 0 8px #f2f6fc}
+.mediq-entry-stops strong{font-size:18px;letter-spacing:-.04em;margin-top:10px}.mediq-entry-stops span{font-size:12px;color:#61748e}
+.mediq-entry-stops .mediq-entry-lock,.mediq-entry-stops .mediq-entry-hospital{display:grid;place-items:center;height:112px;width:112px;border-radius:50%;background:#eef5ff;font-size:42px;color:#3566b8;border:8px solid #f8fbff}
+.mediq-entry-journey-note{font-size:10px;color:#76879b;text-align:center;margin:22px 0 0;line-height:1.5}
+.mediq-entry-footer{position:absolute;bottom:26px;left:4.7vw;font-size:13px;color:#4a617c}
+.mediq-entry-leaves{pointer-events:none;position:absolute;inset:0;z-index:0}
+.mediq-entry-leaves i{position:absolute;left:68%;top:75%;width:34px;height:15px;border-radius:100% 0 100% 0;background:linear-gradient(20deg,#769752,#b8cf8a);opacity:0;animation:mediq-breeze 12s linear infinite;filter:blur(.8px)}
+.mediq-entry-leaves i:nth-child(2){left:78%;top:82%;animation-delay:-4s;width:48px;height:20px;filter:blur(2px)}
+.mediq-entry-leaves i:nth-child(3){left:90%;top:68%;animation-delay:-8s;width:24px;height:12px}
+@keyframes mediq-breeze{0%{opacity:0;transform:translate(0,35px) rotate(-20deg)}15%{opacity:.6}70%{opacity:.5}100%{opacity:0;transform:translate(-180px,-90px) rotate(70deg)}}
+.mediq-entry-paused .mediq-entry-leaves i{animation-play-state:paused}
+#capstone-login .mediq-entry button:focus-visible,#capstone-login .mediq-login-back:focus-visible{outline:3px solid #3566b8;outline-offset:5px}
+#capstone-login .mediq-entry-security:focus-visible{outline:3px solid #3566b8;outline-offset:4px;border-radius:4px}
+.mediq-login-back{margin-bottom:24px}
+@media(max-width:1000px){.mediq-entry-copy{width:53%;margin-top:5vh}.mediq-entry-journey{width:40%;padding:18px 14px;top:28%}.mediq-entry-stops img,.mediq-entry-stops .mediq-entry-lock,.mediq-entry-stops .mediq-entry-hospital{width:70px;height:70px}.mediq-entry-stops::before{top:35px}.mediq-entry-stops strong{font-size:14px}.mediq-entry-stops span{font-size:10px}.mediq-entry-actions{flex-direction:column;align-items:flex-start}}
+@media(max-width:740px){.mediq-entry{min-height:100svh;padding-bottom:70px}.mediq-entry-header{padding:12px 20px;gap:10px;flex-wrap:wrap}.mediq-entry-brand .mediq-login-logo{width:140px}.mediq-entry-test{font-size:10px}.mediq-entry-motion{margin-left:auto}.mediq-entry-copy{width:auto;margin:36px 24px 0}.mediq-entry-copy>p{font-size:18px}#capstone-login .mediq-entry h1{font-size:clamp(39px,8.8vw,60px);margin-bottom:20px}.mediq-entry-actions{flex-direction:row}#capstone-login .mediq-entry-actions button{min-height:54px;font-size:14px;padding:14px 20px;gap:12px}.mediq-entry-scene{background-position:68% bottom;background-size:auto 100%;opacity:.5}.mediq-entry::before{background:linear-gradient(#ffffffed 0%,#ffffffd9 52%,#ffffff22)}.mediq-entry-journey{position:relative;top:auto;right:auto;width:auto;margin:34px 20px 0;padding:20px;border-radius:24px}.mediq-entry-stops img,.mediq-entry-stops .mediq-entry-lock,.mediq-entry-stops .mediq-entry-hospital{width:78px;height:78px}.mediq-entry-person{font-size:13px}.mediq-entry-footer{position:relative;left:auto;bottom:auto;margin:26px 24px 0;font-size:12px}.mediq-entry-leaves i{top:87%}}
+@media(prefers-reduced-motion:reduce){.mediq-entry-leaves i{animation:none;opacity:.35}}
+
+#capstone-login.mediq-mobile-login .mediq-entry-motion {min-height:48px;}
+#capstone-login.mediq-mobile-login .mediq-entry-header {
+ padding-top:calc(12px + env(safe-area-inset-top,0px));
+ padding-left:max(20px,env(safe-area-inset-left,0px));
+ padding-right:max(20px,env(safe-area-inset-right,0px));
+}
+#capstone-login.mediq-mobile-login .mediq-entry {padding-bottom:calc(70px + env(safe-area-inset-bottom,0px));}
