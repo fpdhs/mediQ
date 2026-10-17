@@ -50,6 +50,14 @@
       "bytes": 429163,
       "captureDate": "Not verified",
       "source": "Medi Q 증적.zip"
+    },
+    {
+      "file": "patient-qr-ticket.png",
+      "sha256": "54fc50f6e796ef97091bcdae6949e12eb9a697d8a1d6cc927b2b5f233a515148",
+      "bytes": 633357,
+      "captureDate": "Not verified",
+      "source": "Medi Q 증적.zip / 07_환자포털_병원제시용_1회용_공유QR티켓_발급.png",
+      "presentation": "Unmodified desktop evidence; ticket area displayed as a labelled mobile presentation example via CSS. QR expiry shown: 2026-10-15."
     }
   ]
 }
