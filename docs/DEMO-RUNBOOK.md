@@ -1,5 +1,7 @@
 # Capstone Demo Runbook
 
+> 2026-10-17 안내: 현재 공개 시연 주소와 화면·검증 범위는 [Azure 시연 기준](architecture/current-demo-20261017.md)을 확인하세요. 아래 설계·실행 기록은 해당 날짜와 환경의 이력이며, 과거 화면이나 개발 주소를 최신 서비스 안내로 사용하지 않습니다. 요구사항·보안 기준 자체를 변경하는 것은 아닙니다.
+
 ## 현재 시연 기준 — 2026-10-10 KST
 
 13:32 KST: 홍길동56세/A대학병원 CT→B대학병원 전원 시나리오의 로그인·초기화 **후보**를 준비했다. 공개 사이트는 여전히 기존fa5f/11a23 조합이며 실제 초기화·새 CT 표시·배포는 미실행이다. 과거 팬텀 PASS를 승계하지 않는다. 정확한 후보·활성화/복구는 [HCC 시나리오 기록](implementation/synthetic-hcc-study-transfer-2026-10-10.md#latest-hong-gildong-main-scenario-candidate--2026-10-10-1332-kst), 상태 권위 위치는 [발표 환경 통합 상태](implementation/mediq-presentation-integration-status-2026-10-09.md)다. 아래 결과는 과거 조합 이력이다.

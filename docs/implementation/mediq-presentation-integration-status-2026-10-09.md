@@ -1,5 +1,7 @@
 # Medi Q 발표 환경 통합 상태와 실행 순서
 
+> 2026-10-17 안내: 현재 공개 시연 주소와 화면·검증 범위는 [Azure 시연 기준](../architecture/current-demo-20261017.md)을 확인하세요. 아래 설계·실행 기록은 해당 날짜와 환경의 이력이며, 과거 화면이나 개발 주소를 최신 서비스 안내로 사용하지 않습니다. 요구사항·보안 기준 자체를 변경하는 것은 아닙니다.
+
 ## 2026-10-13 Entra 시연 사용자 — 등록 PASS / 초대 수락·로그인 NOT VERIFIED
 
 사용자가 지정한 환자/의료진 이메일을 정확 조회 후 두 Guest로 초대 생성하고 개별 GET readback `PendingAcceptance` 확인. `scripts/entra-demo-users.py --apply` exit0; 증적 artifacts/azure/entra-demo-users-20261013T035605Z-a8a379/result.json은 Git 제외·로컬 ACL 보호, DRAFT / UNASSIGNED. 계정 이메일·oid·초대 링크는 코드/문서에 기록하지 않았다. Graph 초대 발송 요청 성공은 실제 메일 수신·수락·앱 역할·로그인 성공이 아니다. 관리자/Azure RBAC·서버 매핑·공개 ingress·배포 변경 없음. [계약의 지정 guest 예외 및 수락 관문](../integration/entra-oidc-synthetic-actor-contract.md). 다음 작업 한 개: 사용자가 두 초대를 수락하면 Accepted/object ID 재확인. 기존 B 재부팅/700장 전송 중단은 유지한다.
