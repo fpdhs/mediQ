@@ -10,4 +10,4 @@
 .stage .qr-ticket-window img{position:absolute;width:320%;max-width:none;height:auto;left:-110%;top:-44.74%}
 .qr-direction{color:#285fc1;text-align:center}.qr-direction>span{display:block;font-size:28px}.qr-direction small{font-size:11px}
 .stage .qr-reception .image-button{height:auto;border:1px solid #c9d6e8;border-radius:8px;overflow:hidden;background:white}.stage .qr-reception img{height:auto;width:100%}
-@media(max-width:650px){.qr-story{grid-template-columns:1fr;gap:12px;padding:20px 18px}.qr-label,.qr-note{text-align:center}.qr-direction>span{transform:rotate(90deg);font-size:24px}.qr-direction small{display:block}.qr-phone{width:210px}}
+@media(max-width:1000px){.qr-story{grid-template-columns:1fr;gap:12px;padding:20px 18px}.qr-label,.qr-note{text-align:center}.qr-direction>span{transform:rotate(90deg);font-size:24px}.qr-direction small{display:block}.qr-phone{width:210px}}
