@@ -42,6 +42,8 @@ DR은 타 리전 DB 복제 전용 대기 환경입니다. Traffic Manager는 별
 
 ## 화면으로 보기
 
+[Azure 시연 화면 8개 모아보기](https://sureasdufo1-hue.github.io/Highpass-Project/presentation/gallery.html) · [문서·개발 이력 구분](docs/README.md)
+
 | 환자 공유 조건 | 의료진 CT 뷰어 |
 |---|---|
 | ![검사·병원·기간·권한 선택](docs/assets/portfolio-20261017/patient-consent.png) | ![합성 복부 CT 열람](docs/assets/portfolio-20261017/ct-viewer.png) |
@@ -65,6 +67,8 @@ DR은 타 리전 DB 복제 전용 대기 환경입니다. Traffic Manager는 별
 [CT 연결 장애 복구](docs/operations/patient-ct-secondary-address-recovery-2026-10-16.md)에서는 NIC에 존재하지만 OS에서 빠진 영상용 보조 IP를 복구하고 영구 설정을 추가했습니다. 병원 VM 기동·암호화 저장소 복구와 Azure DR은 서로 다른 복구 범위입니다.
 
 ## 문서와 개발
+
+공개 화면 기준은 위 갤러리 하나로 관리합니다. `docs/design/archive/mockups/`는 현재 서비스가 아닌 과거 시안입니다. 이전 발표자료·로컬 테스트 캡처는 해당 시점의 이력으로 남깁니다.
 
 - [요구사항 기준](docs/REQUIREMENTS.md)
 - [아키텍처 기준](docs/ARCHITECTURE.md)

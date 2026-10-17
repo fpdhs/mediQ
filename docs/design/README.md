@@ -1,12 +1,16 @@
 # Medi Q UI / UX 화면설계서 및 디자인 자산 일람
 
-## Medi Q 웹 화면 설계
+## 현재 공개 화면 기준
 
-- [환자 웹 영상 공유 기준](PATIENT-WEB-SHARING-BASELINE.md): 사용자가 지정한 `192.168.111.149:9443/hipass/#PATIENT`의 공유 준비 화면을 환자 웹의 단일 기준으로 적용.
+[Azure 시연 화면 모음](../presentation/gallery.html)과 [현재 구성 안내](../architecture/current-demo-20261017.md)를 먼저 확인하세요. 이 폴더의 아래 목록은 설계·개발 이력입니다. 사설 IP, 로컬 목업, A/B/C 초기 색상 기준은 현행 공개 화면이 아닙니다.
+
+## 과거 웹 화면 설계
+
+- [환자 웹 영상 공유 기준](PATIENT-WEB-SHARING-BASELINE.md): 사용자가 지정한 `192.168.111.149:9443/hipass/#PATIENT`에서 확인했던 공유 준비 화면의 개발 기록.
 
 - [A/B/C 로컬 디자인 구현 보고](MEDI-Q-ABC-DESIGN-IMPLEMENTATION-REPORT.md): 3열 의료진 화면, 집중 Viewer, 청록 환자 화면, 검증과 미연결 범위.
 
-- **현행 구현 기준:** [A 의료진 기본 / B 집중 Viewer / C 환자 기본 — 화면 설계 v1.0](MEDI-Q-SCREEN-BASELINE-V1.md). 사용자 선택 반영; 이전 시각 배치와 구현 순서를 대체. 구현·보안 승인과 별개.
+- **2026-10-09 당시 설계 기준:** [A 의료진 기본 / B 집중 Viewer / C 환자 기본 — 화면 설계 v1.0](MEDI-Q-SCREEN-BASELINE-V1.md). 사용자 선택 반영; 이전 시각 배치와 구현 순서를 대체. 구현·보안 승인과 별개.
 
 - [환자·의료진 웹 화면 설계 v0.1](MEDI-Q-WEB-SCREEN-DESIGN-2026-10-09.md): 시안 기반 배치, 화면별 행동, 데이터·보안 경계, 구현 순서와 수용 기준. DRAFT / UNASSIGNED.
 - [Medi Q 브랜드 및 앱 참조 기준](MEDI-Q-BRAND-REFERENCE-2026-10-09.md): 원본 네이비 사각 Q 로고와 표시 이름 적용 범위.

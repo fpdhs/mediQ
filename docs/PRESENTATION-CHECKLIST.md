@@ -1,5 +1,7 @@
 # Capstone Presentation Checklist
 
+> 2026-10-17 안내: 현재 공개 시연 주소와 화면·검증 범위는 [Azure 시연 기준](architecture/current-demo-20261017.md)을 확인하세요. 아래 설계·실행 기록은 해당 날짜와 환경의 이력이며, 과거 화면이나 개발 주소를 최신 서비스 안내로 사용하지 않습니다. 요구사항·보안 기준 자체를 변경하는 것은 아닙니다.
+
 > CAPSTONE MVP / TECHNICAL TEST ENVIRONMENT ONLY — NOT A PIPA LEGAL DETERMINATION, ISMS-P CERTIFICATION, HOSPITAL SECURITY APPROVAL, OR PRODUCTION READINESS CLAIM
 
 ## 전날

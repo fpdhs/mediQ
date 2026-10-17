@@ -1,3 +1,11 @@
+# 과거 UI 비교용 캡처
+
+이 폴더는 설계·회귀 비교에 사용한 개발 자료입니다. 현재 Azure 화면의 공개 갤러리가 아닙니다.
+
+[현재 시연 화면 모음](https://sureasdufo1-hue.github.io/Highpass-Project/presentation/gallery.html)과 [자료 기준](../../architecture/current-demo-20261017.md)을 확인하세요. 원본 비교와 테스트를 위해 기존 파일은 보존합니다.
+
+## 기존 캡처 목록과 취급 주의사항
+
 # MediQ UI Reference Screenshots
 
 프로젝트 화면을 기능별로 찾기 쉽게 정리한 참고 스크린샷입니다. 파일명은 `역할/기능/상태`를 나타내며, 이 폴더는 문서·디자인 참고용이고 웹 런타임 자산(`public/`)이 아닙니다.
