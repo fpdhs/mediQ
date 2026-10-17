@@ -1,0 +1,55 @@
+{
+  "publicationDate": "2026-10-17",
+  "purpose": "Synthetic MVP screenshot evidence, not live status",
+  "images": [
+    {
+      "file": "ct-viewer.png",
+      "sha256": "5ab1c982294a94796e4a2785b4906de2583d77e09e2d84709d0e85e17d58bbaa",
+      "bytes": 552260,
+      "captureDate": "Not verified",
+      "source": "Medi Q 증적.zip"
+    },
+    {
+      "file": "health-helper.png",
+      "sha256": "f392a1b3d6ca7613c1b64aae72d8180a17cb13f9b1398b1f068d8c21cd34fb19",
+      "bytes": 3036097,
+      "captureDate": "Not verified",
+      "source": "Medi Q 증적.zip"
+    },
+    {
+      "file": "patient-consent.png",
+      "sha256": "54fff221b0936c012e37ba4a1e4d82f47beef91c1637b15deb354ed51177d97a",
+      "bytes": 3432662,
+      "captureDate": "Not verified",
+      "source": "Medi Q 증적.zip"
+    },
+    {
+      "file": "patient-wallet.png",
+      "sha256": "57dc84eb677015fa0786bc1ac08792ec05da4e4956394809c3eb9dca295a75cf",
+      "bytes": 2063596,
+      "captureDate": "Not verified",
+      "source": "Medi Q 증적.zip"
+    },
+    {
+      "file": "reception.png",
+      "sha256": "1e55af7aa4518f3c00f98e4a4c8334958877302f970d2cc9ee4995d440501bdc",
+      "bytes": 834209,
+      "captureDate": "Not verified",
+      "source": "Medi Q 증적.zip"
+    },
+    {
+      "file": "security-operations.png",
+      "sha256": "9c2f669bbdd73fdac0cff65f499a112c0be03245dc0a0a8fd9a5fe22c463bd2a",
+      "bytes": 1324551,
+      "captureDate": "Not verified",
+      "source": "Medi Q 증적.zip"
+    },
+    {
+      "file": "shared-records.png",
+      "sha256": "e1aa657109056d9184e3d69b81dfc18dcdf8ffde160d7259e389d55c216b0f34",
+      "bytes": 429163,
+      "captureDate": "Not verified",
+      "source": "Medi Q 증적.zip"
+    }
+  ]
+}
