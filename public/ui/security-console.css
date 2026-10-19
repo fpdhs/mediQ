@@ -15,3 +15,12 @@
 .sc-period-custom{display:flex;flex-wrap:wrap;gap:12px}.sc-period-custom[hidden],.sc-period-card[hidden]{display:none}.sc-period-panel button{min-height:46px}.sc-period-panel :focus-visible{outline:3px solid #3568a6;outline-offset:3px}.sc-period-status{font-size:14px;line-height:1.7;margin:16px 0 0;}
 .sc-period-card{padding:22px;margin-top:20px;border:1px solid #b9cee1;border-radius:14px;background:#fff;overflow-wrap:anywhere}.sc-period-card h4{font-size:19px;margin:0 0 12px}.sc-period-card p{font-size:14px;line-height:1.6}.sc-period-card small{display:block;font-size:13px;line-height:1.6;color:#4b6276}.sc-period-sources{display:grid;grid-template-columns:1fr 1fr;gap:4px 20px;border-block:1px solid #d6e0e9;padding-block:10px;margin-bottom:14px}
 @media(max-width:700px){.sc-period-panel{margin:18px 14px;padding:20px 16px}.sc-period-heading h3{font-size:21px}.sc-period-form,.sc-period-custom{display:grid;grid-template-columns:minmax(0,1fr);width:100%}.sc-period-form label{min-width:0}.sc-period-sources{grid-template-columns:1fr}.sc-period-card{padding:16px}}
+.sc-reason-button{padding:16px 14px 20px;align-items:flex-start;min-height:76px;cursor:pointer}
+.sc-reason-button>span{min-width:0;font-size:14px;font-weight:650;line-height:1.5}
+.sc-reason-button code,.sc-reason-explanation code{display:block;font-size:11px;font-weight:400;overflow-wrap:anywhere;margin-top:5px;color:#526b87}
+.sc-reason-button strong{white-space:nowrap;font-size:12px}
+.sc-reason-button[aria-expanded=true]{background:#e8effa;box-shadow:inset 0 0 0 2px #426cab}
+.sc-reason-button:focus-visible{outline:3px solid #426cab;outline-offset:3px}
+.sc-reason-explanation{background:#edf2f8;border:1px solid #c5d3e4;border-radius:12px;padding:20px;margin:16px 0;color:#19344e;overflow-wrap:anywhere}
+.sc-reason-explanation h4{margin:0;font-size:18px}.sc-reason-explanation h5{margin:18px 0 6px;font-size:14px}.sc-reason-explanation p{font-size:14px;line-height:1.75;margin:0}.sc-reason-explanation small{display:block;line-height:1.6;margin-top:16px}
+@media(max-width:600px){.sc-reason-button{flex-direction:column;gap:6px}.sc-reason-explanation{padding:16px}}

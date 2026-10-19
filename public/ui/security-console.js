@@ -8,7 +8,24 @@ const colors = {'허용·성공':'#52c6b2','거부·실패':'#ff947e','기타·�
 function el(tag,text,cls){const node=document.createElement(tag);if(text!=null)node.textContent=text;if(cls)node.className=cls;return node;}
 function button(text,fn,cls='sc-button'){const node=el('button',text,cls);node.type='button';node.addEventListener('click',fn);return node;}
 function time(value){return Number.isFinite(Date.parse(value))?new Date(value).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'}):'시각 미확인';}
-function title(value){return names[value]||value||'미확인';}
+export const reasonGuides = Object.freeze({
+  PHR_PATIENT_BINDING_MISMATCH:{title:'계정과 건강기록의 연결이 일치하지 않아요',fact:'요청한 건강기록이 현재 계정에 허용된 환자 기록과 연결되지 않아 차단했습니다.',check:'로그인 계정과 서버의 환자 기록 매핑을 확인하세요. 이름만으로 같은 환자라고 판단하지 않습니다.'},
+  HEALTH_RECORD_PATIENT_REQUIRED:{title:'환자 전용 기록에 다른 역할로 접근했어요',fact:'환자 역할이 필요한 API에 다른 역할의 계정이 요청했습니다.',check:'계정의 서버 역할과 요청한 API를 확인하세요. 의료진은 승인된 의료진 기록 경로를 사용해야 합니다.'},
+  DPOP_PROOF_REQUIRED:{title:'요청 서명 증명이 필요해요',fact:'요청에 필요한 DPoP 증명이 전달되지 않았거나 해당 경로의 입력 조건을 충족하지 못했습니다. DPoP는 요청자가 해당 키를 보유하고 있음을 서명으로 확인하는 장치입니다.',check:'요청 화면의 증명 생성과 서버까지의 전달 여부를 확인하세요. 증명 검사 단계의 거부이며 전체 영상 전달 여부는 연결된 Gateway 기록에서 확인합니다.'},
+  DPOP_NONCE_REPLAYED:{title:'이미 사용한 요청 증명이 다시 들어왔어요',fact:'서명 키와 요청 식별자 조합의 재사용을 감지해 차단했습니다.',check:'브라우저의 중복 전송·재시도인지 증명 재사용 시도인지 확인하세요. 새로운 요청에는 새로운 증명이 필요합니다.'},
+  KEY_RELEASE_DENIED:{title:'복호화 키 사용 승인이 거부됐어요',fact:'키 사용 승인 과정에서 조건을 충족하지 못했습니다. 이 코드만으로 구체적인 실패 원인까지 알 수는 없습니다.',check:'연결된 승인 기록의 동의 상태·병원·유효기간·사용 여부를 확인하세요. 키나 토큰 원문을 검토 메모에 넣지 마세요.'},
+  TICKET_ALREADY_USED:{title:'이미 접수한 QR 티켓이에요',fact:'사용이 완료된 티켓으로 다시 접수를 요청했습니다.',check:'기존 접수 결과와 중복 클릭 여부를 먼저 확인하세요. 이 이벤트만으로 공격이라고 판단하지 않습니다.'}
+});
+function title(value){return reasonGuides[value]?.title||names[value]||value||'미확인';}
+function reasonLabel(value){return reasonGuides[value]?`${title(value)} · ${value}`:title(value);}
+function reasonExplanation(code){
+  const guide=reasonGuides[code],box=el('section',null,'sc-reason-explanation');
+  box.append(el('h4',title(code)),el('code',code||'사유 코드 미제공'));
+  box.append(el('h5','발생 사실'),el('p',guide?.fact||'이 코드의 설명은 아직 등록되지 않았습니다. 원본 이벤트와 연결된 기록을 확인하세요.'));
+  box.append(el('h5','확인할 조치'),el('p',guide?.check||'발생 경로와 서버의 거부 조건을 확인하세요.'));
+  box.append(el('small','거부·실패는 공격 건수가 아닙니다. 중복 요청, 연결 오류, 보안 시험도 함께 기록될 수 있습니다.'));
+  return box;
+}
 function saveFile(name,body,type){const url=URL.createObjectURL(new Blob([body],{type}));const link=el('a');link.href=url;link.download=name;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 export function reportCsv(report){
   const quote=value=>{let text=String(value??'');if(/^[\s]*[=+\-@]/u.test(text))text="'"+text;return '"'+text.replaceAll('"','""')+'"';};
@@ -18,7 +35,7 @@ export function reportCsv(report){
   return '\ufeff'+rows.map(row=>row.map(quote).join(',')).join('\r\n');
 }
 function printReport(report){
-  showSecurityReport(report,{actionLabel:title,reasonLabel:title});
+  showSecurityReport(report,{actionLabel:title,reasonLabel,reasonDescription:code=>reasonGuides[code]?`${reasonGuides[code].fact} 확인할 조치: ${reasonGuides[code].check}`:''});
 }
 export function renderSecurityConsole(root,api){
   let state=mounted.get(root);
@@ -75,7 +92,25 @@ function drawCharts(state){
   circle('#dce6ed',0,'283 0');let offset=0;for(const item of chart.results){const length=chart.total?item.count/chart.total*282.743:0;circle(colors[item.label],-offset,`${length} ${282.743-length}`);offset+=length;}
   const text=document.createElementNS(svg.namespaceURI,'text');text.setAttribute('x','60');text.setAttribute('y','65');text.setAttribute('text-anchor','middle');text.textContent=String(chart.total);svg.append(text);ring.append(svg);
   const legend=el('div',null,'sc-legend');for(const item of chart.results)legend.append(button(`${item.label} ${item.count}건`,()=>{state.result.value=item.label;load(state);},'sc-legend-button'));if(!chart.total)legend.append(el('p','선택 기간에 저장된 기록이 없습니다.'));ring.append(legend);outcomes.append(ring);
-  const reasons=panel('거부된 이유를 읽어요',`거부·실패 ${chart.denied}건 · 사유별 상위 6개`);const max=Math.max(1,...chart.reasons.map(item=>item.count));for(const item of chart.reasons){const row=button('',()=>{state.search.value=item.label;state.result.value='거부·실패';load(state);},'sc-bar-button');row.append(el('span',title(item.label)),el('strong',`${item.count}건`));const bar=el('i');bar.style.width=(item.count/max*100)+'%';row.append(bar);reasons.append(row);}if(!chart.reasons.length)reasons.append(el('p','조회 범위에 거부·실패 기록이 없습니다.'));
+  const reasons=panel('접근이 멈춘 이유',`앱 거부·실패 로그 ${chart.denied}건 · 사유를 눌러 설명과 확인할 내용을 살펴보세요.`);
+  const explanation=el('div',null,'sc-reason-slot');
+  const max=Math.max(1,...chart.reasons.map(item=>item.count));
+  for(const item of chart.reasons){
+    const row=button('',()=>{
+      for(const sibling of reasons.querySelectorAll('.sc-bar-button'))sibling.setAttribute('aria-expanded','false');
+      row.setAttribute('aria-expanded','true');explanation.replaceChildren(reasonExplanation(item.label));
+      explanation.append(button('관련 이벤트 보기',async()=>{state.search.value=item.label;state.source.value='APP';state.result.value='거부·실패';state.review.value='';state.hospital.value='';state.category='';state.action='';await load(state);state.explorer.scrollIntoView({behavior:'auto'});}));
+      explanation.append(el('small','관련 이벤트에서 내용을 확인한 뒤 보고서에 담을 수 있습니다.'));
+    },'sc-bar-button sc-reason-button');
+    row.setAttribute('aria-expanded','false');
+    const label=el('span');label.append(el('span',title(item.label)),el('code',item.label));
+    row.append(label,el('strong',`${item.count}건 · ${chart.denied?(item.count/chart.denied*100).toFixed(1):'0.0'}%`));
+    const bar=el('i');bar.style.width=(item.count/max*100)+'%';row.append(bar);reasons.append(row);
+  }
+  const other=Math.max(0,chart.denied-chart.reasons.reduce((sum,item)=>sum+item.count,0));
+  if(other)reasons.append(el('p',`기타 사유 ${other}건 · ${(other/chart.denied*100).toFixed(1)}%`));
+  if(!chart.reasons.length)reasons.append(el('p','조회 범위에 거부·실패 기록이 없습니다.'));
+  reasons.append(explanation,el('small','비율은 앱 거부·실패 로그 기준입니다. 한 요청에 여러 로그가 남을 수 있습니다.'));
   const trend=panel('시간에 따라 달라지는 신호','앱 이벤트 · 시간별 전체 건수와 거부·실패 건수');const columns=el('div',null,'sc-columns');const peak=Math.max(1,...chart.hours.map(item=>item.count));for(const item of chart.hours){const col=el('div',null,'sc-column');col.title=`${time(item.time)}: 전체 ${item.count}건 / 거부·실패 ${item.denied}건`;col.setAttribute('role','img');col.setAttribute('aria-label',col.title);const all=el('i'),denied=el('b');all.style.height=(item.count/peak*100)+'%';denied.style.height=(item.denied/peak*100)+'%';col.append(all,denied);columns.append(col);}trend.append(columns,el('small',`${time(chart.hours[0].time)} ~ ${time(state.data.until)} · 파랑 전체 / 주황 거부·실패`));
   const kinds=panel('어떤 활동이 있었나요?','종류를 누르면 이벤트 목록이 좁혀집니다.');const chips=el('div',null,'sc-kind-chips');for(const item of chart.categories)chips.append(button(`${item.label} ${item.count}건`,()=>{state.category=item.label;load(state);},'sc-chip'));kinds.append(chips);
   const waf=state.data.sources.waf,firewall=panel('웹 입구에서 발견한 신호','WAF 규칙 이벤트 표본 · 전체 접속 대비 차단률이 아닙니다.');
@@ -102,6 +137,7 @@ function drawEvents(state){
 function toggleSelected(state,event){const key=event.source+':'+event.eventRef;if(state.selected.has(key))state.selected.delete(key);else if(state.selected.size<50)state.selected.set(key,event);else state.status.textContent='보고서 한 건에는 최대 50개 이벤트를 담을 수 있습니다.';drawBasket(state);}
 async function showDetail(state,event){
   const version=(state.detailVersion||0)+1;state.detailVersion=version;const host=state.detail;host.replaceChildren(el('h3',title(event.action)),el('p',`${time(event.time)} · ${event.resultGroup}`));const list=el('dl');for(const[label,value]of [['출처',event.source],['기관·자원',event.hospitalId],['주체 유형',event.actorType],['사유',title(event.reasonCode)],['이벤트 참조',event.eventRef],['검토',reviewNames[event.review?.status||'UNREVIEWED']]]){list.append(el('dt',label),el('dd',value));}host.append(list);if(event.review?.note)host.append(el('p','검토 메모: '+event.review.note));host.append(button('보고서에 담기 / 빼기',()=>{toggleSelected(state,event);drawEvents(state);}));
+  host.append(reasonExplanation(event.reasonCode));
   if(event.auditSessionId&&event.auditSessionId!=='UNKNOWN'){
     const flow=el('ol',null,'sc-flow');host.append(el('h4','같은 실행의 연결 기록'),flow);
     try{const query=new URLSearchParams({session:event.auditSessionId,until:state.data.until,from:state.data.from});const data=await state.api.fetchJson('/api/security/events?'+query,{cache:'no-store',signal:AbortSignal.timeout(15000)});if(version!==state.detailVersion)return;for(const related of [...data.events].reverse())flow.append(el('li',`${time(related.time)} · ${title(related.action)} · ${related.result}`));flow.append(el('li',`관련 ${data.total}건 중 최신 ${data.events.length}건 · 같은 감사 세션 기준`));}catch{if(version===state.detailVersion)flow.append(el('li','관련 흐름을 불러오지 못했습니다.'));}
