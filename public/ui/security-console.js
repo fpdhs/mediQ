@@ -37,6 +37,13 @@ export function reportCsv(report){
 function printReport(report){
   showSecurityReport(report,{actionLabel:title,reasonLabel,reasonDescription:code=>reasonGuides[code]?`${reasonGuides[code].fact} 확인할 조치: ${reasonGuides[code].check}`:''});
 }
+function setConsoleView(state,view){
+  state.view=view;
+  for(const[key,panel]of Object.entries(state.views))panel.hidden=key!==view;
+  for(const[key,tab]of Object.entries(state.tabs)){tab.setAttribute('aria-selected',String(key===view));tab.tabIndex=key===view?0:-1;}
+  state.root.classList.toggle('sc-presenting',view==='dashboard'&&state.presenting===true);
+}
+function explore(state){setConsoleView(state,'events');return load(state);}
 export function renderSecurityConsole(root,api){
   let state=mounted.get(root);
   if(!state){state={api,selected:new Map(),version:0,until:null};mounted.set(root,state);build(root,state);}
@@ -46,10 +53,15 @@ export function renderSecurityConsole(root,api){
   state.overview=api.overview;state.until=null;load(state);
 }
 function build(root,state){
-  root.replaceChildren();root.classList.add('sc-root');
+  root.replaceChildren();root.classList.add('sc-root');state.root=root;
   const hero=el('header',null,'sc-hero'),heading=el('div');heading.append(el('p','Medi Q 보안 관제실','sc-brand'),el('h2','신호를 읽고, 사건을 연결하세요.'),el('p','동의부터 영상 열람까지, 남겨진 기록을 따라갑니다.','sc-subtitle'));
-  const signal=button('',()=>{state.review.value='UNREVIEWED';state.result.value='거부·실패';load(state);state.explorer.scrollIntoView({behavior:'auto'});},'sc-signal');state.heroCount=el('strong','—');signal.append(state.heroCount,el('span','확인할 접근 거부·실패'));hero.append(heading,signal);root.append(hero);
-  const nav=el('nav',null,'sc-nav');nav.setAttribute('aria-label','관제실 바로가기');nav.append(button('상황판',()=>state.charts.scrollIntoView({behavior:'auto'})),button('이벤트 탐색',()=>state.explorer.scrollIntoView({behavior:'auto'})),button('보고서 바구니',()=>state.basket.scrollIntoView({behavior:'auto'})),button('새 기록 불러오기',()=>state.api.refresh()));state.status=el('p','감사 자료 연결 중…','sc-status');state.status.setAttribute('role','status');root.append(nav,state.status);
+  const signal=button('',()=>{state.review.value='UNREVIEWED';state.result.value='거부·실패';explore(state);state.explorer.scrollIntoView({behavior:'auto'});},'sc-signal');state.heroCount=el('strong','—');signal.append(state.heroCount,el('span','확인할 접근 거부·실패'));hero.append(heading,signal);root.append(hero);
+  const nav=el('nav',null,'sc-nav');nav.setAttribute('aria-label','관제실 메뉴');const tabs=el('div',null,'sc-tabs');tabs.setAttribute('role','tablist');state.tabs={};
+  for(const[key,label]of [['dashboard','상황판'],['events','이벤트 탐색기'],['reports','보고서']]){const tab=button(label,()=>setConsoleView(state,key));tab.id='sc-tab-'+key;tab.setAttribute('role','tab');tab.setAttribute('aria-controls','sc-panel-'+key);state.tabs[key]=tab;tabs.append(tab);}
+  tabs.addEventListener('keydown',event=>{const keys=Object.keys(state.tabs),index=keys.findIndex(key=>state.tabs[key]===event.target);if(index<0||!['ArrowRight','ArrowLeft','Home','End'].includes(event.key))return;event.preventDefault();const next=event.key==='Home'?0:event.key==='End'?keys.length-1:(index+(event.key==='ArrowRight'?1:keys.length-1))%keys.length;setConsoleView(state,keys[next]);state.tabs[keys[next]].focus();});
+  const present=button('발표 보기',()=>{state.presenting=!state.presenting;present.textContent=state.presenting?'기본 보기':'발표 보기';present.setAttribute('aria-pressed',String(state.presenting));setConsoleView(state,'dashboard');});present.setAttribute('aria-pressed','false');nav.append(tabs,present,button('새 기록 불러오기',()=>state.api.refresh()));
+  state.status=el('p','감사 자료 연결 중…','sc-status');state.status.setAttribute('role','status');root.append(nav,state.status);
+  const rangeRoot=el('section',null,'sc-range');root.append(rangeRoot);
   state.sources=el('div',null,'sc-sources');state.charts=el('div',null,'sc-charts');root.append(state.sources,state.charts);
   const work=el('div',null,'sc-work');state.explorer=el('section',null,'sc-explorer');state.explorer.append(el('h3','이벤트 탐색기'));
   const form=el('form',null,'sc-search');const searchLabel=el('label','이벤트 검색');state.search=el('input');state.search.type='search';state.search.maxLength=120;state.search.placeholder='TOKEN_EXPIRED, 토큰, 병원 또는 이벤트 참조';searchLabel.append(state.search);form.append(searchLabel);
@@ -64,8 +76,11 @@ function build(root,state){
   state.count=el('p','—','sc-count');state.list=el('div',null,'sc-events');state.pager=el('div',null,'sc-pager');state.explorer.append(state.count,state.list,state.pager);
   const side=el('aside',null,'sc-side');state.detail=el('section',null,'sc-detail');state.detail.append(el('h3','사건을 따라가 볼까요?'),el('p','이벤트를 선택하면 관련 흐름과 검토 기록을 확인할 수 있어요.'));state.basket=el('section',null,'sc-basket');side.append(state.detail,state.basket);work.append(state.explorer,side);root.append(work);drawBasket(state);
   const periodRoot=el('section',null,'sc-period-panel');work.before(periodRoot);
-  state.periodPanel=createPeriodReportPanel({root:periodRoot,getApi:()=>state.api,getData:()=>state.data,onRange:range=>{state.range=range;state.until=null;return load(state);},getSelected:()=>[...state.selected.values()],printReport,reportCsv,saveFile});
+  state.periodPanel=createPeriodReportPanel({root:periodRoot,rangeRoot,getApi:()=>state.api,getData:()=>state.data,onRange:range=>{state.range=range;state.until=null;return load(state);},getSelected:()=>[...state.selected.values()],printReport,reportCsv,saveFile});
   const boundary=el('details',null,'sc-boundary');boundary.append(el('summary','조회 범위와 기록 연결 확인'));state.boundary=el('p','확인 전');boundary.append(state.boundary);root.append(boundary);
+  const dashboard=el('section',null,'sc-dashboard'),reports=el('section',null,'sc-reports');state.metrics=el('div',null,'sc-metrics');dashboard.append(state.metrics,state.charts,state.sources,boundary);reports.append(periodRoot,state.basket);root.append(dashboard,work,reports);
+  state.views={dashboard,events:work,reports};for(const[key,panel]of Object.entries(state.views)){panel.id='sc-panel-'+key;panel.setAttribute('role','tabpanel');panel.setAttribute('aria-labelledby','sc-tab-'+key);}
+  const reportLink=button('이 기간으로 보고서 만들기',()=>setConsoleView(state,'reports'));rangeRoot.append(reportLink);setConsoleView(state,'dashboard');
 }
 async function load(state,page=0){
   const version=++state.version;state.loading=true;drawBasket(state);state.status.textContent='이벤트와 집계를 불러오는 중…';
@@ -85,13 +100,14 @@ function drawSources(state){
 }
 function drawCharts(state){
   const chart=state.data.chart;state.heroCount.textContent=chart.unreviewed.toLocaleString();state.charts.replaceChildren();
+  state.metrics.replaceChildren();for(const[label,value]of [['앱 이벤트',chart.total],['허용·성공',chart.results.find(item=>item.label==='허용·성공')?.count||0],['거부·실패',chart.denied],['검토 전 거부·실패',chart.unreviewed]]){const card=el('article');card.append(el('span',label),el('strong',Number(value).toLocaleString()),el('small','로그 건수'));state.metrics.append(card);}
   const panel=(heading,copy)=>{const node=el('section',null,'sc-chart');node.append(el('h3',heading),el('p',copy));state.charts.append(node);return node;};
   const outcomes=panel('접근 결과의 균형',`앱 기록 ${chart.total.toLocaleString()}건 · 선택 시점 이전 ${chart.periodHours}시간 전체`);
   const ring=el('div',null,'sc-ring-row'),svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox','0 0 120 120');svg.setAttribute('role','img');svg.setAttribute('aria-label',chart.results.map(item=>`${item.label} ${item.count}건`).join(',')||'집계된 앱 기록 없음');
   const circle=(stroke,offset,dash)=>{const c=document.createElementNS(svg.namespaceURI,'circle');for(const[k,v]of Object.entries({cx:60,cy:60,r:45,fill:'none',stroke,'stroke-width':13,'stroke-dasharray':dash,'stroke-dashoffset':offset,transform:'rotate(-90 60 60)'}))c.setAttribute(k,String(v));svg.append(c);};
   circle('#dce6ed',0,'283 0');let offset=0;for(const item of chart.results){const length=chart.total?item.count/chart.total*282.743:0;circle(colors[item.label],-offset,`${length} ${282.743-length}`);offset+=length;}
   const text=document.createElementNS(svg.namespaceURI,'text');text.setAttribute('x','60');text.setAttribute('y','65');text.setAttribute('text-anchor','middle');text.textContent=String(chart.total);svg.append(text);ring.append(svg);
-  const legend=el('div',null,'sc-legend');for(const item of chart.results)legend.append(button(`${item.label} ${item.count}건`,()=>{state.result.value=item.label;load(state);},'sc-legend-button'));if(!chart.total)legend.append(el('p','선택 기간에 저장된 기록이 없습니다.'));ring.append(legend);outcomes.append(ring);
+  const legend=el('div',null,'sc-legend');for(const item of chart.results)legend.append(button(`${item.label} ${item.count}건`,()=>{state.result.value=item.label;explore(state);},'sc-legend-button'));if(!chart.total)legend.append(el('p','선택 기간에 저장된 기록이 없습니다.'));ring.append(legend);outcomes.append(ring);
   const reasons=panel('접근이 멈춘 이유',`앱 거부·실패 로그 ${chart.denied}건 · 사유를 눌러 설명과 확인할 내용을 살펴보세요.`);
   const explanation=el('div',null,'sc-reason-slot');
   const max=Math.max(1,...chart.reasons.map(item=>item.count));
@@ -99,7 +115,7 @@ function drawCharts(state){
     const row=button('',()=>{
       for(const sibling of reasons.querySelectorAll('.sc-bar-button'))sibling.setAttribute('aria-expanded','false');
       row.setAttribute('aria-expanded','true');explanation.replaceChildren(reasonExplanation(item.label));
-      explanation.append(button('관련 이벤트 보기',async()=>{state.search.value=item.label;state.source.value='APP';state.result.value='거부·실패';state.review.value='';state.hospital.value='';state.category='';state.action='';await load(state);state.explorer.scrollIntoView({behavior:'auto'});}));
+      explanation.append(button('관련 이벤트 보기',async()=>{state.search.value=item.label;state.source.value='APP';state.result.value='거부·실패';state.review.value='';state.hospital.value='';state.category='';state.action='';await explore(state);state.explorer.scrollIntoView({behavior:'auto'});}));
       explanation.append(el('small','관련 이벤트에서 내용을 확인한 뒤 보고서에 담을 수 있습니다.'));
     },'sc-bar-button sc-reason-button');
     row.setAttribute('aria-expanded','false');
@@ -112,17 +128,17 @@ function drawCharts(state){
   if(!chart.reasons.length)reasons.append(el('p','조회 범위에 거부·실패 기록이 없습니다.'));
   reasons.append(explanation,el('small','비율은 앱 거부·실패 로그 기준입니다. 한 요청에 여러 로그가 남을 수 있습니다.'));
   const trend=panel('시간에 따라 달라지는 신호','앱 이벤트 · 시간별 전체 건수와 거부·실패 건수');const columns=el('div',null,'sc-columns');const peak=Math.max(1,...chart.hours.map(item=>item.count));for(const item of chart.hours){const col=el('div',null,'sc-column');col.title=`${time(item.time)}: 전체 ${item.count}건 / 거부·실패 ${item.denied}건`;col.setAttribute('role','img');col.setAttribute('aria-label',col.title);const all=el('i'),denied=el('b');all.style.height=(item.count/peak*100)+'%';denied.style.height=(item.denied/peak*100)+'%';col.append(all,denied);columns.append(col);}trend.append(columns,el('small',`${time(chart.hours[0].time)} ~ ${time(state.data.until)} · 파랑 전체 / 주황 거부·실패`));
-  const kinds=panel('어떤 활동이 있었나요?','종류를 누르면 이벤트 목록이 좁혀집니다.');const chips=el('div',null,'sc-kind-chips');for(const item of chart.categories)chips.append(button(`${item.label} ${item.count}건`,()=>{state.category=item.label;load(state);},'sc-chip'));kinds.append(chips);
+  const kinds=panel('어떤 활동이 있었나요?','종류를 누르면 이벤트 목록이 좁혀집니다.');const chips=el('div',null,'sc-kind-chips');for(const item of chart.categories)chips.append(button(`${item.label} ${item.count}건`,()=>{state.category=item.label;explore(state);},'sc-chip'));kinds.append(chips);
   const waf=state.data.sources.waf,firewall=panel('웹 입구에서 발견한 신호','WAF 규칙 이벤트 표본 · 전체 접속 대비 차단률이 아닙니다.');
   if(waf.status==='available'){
     firewall.append(el('p',`탐지 ${waf.count-waf.denied}개 · 명시적 차단 ${waf.denied}개 · 수집 ${time(waf.observedAt)}`));
     const peak=Math.max(1,...waf.rules.map(item=>item.count));
-    for(const item of waf.rules){const row=button('',()=>{state.source.value='WAF';state.search.value=item.label;state.category='';state.result.value='';load(state);},'sc-bar-button');row.append(el('span',item.label),el('strong',`${item.count}개`));const bar=el('i');bar.style.width=(item.count/peak*100)+'%';row.append(bar);firewall.append(row);}
+    for(const item of waf.rules){const row=button('',()=>{state.source.value='WAF';state.search.value=item.label;state.category='';state.result.value='';explore(state);},'sc-bar-button');row.append(el('span',item.label),el('strong',`${item.count}개`));const bar=el('i');bar.style.width=(item.count/peak*100)+'%';row.append(bar);firewall.append(row);}
     if(!waf.count)firewall.append(el('p','수집된 표본에 선택 기간 규칙 이벤트가 없습니다.'));
   }else firewall.append(el('p','수집 지연 또는 연결 실패 · 탐지 건수 미확인'));
   const entra=state.data.sources.entra,identity=panel('로그인의 바깥쪽 근거','Microsoft Entra 원본 · 지정 앱 로그인 표본');
   if(entra.status==='available'){
-    const peak=Math.max(1,...entra.results.map(item=>item.count));for(const item of entra.results){const row=button('',()=>{state.source.value='ENTRA';state.result.value=item.label;state.category='';state.search.value='';load(state);},'sc-bar-button');row.append(el('span',item.label),el('strong',`${item.count}건`));const bar=el('i');bar.style.width=(item.count/peak*100)+'%';row.append(bar);identity.append(row);}
+    const peak=Math.max(1,...entra.results.map(item=>item.count));for(const item of entra.results){const row=button('',()=>{state.source.value='ENTRA';state.result.value=item.label;state.category='';state.search.value='';explore(state);},'sc-bar-button');row.append(el('span',item.label),el('strong',`${item.count}건`));const bar=el('i');bar.style.width=(item.count/peak*100)+'%';row.append(bar);identity.append(row);}
     if(!entra.count)identity.append(el('p','조회는 성공했지만 선택 기간의 지정 앱 로그인 기록은 없습니다. 수집 지연·진단 설정은 별도 확인이 필요합니다.'));
   }else identity.append(el('p','Entra 조회 실패 또는 미설정 · 건수 미확인'));
   identity.append(el('small',entra.diagnostics));
@@ -147,6 +163,7 @@ async function showDetail(state,event){
   }
 }
 function drawBasket(state){
+  if(state.tabs?.reports)state.tabs.reports.textContent=`보고서 · ${state.selected.size}`;
   const host=state.basket;host.replaceChildren(el('h3',`보고서 바구니 · ${state.selected.size}`),el('p','관련 이벤트를 모아 사건의 흐름을 남겨요.'));for(const[key,event]of state.selected){const row=el('div',null,'sc-basket-item');row.append(el('span',title(event.action)),button('빼기',()=>{state.selected.delete(key);drawBasket(state);if(state.data)drawEvents(state);},'sc-text-button'));host.append(row);}if(!state.selected.size)host.append(el('p','이벤트 옆의 ＋ 보고서를 눌러 담아 주세요.'));
   const actions=el('div',null,'sc-report-actions');for(const[format,label]of [['PRINT','PDF / 인쇄'],['CSV','CSV 저장'],['JSON','근거 JSON']]){const action=button(label,()=>exportReport(state,format));action.disabled=!state.selected.size||state.exporting||state.loading;actions.append(action);}host.append(actions);state.reportStatus=el('p',state.reportMessage||'생성 문서는 검토 전 초안으로 표시됩니다.','sc-report-status');state.reportStatus.setAttribute('role','status');host.append(state.reportStatus);
 }
