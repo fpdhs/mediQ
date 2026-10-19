@@ -52,6 +52,8 @@ import { createPacsTransferJobRuntime } from "./pacs-transfer-job-runtime.js";
 import { findAzureKeyVaultAuditEvent, listAzureKeyVaultAudit } from './azure-keyvault-audit.js';
 import { toSecurityAuditView } from './security-observatory-view.js';
 import { buildEventIndex, parseEventQuery, createSecurityReport } from './security-console.js';
+import {helperConnectionStatus} from './security-helper-monitor.js';
+let lastHelperConnectionState='';
 import {createPeriodSecurityReport,readSecurityReportSnapshot} from './security-period-report.js';
 import { listWafAudit } from './waf-audit.js';
 import { listEntraAudit } from './entra-audit.js';
@@ -859,6 +861,12 @@ async function routeApi(request, response, url) {
     await store.save();
     if (report) return sendJson(response, 201, report);
     const { allEvents, filteredEvents, ...view } = index;
+    view.helperConnection=await helperConnectionStatus();
+    const connectionState=[view.helperConnection.transport,view.helperConnection.relay,view.helperConnection.model].join('_');
+    if(connectionState!==lastHelperConnectionState){
+      await service.writeAudit({actorType:'SYSTEM',actorId:'health-helper-monitor',action:'HEALTH_HELPER_CONNECTION_CHECK',result:connectionState==='REACHABLE_READY_AVAILABLE'?'SUCCESS':'ALERT',reasonCode:'HELPER_CONNECTION_'+connectionState});
+      await store.save();lastHelperConnectionState=connectionState;
+    }
     return sendJson(response, 200, view);
   }
 

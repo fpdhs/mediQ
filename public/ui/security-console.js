@@ -9,6 +9,14 @@ function el(tag,text,cls){const node=document.createElement(tag);if(text!=null)n
 function button(text,fn,cls='sc-button'){const node=el('button',text,cls);node.type='button';node.addEventListener('click',fn);return node;}
 function time(value){return Number.isFinite(Date.parse(value))?new Date(value).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'}):'시각 미확인';}
 export const reasonGuides = Object.freeze({
+  HELPER_TRANSLATION_RAG_STARTED:{title:'근거 검색·답변 처리를 시작했어요',fact:'건강도우미가 요청 처리를 시작했습니다. 답변 완료를 의미하지 않습니다.',check:'같은 요청의 완료 또는 실패 기록을 확인하세요.'},
+  HELPER_TRANSLATION_ANSWER_GENERATED:{title:'근거 기반 답변을 생성했어요',fact:'모델 생성 경로에서 결과를 반환했습니다.',check:'임상적 정확성 검증과는 구분합니다. 같은 요청의 연결 기록을 확인하세요.'},
+  HELPER_TRANSLATION_EVIDENCE_DELIVERED:{title:'근거 안내를 제공했어요',fact:'모델 생성 답변 대신 근거 안내를 반환했습니다.',check:'모델 장애인지 근거 안내 정책인지 이 코드만으로 단정하지 않습니다.'},
+  HELPER_CLINICAL_REQUEST_REFUSED:{title:'진단·치료 요청에 안전 안내를 제공했어요',fact:'임상 판단 요청을 거절하고 안전 안내를 정상 제공했습니다.',check:'모델 답변 생성 성공이나 시스템 장애로 합산하지 않습니다.'},
+  HELPER_EVIDENCE_INSUFFICIENT:{title:'사용할 근거가 부족해요',fact:'질문에 연결할 검토된 근거를 찾지 못했습니다.',check:'지식베이스의 주제 범위와 자료 검토 상태를 확인하세요.'},
+  HELPER_MODEL_TIMEOUT:{title:'응답 대기시간을 초과했어요',fact:'정해진 시간 안에 처리를 완료하지 못했습니다.',check:'SSH 통로·중계·모델 상태와 동시 요청을 확인하세요.'},
+  HELPER_OUTPUT_REJECTED:{title:'생성 결과가 출력 검증을 통과하지 못했어요',fact:'출력 검증 조건을 충족하지 못한 결과입니다.',check:'검증 규칙을 확인하세요. 환자 질문·답변 원문을 관제 메모에 복사하지 마세요.'},
+  HELPER_RATE_LIMITED:{title:'요청 처리 제한에 도달했어요',fact:'요청 빈도 또는 동시 처리 제한으로 요청을 거부했습니다.',check:'재시도 빈도와 동시 요청 수를 확인하세요.'},
   PHR_PATIENT_BINDING_MISMATCH:{title:'계정과 건강기록의 연결이 일치하지 않아요',fact:'요청한 건강기록이 현재 계정에 허용된 환자 기록과 연결되지 않아 차단했습니다.',check:'로그인 계정과 서버의 환자 기록 매핑을 확인하세요. 이름만으로 같은 환자라고 판단하지 않습니다.'},
   HEALTH_RECORD_PATIENT_REQUIRED:{title:'환자 전용 기록에 다른 역할로 접근했어요',fact:'환자 역할이 필요한 API에 다른 역할의 계정이 요청했습니다.',check:'계정의 서버 역할과 요청한 API를 확인하세요. 의료진은 승인된 의료진 기록 경로를 사용해야 합니다.'},
   DPOP_PROOF_REQUIRED:{title:'요청 서명 증명이 필요해요',fact:'요청에 필요한 DPoP 증명이 전달되지 않았거나 해당 경로의 입력 조건을 충족하지 못했습니다. DPoP는 요청자가 해당 키를 보유하고 있음을 서명으로 확인하는 장치입니다.',check:'요청 화면의 증명 생성과 서버까지의 전달 여부를 확인하세요. 증명 검사 단계의 거부이며 전체 영상 전달 여부는 연결된 Gateway 기록에서 확인합니다.'},
@@ -142,6 +150,18 @@ function drawCharts(state){
     if(!entra.count)identity.append(el('p','조회는 성공했지만 선택 기간의 지정 앱 로그인 기록은 없습니다. 수집 지연·진단 설정은 별도 확인이 필요합니다.'));
   }else identity.append(el('p','Entra 조회 실패 또는 미설정 · 건수 미확인'));
   identity.append(el('small',entra.diagnostics));
+  const helper=chart.helper,connection=state.data.helperConnection;
+  const health=panel('건강도우미 · 응답과 연결','질문 원문 없이 요청별 처리 결과와 현재 연결을 확인합니다.');health.classList.add('sc-helper-monitor');
+  if(helper){
+    health.append(el('p',`연결된 요청 ${helper.requestCount}건 · 로그 ${helper.logCount}건 · 요청 연결 불가 로그 ${helper.unlinked}건`));
+    const counts=el('div',null,'sc-kind-chips');for(const[key,label]of [['generated','답변 생성'],['evidence','근거·시나리오 안내'],['safe','안전 안내'],['failed','처리 실패'],['unknown','종료·결과 미확인']])counts.append(el('span',`${label} ${helper.counts[key]}건`,'sc-chip'));health.append(counts);
+    health.append(el('p',helper.pairedCount?`시작·종료 로그 ${helper.pairedCount}쌍 · 중앙값 ${(helper.medianMs/1000).toFixed(1)}초 · P95 ${(helper.p95Ms/1000).toFixed(1)}초`:'같은 조회 기간 내 시작·종료 로그 쌍이 없어 처리시간을 계산하지 않았습니다.'));
+    health.append(el('small',`마지막 요청 기록: ${helper.lastEventAt?time(helper.lastEventAt):'선택 기간 기록 없음'} · 처리시간은 감사 로그 간 간격이며 모델 추론 시간과 다릅니다.`));
+  }else health.append(el('p','건강도우미 요청 집계 미확인'));
+  const labels={REACHABLE:'응답 도달',READY:'정상 응답',AVAILABLE:'모델 설치 확인',UNAVAILABLE:'연결·실행 확인 필요',NOT_CONFIGURED:'미설정',UNKNOWN:'미확인'};
+  const stages=el('div',null,'sc-kind-chips');for(const[key,label]of [['transport','SSH 전달 경로'],['relay','중계 서비스'],['model','모델 API']])stages.append(el('span',`${label}: ${labels[connection?.[key]]||'미확인'}`,'sc-chip'));health.append(stages);
+  health.append(el('small',`연결 확인: ${connection?.observedAt?time(connection.observedAt):'미확인'} · 최대 30초 캐시. 모델 API 확인은 생성 시험이 아닙니다. SSH 프로세스 자체 상태는 별도 확인이 필요합니다.`));
+  health.append(button('건강도우미 기록 보기',()=>{state.category='건강도우미';state.search.value='';state.source.value='APP';state.result.value='';state.review.value='';state.hospital.value='';state.action='';explore(state);}));
 }
 function drawEvents(state){
   const data=state.data;state.count.textContent=`검색 결과 ${data.total}건 · ${data.page+1}페이지${state.category?' · '+state.category:''}`;state.list.replaceChildren();

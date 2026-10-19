@@ -15,6 +15,13 @@ async function acquireLock(timeoutMs=1000){
 }
 const server=createServer(async(req,res)=>{
   const send=(status,value)=>{res.writeHead(status,{'content-type':'application/json','cache-control':'no-store'});res.end(JSON.stringify(value));};
+  if(req.method==='GET'&&req.url==='/health'){
+    try{
+      const response=await fetch('http://127.0.0.1:11434/api/tags',{signal:AbortSignal.timeout(2000),redirect:'error'});
+      if(!response.ok)throw Error();const data=await response.json();
+      return send(200,{service:'health-helper-relay',model:data.models?.some(m=>m.name==='qwen3.5:4b')?'AVAILABLE':'UNAVAILABLE',modelName:'qwen3.5:4b'});
+    }catch{return send(200,{service:'health-helper-relay',model:'UNAVAILABLE'});}
+  }
   if(req.method!=='POST'||!['/visit-questions','/translation-selection'].includes(req.url))return send(404,{error:'NOT_FOUND'});
   if(!(await acquireLock()))return send(429,{error:'BUSY'});
   const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),55000);
