@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#193454" />
+    <meta
+      name="description"
+      content="로그인 없이 환자 공유, 의료진 접수, 보안관제를 연결해 보는 Medi Q 포트폴리오 체험판."
+    />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; connect-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'"
+    />
+    <title>Medi Q 직접 체험하기</title>
+    <link rel="icon" href="../assets/mediq-dark.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="demo.css" />
+    <script src="assets/qrcode.js" defer></script>
+    <script src="app.js" type="module"></script>
+  </head>
+  <body>
+    <a class="skip" href="#main">본문으로 이동</a>
+    <div class="demo-notice">
+      포트폴리오 체험판
+      <span>가상 데이터 · 실제 로그인·병원 전송·AI 호출 없음</span>
+    </div>
+    <header id="header"></header>
+    <main id="main" tabindex="-1"></main>
+    <footer>
+      이 탭에서 만든 체험 기록만 연결됩니다. 새로고침하면 처음부터 시작합니다.
+      <a href="../#architecture">실제 구축했던 구조 살펴보기</a>
+    </footer>
+    <div id="notice" role="status" aria-live="polite"></div>
+    <dialog id="dialog" aria-labelledby="dialog-title"></dialog>
+    <noscript
+      >체험판은 JavaScript가 필요합니다.
+      <a href="../presentation/gallery.html">대신 화면 모음 보기</a></noscript
+    >
+  </body>
+</html>
