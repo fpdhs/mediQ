@@ -2,6 +2,7 @@ import { createHash, randomUUID } from 'node:crypto';
 import { toSecurityAuditView } from './security-observatory-view.js';
 import {rememberSecurityReport} from './security-period-report.js';
 import {summarizeHelper} from './security-helper-monitor.js';
+import {helperRequestDetails,qrLifecycle} from './security-detail-data.js';
 
 const BAD = new Set(['DENIED', 'FAIL', 'FAILED', 'ERROR', 'FAILURE']);
 export function eventCategory(action = '') {
@@ -87,6 +88,7 @@ export function buildEventIndex(logs, azure, reviews, query, waf = {status:'not_
       waf: {status:waf.status,reason:waf.reason,count:firewall.length,observedAt:waf.observedAt,scope:waf.scope,truncatedPossible:true,
         rules:countBy(firewall,'reasonCode').slice(0,6),results:countBy(firewall,'result'),denied:firewall.filter(event=>event.result==='DENIED').length} },
     facets: { categories: [...new Set(events.map(event => event.category))], hospitals: [...new Set(events.map(event => event.hospitalId))].filter(Boolean), actions: [...new Set(events.map(event => event.action))].filter(Boolean) },
+    helperRequests:helperRequestDetails(app),qrLifecycle:qrLifecycle(app),
     allEvents: events, filteredEvents: filtered };
 }
 

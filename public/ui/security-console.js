@@ -1,5 +1,6 @@
 import { showSecurityReport } from './security-report.js';
 import {createPeriodReportPanel} from './security-period-panel.js';
+import {drawHelperRequests,drawQrLifecycle,drawProtection} from './security-detail-panels.js';
 const mounted = new WeakMap();
 const bad = new Set(['DENIED','FAIL','FAILED','ERROR','FAILURE']);
 const names = { TOKEN_EXPIRED:'토큰 유효기간 만료', CONSENT_EXPIRED:'동의 기간 만료', CONSENT_REVOKED:'동의 철회', SCOPE_MISMATCH:'검사 범위 불일치', HOSPITAL_MISMATCH:'수신 병원 불일치', ROLE_NOT_ALLOWED:'허용되지 않은 역할', TOKEN_INVALID:'유효하지 않은 토큰', DOWNLOAD_NOT_ALLOWED:'다운로드 미허용', SECURITY_CONSOLE_DENIED:'관제실 접근 거부', SECURITY_OVERVIEW_READ:'관제 기록 조회', SECURITY_EVENTS_SEARCHED:'이벤트 검색', SECURITY_REPORT_GENERATED:'사건 보고서 생성', TOKEN_ISSUED:'접근 토큰 발급', IMAGE_VIEWED:'의료영상 열람', CONSENT_CREATED:'공유 동의 생성', CONSENT_REVOKED:'공유 동의 철회' };
@@ -50,6 +51,7 @@ function setConsoleView(state,view){
   for(const[key,panel]of Object.entries(state.views))panel.hidden=key!==view;
   for(const[key,tab]of Object.entries(state.tabs)){tab.setAttribute('aria-selected',String(key===view));tab.tabIndex=key===view?0:-1;}
   state.root.classList.toggle('sc-presenting',view==='dashboard'&&state.presenting===true);
+  if(view==='protection')drawProtection(state.views.protection,state.api);
 }
 function explore(state){setConsoleView(state,'events');return load(state);}
 export function renderSecurityConsole(root,api){
@@ -65,7 +67,7 @@ function build(root,state){
   const hero=el('header',null,'sc-hero'),heading=el('div');heading.append(el('p','Medi Q 보안 관제실','sc-brand'),el('h2','신호를 읽고, 사건을 연결하세요.'),el('p','동의부터 영상 열람까지, 남겨진 기록을 따라갑니다.','sc-subtitle'));
   const signal=button('',()=>{state.review.value='UNREVIEWED';state.result.value='거부·실패';explore(state);state.explorer.scrollIntoView({behavior:'auto'});},'sc-signal');state.heroCount=el('strong','—');signal.append(state.heroCount,el('span','확인할 접근 거부·실패'));hero.append(heading,signal);root.append(hero);
   const nav=el('nav',null,'sc-nav');nav.setAttribute('aria-label','관제실 메뉴');const tabs=el('div',null,'sc-tabs');tabs.setAttribute('role','tablist');state.tabs={};
-  for(const[key,label]of [['dashboard','상황판'],['events','이벤트 탐색기'],['reports','보고서']]){const tab=button(label,()=>setConsoleView(state,key));tab.id='sc-tab-'+key;tab.setAttribute('role','tab');tab.setAttribute('aria-controls','sc-panel-'+key);state.tabs[key]=tab;tabs.append(tab);}
+  for(const[key,label]of [['dashboard','상황판'],['events','이벤트 탐색기'],['helper','건강도우미 요청'],['qr','QR 생애주기'],['protection','보호 설정'],['reports','보고서']]){const tab=button(label,()=>setConsoleView(state,key));tab.id='sc-tab-'+key;tab.setAttribute('role','tab');tab.setAttribute('aria-controls','sc-panel-'+key);state.tabs[key]=tab;tabs.append(tab);}
   tabs.addEventListener('keydown',event=>{const keys=Object.keys(state.tabs),index=keys.findIndex(key=>state.tabs[key]===event.target);if(index<0||!['ArrowRight','ArrowLeft','Home','End'].includes(event.key))return;event.preventDefault();const next=event.key==='Home'?0:event.key==='End'?keys.length-1:(index+(event.key==='ArrowRight'?1:keys.length-1))%keys.length;setConsoleView(state,keys[next]);state.tabs[keys[next]].focus();});
   const present=button('발표 보기',()=>{state.presenting=!state.presenting;present.textContent=state.presenting?'기본 보기':'발표 보기';present.setAttribute('aria-pressed',String(state.presenting));setConsoleView(state,'dashboard');});present.setAttribute('aria-pressed','false');nav.append(tabs,present,button('새 기록 불러오기',()=>state.api.refresh()));
   state.status=el('p','감사 자료 연결 중…','sc-status');state.status.setAttribute('role','status');root.append(nav,state.status);
@@ -87,7 +89,8 @@ function build(root,state){
   state.periodPanel=createPeriodReportPanel({root:periodRoot,rangeRoot,getApi:()=>state.api,getData:()=>state.data,onRange:range=>{state.range=range;state.until=null;return load(state);},getSelected:()=>[...state.selected.values()],printReport,reportCsv,saveFile});
   const boundary=el('details',null,'sc-boundary');boundary.append(el('summary','조회 범위와 기록 연결 확인'));state.boundary=el('p','확인 전');boundary.append(state.boundary);root.append(boundary);
   const dashboard=el('section',null,'sc-dashboard'),reports=el('section',null,'sc-reports');state.metrics=el('div',null,'sc-metrics');dashboard.append(state.metrics,state.charts,state.sources,boundary);reports.append(periodRoot,state.basket);root.append(dashboard,work,reports);
-  state.views={dashboard,events:work,reports};for(const[key,panel]of Object.entries(state.views)){panel.id='sc-panel-'+key;panel.setAttribute('role','tabpanel');panel.setAttribute('aria-labelledby','sc-tab-'+key);}
+  const helper=el('section',null,'sc-detail-view'),qr=el('section',null,'sc-detail-view'),protection=el('section',null,'sc-detail-view');root.append(helper,qr,protection);
+  state.views={dashboard,events:work,helper,qr,protection,reports};for(const[key,panel]of Object.entries(state.views)){panel.id='sc-panel-'+key;panel.setAttribute('role','tabpanel');panel.setAttribute('aria-labelledby','sc-tab-'+key);}
   const reportLink=button('이 기간으로 보고서 만들기',()=>setConsoleView(state,'reports'));rangeRoot.append(reportLink);setConsoleView(state,'dashboard');
 }
 async function load(state,page=0){
@@ -96,7 +99,7 @@ async function load(state,page=0){
   if(state.range){query.delete('hours');query.set('from',state.range.from);query.set('until',state.range.until);}
   for(const[key,value]of Object.entries({q:state.search.value,source:state.source.value,result:state.result.value,review:state.review.value,hospital:state.hospital.value,category:state.category,action:state.action}))if(value)query.set(key,value);
   state.periodPanel?.setLoading(true);
-  try{const data=await state.api.fetchJson('/api/security/events?'+query,{signal:AbortSignal.timeout(15000),cache:'no-store'});if(version!==state.version)return;state.data=data;state.until=data.until;state.loading=false;state.status.textContent=`${time(data.from)} ~ ${time(data.until)} · 한국시간`;drawSources(state);drawCharts(state);drawEvents(state);drawBasket(state);state.periodPanel?.setLoading(false);}
+  try{const data=await state.api.fetchJson('/api/security/events?'+query,{signal:AbortSignal.timeout(15000),cache:'no-store'});if(version!==state.version)return;state.data=data;state.until=data.until;state.loading=false;state.status.textContent=`${time(data.from)} ~ ${time(data.until)} · 한국시간`;drawSources(state);drawCharts(state);drawEvents(state);drawBasket(state);drawHelperRequests(state.views.helper,data.helperRequests,data.helperConnection);drawQrLifecycle(state.views.qr,data.qrLifecycle);if(state.view==='protection')drawProtection(state.views.protection,state.api);state.periodPanel?.setLoading(false);}
   catch{if(version!==state.version)return;state.loading=false;drawBasket(state);state.periodPanel?.setLoading(false,true);state.status.textContent='이벤트 조회 실패 · 기존 선택 기록은 유지됩니다.';state.charts.replaceChildren(el('p','집계를 확인할 수 없습니다. 다시 불러오기를 눌러 주세요.'));state.list.replaceChildren(el('p','이벤트를 조회하지 못했습니다.'));}
 }
 function drawSources(state){
@@ -162,6 +165,10 @@ function drawCharts(state){
   const stages=el('div',null,'sc-kind-chips');for(const[key,label]of [['transport','SSH 전달 경로'],['relay','중계 서비스'],['model','모델 API']])stages.append(el('span',`${label}: ${labels[connection?.[key]]||'미확인'}`,'sc-chip'));health.append(stages);
   health.append(el('small',`연결 확인: ${connection?.observedAt?time(connection.observedAt):'미확인'} · 최대 30초 캐시. 모델 API 확인은 생성 시험이 아닙니다. SSH 프로세스 자체 상태는 별도 확인이 필요합니다.`));
   health.append(button('건강도우미 기록 보기',()=>{state.category='건강도우미';state.search.value='';state.source.value='APP';state.result.value='';state.review.value='';state.hospital.value='';state.action='';explore(state);}));
+  health.append(button('요청별 상세 보기',()=>setConsoleView(state,'helper')));
+  const qr=panel('QR 티켓의 흐름','발급부터 접수·철회·거부까지 · 로그 건수');qr.classList.add('sc-qr-summary');
+  for(const[key,label]of [['ISSUED','발급'],['USED','접수 사용'],['REVOKED','철회·교체'],['DENIED','거부']])qr.append(el('span',`${label} ${state.data.qrLifecycle?.counts?.[key]??0}건`,'sc-chip'));
+  qr.append(button('QR 생애주기 보기',()=>setConsoleView(state,'qr')));
 }
 function drawEvents(state){
   const data=state.data;state.count.textContent=`검색 결과 ${data.total}건 · ${data.page+1}페이지${state.category?' · '+state.category:''}`;state.list.replaceChildren();

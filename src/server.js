@@ -53,6 +53,7 @@ import { findAzureKeyVaultAuditEvent, listAzureKeyVaultAudit } from './azure-key
 import { toSecurityAuditView } from './security-observatory-view.js';
 import { buildEventIndex, parseEventQuery, createSecurityReport } from './security-console.js';
 import {helperConnectionStatus} from './security-helper-monitor.js';
+import {protectionStatus} from './security-protection-status.js';
 let lastHelperConnectionState='';
 import {createPeriodSecurityReport,readSecurityReportSnapshot} from './security-period-report.js';
 import { listWafAudit } from './waf-audit.js';
@@ -104,7 +105,8 @@ if (process.env.HIPASS_CAPSTONE_KEY_RELEASE === "1") {
   if (process.env.HIPASS_CONTROL_PLANE_ONLY !== "1" || process.env.HIPASS_STORE !== "postgres" || !process.env.HIPASS_KEY_RELEASE_SERVICE_TOKEN) throw new Error("KEY_RELEASE_PROFILE_REQUIRED");
   requireInternalServiceScope(new InternalServiceProvider().authenticate({ headers: { "x-hipass-service-token": process.env.HIPASS_KEY_RELEASE_SERVICE_TOKEN } }), "gateway:package-key-release");
   const { Pool } = await import("pg");
-  const pool = new Pool({ connectionString: store.connectionString, max: 4, connectionTimeoutMillis: 5000,
+  const {postgresTlsOptions} = await import('./postgres-tls.js');
+  const pool = new Pool({ connectionString: store.connectionString, ...postgresTlsOptions(store.connectionString), max: 4, connectionTimeoutMillis: 5000,
     statement_timeout: 4000, query_timeout: 5000, options: "-c lock_timeout=3000" });
   pool.on("error", () => console.warn("KEY_RELEASE_DATABASE_UNAVAILABLE"));
   const schema = await pool.query("SELECT to_regclass('capstone_key_releases') IS NOT NULL AS ready");
@@ -800,6 +802,15 @@ async function routeApi(request, response, url) {
     await store.save();
     sendJson(response, 201, { ok: true });
     return;
+  }
+
+  if (method === 'GET' && url.pathname === '/api/security/protection') {
+    await requireSecurityObservatoryPrincipal(request, principal);
+    response.setHeader('cache-control','no-store');
+    if(url.search)return sendError(response,400,'SECURITY_QUERY_INVALID');
+    const status=await protectionStatus(store);
+    await service.writeAudit({actorType:principal.role,actorId:principalActorId(principal),action:'SECURITY_PROTECTION_READ',result:'SUCCESS',reasonCode:'SECURITY_ADMIN_AUTHORIZED'});
+    await store.save();return sendJson(response,200,status);
   }
 
   if (method === "GET" && url.pathname === "/api/security/overview") {
