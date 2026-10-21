@@ -2,11 +2,11 @@
 
 환자가 공유할 검사와 병원을 선택하고, 의료진이 승인된 범위의 영상을 조회하는 의료영상 공유 MVP입니다. 합성 환자와 가상 병원 A/B, Orthanc PACS로 시연합니다.
 
-**[프로젝트 둘러보기](https://sureasdufo1-hue.github.io/Highpass-Project/)** · **[Azure 웹 시연](https://highpass-demo.japaneast.cloudapp.azure.com/hipass/)** · **[모바일 시연](https://highpass-demo.japaneast.cloudapp.azure.com/mobile/)**
+**[프로젝트 둘러보기](https://sureasdufo1-hue.github.io/Highpass-Project/)** · **[Medi Q 직접 체험하기](https://sureasdufo1-hue.github.io/Highpass-Project/demo/)** · **[환자로 체험하기](https://sureasdufo1-hue.github.io/Highpass-Project/demo/#patient)**
 
 **[프로젝트 발표자료 PDF 보기 · 63페이지](https://sureasdufo1-hue.github.io/Highpass-Project/presentation/project.html)** · [PDF 바로 열기](https://sureasdufo1-hue.github.io/Highpass-Project/assets/documents/mediq-project-20261017.pdf)
 
-시연 서비스는 승인된 Microsoft 계정이 필요합니다. GitHub Pages는 로그인 없이 화면과 구성을 볼 수 있는 소개 페이지입니다. 이재석·김범희 공동 프로젝트. 소개 자료 갱신: **2026.10.17**.
+Azure 시연 서비스는 종료되었습니다. GitHub Pages 체험판에서는 로그인 없이 환자 공유 → 의료진 접수·열람 → 관제 기록 확인을 이어갈 수 있습니다. 실제 인증·병원 전송·AI 호출 없이 가상 데이터로 작동하며, 새로고침하면 체험 기록이 초기화됩니다. 아래 구성과 증적은 구축 당시 기록입니다. 이재석·김범희 공동 프로젝트. 체험판 갱신: **2026.10.21**.
 
 ![Medi Q 환자 건강지갑](docs/assets/portfolio-20261017/patient-wallet.png)
 
@@ -20,7 +20,7 @@
 
 로그인, QR 접수, 영상 접근권한은 각각 확인합니다. `VIEW_ONLY`와 `DOWNLOAD_ALLOWED`를 구분하며, 철회·만료·범위 초과 요청을 거부합니다.
 
-## 현재 구성
+## Azure 구축 당시 구성
 
 ```mermaid
 flowchart TB
