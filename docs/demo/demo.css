@@ -966,6 +966,63 @@ dialog::backdrop {
     font-size: 14px;
   }
 }
+@media (max-width: 800px) {
+  .wallet {
+    aspect-ratio: auto;
+    padding-top: 100px;
+    margin-top: 12px;
+  }
+  .wallet > .leather {
+    position: relative;
+    display: block;
+    top: auto;
+  }
+  .wallet-cards {
+    top: 8px;
+    height: 160px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .wallet-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 12px 3px 30px;
+    border-radius: 9px;
+  }
+  .wallet-card + .wallet-card {
+    margin-left: -3px;
+  }
+  .wallet-card small {
+    display: none;
+  }
+  .wallet-card strong {
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 5px 0;
+    word-break: keep-all;
+  }
+  .wallet-card .card-icon {
+    font-size: 20px;
+  }
+  .wallet-card:nth-child(2) {
+    --lift: 7px;
+  }
+  .wallet-card:nth-child(3) {
+    --lift: 10px;
+  }
+  .wallet-card:nth-child(4) {
+    --lift: 13px;
+  }
+  .wallet-card-cta {
+    padding: 5px 8px;
+    font-size: 10px;
+    margin-top: 6px;
+  }
+  .wallet-hint {
+    margin-top: 6px;
+  }
+}
 @media (max-width: 520px) {
   main {
     padding: 26px 16px 35px;
@@ -1018,56 +1075,8 @@ dialog::backdrop {
   .form-grid {
     grid-template-columns: 1fr;
   }
-  .wallet {
-    aspect-ratio: auto;
-    height: calc(100px + (100vw - 32px) * 826 / 1905);
-    margin-top: 12px;
-  }
-  .wallet > .leather {
-    top: 100px;
-  }
-  .wallet-cards {
-    top: 8px;
-    left: 7%;
-    right: 7%;
-    height: 160px;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-  .wallet-card {
-    padding: 12px 3px 50px;
-    border-radius: 9px;
-  }
-  .wallet-card + .wallet-card {
-    margin-left: -3px;
-  }
-  .wallet-card small {
-    display: none;
-  }
   .wallet-card strong {
     font-size: 12px;
-    line-height: 1.5;
-    margin: 5px 0;
-    word-break: keep-all;
-  }
-  .wallet-card .card-icon {
-    font-size: 20px;
-  }
-  .wallet-card:nth-child(2) {
-    --lift: 7px;
-  }
-  .wallet-card:nth-child(3) {
-    --lift: 10px;
-  }
-  .wallet-card:nth-child(4) {
-    --lift: 13px;
-  }
-  .wallet-card-cta {
-    padding: 5px 8px;
-    font-size: 10px;
-    margin-top: 6px;
-  }
-  .wallet-hint {
-    margin-top: 6px;
   }
   .ticket-body {
     grid-template-columns: 1fr;
