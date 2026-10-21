@@ -117,3 +117,18 @@ test("standalone static demo has no API transports, HTML injection or browser cr
   assert.match(html, /connect-src 'none'/);
   assert.match(html, /실제 로그인·병원 전송·AI 호출 없음/);
 });
+
+test("patient demo uses the latest home wallet artwork unchanged", async () => {
+  const [source, demo, app] = await Promise.all([
+    readFile(
+      new URL("../public/images/mediq-wallet-front-v1.webp", import.meta.url),
+    ),
+    readFile(
+      new URL("../docs/demo/assets/wallet-home-front.webp", import.meta.url),
+    ),
+    readFile(new URL("../docs/demo/app.js", import.meta.url), "utf8"),
+  ]);
+  assert.deepEqual(demo, source);
+  assert.match(app, /assets\/wallet-home-front.webp/);
+  assert.doesNotMatch(app, /assets\/wallet-(back|front).webp/);
+});

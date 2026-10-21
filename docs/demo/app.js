@@ -302,10 +302,10 @@ function welcome() {
 }
 function patientHome() {
   const cards = [
-    ["ticket", "▦", "공유 QR", "병원에 보여줄 티켓"],
-    ["records", "▤", "내 건강기록", "검사와 기록 확인"],
-    ["share", "↗", "영상 공유", "공유 조건 선택"],
-    ["helper", "✦", "건강도우미", "진료 질문 챙기기"],
+    ["ticket", "▦", "공유 QR", "병원에 보여줄 나의 티켓"],
+    ["records", "▤", "내 건강기록", "영상부터 건강검진까지"],
+    ["share", "↗", "영상 공유", "다음 병원에 안전하게"],
+    ["helper", "✦", "건강도우미", "내 기록을 알기 쉽게"],
   ];
   return [
     heading(
@@ -343,12 +343,7 @@ function patientHome() {
     ),
     el(
       "div",
-      { class: "wallet" },
-      el("img", {
-        class: "leather back",
-        src: "assets/wallet-back.webp",
-        alt: "",
-      }),
+      { class: "wallet", "aria-label": "건강지갑 · 카드를 선택하세요" },
       el(
         "div",
         { class: "wallet-cards" },
@@ -359,13 +354,17 @@ function patientHome() {
             el("span", { class: "card-icon", "aria-hidden": "true" }, icon),
             el("strong", {}, title),
             el("small", {}, description),
+            key === "ticket" &&
+              el("span", { class: "wallet-card-cta" }, "QR 보기"),
           ),
         ),
       ),
       el("img", {
         class: "leather front",
-        src: "assets/wallet-front.webp",
+        src: "assets/wallet-home-front.webp",
         alt: "",
+        width: 1905,
+        height: 826,
       }),
     ),
     p("카드를 누르면 해당 화면이 열립니다.", "wallet-hint"),
