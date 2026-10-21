@@ -23,6 +23,29 @@ async (page) => {
   await page.goto(base);
   await btn("환자로 체험하기").click();
   await page.getByRole("heading", { name: "홍길동님의 건강지갑" }).waitFor();
+  ensure(
+    (await page.locator(".wallet .leather").getAttribute("src")) ===
+      "assets/wallet-home-front.webp",
+    "LATEST_HOME_WALLET_ASSET",
+  );
+  for (const width of [1440, 768, 521, 390, 320]) {
+    await page.setViewportSize({ width, height: 1000 });
+    for (const [index, target] of [
+      "ticket",
+      "records",
+      "share",
+      "helper",
+    ].entries()) {
+      await page.goto(`${base}#patient`);
+      const card = page.locator(".wallet-card").nth(index);
+      // Click the visible title, not the part tucked under the leather front.
+      await card.locator("strong").click();
+      await page.waitForURL(`${base}#${target}`);
+      ensure(true, `WALLET_CARD_${target}_${width}`);
+    }
+  }
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto(`${base}#patient`);
   await shot("patient");
   await btn("영상 공유").click();
   await page.getByRole("checkbox").check();

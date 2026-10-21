@@ -27,7 +27,9 @@ FR-001~005 동의, FR-006~013 기록/열람, FR-014~025 정책/단기권한,
 FR-032~041 뷰어/감사 기능군을 설명하기 위한 UI 시뮬레이션이다. 해당 FR의 운영 구현 완료 근거는 아니다.
 
 ## 자산
-기존 public/images/mediq-wallet-model-{front,back}.webp를 동일 복사.
+환자 홈은 최신 public/ui/wallet-home.js와 같은 public/images/mediq-wallet-front-v1.webp를
+assets/wallet-home-front.webp로 동일 복사한다. 중앙 잠금띠가 있는 앞면 지갑 위에
+공유 QR·내 건강기록·영상 공유·건강도우미 카드 네 장을 실제 버튼으로 배치한다.
 기존 public/images/mediq-synthetic-abdominal-ct.png를 합성 예시로 표시.
 PretendardVariable.woff2 및 동봉 라이선스는 public/fonts/pretendard에서 복사.
 QR 라이브러리는 기존 public/qrcode.js (Kazuhiko Arase, MIT)를 그대로 사용한다.
